@@ -378,13 +378,31 @@ func can_jump() -> bool:
 	return _control_enabled and is_on_floor()
 
 
+func look_orientation() -> Vector2:
+	return Vector2(rotation.y, _head.rotation.x)
+
+
+func set_look_orientation(orientation: Vector2) -> void:
+	rotation.y = wrapf(orientation.x, -PI, PI)
+	_head.rotation.x = clampf(
+		orientation.y,
+		-MAX_PITCH_RADIANS,
+		MAX_PITCH_RADIANS
+	)
+	_reset_synthetic_mouse_baseline()
+
+
 func face_position(target_position: Vector3) -> void:
 	var flat_target := Vector3(target_position.x, global_position.y, target_position.z)
 	if not flat_target.is_equal_approx(global_position):
 		look_at(flat_target, Vector3.UP)
-	var local_target := _head.to_local(target_position)
+	var camera_to_target := target_position - _camera.global_position
+	var horizontal_distance := Vector2(
+		camera_to_target.x,
+		camera_to_target.z
+	).length()
 	_head.rotation.x = clampf(
-		-atan2(local_target.y, maxf(0.001, -local_target.z)),
+		atan2(camera_to_target.y, maxf(0.001, horizontal_distance)),
 		-MAX_PITCH_RADIANS,
 		MAX_PITCH_RADIANS
 	)

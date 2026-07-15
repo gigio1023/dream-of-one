@@ -134,6 +134,31 @@ func _run() -> void:
 	(player.get_node("Head") as Node3D).rotation.x = 0.0
 	await physics_frame
 	await physics_frame
+	var camera := player.get_node("Head/Camera3D") as Camera3D
+	var initial_look: Vector2 = player.call("look_orientation")
+	player.call("set_look_orientation", Vector2(0.37, 0.41))
+	var below_target := camera.global_position + Vector3(0.9, -0.8, -2.4)
+	player.call("face_position", below_target)
+	var camera_forward := -camera.global_transform.basis.z.normalized()
+	if (
+		camera_forward.dot((below_target - camera.global_position).normalized()) < 0.999
+		or float((player.call("look_orientation") as Vector2).y) >= 0.0
+	):
+		_failures.append(
+			"Player3D face_position did not frame a lower target from an existing pitch"
+		)
+	player.call("set_look_orientation", Vector2(-0.28, -0.36))
+	var above_target := camera.global_position + Vector3(-0.7, 0.9, -2.6)
+	player.call("face_position", above_target)
+	camera_forward = -camera.global_transform.basis.z.normalized()
+	if (
+		camera_forward.dot((above_target - camera.global_position).normalized()) < 0.999
+		or float((player.call("look_orientation") as Vector2).y) <= 0.0
+	):
+		_failures.append(
+			"Player3D face_position did not frame a higher target from an existing pitch"
+		)
+	player.call("set_look_orientation", initial_look)
 	if player.call("preload_intent_target") != focus_npc:
 		_failures.append("disabled NPC did not remain visible to raw preload aim")
 	if _last_preload_intent_target != focus_npc:
@@ -394,5 +419,5 @@ func _finish(probe: Node, player: Node) -> void:
 			push_error(failure)
 		quit(1)
 		return
-	print("Godot AI input smoke passed: mouse look, Unicode, assisted preload aim, gated E, unfocused owner handoff, safe focus grace, and bounded ready-NPC aim assist")
+	print("Godot AI input smoke passed: mouse look, Unicode, camera framing, assisted preload aim, gated E, unfocused owner handoff, safe focus grace, and bounded ready-NPC aim assist")
 	quit()

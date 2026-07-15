@@ -371,10 +371,12 @@ the dev machine with all six NPC loops live.
 
 - **World pause**: a player modal conversation freezes world time, NPC
   simulation, and physics from open through its merged LLM wait and clean end;
-  conversation locks player movement and camera on the interlocutor. Ambient
-  NPC provider work never pauses free exploration. Results carry the observed
-  world revision, are revalidated before applying, and wait until resume if
-  they complete during a modal pause.
+  conversation locks player movement and frames the interlocutor at the
+  authored interaction height. A clean end or recoverable start failure
+  restores the exact pre-conversation yaw/pitch before mouse capture and
+  movement return. Ambient NPC provider work never pauses free exploration.
+  Results carry the observed world revision, are revalidated before applying,
+  and wait until resume if they complete during a modal pause.
 - **Direction-aware subtitles**: audible NPC speech (mono- and NPC-to-NPC
   dialogue) renders as subtitles with speaker attribution and rough direction
   cues when in earshot; audibility ranges come from `world_layout.json`

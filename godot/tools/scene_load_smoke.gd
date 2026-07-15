@@ -957,6 +957,11 @@ func _check_conversation_start_not_ready_recovery_contract(
 	var saved_rebase_in_flight := bool(instance.get("_advance_rebase_in_flight"))
 	var saved_paused := paused
 	var saved_control := bool(player.get("_control_enabled"))
+	var saved_look: Vector2 = player.call("look_orientation")
+	var saved_return_look: Vector2 = instance.get("_conversation_return_look")
+	var saved_return_look_valid := bool(
+		instance.get("_conversation_return_look_valid")
+	)
 
 	var attempted: Dictionary = {}
 	attempted[actor_id] = true
@@ -1002,6 +1007,11 @@ func _check_conversation_start_not_ready_recovery_contract(
 	instance.set("_run_snapshot", staged_snapshot)
 	instance.set("_conversation_contact_id", start_error_contact_id)
 	instance.set("_conversation_contact_zone_id", "StudioReceptionConversation")
+	var return_look := Vector2(0.42, -0.18)
+	player.call("set_look_orientation", return_look)
+	instance.set("_conversation_return_look", return_look)
+	instance.set("_conversation_return_look_valid", true)
+	player.call("face_position", actor_node.get_interaction_aim_position())
 	player.set_control_enabled(false)
 	hud.begin_conversation(saved_actor)
 	paused = true
@@ -1024,6 +1034,13 @@ func _check_conversation_start_not_ready_recovery_contract(
 	):
 		_failures.append(
 			"%s final conversation_not_ready did not enter recoverable rebase state" % label
+		)
+	if (
+		(player.call("look_orientation") as Vector2).distance_to(return_look) > 0.001
+		or bool(instance.get("_conversation_return_look_valid"))
+	):
+		_failures.append(
+			"%s failed conversation start did not restore the player's prior view" % label
 		)
 	# Consume the handler's deferred callback while the in-flight guard is still
 	# set, then apply the same accepted full-snapshot path used by a real rebase.
@@ -1080,6 +1097,9 @@ func _check_conversation_start_not_ready_recovery_contract(
 	instance.set("_pending_contact_ready_id", saved_pending_contact_id)
 	instance.set("_conversation_contact_id", saved_conversation_contact_id)
 	instance.set("_conversation_contact_zone_id", saved_conversation_contact_zone_id)
+	instance.set("_conversation_return_look", saved_return_look)
+	instance.set("_conversation_return_look_valid", saved_return_look_valid)
+	player.call("set_look_orientation", saved_look)
 	player.set_control_enabled(saved_control)
 	paused = saved_paused
 
@@ -3538,6 +3558,9 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		hud.hesitation_expired.disconnect(record_hesitation)
 	hud.close_conversation()
 
+	var stale_conversation_look := Vector2(-0.73, 0.31)
+	instance.set("_conversation_return_look", stale_conversation_look)
+	instance.set("_conversation_return_look_valid", true)
 	instance.call("_enter_hearing_due")
 	var due_snapshot: Dictionary = instance.call("presentation_snapshot")
 	var due_provider_progress := _provider_evidence_progress_from_snapshot(
@@ -3549,8 +3572,11 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		or not bool(player.get("_control_enabled"))
 		or bool((due_snapshot.get("contact", {}) as Dictionary).get("active", false))
 		or player.focused_interactable() != null
+		or bool(instance.get("_conversation_return_look_valid"))
 	):
-		_failures.append("%s hearing due did not freeze world work while preserving control" % label)
+		_failures.append(
+			"%s hearing due did not freeze world work or discard an ordinary view" % label
+		)
 	for actor_value in instance.get_tree().get_nodes_in_group(&"npc_actors"):
 		if actor_value is NPC3D and (actor_value as NPC3D).is_interaction_enabled():
 			_failures.append("%s hearing due left a resident interaction prompt enabled" % label)
@@ -3598,10 +3624,14 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 	var expected_focus_value: Variant = town.anchor_position("Station.hearing_table")
 	var facing_ok := false
 	if expected_focus_value is Vector3:
-		var planar_target := expected_focus_value as Vector3 - player.global_position
-		planar_target.y = 0.0
-		if not planar_target.is_zero_approx():
-			facing_ok = (-player.global_transform.basis.z).dot(planar_target.normalized()) > 0.95
+		var camera := player.get_node("Head/Camera3D") as Camera3D
+		var camera_target := expected_focus_value as Vector3 - camera.global_position
+		if not camera_target.is_zero_approx():
+			facing_ok = (
+				(-camera.global_transform.basis.z).normalized().dot(
+					camera_target.normalized()
+				) > 0.99
+			)
 	if (
 		int((staged_snapshot.get("hearingFlow", {}) as Dictionary).get("openAttempts", 0)) != 1
 		or not paused
@@ -3822,6 +3852,7 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 	):
 		paused = false
 		return
+	var conversation_return_look: Vector2 = instance.get("_conversation_return_look")
 	var opened := false
 	for _frame in range(120):
 		await process_frame
@@ -3882,6 +3913,12 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 		return
 	if not bool(player.get("_control_enabled")):
 		_failures.append("%s player control did not resume after conversation" % label)
+	if (
+		(player.call("look_orientation") as Vector2).distance_to(
+			conversation_return_look
+		) > 0.001
+	):
+		_failures.append("%s conversation did not restore the player's prior view" % label)
 	if receptionist.is_interaction_enabled():
 		_failures.append("%s leaves a false receptionist re-conversation prompt" % label)
 	var main_snapshot: Dictionary = instance.call("presentation_snapshot")

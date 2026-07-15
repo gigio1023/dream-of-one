@@ -148,6 +148,8 @@ var _lifecycle_generation := 0
 var _hesitation_retry_scheduled := false
 var _player_focus_attention_target: Node = null
 var _player_preload_attention_target: Node = null
+var _conversation_return_look := Vector2.ZERO
+var _conversation_return_look_valid := false
 
 
 func _ready() -> void:
@@ -879,6 +881,7 @@ func _enter_hearing_due() -> void:
 	if _run_status in ["hearing_active", "terminal", "closed"]:
 		return
 	var first_entry := _hearing_id.is_empty()
+	_discard_conversation_look()
 	_run_status = "hearing_due"
 	_run_snapshot["runStatus"] = _run_status
 	_run_snapshot["hearingProcedure"] = null
@@ -1051,6 +1054,7 @@ func _enter_terminal_outcome() -> void:
 	if _terminal_result.is_empty():
 		push_error("Terminal run state has no terminalResult.")
 		return
+	_discard_conversation_look()
 	_lifecycle_generation += 1
 	_run_status = "terminal"
 	_run_snapshot["runStatus"] = _run_status
@@ -1111,6 +1115,7 @@ func _new_run_end_id() -> String:
 
 
 func _reload_current_run_scene() -> void:
+	_discard_conversation_look()
 	get_tree().paused = false
 	var error := get_tree().reload_current_scene()
 	if error != OK:
@@ -1171,7 +1176,10 @@ func _begin_conversation(
 	_active_turn = {}
 	_required_retry_answer = {}
 	_conversation_start_retry_required = false
-	_player.call("face_position", target.global_position + Vector3.UP * 1.35)
+	if not _conversation_return_look_valid:
+		_conversation_return_look = _player.look_orientation()
+		_conversation_return_look_valid = true
+	_player.face_position(target.global_position + Vector3.UP * 1.35)
 	_player.set_control_enabled(false)
 	_player.release_mouse()
 	_hud.begin_conversation(_actor_view(str(actor_id)))
@@ -3700,6 +3708,7 @@ func _finish_conversation_modal() -> void:
 	_ending_conversation = false
 	_conversation_target = null
 	_hud.close_conversation()
+	_restore_conversation_look()
 	_player.set_control_enabled(true)
 	_player.capture_mouse()
 	get_tree().paused = false
@@ -3710,6 +3719,18 @@ func _finish_conversation_modal() -> void:
 		call_deferred("_rebase_run_after_advance_conflict")
 	else:
 		_queue_nearby_conversation_preloads()
+
+
+func _restore_conversation_look() -> void:
+	if not _conversation_return_look_valid:
+		return
+	_player.set_look_orientation(_conversation_return_look)
+	_discard_conversation_look()
+
+
+func _discard_conversation_look() -> void:
+	_conversation_return_look = Vector2.ZERO
+	_conversation_return_look_valid = false
 
 
 func _set_run_clock_paused(value: bool) -> void:

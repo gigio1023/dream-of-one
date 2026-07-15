@@ -1044,6 +1044,7 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
     const resolved = await ordinaryMergedTurn(request);
     if (request.playerLine === fallbackContent(request.locale).hesitationMarker) {
       interrogationAnswerGoals = [...request.observePacket.goals];
+      resolved.proposal.signals = [];
       resolved.proposal.meaningfulFirsthand = true;
       resolved.proposal.stance = "vouch";
     }
@@ -1260,6 +1261,8 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
     { type: "hesitation" },
   );
   assert.equal(answered.nextTurn, null);
+  assert.deepEqual(answered.judgment.signals, ["response_hesitation"]);
+  assert.deepEqual(answered.memoryDelta.signals, ["response_hesitation"]);
   assert.equal(answered.judgment.meaningfulFirsthand, false);
   assert.equal(answered.memoryDelta.meaningfulFirsthand, false);
   assert.notEqual(answered.actor.stance, "vouch");

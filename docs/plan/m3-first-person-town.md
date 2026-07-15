@@ -208,8 +208,9 @@ can overhear with subtitles.
   revision checks. Initial guardrails, tuned only from measured Qwen runs:
   three global provider calls maximum, one foreground slot reserved for the
   player, at most two background calls, and at most one ambient NPC
-  conversation at a time. A run starts with 120 calls / 300k tokens, reserving
-  the final 20 calls / 50k tokens for player conversation and the hearing;
+  conversation at a time. A run starts with 120 calls / 450k tokens, reserving
+  the final 20 calls / 200k tokens for player conversation and the hearing
+  while keeping the measured autonomous-background ceiling at 250k tokens;
   ambient exhaustion yields to policy movement rather than consuming the
   reserve. Reaching `hearing_due` closes the background lane: queued preload
   or goal work cannot begin transport, and active background work plus stale

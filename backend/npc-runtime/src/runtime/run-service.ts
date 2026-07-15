@@ -2215,9 +2215,15 @@ export class RunService {
         playerLine.trim().length > 0;
       const hasFirsthand = actor.hasMeaningfulFirsthandConversation || meaningfulFirsthand;
       const stanceAfter = this.validatedStance(resolved.proposal.stance, hasFirsthand);
+      // A timeout is an engine-observed interrogation event, not a semantic
+      // judgment the provider may omit. The model still owns its meaning,
+      // why-line, and bounded score movement; the runtime preserves the fact.
+      const signals = answer.type === "hesitation"
+        ? [...new Set([...resolved.proposal.signals, "response_hesitation" as const])]
+        : [...resolved.proposal.signals];
       const nextRevision = run.worldRevision + 1;
       const judgment: RunJudgment = {
-        signals: [...resolved.proposal.signals],
+        signals,
         whyLine: resolved.proposal.whyLine,
         suspicionDelta: suspicionAfter - suspicionBefore,
         reportDelta,
@@ -2237,7 +2243,7 @@ export class RunService {
         turnId,
         playerLine,
         npcLine: resolved.proposal.utterance,
-        signals: [...resolved.proposal.signals],
+        signals: [...signals],
         whyLine: resolved.proposal.whyLine,
         suspicionBefore,
         suspicionAfter,

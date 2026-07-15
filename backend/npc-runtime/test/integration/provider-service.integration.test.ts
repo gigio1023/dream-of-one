@@ -851,9 +851,9 @@ test("an explicit offered-tool decision cannot escape through a null completion"
   const explicitWait = {
     toolCall: {
       tool: "wait",
-      args: { reason: "역할 정책상 외부 확인 전에는 이 출처를 기록하지 않습니다." },
+      args: { reason: "외부 확인 전에는 이 출처를 기록하지 않겠습니다." },
     },
-    utterance: "외부 확인 전에는 이 출처를 기록하지 않겠습니다.",
+    utterance: null,
     citedRecordIds: [],
     rationale: "기록 보류를 명시적으로 선택합니다.",
     done: true,
@@ -876,7 +876,7 @@ test("an explicit offered-tool decision cannot escape through a null completion"
     observePacket: packet,
     blockedSignatures: [],
     requireToolCall: true,
-    requireUtterance: true,
+    administrativeDecisionSpeech: true,
   });
 
   assert.equal(result.meta.transport, "live");
@@ -887,23 +887,32 @@ test("an explicit offered-tool decision cannot escape through a null completion"
   const properties = firstSchema.properties as Record<string, Record<string, unknown>>;
   const toolCallBranches = properties.toolCall?.anyOf as Array<Record<string, unknown>>;
   assert.ok(toolCallBranches.every(branch => branch.type !== "null"));
-  assert.equal(properties.utterance?.type, "string");
+  assert.equal(properties.utterance?.type, "null");
+  assert.equal(
+    agentStepToolArgsJsonSchema(firstSchema, "wait")[0]?.reason?.maxLength,
+    TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
+  );
+  assert.ok(
+    agentStepToolArgsJsonSchema(firstSchema, "write_record").every(
+      args => args.whyLine?.maxLength === TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
+    ),
+  );
   assert.match(
     textGen.requests[0]?.instructions ?? "",
-    /Choose one explicit non-null toolCall/,
+    /Choose one explicit non-null write_record or wait toolCall/,
   );
   const input = JSON.parse(textGen.requests[0]?.input ?? "{}") as {
     requireToolCall?: boolean;
-    requireUtterance?: boolean;
+    administrativeDecisionSpeech?: boolean;
   };
   assert.equal(input.requireToolCall, true);
-  assert.equal(input.requireUtterance, true);
+  assert.equal(input.administrativeDecisionSpeech, true);
   const constraints = {
     effectiveTools: ["write_record", "wait"] as const,
     observePacket: packet,
     recordContracts: { write_record: "m3r" as const },
     requireToolCall: true,
-    requireUtterance: true,
+    administrativeDecisionSpeech: true,
   };
   assert.equal(
     agentStepProposalSchemaForRequest("ko-KR", constraints).safeParse(nullCompletion).success,
@@ -912,6 +921,36 @@ test("an explicit offered-tool decision cannot escape through a null completion"
   assert.equal(
     agentStepProposalSchemaForRequest("ko-KR", constraints).safeParse(explicitWait).success,
     true,
+  );
+  assert.equal(
+    agentStepProposalSchemaForRequest("ko-KR", constraints).safeParse({
+      ...explicitWait,
+      utterance: "이 진술을 공식 기록으로 남기겠습니다.",
+    }).success,
+    false,
+    "a separate line cannot contradict the selected administrative action",
+  );
+  assert.equal(
+    agentStepProposalSchemaForRequest("ko-KR", constraints).safeParse({
+      toolCall: {
+        tool: "write_record",
+        args: {
+          recordKind: "note",
+          sourceMemoryId: packet.administrativeSources[0]?.memoryId,
+          stateBody: "방문자의 진술을 접수 기록으로 남겼습니다.",
+          whyLine: "직접 들은 진술을 접수 기록으로 남기겠습니다.",
+          institutionalPressureDelta: 25,
+          textSurfaceId: packet.administrativeAuthority?.writableTextSurfaceIds[0],
+          openQuestion: null,
+        },
+      },
+      utterance: null,
+      citedRecordIds: [],
+      rationale: "직접 들은 진술을 기록합니다.",
+      done: true,
+    }).success,
+    true,
+    "the write branch owns its matching spoken why-line",
   );
 });
 
@@ -927,22 +966,23 @@ test("deterministic fallback makes an administrative deferral audible in the run
     observePacket: packet,
     blockedSignatures: [],
     requireToolCall: true,
-    requireUtterance: true,
+    administrativeDecisionSpeech: true,
   });
 
   assert.equal(result.proposal.toolCall?.tool, "wait");
   assert.equal(
-    result.proposal.utterance,
+    result.proposal.toolCall?.args.reason,
     fallbackContent("ko-KR").agent.administrativeWaitUtterance,
   );
+  assert.equal(result.proposal.utterance, undefined);
   assert.equal(
     agentStepProposalSchemaForRequest("ko-KR", {
       effectiveTools: ["write_record", "wait"],
       observePacket: packet,
       recordContracts: { write_record: "m3r" },
       requireToolCall: true,
-      requireUtterance: true,
-    }).safeParse(result.proposal).success,
+      administrativeDecisionSpeech: true,
+    }).safeParse({ ...result.proposal, utterance: null }).success,
     true,
   );
 });

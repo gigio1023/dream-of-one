@@ -1177,8 +1177,8 @@ test("provider run observations bound recent history without deleting runtime or
     return {
       proposal: request.requireToolCall
         ? {
-            toolCall: { tool: "wait", args: { reason: "추가 확인 전에는 기록하지 않습니다." } },
-            utterance: "추가 확인 전에는 이 내용을 기록하지 않겠습니다.",
+            toolCall: { tool: "wait", args: { reason: "추가 확인 전에는 이 내용을 기록하지 않겠습니다." } },
+            utterance: null,
             citedRecordIds: [],
             rationale: "현재 확인한 정보만으로는 기록하지 않습니다.",
             done: true,

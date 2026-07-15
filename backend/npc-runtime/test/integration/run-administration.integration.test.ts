@@ -128,7 +128,7 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
     ) {
       administrativeChoices += 1;
       assert.equal(request.requireToolCall, true);
-      assert.equal(request.requireUtterance, true);
+      assert.equal(request.administrativeDecisionSpeech, true);
       assert.deepEqual(request.observePacket.toolCatalog, ["write_record", "wait"]);
       assert.match(request.goal, /report-inclination change of 25/);
       assert.match(request.goal, /A positive change favors preserving/);
@@ -138,10 +138,10 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
           toolCall: {
             tool: "wait",
             args: {
-              reason: "접수 담당자 정책상 외부 확인 전에는 단독 진술을 기록하지 않고 보류합니다.",
+              reason: "외부 확인 전까지는 이 진술을 기록하지 않고 보류하겠습니다.",
             },
           },
-          utterance: "외부 확인 전까지는 이 진술을 기록하지 않고 보류하겠습니다.",
+          utterance: null,
           citedRecordIds: [],
           rationale: "접수 담당자의 확인 정책 때문에 이번 단독 진술은 보류합니다.",
           done: true,
@@ -291,7 +291,7 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
     note =>
       note.includes("administrative_wait") &&
       note.includes("admin-provider-declines:source") &&
-      note.includes("기록하지 않고 보류합니다"),
+      note.includes("기록하지 않고 보류하겠습니다"),
   ));
 
   receptionist.locationId = "";
@@ -338,7 +338,7 @@ test("one stale administrative choice retries after the scene settles, then stay
     return {
       proposal: {
         toolCall: { tool: "wait", args: { reason: "이 출처는 기록하지 않기로 최종 판단했습니다." } },
-        utterance: "이 출처는 기록하지 않기로 최종 판단했습니다.",
+        utterance: null,
         citedRecordIds: [],
         rationale: "기록으로 남길 근거가 충분하지 않습니다.",
         done: true,
@@ -483,13 +483,12 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
             recordKind: derivedRecordKind,
             sourceMemoryId: derivedSource.memoryId,
             stateBody: "관리자가 읽은 접수 기록을 후속 확인 기록으로 전파했습니다.",
-            whyLine: "같은 접수 근거를 다른 기록으로 전파했지만 새로운 독립 증거는 아닙니다.",
+            whyLine: "같은 접수 근거를 후속 확인 기록으로 남기겠습니다.",
             institutionalPressureDelta: 25,
             textSurfaceId: derivedSurfaceId,
             openQuestion: null,
           },
         },
-        utterance: "읽은 접수 내용을 후속 확인 기록으로 남기겠습니다.",
         citedRecordIds: derivedVisibleRecordId ? [derivedVisibleRecordId] : [],
         rationale: "읽은 기록을 권한 안에서 후속 기록으로 전파합니다.",
         done: true,
@@ -601,6 +600,12 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
   assert.match(administrativeRequest.goal, /Generic delay or generic insufficient-evidence/);
   assert.match(administrativeRequest.goal, /never a deterministic mandate to write/);
   assert.equal(adminDelta.action, "write_record");
+  assert.equal(written.speechEvents.length, 1);
+  assert.equal(
+    written.speechEvents[0]?.line,
+    adminDelta.ledgerEvent.whyLine,
+    "the committed write branch and its world subtitle have one source of truth",
+  );
   assert.equal(adminDelta.ledgerEvent.sourceMemoryId, answered.memoryDelta.memoryId);
   assert.equal(adminDelta.ledgerEvent.pressureDelta, 25);
   assert.equal(adminDelta.ledgerEvent.openQuestion?.text, "접수 기록에 남은 방문 경위는 무엇인가?");

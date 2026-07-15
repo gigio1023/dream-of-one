@@ -148,7 +148,7 @@ function nextStep(request: AgentStepRequest): AgentStepProposal {
           recordKind: "note",
           sourceMemoryId: pressureSource.memoryId,
           stateBody: "방문자가 마을 절차를 모른다고 밝혀 방문 경위를 추가 확인해야 함.",
-          whyLine: "접수 담당자가 직접 들은 진술을 확인 기록으로 남겼습니다.",
+          whyLine: "직접 들은 진술을 접수 확인 기록으로 남기겠습니다.",
           institutionalPressureDelta: pressureSource.reportDelta,
           textSurfaceId,
           openQuestion: {
@@ -158,7 +158,6 @@ function nextStep(request: AgentStepRequest): AgentStepProposal {
           },
         },
       },
-      utterance: "이 진술은 접수 확인 기록으로 남겨 두겠습니다.",
       citedRecordIds: [],
       rationale: "직접 들은 의심 진술을 권한 안에서 기록합니다.",
       done: true,

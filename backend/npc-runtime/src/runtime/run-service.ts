@@ -20,6 +20,7 @@ import { fallbackContent } from "../localization/fallback-content.js";
 import {
   agentStepProposalSchema,
   ambientReplyJudgmentSchema,
+  TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
 } from "../providers/envelope.js";
 import type {
   AmbientReplyJudgment,
@@ -2674,7 +2675,7 @@ export class RunService {
           ? { requiredToolCall: { tool: "move_to" as const, targetId: "player" as const } }
           : {}),
         ...(observation.administrativeDecisionSourceMemoryId !== null
-          ? { requireToolCall: true, requireUtterance: true }
+          ? { requireToolCall: true, administrativeDecisionSpeech: true }
           : {}),
         budgetCeiling: {
           maxCalls: runAmbientCallCeiling(initialRun),
@@ -2805,6 +2806,10 @@ export class RunService {
     }
 
     if (!attempt.resolvedAction) {
+      const administrativeFallbackLine =
+        observation.administrativeDecisionSourceMemoryId !== null
+          ? fallbackContent(this.requireRun(runId).locale).agent.administrativeWaitUtterance
+          : null;
       attempt.resolvedAction =
         observation.procedure === "interrogation" &&
         observation.observePacket.playerContact?.available
@@ -2812,10 +2817,12 @@ export class RunService {
               tool: "move_to_player",
               contactReason: fallbackContent(this.requireRun(runId).locale).whyLines.none,
             }
-          : { tool: "wait", reason: "bounded goal fallback" };
-      if (observation.administrativeDecisionSourceMemoryId !== null) {
-        attempt.resolvedUtterance =
-          fallbackContent(this.requireRun(runId).locale).agent.administrativeWaitUtterance;
+          : {
+              tool: "wait",
+              reason: administrativeFallbackLine ?? "bounded goal fallback",
+            };
+      if (administrativeFallbackLine) {
+        attempt.resolvedUtterance = administrativeFallbackLine;
         attempt.resolvedUtteranceCitations = [];
       }
       const fallbackMeta = this.goalFallbackMeta("invalid_envelope");
@@ -3139,30 +3146,11 @@ export class RunService {
     const step = parsed.data;
     const requiresAdministrativeSpeech =
       observation.administrativeDecisionSourceMemoryId !== null;
-    let administrativeSpeech:
-      | { line: string; citedRecords: RunRecordCitation[] }
-      | undefined;
-    if (requiresAdministrativeSpeech) {
-      if (!step.utterance) {
-        return {
-          reason: "invalid_args",
-          detail: "an administrative choice requires one in-fiction utterance",
-        };
-      }
-      const observedCitations = this.observedRecordCitations(
-        observation.observePacket,
-        step.citedRecordIds,
-      );
-      const citedRecords = observedCitations
-        ? this.commitObservedRecordCitations(run, observation.actorId, observedCitations)
-        : null;
-      if (!citedRecords) {
-        return {
-          reason: "not_visible",
-          detail: "administrative speech cited a record revision outside the current observation",
-        };
-      }
-      administrativeSpeech = { line: step.utterance, citedRecords };
+    if (requiresAdministrativeSpeech && step.utterance) {
+      return {
+        reason: "invalid_args",
+        detail: "administrative speech must come from the selected tool's reason or why-line",
+      };
     }
     if (step.done && !step.toolCall) {
       if (observation.procedure === "interrogation") {
@@ -3198,6 +3186,36 @@ export class RunService {
     }
     const asId = (value: unknown): string | null =>
       typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
+    let administrativeSpeech:
+      | { line: string; citedRecords: RunRecordCitation[] }
+      | undefined;
+    if (requiresAdministrativeSpeech) {
+      const line = call.tool === "wait"
+        ? asId(call.args.reason)
+        : call.tool === "write_record"
+          ? asId(call.args.whyLine)
+          : null;
+      if (!line || [...line].length > TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS) {
+        return {
+          reason: "invalid_args",
+          detail: `administrative ${call.tool} requires one tool-bound spoken line of at most ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points`,
+        };
+      }
+      const observedCitations = this.observedRecordCitations(
+        observation.observePacket,
+        step.citedRecordIds,
+      );
+      const citedRecords = observedCitations
+        ? this.commitObservedRecordCitations(run, observation.actorId, observedCitations)
+        : null;
+      if (!citedRecords) {
+        return {
+          reason: "not_visible",
+          detail: "administrative speech cited a record revision outside the current observation",
+        };
+      }
+      administrativeSpeech = { line, citedRecords };
+    }
     const asOpenQuestion = (value: unknown): RunOpenQuestion | null | undefined => {
       if (value === null) return null;
       if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;

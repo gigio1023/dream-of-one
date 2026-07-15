@@ -246,7 +246,14 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
         }
       : requiresExplicitWait
         ? {
-            toolCall: { tool: "wait", args: { reason: content.previousResultWaitReason } },
+            toolCall: {
+              tool: "wait",
+              args: {
+                reason: request.administrativeDecisionSpeech
+                  ? content.administrativeWaitUtterance
+                  : content.previousResultWaitReason,
+              },
+            },
             ...(request.requireUtterance
               ? { utterance: content.administrativeWaitUtterance }
               : {}),

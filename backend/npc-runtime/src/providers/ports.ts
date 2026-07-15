@@ -266,6 +266,8 @@ export interface AgentStepRequest {
   /** Require an explicit choice from the offered tools without selecting one for the model. */
   requireToolCall?: boolean;
   requireUtterance?: boolean;
+  /** Speak the selected administrative tool's own reason/why-line; top-level utterance stays absent. */
+  administrativeDecisionSpeech?: boolean;
   /** Absolute scope ceiling used by background work that must preserve a reserve. */
   budgetCeiling?: { maxCalls: number; maxTokens: number };
 }

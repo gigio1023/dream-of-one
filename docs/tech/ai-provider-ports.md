@@ -172,7 +172,7 @@ request is likewise narrowed to exactly `move_to(player)` and `done=true`;
 unlike ambient speech, that movement requires no utterance. The envelope
 always contains exactly
 `toolCall`, `utterance`, `citedRecordIds`, `rationale`, and `done`, using `null`
-for absent speech and `[]` for no record citation. A free-world utterance may
+for absent speech and `[]` for no record citation. A free-world spoken line may
 cite at most eight records visible to its current speaker, and must cite every
 record whose content it meaningfully conveys. The same effective-tool
 constraint is enforced by the local
@@ -185,11 +185,13 @@ administrative packets receive only the M3R branch. When a report-bearing
 source reaches a writable procedure, the request still offers both
 `write_record` and `wait` but removes the nullable completion branch: the model
 must make one explicit tool choice without the runtime preferring either one.
-It also removes the nullable utterance branch for that request. The model must
-say one concise, localized, in-fiction sentence that makes its chosen write or
-deferral understandable without exposing stable ids. An explicit wait
-therefore carries both its reason into resident memory and its natural wording
-into the ordinary audible-speech path instead of escaping through a generic
+The top-level `utterance` is fixed to null for that request. Instead, the
+selected branch owns its one concise, localized, in-fiction sentence:
+`wait.reason` for a deferral or `write_record.whyLine` for a write. Binding the
+spoken line to the authoritative tool prevents a separately generated sentence
+from claiming the opposite action. An explicit wait therefore carries its
+reason into both resident memory and the ordinary audible-speech path instead
+of escaping through a generic
 `done` response. This requirement communicates the model's decision; it does
 not make either branch more likely. Locale and request
 validation report field-specific paths to the single repair attempt, and
@@ -217,9 +219,9 @@ record mutation, or verdict authority. The runtime stores the exact source
 speech memory before applying the listener judgment, clamps suspicion, and
 never lets hearsay create meaningful-firsthand provenance. This replaces the
 old second `proposeNextStep`; it does not add another provider call. Agent-step
-and ambient-reply utterances are transient world subtitles, so their transport
-schemas cap them at 64 Unicode code points and repair an overlong line before
-it reaches the client. Modal conversation and hearing prose keep their separate
+spoken lines and ambient-reply utterances are transient world subtitles, so
+their transport schemas cap them at 64 Unicode code points and repair an
+overlong line before it reaches the client. Modal conversation and hearing prose keep their separate
 surfaces and are not subject to this transient cap.
 
 `HearingJudgment` contains exactly six resident assessments, a proposed

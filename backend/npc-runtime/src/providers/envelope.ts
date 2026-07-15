@@ -663,6 +663,7 @@ export interface AgentStepRequestSchemaConstraints {
   requiredToolCall?: RequiredAgentToolCall;
   requireToolCall?: boolean;
   requireUtterance?: boolean;
+  administrativeDecisionSpeech?: boolean;
 }
 
 const administrativeOpenQuestionValueSchema = z
@@ -1073,7 +1074,48 @@ export function agentStepProposalSchemaForRequest(
         message: "required utterance must be nonempty",
       });
     }
-    if (!value.utterance && value.citedRecordIds.length > 0) {
+    if (constraints.administrativeDecisionSpeech) {
+      if (value.utterance) {
+        context.addIssue({
+          code: "custom",
+          path: ["utterance"],
+          message: "administrative decision speech must come from the selected tool field",
+        });
+      }
+      const spokenField = value.toolCall?.tool === "wait"
+        ? { path: ["toolCall", "args", "reason"] as (string | number)[], value: value.toolCall.args.reason }
+        : value.toolCall?.tool === "write_record"
+          ? { path: ["toolCall", "args", "whyLine"] as (string | number)[], value: value.toolCall.args.whyLine }
+          : null;
+      if (!spokenField || typeof spokenField.value !== "string") {
+        context.addIssue({
+          code: "custom",
+          path: ["toolCall"],
+          message: "administrative decision speech requires wait.reason or write_record.whyLine",
+        });
+      } else {
+        const parsedSpeech = transientWorldUtterance.safeParse(spokenField.value);
+        if (!parsedSpeech.success) {
+          context.addIssue({
+            code: "custom",
+            path: spokenField.path,
+            message: `administrative decision speech must be one nonempty sentence of at most ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points`,
+          });
+        } else {
+          addPlayerVisibleTextIssues(
+            context,
+            spokenField.path,
+            parsedSpeech.data,
+            locale,
+          );
+        }
+      }
+    }
+    if (
+      !value.utterance &&
+      !constraints.administrativeDecisionSpeech &&
+      value.citedRecordIds.length > 0
+    ) {
       context.addIssue({
         code: "custom",
         path: ["citedRecordIds"],
@@ -1791,6 +1833,26 @@ export function agentStepProposalJsonSchemaForTools(
     }
     return constrainBranch(branch, toolName);
   });
+
+  if (constraints.administrativeDecisionSpeech) {
+    properties.utterance = { type: "null" };
+    for (const branch of narrowedBranches) {
+      const toolName = toolNameForBranch(branch);
+      if (toolName !== "wait" && toolName !== "write_record") continue;
+      const branchProperties = (branch as Record<string, unknown>).properties as
+        | Record<string, Record<string, unknown>>
+        | undefined;
+      const argsSchema = branchProperties?.args;
+      const argsProperties = argsSchema?.properties as
+        | Record<string, Record<string, unknown>>
+        | undefined;
+      const spokenField = toolName === "wait" ? "reason" : "whyLine";
+      if (!argsProperties?.[spokenField]) {
+        throw new Error(`administrative ${toolName} JSON schema is missing ${spokenField}`);
+      }
+      argsProperties[spokenField] = structuredClone(transientWorldUtteranceJsonString);
+    }
+  }
 
   if (constraints.requiredToolCall) {
     const requiredBranch = narrowedBranches.find(

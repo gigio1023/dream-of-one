@@ -861,6 +861,7 @@ export class ProviderService implements NpcProposalPort {
       requiredToolCall: request.requiredToolCall,
       requireToolCall: request.requireToolCall,
       requireUtterance: request.requireUtterance,
+      administrativeDecisionSpeech: request.administrativeDecisionSpeech,
     };
     const jsonSchema = agentStepProposalJsonSchemaForTools(schemaConstraints, request.locale);
     const instructions = [
@@ -875,13 +876,15 @@ export class ProviderService implements NpcProposalPort {
       "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
       `Every non-null utterance appears as a transient world subtitle. Use one concise sentence no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points.`,
-      "citedRecordIds must contain every visible record whose content the utterance meaningfully conveys, and no other id. Use [] when the utterance cites no record or is null. A citation authorizes later disclosure only if the player actually hears the line, so make the cited content understandable in the utterance itself.",
+      "citedRecordIds must contain every visible record whose content the spoken line meaningfully conveys, and no other id. The spoken line is top-level utterance except for an administrative decision, where it is wait.reason or write_record.whyLine. Use [] when speech cites no record or is absent. A citation authorizes later disclosure only if the player actually hears the line, so make cited content understandable in that line itself.",
       request.requiredToolCall
         ? request.requiredToolCall.tool === "talk_to"
           ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required reply, toolCall and utterance must both be non-null. Do not add top-level keys."
           : request.requireUtterance
             ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall and utterance must both be non-null. Do not add top-level keys."
             : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall must be non-null; utterance may be null. Do not add top-level keys."
+        : request.administrativeDecisionSpeech
+          ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Choose one explicit non-null write_record or wait toolCall. Set top-level utterance to null. The selected tool's own whyLine or reason is the only spoken line. Do not add top-level keys."
         : request.requireToolCall
           ? request.requireUtterance
             ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Choose one explicit non-null toolCall from the offered branches and one non-null in-fiction utterance explaining that choice; this requires a decision but does not prefer any branch. Use [] for no citation. Do not add top-level keys."
@@ -907,6 +910,14 @@ export class ProviderService implements NpcProposalPort {
                 ? "Return that move_to call with done=true and one nonempty in-fiction utterance."
                 : "Return that move_to call with done=true. Do not invent speech; utterance may be null.",
             ]
+        : []),
+      ...(request.administrativeDecisionSpeech
+        ? [
+            "This is one administrative decision with exactly one authoritative action and one structurally bound spoken line.",
+            "For wait, write args.reason as the resident's concise first-person in-world sentence stating that this exact source will not be recorded now and the concrete reason. Do not promise a record, report, handoff, alert, or other action.",
+            "For write_record, write args.whyLine as the resident's concise first-person in-world sentence stating that this exact record is being made and why. Do not promise a handoff, alert, security action, or any other mutation not present in the tool call.",
+            "Set top-level utterance to null. The runtime speaks only the selected tool's reason or whyLine, so it cannot diverge from the authoritative branch.",
+          ]
         : []),
       ...(!request.requiredToolCall && allowedTalkActorIds !== undefined
         ? [allowedTalkActorIds.length > 0
@@ -936,6 +947,7 @@ export class ProviderService implements NpcProposalPort {
       requiredToolCall: request.requiredToolCall ?? null,
       requireToolCall: request.requireToolCall ?? false,
       requireUtterance: request.requireUtterance ?? false,
+      administrativeDecisionSpeech: request.administrativeDecisionSpeech ?? false,
       playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
     const input = JSON.stringify(requestContext);

@@ -45,6 +45,7 @@ export interface BoundedProposalLoopInput<T> {
   requiredToolCall?: RequiredAgentToolCall;
   requireToolCall?: boolean;
   requireUtterance?: boolean;
+  administrativeDecisionSpeech?: boolean;
   budgetCeiling?: { maxCalls: number; maxTokens: number };
 }
 
@@ -90,6 +91,9 @@ export async function runBoundedProposalLoop<T>(
       ...(input.requiredToolCall ? { requiredToolCall: input.requiredToolCall } : {}),
       ...(input.requireToolCall ? { requireToolCall: true } : {}),
       ...(input.requireUtterance ? { requireUtterance: true } : {}),
+      ...(input.administrativeDecisionSpeech
+        ? { administrativeDecisionSpeech: true }
+        : {}),
       ...(input.budgetCeiling ? { budgetCeiling: input.budgetCeiling } : {}),
     };
     const resolved = input.invoke

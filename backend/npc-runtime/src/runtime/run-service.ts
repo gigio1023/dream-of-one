@@ -2931,9 +2931,12 @@ export class RunService {
       observePacket.administrativeAuthority.writableTextSurfaceIds.length > 0,
     );
     if (hasPendingAdministrativeDecision) {
+      const reportDirection = (administrativeDecisionSource?.reportDelta ?? 0) > 0
+        ? "A positive change favors preserving the source in a record."
+        : "A negative change favors giving the source an unwritten disposition.";
       goal = [
         goal,
-        `Administrative source ${administrativeDecisionSource?.memoryId ?? "unknown"} carries a nonzero, model-authored report inclination and a writable procedure is available. Before unrelated movement, observation, or speech, judge whether to preserve this source with write_record or give it a final unwritten disposition with wait. If waiting, explain what makes a record unwarranted in the rationale. The inclination is evidence for this decision, never a deterministic mandate to write.`,
+        `Administrative source ${administrativeDecisionSource?.memoryId ?? "unknown"} previously received a model-authored report-inclination change of ${administrativeDecisionSource?.reportDelta ?? 0}, with this reason: ${administrativeDecisionSource?.whyLine ?? "none"}. ${reportDirection} Before unrelated movement, observation, or speech, judge whether to preserve this source with write_record or give it a final unwritten disposition with wait. Keep this choice consistent with the earlier judgment unless current observed facts or a concrete role policy justify changing course, and name that reason in the rationale. Generic delay or generic insufficient-evidence language is not a new fact. The earlier inclination is evidence for this decision, never a deterministic mandate to write.`,
       ].join(" ");
       observePacket.goals = [goal];
     }

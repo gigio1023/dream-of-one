@@ -411,7 +411,12 @@ has an authorized writable surface, that gained opportunity enters the
 semantic key once and the bounded goal offers only `write_record` and `wait`:
 the provider must deliberately preserve one grounded source or give it a
 final unwritten disposition instead of deferring the choice through unrelated
-movement or speech. That disposition removes only the cited source from later
+movement or speech. The packet repeats the earlier model-authored report
+inclination and why-line: a positive change favors recording, a negative change
+favors leaving it unwritten, and reversing that direction asks for a current
+fact or concrete role-policy reason rather than generic delay. This is a
+consistency instruction, not a runtime mandate; either validated action still
+commits. An unwritten disposition removes only the cited source from later
 administrative packets and remains in the resident's own action notes, so a
 new social event cannot silently reopen the same decision. Leaving the surface
 is non-actionable. One result invalidated by changing spatial facts is

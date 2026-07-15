@@ -128,12 +128,20 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
     ) {
       administrativeChoices += 1;
       assert.deepEqual(request.observePacket.toolCatalog, ["write_record", "wait"]);
+      assert.match(request.goal, /report-inclination change of 25/);
+      assert.match(request.goal, /A positive change favors preserving/);
+      assert.match(request.goal, /concrete role policy justify changing course/);
       return {
         proposal: {
-          toolCall: { tool: "wait", args: { reason: "기록하지 않고 보류합니다." } },
+          toolCall: {
+            tool: "wait",
+            args: {
+              reason: "접수 담당자 정책상 외부 확인 전에는 단독 진술을 기록하지 않고 보류합니다.",
+            },
+          },
           utterance: null,
           citedRecordIds: [],
-          rationale: "현재 근거는 기록하지 않기로 판단했습니다.",
+          rationale: "접수 담당자의 확인 정책 때문에 이번 단독 진술은 보류합니다.",
           done: true,
         },
         meta: {
@@ -557,6 +565,8 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
   assert.ok(administrativeRequest);
   assert.deepEqual(administrativeRequest.observePacket.toolCatalog, ["write_record", "wait"]);
   assert.deepEqual(administrativeRequest.allowedTalkActorIds, []);
+  assert.match(administrativeRequest.goal, /report-inclination change of 15/);
+  assert.match(administrativeRequest.goal, /Generic delay or generic insufficient-evidence/);
   assert.match(administrativeRequest.goal, /never a deterministic mandate to write/);
   assert.equal(adminDelta.action, "write_record");
   assert.equal(adminDelta.ledgerEvent.sourceMemoryId, answered.memoryDelta.memoryId);

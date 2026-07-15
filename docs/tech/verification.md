@@ -48,6 +48,17 @@ provider/language evidence only: the final Godot AI route still supplies the
 rendered layout, IME, and play evidence, without adding a locale-specific
 smoke harness or weakening the Qwen/zero-fallback requirements.
 
+A bounded rendered first-contact run at commit `de5a46fa` (2026-07-15) then
+completed the real park flow from an `E` prompt through one Korean answer and
+the next generated turn. It used nine calls and 21,267 charged tokens, all on
+`modelscope/qwen3.7-plus` with `transport=live`; repair, fallback, failure,
+dropped result, truncation, and in-flight remainder were all zero. The world
+paused during the modal exchange, social revision advanced, and the former
+empty preparation modal did not recur. Its bounded fun answer was
+*conditionally yes*: the remembered answer, why-line, and follow-up made the
+social loop worth continuing despite rough visuals. This proves first contact,
+not the still-pending full interrogation, recovery, hearing, or IME routes.
+
 ### Headless evidence boundary
 
 Headless is the default implementation-time route so automated work does not

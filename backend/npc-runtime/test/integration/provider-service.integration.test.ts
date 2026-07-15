@@ -448,7 +448,9 @@ test("required talk_to narrows transport and Zod contracts and repairs an invali
   const utteranceSchema = (
     textGen.requests[0].jsonSchema as { properties: { utterance: Record<string, unknown> } }
   ).properties.utterance;
-  assert.deepEqual(utteranceSchema, { type: "string", minLength: 1 });
+  assert.equal(utteranceSchema.type, "string");
+  assert.equal(utteranceSchema.minLength, 1);
+  assert.match(String(utteranceSchema.description), /Never include an internal stable id/);
   const doneSchema = (
     textGen.requests[0].jsonSchema as { properties: { done: Record<string, unknown> } }
   ).properties.done;
@@ -566,7 +568,11 @@ test("required move_to player narrows transport and Zod contracts without requir
     schema.properties.toolCall.anyOf[0]?.properties?.args.properties.targetId?.const,
     "player",
   );
-  assert.deepEqual(schema.properties.utterance, { type: ["string", "null"] });
+  assert.deepEqual(schema.properties.utterance.type, ["string", "null"]);
+  assert.match(
+    String(schema.properties.utterance.description),
+    /Never include an internal stable id/,
+  );
   assert.deepEqual(schema.properties.done, { type: "boolean", const: true });
 
   const requestSchema = agentStepProposalSchemaForRequest("ko-KR", {
@@ -1628,6 +1634,40 @@ test("Korean player-visible fields require Hangul but allow natural mixed conten
     );
   }
 
+  const contaminated = "방문자의 持ち物을 확인했습니다.";
+  const contaminatedResult = conversationJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...base,
+    whyLine: contaminated,
+  });
+  assert.equal(contaminatedResult.success, false);
+  if (!contaminatedResult.success) {
+    assert.equal(
+      contaminatedResult.error.issues[0]?.message,
+      "player-visible Korean text must not contain Japanese kana",
+    );
+  }
+  assert.equal(
+    conversationJudgmentSchemaForLocale("ja-JP").safeParse({
+      ...base,
+      whyLine: contaminated,
+    }).success,
+    true,
+    "Japanese player-visible text remains valid in the Japanese locale",
+  );
+
+  const lowercaseEnglish = "방문자가 목적을 stated하여 의문이 줄었습니다.";
+  const lowercaseEnglishResult = conversationJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...base,
+    whyLine: lowercaseEnglish,
+  });
+  assert.equal(lowercaseEnglishResult.success, false);
+  if (!lowercaseEnglishResult.success) {
+    assert.equal(
+      lowercaseEnglishResult.error.issues[0]?.message,
+      "player-visible Korean text may use Latin script only for title-case names or short uppercase acronyms",
+    );
+  }
+
   const rejected = ["Mira checked it.", "來歷確認", "确认来历", "2026", "?!…"];
   for (const whyLine of rejected) {
     const parsed = conversationJudgmentSchemaForLocale("ko-KR").safeParse({
@@ -1724,6 +1764,8 @@ test("provider service returns schema-validated live conversation proposals", as
   assert.equal(result.meta.usedFallback, false);
   assert.equal(result.proposal.suggestedReplies.length, 3);
   assert.equal(textGen.requests[0].schemaName, "npc_conversation_turn");
+  assert.match(textGen.requests[0].instructions, /Missing context means unknown, never absent/);
+  assert.match(textGen.requests[0].instructions, /without inventing a new identity/);
   assert.deepEqual(service.auditSnapshot("session-provider-test"), {
     callsUsed: 1,
     tokensUsed: 50,
@@ -2186,9 +2228,14 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
     textGen.requests[0].instructions,
     /actorContext and selfContext describe only this resident's authored identity/,
   );
+  assert.match(textGen.requests[0].instructions, /Missing context means unknown, never absent/);
+  assert.match(textGen.requests[0].instructions, /hard validity boundary/);
   const input = JSON.parse(textGen.requests[0].input);
   assert.equal(input.stanceBefore, "uncertain");
   assert.equal(input.hasMeaningfulFirsthandConversation, false);
+  assert.equal(input.groundingContract.knowledgeMode, "closed_world");
+  assert.deepEqual(input.groundingContract.suppliedPlayerStatements, [judgmentRequest().playerLine]);
+  assert.ok(input.groundingContract.validityRules.length >= 3);
 });
 
 test("typed multilingual player text keeps exact Unicode bytes in the provider request after edge trim", async () => {
@@ -2226,7 +2273,14 @@ test("typed multilingual player text keeps exact Unicode bytes in the provider r
 
   assert.equal(result.meta.transport, "live");
   assert.equal(textGen.requests.length, 1);
-  const providerInput = JSON.parse(textGen.requests[0].input) as { playerLine: string };
+  const providerInput = JSON.parse(textGen.requests[0].input) as {
+    playerLine: string;
+    groundingContract?: {
+      knowledgeMode?: string;
+      suppliedPlayerStatements?: string[];
+      validityRules?: string[];
+    };
+  };
   assert.equal(providerInput.playerLine, expectedPlayerLine);
   assert.equal(providerInput.playerLine.length, expectedPlayerLine.length, "text is not truncated");
   assert.deepEqual(
@@ -2234,6 +2288,12 @@ test("typed multilingual player text keeps exact Unicode bytes in the provider r
     Buffer.from(expectedPlayerLine),
     "internal spaces, punctuation, and Unicode normalization form stay byte-exact",
   );
+  assert.equal(providerInput.groundingContract?.knowledgeMode, "closed_world");
+  assert.deepEqual(
+    providerInput.groundingContract?.suppliedPlayerStatements,
+    [expectedPlayerLine],
+  );
+  assert.ok((providerInput.groundingContract?.validityRules?.length ?? 0) >= 3);
 });
 
 test("player-visible stable ids get one bounded repair even when the prose contains Hangul", async () => {
@@ -2271,6 +2331,16 @@ test("player-visible stable ids get one bounded repair even when the prose conta
   assert.equal(result.meta.usedFallback, false);
   assert.equal(textGen.requests.length, 2);
   assert.equal(textGen.requests[1]?.purpose, "repair");
+  assert.match(textGen.requests[1]?.instructions ?? "", /rewrite the whole affected field/);
+  const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
+    requestContext?: { playerLine?: string; actor?: { actorId?: string } };
+  };
+  assert.equal(repairInput.requestContext?.playerLine, judgmentRequest().playerLine);
+  assert.equal(repairInput.requestContext?.actor?.actorId, judgmentRequest().observePacket.actorId);
+  const turnSchema = textGen.requests[0]?.jsonSchema as {
+    properties?: { utterance?: { description?: string } };
+  };
+  assert.match(turnSchema.properties?.utterance?.description ?? "", /Never include an internal stable id/);
   assert.doesNotMatch(
     JSON.stringify({
       utterance: result.proposal.utterance,
@@ -2280,6 +2350,35 @@ test("player-visible stable ids get one bounded repair even when the prose conta
     }),
     /NPC_|mem-|TS_/,
   );
+});
+
+test("an invalid-envelope fallback never promotes an uncertain resident to vouch", async () => {
+  const leakedStableIdTurn = {
+    ...JSON.parse(validMergedTurn),
+    utterance: "NPC_Office_Worker의 답변을 확인했습니다.",
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(leakedStableIdTurn) },
+    { text: JSON.stringify(leakedStableIdTurn) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/stable-id-fallback-stance",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    playerLine: "안내를 받으러 왔습니다.",
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["사무실에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "fallback");
+  assert.equal(result.meta.fallbackReason, "invalid_envelope");
+  assert.equal(result.proposal.meaningfulFirsthand, true);
+  assert.equal(result.proposal.stance, "uncertain");
 });
 
 test("agent-step prompts keep visible language Korean and stop successful repetition", async () => {

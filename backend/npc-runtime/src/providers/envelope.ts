@@ -18,6 +18,8 @@ import type { RequiredAgentToolCall } from "./ports.js";
 
 const nonEmpty = z.string().trim().min(1);
 const requiredPlayerVisibleHangul = /\p{Script=Hangul}/u;
+const forbiddenKoreanPlayerVisibleKana = /[\p{Script=Hiragana}\p{Script=Katakana}]/u;
+const koreanPlayerVisibleLatinWords = /\p{Script=Latin}+/gu;
 const forbiddenPlayerVisibleStableIds = [
   /\b[A-Za-z][A-Za-z0-9]*_[A-Za-z0-9_]+\b/u,
   /\b(?:mem|sess|rec|led)-[A-Za-z0-9_.:-]+\b/u,
@@ -27,6 +29,17 @@ const forbiddenPlayerVisibleStableIds = [
 ] as const;
 const intentSchema = z.enum(CONVERSATION_CHOICE_INTENTS);
 const suggestedReplySchema = z.object({ text: nonEmpty, intent: intentSchema }).strict();
+const playerVisibleJsonString = {
+  type: "string",
+  minLength: 1,
+  description:
+    "Player-visible natural-language prose only. Obey the request groundingContract when present; never invent a player or world fact. Never include an internal stable id, identifier token, or underscore name.",
+} as const;
+const nullablePlayerVisibleJsonString = {
+  type: ["string", "null"],
+  description:
+    "Player-visible natural-language prose only when non-null. Obey the request groundingContract when present; never invent a player or world fact. Never include an internal stable id, identifier token, or underscore name.",
+} as const;
 
 function isKoreanLocale(locale: string): boolean {
   return supportedLocaleEntry(locale).presentationId === "ko";
@@ -51,6 +64,29 @@ function addPlayerVisibleTextIssues(
       code: "custom",
       path,
       message: "player-visible Korean text must contain at least one Hangul code point",
+    });
+  }
+  if (requireHangul && forbiddenKoreanPlayerVisibleKana.test(text)) {
+    context.addIssue({
+      code: "custom",
+      path,
+      message: "player-visible Korean text must not contain Japanese kana",
+    });
+  }
+  if (
+    requireHangul &&
+    [...text.matchAll(koreanPlayerVisibleLatinWords)].some(match => {
+      const token = match[0];
+      return token.length > 1 &&
+        !/^[A-Z][a-z]+$/u.test(token) &&
+        !/^[A-Z0-9]{2,6}$/u.test(token);
+    })
+  ) {
+    context.addIssue({
+      code: "custom",
+      path,
+      message:
+        "player-visible Korean text may use Latin script only for title-case names or short uppercase acronyms",
     });
   }
 }
@@ -816,7 +852,7 @@ export const conversationProposalJsonSchema: Record<string, unknown> = {
   additionalProperties: false,
   required: ["utterance", "suggestedReplies", "continueConversation"],
   properties: {
-    utterance: { type: "string", minLength: 1 },
+    utterance: playerVisibleJsonString,
     suggestedReplies: {
       type: "array",
       minItems: 3,
@@ -826,7 +862,7 @@ export const conversationProposalJsonSchema: Record<string, unknown> = {
         additionalProperties: false,
         required: ["text", "intent"],
         properties: {
-          text: { type: "string", minLength: 1 },
+          text: playerVisibleJsonString,
           intent: { type: "string", enum: [...CONVERSATION_CHOICE_INTENTS] },
         },
       },
@@ -846,7 +882,7 @@ export const conversationJudgmentJsonSchema: Record<string, unknown> = {
       type: "array",
       items: { type: "string", enum: [...CONVERSATION_SUSPICION_SIGNALS] },
     },
-    whyLine: { type: "string", minLength: 1 },
+    whyLine: playerVisibleJsonString,
   },
 };
 
@@ -872,7 +908,7 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
       type: "array",
       items: { type: "string", enum: [...CONVERSATION_SUSPICION_SIGNALS] },
     },
-    whyLine: { type: "string", minLength: 1 },
+    whyLine: playerVisibleJsonString,
     stance: { type: "string", enum: [...COARSE_STANCES] },
     meaningfulFirsthand: { type: "boolean" },
     openQuestion: {
@@ -884,13 +920,13 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
           required: ["status", "text", "whyLine"],
           properties: {
             status: { type: "string", enum: ["open", "resolved"] },
-            text: { type: "string", minLength: 1 },
-            whyLine: { type: "string", minLength: 1 },
+            text: playerVisibleJsonString,
+            whyLine: playerVisibleJsonString,
           },
         },
       ],
     },
-    utterance: { type: "string", minLength: 1 },
+    utterance: playerVisibleJsonString,
     suggestedReplies: {
       type: "array",
       minItems: 3,
@@ -900,7 +936,7 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
         additionalProperties: false,
         required: ["text", "intent"],
         properties: {
-          text: { type: "string", minLength: 1 },
+          text: playerVisibleJsonString,
           intent: { type: "string", enum: [...CONVERSATION_CHOICE_INTENTS] },
         },
       },
@@ -937,12 +973,12 @@ export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
         },
       },
     },
-    utterance: { type: "string", minLength: 1 },
+    utterance: playerVisibleJsonString,
     rationale: { type: "string", minLength: 1 },
     done: { type: "boolean", const: true },
     suspicionDelta: { type: "integer" },
     proposedStance: { type: "string", enum: [...COARSE_STANCES] },
-    whyLine: { type: "string", minLength: 1 },
+    whyLine: playerVisibleJsonString,
     openQuestion: {
       anyOf: [
         { type: "null" },
@@ -952,8 +988,8 @@ export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
           required: ["status", "text", "whyLine"],
           properties: {
             status: { type: "string", enum: ["open", "resolved"] },
-            text: { type: "string", minLength: 1 },
-            whyLine: { type: "string", minLength: 1 },
+            text: playerVisibleJsonString,
+            whyLine: playerVisibleJsonString,
           },
         },
       ],
@@ -1008,7 +1044,7 @@ export const hearingJudgmentJsonSchema: Record<string, unknown> = {
           actorId: { type: "string", minLength: 1 },
           contactBasis: { type: "string", enum: [...HEARING_CONTACT_BASES] },
           proposedStance: { type: "string", enum: [...COARSE_STANCES] },
-          testimonyLine: { type: "string", minLength: 1 },
+          testimonyLine: playerVisibleJsonString,
           citedMemoryIds: {
             type: "array",
             items: { type: "string", minLength: 1 },
@@ -1017,8 +1053,8 @@ export const hearingJudgmentJsonSchema: Record<string, unknown> = {
       },
     },
     proposedVerdict: { type: "string", enum: ["ordinary", "abnormal"] },
-    verdictWhyLine: { type: "string", minLength: 1 },
-    officerLine: { type: "string", minLength: 1 },
+    verdictWhyLine: playerVisibleJsonString,
+    officerLine: playerVisibleJsonString,
     citedRecordIds: {
       type: "array",
       items: { type: "string", minLength: 1 },
@@ -1055,8 +1091,8 @@ const administrativeOpenQuestionJsonSchema: Record<string, unknown> = {
       required: ["status", "text", "whyLine"],
       properties: {
         status: { type: "string", enum: ["open", "resolved"] },
-        text: { type: "string", minLength: 1 },
-        whyLine: { type: "string", minLength: 1 },
+        text: playerVisibleJsonString,
+        whyLine: playerVisibleJsonString,
       },
     },
   ],
@@ -1189,7 +1225,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
         })),
       ],
     },
-    utterance: { type: ["string", "null"] },
+    utterance: nullablePlayerVisibleJsonString,
     rationale: { type: "string", minLength: 1 },
     done: { type: "boolean" },
   },
@@ -1428,7 +1464,7 @@ export function agentStepProposalJsonSchemaForTools(
       constraints.requiredToolCall.tool === "talk_to" ||
       constraints.requireUtterance === true
     ) {
-      properties.utterance = { type: "string", minLength: 1 };
+      properties.utterance = playerVisibleJsonString;
     }
     properties.done = { type: "boolean", const: true };
   }

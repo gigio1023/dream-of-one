@@ -79,7 +79,8 @@ correctly remains live.
 `MergedConversationTurn` is judgment fields (bounded suspicion/report deltas,
 signal classes, and a player-visible why-line) plus the NPC's next utterance
 and three reply suggestions. If a live model breaks that schema, `ProviderService`
-retries once, then falls back to composing the rule judgment with the
+retries once with the original grounded request context plus field-specific
+validation issues, then falls back to composing the rule judgment with the
 canned reply set — that merged-conversation schema is not request-shrunk.
 
 `ConversationProposal` contains an NPC utterance and three generated reply
@@ -91,6 +92,16 @@ it does not decide what the answer meant. `AgentStepProposal` contains at
 most one tool call, an optional utterance, and a stop flag. The runtime
 validates every tool against visibility, role authority, object state, and
 the offered catalog.
+
+Conversation requests also carry a machine-readable `groundingContract` built
+from supplied scene context, the player's supplied statements, visible object
+and record facts, and heard speech. It is closed-world for player-visible prose:
+an unlisted identity, role, possession, document, approval, appointment, or
+past event is unknown, not missing or completed. The NPC may ask about an
+unknown, but neither its speech nor a suggested player reply may turn it into a
+fact. This boundary is repeated in the provider instructions and retained in
+the one repair request; model-authored wording remains free inside that factual
+boundary.
 
 For each agent-step request, `ProviderService` derives a strict JSON schema
 from that request's effective tool catalog and current observe packet. Only
@@ -222,9 +233,14 @@ and record/ledger prose. Every nonempty Korean player-visible field must contain
 at least one Hangul code point. This lightweight presence check rejects pure
 English, pure Chinese/Hanja, digits-only, and punctuation-only output while
 allowing natural Korean to include names in Latin script, established acronyms,
-numerals, and occasional Hanja. It is an envelope-validity guard, not a language
-quality classifier: wording and style remain provider-owned and content-review
-owned. An independent all-locale guard rejects canonical internal stable-ID
+numerals, and occasional Hanja. Multi-letter Latin words are limited to
+title-case names or short uppercase acronyms, so a stray lowercase English word
+does not pass merely because the sentence also contains Hangul. Korean output
+containing Japanese hiragana or katakana is also rejected, even when another
+part of the field contains Hangul.
+These are envelope-validity guards, not a general language quality classifier:
+wording and style remain provider-owned and content-review owned. An independent
+all-locale guard rejects canonical internal stable-ID
 shapes such as actor, memory, record-surface, movement, and semantic-anchor ids
 from every player-visible field while leaving tool arguments and internal
 rationale untouched. Other locales keep structural and locale instructions
@@ -245,7 +261,10 @@ as native-quality non-Korean judgment.
 
 Adapters return text and usage only. `ProviderService` parses the text with the
 zod schemas in `src/providers/envelope.ts`. Invalid JSON receives one bounded
-repair request. The following conditions use deterministic fallback and are
+repair request containing the original grounded request context, the invalid
+envelope, and field-specific validation issues. Player-visible JSON-schema
+fields also describe the no-internal-ID contract so compatible structured-output
+providers can avoid the repair in the first place. The following conditions use deterministic fallback and are
 reported in `ProposalMeta`:
 
 - missing credentials or unavailable profile;
@@ -277,7 +296,9 @@ a live schema mismatch without turning provider text into a log surface.
 Fallback is resilience, not the production policy. For player judgment, fallback is
 the deterministic signal classifier in
 `src/runtime/conversation-suspicion.ts`; for conversation and agent steps it
-is the bounded rule adapter. The HUD shows the selected profile,
+is the bounded rule adapter. A merged conversation fallback may preserve an
+already-earned stance, but it cannot promote an uncertain or opposed resident
+to `vouch`; transport or format failure is not positive social evidence. The HUD shows the selected profile,
 `live`/`fallback`/`scripted` transport, and fallback reason.
 The same cumulative metadata remains available run-wide as `providerAudit` and
 `providerRuntimeTrace` on snapshots, successful preload responses, every typed

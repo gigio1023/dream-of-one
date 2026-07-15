@@ -195,6 +195,40 @@ function sanitizedValidationIssues(
 
 const PRIVATE_ACTOR_CONTEXT_GUIDE =
   "actorContext and selfContext describe only this resident's authored identity, voice, private motivation, and holder-local relationship knowledge. They may shape tone, priorities, and questions, but they are not observations or evidence about the player. Treat only supplied memories, heard speech, visible records, and visible facts as evidence, and never reveal a private pressure unless this resident deliberately chooses to speak about it in-fiction.";
+const CONVERSATION_VISIBLE_FACT_GUIDE =
+  "The groundingContract is a hard validity boundary, not a style suggestion. NPC speech and player reply suggestions may mention only people, documents, records, possessions, appointments, systems, approvals, identities, roles, and past events affirmatively supplied in the request. Missing context means unknown, never absent. The NPC may ask a neutral question about an unknown, but must not claim a record or item exists, was checked, is missing, or belongs to anyone. Every suggested player reply must be speakable without inventing a new identity, job, possession, document, invitation, approval, appointment, or past action. If no player statement supplies one, use a question, refusal, uncertainty, or a statement about the present conversation instead.";
+
+function conversationGroundingContract(
+  request:
+    | ConversationTurnRequest
+    | ConversationJudgmentRequest
+    | MergedConversationTurnRequest,
+  newestPlayerLine?: string,
+) {
+  const playerStatements = request.conversationHistory
+    .filter(line => line.speakerId === "player")
+    .map(line => line.line);
+  if (newestPlayerLine !== undefined) playerStatements.push(newestPlayerLine);
+  return {
+    knowledgeMode: "closed_world",
+    suppliedSceneContext: "sceneFacts" in request ? request.sceneFacts : [],
+    suppliedPlayerStatements: playerStatements,
+    visibleObjectFacts: request.observePacket.visibleObjects.map(object => ({
+      label: object.label,
+      state: object.state,
+    })),
+    visibleRecordFacts: request.observePacket.visibleRecords.map(record => ({
+      kind: record.kind,
+      stateBody: record.stateBody,
+    })),
+    heardSpeech: request.observePacket.heardSpeech,
+    validityRules: [
+      "Treat every unlisted person, identity, role, item, document, record, approval, appointment, possession, and past event as unknown.",
+      "Do not convert unknown into absent, missing, checked, expected, owned, received, or completed.",
+      "A suggested player reply may repeat supplied player statements or react to the present exchange; it may not add biography, possessions, paperwork, invitations, approvals, appointments, or past actions.",
+    ],
+  };
+}
 
 function localeOutputInstructions(locale: string, fields: string): string[] {
   const supportedLocale = requireSupportedGameplayLocale(locale);
@@ -205,7 +239,7 @@ function localeOutputInstructions(locale: string, fields: string): string[] {
   if (supportedLocaleEntry(supportedLocale).presentationId === "ko") {
     instructions.push(
       "Write natural Korean prose in every player-visible text field, and include at least one Hangul code point in each nonempty field.",
-      "Latin-script names, established acronyms such as AI or QR, numerals, and occasional Hanja are allowed when natural, but they cannot replace Korean prose.",
+      "Latin-script names, established acronyms such as AI or QR, numerals, and occasional Hanja are allowed when natural, but they cannot replace Korean prose. Never mix Japanese hiragana or katakana into Korean player-visible text.",
     );
   }
   return instructions;
@@ -306,6 +340,7 @@ export class ProviderService implements NpcProposalPort {
       "You are an NPC inside Dream of One, a social-suspicion game.",
       "Stay in role and use only visible context.",
       PRIVATE_ACTOR_CONTEXT_GUIDE,
+      CONVERSATION_VISIBLE_FACT_GUIDE,
       ...localeOutputInstructions(
         request.locale,
         "the NPC utterance and all three player reply suggestions",
@@ -313,16 +348,19 @@ export class ProviderService implements NpcProposalPort {
       "Return one NPC utterance and exactly three short player reply suggestions.",
       "The reply intent labels shape variety only; they never decide suspicion or game truth.",
       "Do not claim a verdict, hidden fact, or world mutation.",
+      "Before returning JSON, remove every player or world claim that the groundingContract does not affirmatively support.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
-    const input = JSON.stringify({
+    const requestContext = {
       objective: request.objective,
       sceneFacts: request.sceneFacts,
       actor: request.observePacket,
       conversationHistory: request.conversationHistory.slice(-6),
+      groundingContract: conversationGroundingContract(request),
       beatId: request.beatId,
       locale: request.locale,
-    });
+    };
+    const input = JSON.stringify(requestContext);
     return this.resolveValidated<ConversationProposal>({
       sessionId: request.sessionId,
       request: {
@@ -333,6 +371,7 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema: conversationProposalJsonSchema,
       },
       schema: conversationProposalSchemaForLocale(request.locale),
+      repairContext: requestContext,
       fallback: () => this.options.fallback.proposeConversationTurn(request),
     });
   }
@@ -345,6 +384,7 @@ export class ProviderService implements NpcProposalPort {
       "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
       PRIVATE_ACTOR_CONTEXT_GUIDE,
+      CONVERSATION_VISIBLE_FACT_GUIDE,
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
       "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
@@ -354,15 +394,17 @@ export class ProviderService implements NpcProposalPort {
       "Do not decide any verdict or session outcome.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
-    const input = JSON.stringify({
+    const requestContext = {
       playerLine: request.playerLine,
       conversationHistory: request.conversationHistory.slice(-10),
       actor: request.observePacket,
       suspicionBefore: request.suspicionBefore,
       reportPressureBefore: request.reportPressureBefore,
+      groundingContract: conversationGroundingContract(request, request.playerLine),
       beatId: request.beatId,
       locale: request.locale,
-    });
+    };
+    const input = JSON.stringify(requestContext);
     return this.resolveValidated<ConversationJudgment>({
       sessionId: request.sessionId,
       request: {
@@ -373,6 +415,7 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema: conversationJudgmentJsonSchema,
       },
       schema: conversationJudgmentSchemaForLocale(request.locale),
+      repairContext: requestContext,
       fallback: () => this.options.fallback.judgeConversationTurn(request),
     });
   }
@@ -385,6 +428,7 @@ export class ProviderService implements NpcProposalPort {
       "In one response, judge the player's newest line AND write your next spoken reply with exactly three short player reply suggestions.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
       PRIVATE_ACTOR_CONTEXT_GUIDE,
+      CONVERSATION_VISIBLE_FACT_GUIDE,
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
       "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
@@ -400,9 +444,10 @@ export class ProviderService implements NpcProposalPort {
         "whyLine, openQuestion text/whyLine, utterance, and all three suggestion texts",
       ),
       "Do not decide any verdict or session outcome, and do not claim a hidden fact or world mutation.",
+      "Before returning JSON, remove every player or world claim that the groundingContract does not affirmatively support.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
-    const input = JSON.stringify({
+    const requestContext = {
       playerLine: request.playerLine,
       conversationHistory: request.conversationHistory.slice(-10),
       objective: request.objective,
@@ -412,9 +457,11 @@ export class ProviderService implements NpcProposalPort {
       reportPressureBefore: request.reportPressureBefore,
       stanceBefore: request.stanceBefore,
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
+      groundingContract: conversationGroundingContract(request, request.playerLine),
       beatId: request.beatId,
       locale: request.locale,
-    });
+    };
+    const input = JSON.stringify(requestContext);
     return this.resolveValidated<MergedConversationTurn>({
       sessionId: request.sessionId,
       request: {
@@ -425,6 +472,7 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema: mergedConversationTurnJsonSchema,
       },
       schema: mergedConversationTurnSchemaForLocale(request.locale),
+      repairContext: requestContext,
       fallback: () => this.options.fallback.judgeAndProposeConversationTurn(request),
     });
   }
@@ -495,7 +543,7 @@ export class ProviderService implements NpcProposalPort {
       toolGuideForTools(effectiveTools, recordContracts),
       "Return only JSON matching the supplied schema.",
     ].join("\n");
-    const input = JSON.stringify({
+    const requestContext = {
       goal: request.goal,
       iteration: request.iteration,
       observe: request.observePacket,
@@ -505,7 +553,8 @@ export class ProviderService implements NpcProposalPort {
       requiredToolCall: request.requiredToolCall ?? null,
       requireUtterance: request.requireUtterance ?? false,
       locale: request.locale,
-    });
+    };
+    const input = JSON.stringify(requestContext);
     return this.resolveValidated<AgentStepProposal>({
       sessionId: request.sessionId,
       request: {
@@ -516,6 +565,7 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema,
       },
       schema: agentStepProposalSchemaForRequest(request.locale, schemaConstraints),
+      repairContext: requestContext,
       budgetCeiling: request.budgetCeiling,
       fallback: () => this.options.fallback.proposeNextStep(request),
     });
@@ -542,7 +592,7 @@ export class ProviderService implements NpcProposalPort {
       ),
       "Do not decide a verdict or mutate the world. Return only JSON matching the supplied schema.",
     ].join(" ");
-    const input = JSON.stringify({
+    const requestContext = {
       runId: request.sessionId,
       wakeId: request.wakeId,
       conversationId: request.conversationId,
@@ -555,7 +605,8 @@ export class ProviderService implements NpcProposalPort {
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
       listener: request.observePacket,
       locale: request.locale,
-    });
+    };
+    const input = JSON.stringify(requestContext);
     return this.resolveValidated<AmbientReplyJudgment>({
       sessionId: request.sessionId,
       request: {
@@ -566,6 +617,7 @@ export class ProviderService implements NpcProposalPort {
         jsonSchema,
       },
       schema: ambientReplyJudgmentSchemaForRequest(request.locale, request.targetActorId),
+      repairContext: requestContext,
       budgetCeiling: request.budgetCeiling,
       fallback: () => this.options.fallback.judgeAndProposeAmbientReply(request),
     });
@@ -692,7 +744,7 @@ export class ProviderService implements NpcProposalPort {
       const repairRequest: TextGenRequest = {
         ...input.request,
         purpose: "repair",
-        instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary.`,
+        instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary. When a player-visible field exposes an internal stable id, rewrite the whole affected field as natural in-fiction prose in the run language. Never repeat the identifier, an underscore token, or an internal id-shaped substitute in player-visible text.`,
         input: JSON.stringify({
           ...(input.repairContext === undefined
             ? {}

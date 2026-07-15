@@ -46,12 +46,15 @@ function localizedFallbackWhyLine(
 function fallbackStance(
   suspicionAfter: number,
   signals: readonly ConversationSuspicionSignal[],
+  stanceBefore: "oppose" | "uncertain" | "vouch" | undefined,
   exactFallbackIntent?: ConversationChoiceIntent,
 ): "oppose" | "uncertain" | "vouch" {
   if (suspicionAfter >= 55) return "oppose";
   if (exactFallbackIntent === "uncertain/repair") return "uncertain";
   if (exactFallbackIntent === "risky/weird") return "uncertain";
-  if (signals.length === 0) return "vouch";
+  // A transport or format failure may preserve an earned stance, but generic
+  // fallback wording must never manufacture a new positive social judgment.
+  if (signals.length === 0) return stanceBefore ?? "uncertain";
   return "uncertain";
 }
 
@@ -181,6 +184,7 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
         stance: fallbackStance(
           suspicionAfter,
           judged.proposal.signals,
+          request.stanceBefore,
           exactFallbackIntent,
         ),
         meaningfulFirsthand,

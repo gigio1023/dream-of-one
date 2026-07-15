@@ -264,7 +264,11 @@ test("deterministic fallback has exact six-locale parity and selects the run loc
       sceneFacts: ["face-to-face at Studio reception"],
     });
     assert.equal(safe.proposal.signals.includes("role_script_break"), false);
-    assert.equal(safe.proposal.stance, "vouch");
+    assert.equal(
+      safe.proposal.stance,
+      "uncertain",
+      `${locale} technical fallback must not manufacture a new vouch`,
+    );
     const repair = await fallback.judgeAndProposeConversationTurn({
       ...judgmentRequest,
       playerLine: repairReply.text,

@@ -121,7 +121,7 @@ func _instance_scene(spec: Dictionary) -> void:
 	if not is_instance_valid(instance) or not instance.is_inside_tree():
 		_failures.append("%s did not survive one process frame" % label)
 	else:
-		_check_runtime_shape(label, instance)
+		await _check_runtime_shape(label, instance)
 		if label == "town_3d":
 			await _check_npc_movement(label, instance)
 		if label == "main_3d":
@@ -369,6 +369,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			else:
 				_check_town_navigation(label, instance, region)
 				await _check_npc_spatial_facts(label, instance)
+			await _check_player_portal_clearance(label, instance)
 			_check_town_location_coverage(label, instance)
 			_check_respawn_anchor_contract(label, instance)
 			for tree_blocker_name in [
@@ -1943,6 +1944,77 @@ func _check_actor_spawn_clearance(
 				"%s %s did not instantiate at its authored spawn"
 				% [label, actor_id]
 			)
+
+
+func _check_player_portal_clearance(label: String, town: Node) -> void:
+	var player := town.get_node_or_null("Actors/Player3D") as CharacterBody3D
+	if player == null:
+		_failures.append("%s has no player for portal-clearance checks" % label)
+		return
+	var layout: Dictionary = town.call("layout_snapshot")
+	var portal_widths: Dictionary = {}
+	for portal_value in layout.get("open_portals", []) as Array:
+		if portal_value is Dictionary:
+			var portal := portal_value as Dictionary
+			portal_widths[str(portal.get("id", ""))] = float(portal.get("width", 0.0))
+	for portal_id in [
+		"PORTAL_STUDIO_FRONT",
+		"PORTAL_OFFICE_FRONT",
+		"PORTAL_STATION_FRONT",
+	]:
+		if float(portal_widths.get(portal_id, 0.0)) < 2.4:
+			_failures.append("%s %s is narrower than the 2.4m open-portal contract" % [label, portal_id])
+
+	var original_transform := player.global_transform
+	var original_velocity := player.velocity
+	var original_control := bool(player.get("_control_enabled"))
+	player.call("set_control_enabled", false)
+	var crossings := [
+		{
+			"id": "Studio",
+			"outside": Vector3(0.0, 0.05, -11.0),
+			"inward": Vector3(0.0, 0.0, -2.0),
+			"lateral": Vector3(1.0, 0.0, 0.0),
+		},
+		{
+			"id": "Office",
+			"outside": Vector3(-11.0, 0.05, 0.0),
+			"inward": Vector3(-2.0, 0.0, 0.0),
+			"lateral": Vector3(0.0, 0.0, 1.0),
+		},
+		{
+			"id": "Station",
+			"outside": Vector3(11.0, 0.05, 0.0),
+			"inward": Vector3(2.0, 0.0, 0.0),
+			"lateral": Vector3(0.0, 0.0, 1.0),
+		},
+	]
+	for crossing_value in crossings:
+		var crossing := crossing_value as Dictionary
+		for lateral_sign in [-1.0, 1.0]:
+			var outside := crossing["outside"] as Vector3
+			var lateral := crossing["lateral"] as Vector3
+			var start: Vector3 = outside + lateral * 0.65 * lateral_sign
+			var inward: Vector3 = crossing["inward"] as Vector3
+			player.global_position = start
+			player.velocity = Vector3.ZERO
+			await physics_frame
+			var inward_collision := player.move_and_collide(inward)
+			if inward_collision != null or _planar_distance(player.global_position, start + inward) > 0.05:
+				_failures.append(
+					"%s player capsule cannot enter %s portal at lateral offset %.2f"
+					% [label, str(crossing["id"]), 0.65 * lateral_sign]
+				)
+				continue
+			var outward_collision := player.move_and_collide(-inward)
+			if outward_collision != null or _planar_distance(player.global_position, start) > 0.05:
+				_failures.append(
+					"%s player capsule cannot exit %s portal at lateral offset %.2f"
+					% [label, str(crossing["id"]), 0.65 * lateral_sign]
+				)
+	player.global_transform = original_transform
+	player.velocity = original_velocity
+	player.call("set_control_enabled", original_control)
 
 
 func _check_npc_spatial_facts(label: String, instance: Node) -> void:

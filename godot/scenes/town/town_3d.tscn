@@ -123,16 +123,16 @@ size = Vector3(0.3, 3, 8)
 size = Vector3(0.3, 3, 8)
 
 [sub_resource type="BoxMesh" id="BoxMesh_gvglg"]
-size = Vector3(5.2, 3, 0.3)
+size = Vector3(4.8, 3, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_nyc7s"]
-size = Vector3(5.2, 3, 0.3)
+size = Vector3(4.8, 3, 0.3)
 
 [sub_resource type="BoxMesh" id="BoxMesh_cbn8s"]
-size = Vector3(5.2, 3, 0.3)
+size = Vector3(4.8, 3, 0.3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0vqtq"]
-size = Vector3(5.2, 3, 0.3)
+size = Vector3(4.8, 3, 0.3)
 
 [sub_resource type="BoxMesh" id="BoxMesh_kdj3r"]
 size = Vector3(12, 0.2, 8)
@@ -159,16 +159,16 @@ size = Vector3(8, 3, 0.3)
 size = Vector3(8, 3, 0.3)
 
 [sub_resource type="BoxMesh" id="BoxMesh_kjof5"]
-size = Vector3(0.3, 3, 5.2)
+size = Vector3(0.3, 3, 4.8)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_34ynp"]
-size = Vector3(0.3, 3, 5.2)
+size = Vector3(0.3, 3, 4.8)
 
 [sub_resource type="BoxMesh" id="BoxMesh_7ipdd"]
-size = Vector3(0.3, 3, 5.2)
+size = Vector3(0.3, 3, 4.8)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rhl1y"]
-size = Vector3(0.3, 3, 5.2)
+size = Vector3(0.3, 3, 4.8)
 
 [sub_resource type="BoxMesh" id="BoxMesh_uba1s"]
 size = Vector3(8, 0.2, 12)
@@ -195,16 +195,16 @@ size = Vector3(8, 3, 0.3)
 size = Vector3(8, 3, 0.3)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wjxuu"]
-size = Vector3(0.3, 3, 5.2)
+size = Vector3(0.3, 3, 4.8)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_cwpl7"]
-size = Vector3(0.3, 3, 5.2)
+size = Vector3(0.3, 3, 4.8)
 
 [sub_resource type="BoxMesh" id="BoxMesh_guvuc"]
-size = Vector3(0.3, 3, 5.2)
+size = Vector3(0.3, 3, 4.8)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_tmutd"]
-size = Vector3(0.3, 3, 5.2)
+size = Vector3(0.3, 3, 4.8)
 
 [sub_resource type="BoxMesh" id="BoxMesh_2jadv"]
 size = Vector3(8, 0.2, 12)
@@ -462,7 +462,7 @@ mesh = SubResource("BoxMesh_vj6g0")
 shape = SubResource("BoxShape3D_675mr")
 
 [node name="StudioFrontLeft" type="StaticBody3D" parent="Geometry/Buildings" unique_id=520072866 groups=["town_navigation_source"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, 1.5, -12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 1.5, -12)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StudioFrontLeft" unique_id=1556758542]
 material_override = ExtResource("5_imofn")
@@ -472,7 +472,7 @@ mesh = SubResource("BoxMesh_gvglg")
 shape = SubResource("BoxShape3D_nyc7s")
 
 [node name="StudioFrontRight" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1979960317 groups=["town_navigation_source"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, 1.5, -12)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 1.5, -12)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StudioFrontRight" unique_id=1305087469]
 material_override = ExtResource("5_imofn")
@@ -522,7 +522,7 @@ mesh = SubResource("BoxMesh_cwpl7")
 shape = SubResource("BoxShape3D_guvuc")
 
 [node name="OfficeFrontNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1079770349 groups=["town_navigation_source"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, -3.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, -3.6)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/OfficeFrontNorth" unique_id=1228980718]
 material_override = ExtResource("7_wqg2r")
@@ -532,7 +532,7 @@ mesh = SubResource("BoxMesh_kjof5")
 shape = SubResource("BoxShape3D_34ynp")
 
 [node name="OfficeFrontSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=555217358 groups=["town_navigation_source"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, 3.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.5, 3.6)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/OfficeFrontSouth" unique_id=2025190522]
 material_override = ExtResource("7_wqg2r")
@@ -582,7 +582,7 @@ mesh = SubResource("BoxMesh_313o1")
 shape = SubResource("BoxShape3D_rfl4i")
 
 [node name="StationFrontNorth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=1626608336 groups=["town_navigation_source"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, -3.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, -3.6)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StationFrontNorth" unique_id=1609326085]
 material_override = ExtResource("8_7hdwp")
@@ -592,7 +592,7 @@ mesh = SubResource("BoxMesh_wjxuu")
 shape = SubResource("BoxShape3D_cwpl7")
 
 [node name="StationFrontSouth" type="StaticBody3D" parent="Geometry/Buildings" unique_id=2124462945 groups=["town_navigation_source"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, 3.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 1.5, 3.6)
 
 [node name="Visual" type="MeshInstance3D" parent="Geometry/Buildings/StationFrontSouth" unique_id=2038483899]
 material_override = ExtResource("8_7hdwp")

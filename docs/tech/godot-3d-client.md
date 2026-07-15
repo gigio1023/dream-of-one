@@ -300,7 +300,10 @@ surfaces with the portals open; a bidirectional `NavigationLink3D` bridges each
 narrow portal's two baked surfaces inside the same navigation map. The link
 follows the physical opening and is not a scene transition. Portal ids and
 connections remain semantic visibility and audibility boundaries in
-`world_layout.json`; there is no dynamic open/closed state.
+`world_layout.json`; there is no dynamic open/closed state. The three active
+town portals use 2.4 m of clear width so the 0.35 m player capsule has useful
+steering tolerance and can pass a resident without turning an open entrance
+into a precision-alignment challenge.
 
 **Town scale.** Small enough that any building-to-building walk stays under
 roughly 30 seconds, and the park center keeps all three building entrances in

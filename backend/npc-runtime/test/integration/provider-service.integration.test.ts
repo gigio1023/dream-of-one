@@ -858,6 +858,29 @@ test("agent-step record contracts select only M3R or legacy schemas and guides",
   assert.match(textGen.requests[0].instructions, /no direction is preferred/);
   assert.match(textGen.requests[0].instructions, /One independent non-record source may create positive pressure only once/);
 
+  const m3rToolBranches = (
+    (m3rSchema.properties as Record<string, Record<string, unknown>>).toolCall.anyOf
+  ) as Array<{
+      properties?: {
+        tool?: { const?: string };
+        args?: { properties?: Record<string, { description?: string }> };
+      };
+    }>;
+  const m3rWriteBranches = m3rToolBranches.filter(
+    branch => branch.properties?.tool?.const === "write_record",
+  );
+  assert.equal(m3rWriteBranches.length, 2);
+  for (const branch of m3rWriteBranches) {
+    assert.match(
+      branch.properties?.args?.properties?.stateBody?.description ?? "",
+      /Player-visible natural-language prose/,
+    );
+    assert.match(
+      branch.properties?.args?.properties?.whyLine?.description ?? "",
+      /Player-visible natural-language prose/,
+    );
+  }
+
   const legacySchema = textGen.requests[1].jsonSchema;
   assert.deepEqual(recordBranches(legacySchema, "write_record"), [[
     "citedLedgerEventId",
@@ -1654,6 +1677,19 @@ test("Korean player-visible fields require Hangul but allow natural mixed conten
     true,
     "Japanese player-visible text remains valid in the Japanese locale",
   );
+
+  const chineseClause = "주민이 为何 그렇게 말했는지 확인했습니다.";
+  const chineseClauseResult = conversationJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...base,
+    whyLine: chineseClause,
+  });
+  assert.equal(chineseClauseResult.success, false);
+  if (!chineseClauseResult.success) {
+    assert.equal(
+      chineseClauseResult.error.issues[0]?.message,
+      "player-visible Korean text must not contain Chinese function words or clauses",
+    );
+  }
 
   const lowercaseEnglish = "방문자가 목적을 stated하여 의문이 줄었습니다.";
   const lowercaseEnglishResult = conversationJudgmentSchemaForLocale("ko-KR").safeParse({

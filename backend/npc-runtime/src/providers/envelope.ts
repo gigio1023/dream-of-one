@@ -19,6 +19,8 @@ import type { RequiredAgentToolCall } from "./ports.js";
 const nonEmpty = z.string().trim().min(1);
 const requiredPlayerVisibleHangul = /\p{Script=Hangul}/u;
 const forbiddenKoreanPlayerVisibleKana = /[\p{Script=Hiragana}\p{Script=Katakana}]/u;
+const forbiddenKoreanPlayerVisibleChineseFragments =
+  /(?:为何|为什么|因为|所以|没有|不是|已经|可以|需要|如果|但是|这个|那个|他们|我们|你们)/u;
 const koreanPlayerVisibleLatinWords = /\p{Script=Latin}+/gu;
 const forbiddenPlayerVisibleStableIds = [
   /\b[A-Za-z][A-Za-z0-9]*_[A-Za-z0-9_]+\b/u,
@@ -76,6 +78,13 @@ function addPlayerVisibleTextIssues(
       code: "custom",
       path,
       message: "player-visible Korean text must not contain Japanese kana",
+    });
+  }
+  if (requireHangul && forbiddenKoreanPlayerVisibleChineseFragments.test(text)) {
+    context.addIssue({
+      code: "custom",
+      path,
+      message: "player-visible Korean text must not contain Chinese function words or clauses",
     });
   }
   if (
@@ -1122,7 +1131,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
               objectId: { type: "string" },
               toState: { type: "string" },
               ledgerKind: { type: "string" },
-              whyLine: { type: "string" },
+              whyLine: playerVisibleJsonString,
             },
           ],
           [
@@ -1139,7 +1148,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
                   recordId: { type: "string" },
                   kind: { type: "string", enum: [...RECORD_KINDS] },
                   targetId: { type: "string" },
-                  stateBody: { type: "string" },
+                  stateBody: playerVisibleJsonString,
                   visibleTo: {
                     type: "array",
                     items: { type: "string", enum: [...WORLD_ROLES] },
@@ -1147,7 +1156,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
                 },
               },
               citedLedgerEventId: { type: ["string", "null"] },
-              whyLine: { type: "string" },
+              whyLine: playerVisibleJsonString,
             },
             ["objectId", "toState", "ledgerKind", "record", "citedLedgerEventId", "whyLine"],
           ],
@@ -1156,8 +1165,8 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
             {
               recordKind: { type: "string", enum: [...RECORD_KINDS] },
               sourceMemoryId: { type: "string" },
-              stateBody: { type: "string" },
-              whyLine: { type: "string" },
+              stateBody: playerVisibleJsonString,
+              whyLine: playerVisibleJsonString,
               institutionalPressureDelta: { type: "integer" },
               textSurfaceId: { type: "string" },
               openQuestion: administrativeOpenQuestionJsonSchema,
@@ -1177,8 +1186,8 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
             {
               recordKind: { type: "string", enum: [...RECORD_KINDS] },
               sourceMemoryId: { type: "string" },
-              stateBody: { type: "string" },
-              whyLine: { type: "string" },
+              stateBody: playerVisibleJsonString,
+              whyLine: playerVisibleJsonString,
               institutionalPressureDelta: { type: "integer" },
               textSurfaceId: { type: "string" },
               recordId: { type: "string" },
@@ -1200,7 +1209,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
             "read_record",
             {
               recordId: { type: "string" },
-              whyLine: { type: "string" },
+              whyLine: playerVisibleJsonString,
               institutionalPressureDelta: { type: "integer" },
               openQuestion: administrativeOpenQuestionJsonSchema,
             },
@@ -1211,7 +1220,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
             {
               targetActorId: { type: "string" },
               action: { type: "string" },
-              whyLine: { type: "string" },
+              whyLine: playerVisibleJsonString,
             },
           ],
         ].map(([tool, properties, requiredArgs]) => ({

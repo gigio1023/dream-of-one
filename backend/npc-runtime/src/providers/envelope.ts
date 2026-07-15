@@ -254,9 +254,30 @@ function addPlayerVisibleTextIssues(
   }
 }
 
+function addUniqueIdListIssues(
+  ids: readonly string[],
+  context: z.RefinementCtx,
+): void {
+  if (new Set(ids).size !== ids.length) {
+    context.addIssue({
+      code: "custom",
+      message: "citation ids must be unique",
+    });
+  }
+}
+
+const uniqueIdListSchema = z.array(nonEmpty).superRefine(addUniqueIdListIssues);
+
+export const MAX_SPEECH_RECORD_CITATIONS = 8;
+const speechRecordCitationIdsSchema = z
+  .array(nonEmpty)
+  .max(MAX_SPEECH_RECORD_CITATIONS)
+  .superRefine(addUniqueIdListIssues);
+
 export const conversationProposalSchema = z
   .object({
     utterance: nonEmpty,
+    citedRecordIds: speechRecordCitationIdsSchema.default([]),
     suggestedReplies: z.tuple([
       suggestedReplySchema,
       suggestedReplySchema,
@@ -298,6 +319,7 @@ export const mergedConversationTurnSchema = z
       .nullable()
       .optional(),
     utterance: nonEmpty,
+    citedRecordIds: speechRecordCitationIdsSchema.default([]),
     suggestedReplies: mergedSuggestedReplySchema,
     continueConversation: z.boolean(),
   })
@@ -305,26 +327,6 @@ export const mergedConversationTurnSchema = z
   .superRefine((value, context) => {
     addSuggestedReplyIntentIssues(context, value.suggestedReplies);
   });
-
-function addUniqueIdListIssues(
-  ids: readonly string[],
-  context: z.RefinementCtx,
-): void {
-  if (new Set(ids).size !== ids.length) {
-    context.addIssue({
-      code: "custom",
-      message: "citation ids must be unique",
-    });
-  }
-}
-
-const uniqueIdListSchema = z.array(nonEmpty).superRefine(addUniqueIdListIssues);
-
-export const MAX_SPEECH_RECORD_CITATIONS = 8;
-const speechRecordCitationIdsSchema = z
-  .array(nonEmpty)
-  .max(MAX_SPEECH_RECORD_CITATIONS)
-  .superRefine(addUniqueIdListIssues);
 
 export const ambientReplyJudgmentSchema = z
   .object({
@@ -432,6 +434,32 @@ export function conversationProposalSchemaForLocale(locale: string) {
   });
 }
 
+function addVisibleConversationRecordCitationIssues(
+  context: z.RefinementCtx,
+  citedRecordIds: readonly string[],
+  visibleIds: readonly string[],
+): void {
+  const visible = new Set(uniqueStrings(visibleIds));
+  citedRecordIds.forEach((recordId, index) => {
+    if (!visible.has(recordId)) {
+      context.addIssue({
+        code: "custom",
+        path: ["citedRecordIds", index],
+        message: `conversation citation ${recordId} is not visible to this resident`,
+      });
+    }
+  });
+}
+
+export function conversationProposalSchemaForRequest(
+  locale: string,
+  visibleIds: readonly string[],
+) {
+  return conversationProposalSchemaForLocale(locale).superRefine((value, context) => {
+    addVisibleConversationRecordCitationIssues(context, value.citedRecordIds, visibleIds);
+  });
+}
+
 export function conversationJudgmentSchemaForLocale(locale: string) {
   return conversationJudgmentSchema.superRefine((value, context) => {
     addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, locale);
@@ -462,6 +490,15 @@ export function mergedConversationTurnSchemaForLocale(locale: string) {
         locale,
       );
     });
+  });
+}
+
+export function mergedConversationTurnSchemaForRequest(
+  locale: string,
+  visibleIds: readonly string[],
+) {
+  return mergedConversationTurnSchemaForLocale(locale).superRefine((value, context) => {
+    addVisibleConversationRecordCitationIssues(context, value.citedRecordIds, visibleIds);
   });
 }
 
@@ -1051,9 +1088,15 @@ export function agentStepProposalSchemaForRequest(
 export const conversationProposalJsonSchema: Record<string, unknown> = {
   type: "object",
   additionalProperties: false,
-  required: ["utterance", "suggestedReplies", "continueConversation"],
+  required: ["utterance", "citedRecordIds", "suggestedReplies", "continueConversation"],
   properties: {
     utterance: playerVisibleJsonString,
+    citedRecordIds: {
+      type: "array",
+      maxItems: MAX_SPEECH_RECORD_CITATIONS,
+      uniqueItems: true,
+      items: { type: "string", minLength: 1 },
+    },
     suggestedReplies: {
       type: "array",
       minItems: 3,
@@ -1079,6 +1122,29 @@ export function conversationProposalJsonSchemaForLocale(
   const schema = structuredClone(conversationProposalJsonSchema);
   annotatePlayerVisibleDescriptions(schema, locale);
   return schema;
+}
+
+function constrainConversationRecordCitations(
+  schema: Record<string, unknown>,
+  visibleIds: readonly string[],
+): Record<string, unknown> {
+  const properties = schema.properties as Record<string, Record<string, unknown>>;
+  const citations = properties.citedRecordIds;
+  const items = citations.items as Record<string, unknown>;
+  const visible = uniqueStrings(visibleIds);
+  if (visible.length === 0) citations.maxItems = 0;
+  else items.enum = visible;
+  return schema;
+}
+
+export function conversationProposalJsonSchemaForRequest(
+  locale: string,
+  visibleIds: readonly string[],
+): Record<string, unknown> {
+  return constrainConversationRecordCitations(
+    conversationProposalJsonSchemaForLocale(locale),
+    visibleIds,
+  );
 }
 
 export const conversationJudgmentJsonSchema: Record<string, unknown> = {
@@ -1116,6 +1182,7 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
     "meaningfulFirsthand",
     "openQuestion",
     "utterance",
+    "citedRecordIds",
     "suggestedReplies",
     "continueConversation",
   ],
@@ -1145,6 +1212,12 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
       ],
     },
     utterance: playerVisibleJsonString,
+    citedRecordIds: {
+      type: "array",
+      maxItems: MAX_SPEECH_RECORD_CITATIONS,
+      uniqueItems: true,
+      items: { type: "string", minLength: 1 },
+    },
     suggestedReplies: {
       type: "array",
       minItems: 3,
@@ -1170,6 +1243,16 @@ export function mergedConversationTurnJsonSchemaForLocale(
   const schema = structuredClone(mergedConversationTurnJsonSchema);
   annotatePlayerVisibleDescriptions(schema, locale);
   return schema;
+}
+
+export function mergedConversationTurnJsonSchemaForRequest(
+  locale: string,
+  visibleIds: readonly string[],
+): Record<string, unknown> {
+  return constrainConversationRecordCitations(
+    mergedConversationTurnJsonSchemaForLocale(locale),
+    visibleIds,
+  );
 }
 
 export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {

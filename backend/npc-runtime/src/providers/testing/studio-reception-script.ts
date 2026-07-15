@@ -21,6 +21,7 @@ function opening(request: ConversationTurnRequest): ConversationProposal {
   if (!utterance) throw new Error(`town fixture cannot speak for ${request.actorId}`);
   return {
     utterance,
+    citedRecordIds: [],
     suggestedReplies: [
       { text: "안내받은 절차를 확인하러 왔습니다.", intent: "safe/local" },
       { text: "먼저 어떤 접수인지 설명해 주세요.", intent: "uncertain/repair" },
@@ -45,6 +46,7 @@ function mergedTurn(request: MergedConversationTurnRequest): MergedConversationT
         whyLine: "방문 목적을 분명히 설명해 의문이 해소되었습니다.",
       },
       utterance: "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+      citedRecordIds: [],
       suggestedReplies: [
         { text: "확인해 주셔서 감사합니다.", intent: "safe/local" },
         { text: "다음 절차도 알려 주세요.", intent: "uncertain/repair" },
@@ -67,6 +69,7 @@ function mergedTurn(request: MergedConversationTurnRequest): MergedConversationT
         whyLine: "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
       },
       utterance: "그렇다면 방문 경위를 더 확인해야겠습니다.",
+      citedRecordIds: [],
       suggestedReplies: [
         { text: "안내받은 내용을 차근히 설명하겠습니다.", intent: "safe/local" },
         { text: "어떤 부분부터 확인할까요?", intent: "uncertain/repair" },
@@ -88,6 +91,7 @@ function mergedTurn(request: MergedConversationTurnRequest): MergedConversationT
       whyLine: "방문 목적이 아직 분명하지 않습니다.",
     },
     utterance: "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+    citedRecordIds: [],
     suggestedReplies: [
       { text: "제가 아는 내용을 말씀드리겠습니다.", intent: "safe/local" },
       { text: "필요한 질문을 해 주세요.", intent: "uncertain/repair" },

@@ -133,6 +133,7 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
           request.playerLine.trim().length > 1 &&
           request.playerLine !== fallbackContent(request.locale).hesitationMarker,
         utterance: proposed.proposal.utterance,
+        citedRecordIds: proposed.proposal.citedRecordIds ?? [],
         suggestedReplies: proposed.proposal.suggestedReplies,
         continueConversation: proposed.proposal.continueConversation,
       },

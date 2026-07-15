@@ -118,6 +118,7 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
     return {
       proposal: {
         utterance: isFollowUp ? content.followUp : content.opening,
+        citedRecordIds: [],
         suggestedReplies: content.suggestedReplies,
         continueConversation: true,
       },
@@ -189,6 +190,7 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
         ),
         meaningfulFirsthand,
         utterance: proposed.proposal.utterance,
+        citedRecordIds: proposed.proposal.citedRecordIds ?? [],
         suggestedReplies: proposed.proposal.suggestedReplies,
         continueConversation: proposed.proposal.continueConversation,
       },

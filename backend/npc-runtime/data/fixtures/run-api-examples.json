@@ -5310,6 +5310,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 90,
               "worldRevision": 13,
               "proposalMeta": {
@@ -7218,6 +7219,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -7315,6 +7317,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "citedRecords": [],
           "signals": [],
           "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
           "suspicionBefore": 0,
@@ -7359,6 +7362,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -7376,6 +7380,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
               "suspicionBefore": 0,
@@ -7570,6 +7575,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -7587,6 +7593,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
               "suspicionBefore": 0,
@@ -7636,6 +7643,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "citedRecords": [],
           "signals": [],
           "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
           "suspicionBefore": 0,
@@ -7803,6 +7811,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -7820,6 +7829,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "citedRecords": [],
                 "signals": [],
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
                 "suspicionBefore": 0,
@@ -8185,6 +8195,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -8202,6 +8213,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
               "suspicionBefore": 0,
@@ -8421,6 +8433,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -8438,6 +8451,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "citedRecords": [],
                 "signals": [],
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
                 "suspicionBefore": 0,
@@ -9462,6 +9476,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 3,
                 "proposalMeta": {
@@ -9479,6 +9494,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+                "citedRecords": [],
                 "signals": [
                   "role_script_break"
                 ],
@@ -12632,6 +12648,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "citedRecords": [],
           "signals": [],
           "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
           "suspicionBefore": 0,
@@ -12676,6 +12693,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -12693,6 +12711,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
               "suspicionBefore": 0,
@@ -12880,6 +12899,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -12897,6 +12917,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
               "suspicionBefore": 0,
@@ -12946,6 +12967,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "citedRecords": [],
           "signals": [],
           "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
           "suspicionBefore": 0,
@@ -13107,6 +13129,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -13124,6 +13147,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "citedRecords": [],
                 "signals": [],
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
                 "suspicionBefore": 0,
@@ -13482,6 +13506,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -13499,6 +13524,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
               "suspicionBefore": 0,
@@ -13712,6 +13738,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -13729,6 +13756,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "citedRecords": [],
                 "signals": [],
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
                 "suspicionBefore": 0,
@@ -14100,6 +14128,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
           "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+          "citedRecords": [],
           "signals": [],
           "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
           "suspicionBefore": 0,
@@ -14144,6 +14173,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -14161,6 +14191,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
               "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "suspicionBefore": 0,
@@ -14348,6 +14379,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -14365,6 +14397,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
               "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "suspicionBefore": 0,
@@ -14414,6 +14447,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
           "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+          "citedRecords": [],
           "signals": [],
           "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
           "suspicionBefore": 0,
@@ -14575,6 +14609,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -14592,6 +14627,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
                 "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+                "citedRecords": [],
                 "signals": [],
                 "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
                 "suspicionBefore": 0,
@@ -14950,6 +14986,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -14967,6 +15004,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
               "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "suspicionBefore": 0,
@@ -15180,6 +15218,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -15197,6 +15236,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
                 "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+                "citedRecords": [],
                 "signals": [],
                 "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
                 "suspicionBefore": 0,
@@ -15570,6 +15610,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
           "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+          "citedRecords": [],
           "signals": [
             "role_script_break"
           ],
@@ -15616,6 +15657,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -15633,6 +15675,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
               "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+              "citedRecords": [],
               "signals": [
                 "role_script_break"
               ],
@@ -15822,6 +15865,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -15839,6 +15883,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
               "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+              "citedRecords": [],
               "signals": [
                 "role_script_break"
               ],
@@ -15892,6 +15937,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
           "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+          "citedRecords": [],
           "signals": [
             "role_script_break"
           ],
@@ -16055,6 +16101,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -16072,6 +16119,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+                "citedRecords": [],
                 "signals": [
                   "role_script_break"
                 ],
@@ -16432,6 +16480,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -16449,6 +16498,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
               "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+              "citedRecords": [],
               "signals": [
                 "role_script_break"
               ],
@@ -16664,6 +16714,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -16681,6 +16732,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
                 "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+                "citedRecords": [],
                 "signals": [
                   "role_script_break"
                 ],
@@ -17054,6 +17106,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "citedRecords": [],
           "signals": [],
           "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
           "suspicionBefore": 0,
@@ -17098,6 +17151,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -17115,6 +17169,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
               "suspicionBefore": 0,
@@ -17302,6 +17357,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -17319,6 +17375,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
               "suspicionBefore": 0,
@@ -17368,6 +17425,7 @@
           "turnId": "sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+          "citedRecords": [],
           "signals": [],
           "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
           "suspicionBefore": 0,
@@ -17529,6 +17587,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -17546,6 +17605,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "citedRecords": [],
                 "signals": [],
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
                 "suspicionBefore": 0,
@@ -17904,6 +17964,7 @@
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
               "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 0,
               "worldRevision": 8,
               "proposalMeta": {
@@ -17921,6 +17982,7 @@
               "turnId": "sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+              "citedRecords": [],
               "signals": [],
               "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
               "suspicionBefore": 0,
@@ -18134,6 +18196,7 @@
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
                 "line": "접수를 도와드리겠습니다. 이곳에 오신 이유를 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 0,
                 "worldRevision": 8,
                 "proposalMeta": {
@@ -18151,6 +18214,7 @@
                 "turnId": "sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
+                "citedRecords": [],
                 "signals": [],
                 "whyLine": "방문 이유를 접수 절차에 맞게 분명히 설명했습니다.",
                 "suspicionBefore": 0,

@@ -335,6 +335,14 @@ export const runAmbientAudibilitySchema = z
   })
   .strict();
 
+export const runRecordCitationSchema = z
+  .object({
+    recordId: nonEmpty,
+    recordRevision: z.number().int().positive(),
+    lastLedgerEventId: nonEmpty,
+  })
+  .strict();
+
 export const runAmbientSpeechEventSchema = z
   .object({
     seq: z.number().int().positive(),
@@ -346,11 +354,7 @@ export const runAmbientSpeechEventSchema = z
     targetActorId: nonEmpty,
     listenerActorIds: z.array(nonEmpty).min(1),
     line: nonEmpty,
-    citedRecords: z.array(z.object({
-      recordId: nonEmpty,
-      recordRevision: z.number().int().positive(),
-      lastLedgerEventId: nonEmpty,
-    }).strict()).default([]),
+    citedRecords: z.array(runRecordCitationSchema).default([]),
     worldSeconds: z.number().nonnegative(),
     observedWorldRevision: z.number().int().nonnegative(),
     worldRevision: z.number().int().positive(),
@@ -400,6 +404,7 @@ export const runNpcUtteranceMemorySchema = z
     conversationId: nonEmpty,
     turnId: nonEmpty,
     line: nonEmpty,
+    citedRecords: z.array(runRecordCitationSchema).default([]),
     worldSeconds: z.number().nonnegative(),
     worldRevision: z.number().int().positive(),
     proposalMeta: proposalMetaSchema,
@@ -416,6 +421,7 @@ export const runPlayerConversationMemorySchema = z
     turnId: nonEmpty,
     playerLine: nonEmpty,
     npcLine: nonEmpty,
+    citedRecords: z.array(runRecordCitationSchema).default([]),
     signals: z.array(signalSchema),
     whyLine: nonEmpty,
     suspicionBefore: z.number().int().min(0).max(125),
@@ -1446,6 +1452,7 @@ export type RunOpenQuestion = z.infer<typeof runOpenQuestionSchema>;
 export type RunRecord = z.infer<typeof runRecordSchema>;
 export type RunLedgerEvent = z.infer<typeof runLedgerEventSchema>;
 export type RunSocialProvenance = z.infer<typeof runSocialProvenanceSchema>;
+export type RunRecordCitation = z.infer<typeof runRecordCitationSchema>;
 export type RunSocialView = z.infer<typeof runSocialViewSchema>;
 export type RunNpcUtteranceMemory = z.infer<typeof runNpcUtteranceMemorySchema>;
 export type RunPlayerConversationMemory = z.infer<typeof runPlayerConversationMemorySchema>;

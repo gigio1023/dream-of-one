@@ -78,7 +78,11 @@ correctly remains live.
 
 `MergedConversationTurn` is judgment fields (bounded suspicion/report deltas,
 signal classes, and a player-visible why-line) plus the NPC's next utterance
-and three reply suggestions. The suggestions are requested in fixed
+and three reply suggestions. It also returns up to eight `citedRecordIds` for
+record content meaningfully conveyed by that NPC utterance. The request-scoped
+transport and Zod schemas admit only record ids visible to the speaking
+resident; an empty visible-record set requires an empty citation list. The
+suggestions are requested in fixed
 `safe/local` → `uncertain/repair` → `risky/weird` order. When an otherwise
 valid merged turn repeats one of those hidden labels, the envelope boundary
 normalizes only the three labels by position before spending a repair call;
@@ -86,11 +90,12 @@ model-authored text, judgment, stance, and memory inputs remain unchanged.
 Any visible-language, fiction, stable-id, shape, or other validation failure
 still makes `ProviderService` retry once with the original grounded request
 context plus field-specific issues, then fall back to composing the rule
-judgment with the canned reply set — that merged-conversation schema is not
-request-shrunk.
+judgment with the canned reply set. Citation scoping narrows only which known
+record ids may be returned; it does not prescribe wording or judgment.
 
 `ConversationProposal` contains an NPC utterance and three generated reply
-suggestions. Reply intent labels shape variety only; they never decide
+suggestions, plus the same request-scoped record citations for an opening
+utterance. Reply intent labels shape variety only; they never decide
 suspicion. `ConversationJudgment` is the judging NPC's read of the player's
 answer: a bounded suspicion/report delta, the signal classes that applied,
 and a player-visible why-line. The runtime clamps deltas and scores;
@@ -110,13 +115,17 @@ true or mutate the world from it.
 
 Conversation requests also carry a machine-readable `groundingContract` built
 from supplied scene context, the player's supplied statements, visible object
-and record facts, and heard speech. It is closed-world for player-visible prose:
+and record facts, and heard speech. Visible record facts retain their stable id
+and exact revision so the provider can cite without exposing either token in
+player-visible prose. It is closed-world for player-visible prose:
 an unlisted identity, role, possession, document, approval, appointment, or
 past event is unknown, not missing or completed. The NPC may ask about an
 unknown, but its speech, reasons, and questions may not turn it into a fact.
-Suggested replies follow the separate uncommitted-candidate rule above. This
-boundary is repeated in the provider instructions and retained in the one
-repair request; model-authored wording remains free inside that factual boundary.
+Suggested replies follow the separate uncommitted-candidate rule above and may
+not introduce resident-only record content that the NPC has not spoken or the
+player has not already supplied. This boundary is repeated in the provider
+instructions and retained in the one repair request; model-authored wording
+remains free inside that factual boundary.
 
 The resident's public role may support generic job topics and ordinary
 capabilities: a receptionist can conditionally ask whether a visit concerns a

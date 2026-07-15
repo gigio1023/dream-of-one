@@ -18,7 +18,11 @@ import {
   RunService,
   STUDIO_RECEPTIONIST_ID,
 } from "../../src/runtime/run-service.js";
-import { runSnapshotSchema } from "../../src/runtime/run-schema.js";
+import {
+  runSnapshotSchema,
+  type RunLedgerEvent,
+  type RunRecord,
+} from "../../src/runtime/run-schema.js";
 import {
   groundOrdinaryConversation,
   runSpatialActors,
@@ -337,6 +341,144 @@ test("all six residents preload and consume a conversation through their current
     assert.equal(ended.actor.actorId, actor.actorId);
     assert.equal(ended.actor.playerConversationReady, false);
   }
+});
+
+test("a record becomes player knowledge only when a cited modal line is presented", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
+  adapter.proposeConversationTurn = async request => {
+    const resolved = await originalOpening(request);
+    if (request.observePacket.visibleRecords.some(record =>
+      record.recordId === "record:conversation:opening"
+    )) {
+      resolved.proposal.utterance = "방문 경위를 확인한 첫 기록이 여기 있습니다.";
+      resolved.proposal.citedRecordIds = ["record:conversation:opening"];
+    }
+    return resolved;
+  };
+  const originalMerged = adapter.judgeAndProposeConversationTurn.bind(adapter);
+  adapter.judgeAndProposeConversationTurn = async request => {
+    const resolved = await originalMerged(request);
+    if (request.observePacket.visibleRecords.some(record =>
+      record.recordId === "record:conversation:reply"
+    )) {
+      resolved.proposal.utterance = "답변과 함께 두 번째 확인 기록도 살펴봤습니다.";
+      resolved.proposal.citedRecordIds = ["record:conversation:reply"];
+    }
+    return resolved;
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds(),
+  });
+  const started = service.start("run-modal-record-citations", "ko-KR");
+  const record = (
+    suffix: "opening" | "reply",
+    seq: number,
+  ): { record: RunRecord; ledger: RunLedgerEvent } => {
+    const recordId = `record:conversation:${suffix}`;
+    const ledgerEventId = `ledger:conversation:${suffix}`;
+    const sourceMemoryId = `mem:conversation:${suffix}`;
+    const seeded: RunRecord = {
+      recordId,
+      kind: "note",
+      authorActorId: STUDIO_RECEPTIONIST_ID,
+      authorRole: "studio_receptionist",
+      targetId: "player",
+      stateBody: suffix === "opening"
+        ? "방문 경위를 확인한 첫 기록입니다."
+        : "답변 뒤에 확인한 두 번째 기록입니다.",
+      visibleToActorIds: [STUDIO_RECEPTIONIST_ID],
+      sourceRefs: [{ sourceMemoryId, originActorId: "player" }],
+      textSurfaceId: "TS_Studio_ReviewRecords",
+      createdWorldSeconds: 1,
+      createdWorldRevision: 1,
+      recordRevision: 1,
+      lastLedgerEventId: ledgerEventId,
+    };
+    const ledger: RunLedgerEvent = {
+      eventId: ledgerEventId,
+      seq,
+      kind: "record_written",
+      actorId: STUDIO_RECEPTIONIST_ID,
+      actorRole: "studio_receptionist",
+      recordId,
+      sourceMemoryId,
+      recordRevision: 1,
+      pressureBefore: 0,
+      pressureDelta: 0,
+      pressureAfter: 0,
+      visibleToActorIds: [STUDIO_RECEPTIONIST_ID],
+      whyLine: "접수 경위를 기록했습니다.",
+      openQuestion: null,
+      worldSeconds: 1,
+      worldRevision: 1,
+    };
+    return { record: seeded, ledger };
+  };
+  type MutableRun = { records: RunRecord[]; ledgerEvents: RunLedgerEvent[] };
+  const internalRun = (Reflect.get(service, "runs") as Map<string, MutableRun>)
+    .get(started.runId);
+  assert.ok(internalRun);
+  const openingRecord = record("opening", 1);
+  const replyRecord = record("reply", 2);
+  internalRun.records.push(openingRecord.record, replyRecord.record);
+  internalRun.ledgerEvents.push(openingRecord.ledger, replyRecord.ledger);
+
+  await preloadReceptionist(service, started.runId);
+  assert.deepEqual(
+    service.snapshot(started.runId).socialView.encounteredRecords,
+    [],
+    "preloading provider prose is not a player encounter",
+  );
+  await groundOrdinaryConversation(
+    service,
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-modal-record-citations",
+  );
+  const conversation = await service.startConversation(
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+  assert.equal(conversation.socialView.encounteredRecords.length, 1);
+  assert.equal(
+    conversation.socialView.encounteredRecords[0]?.recordId,
+    openingRecord.record.recordId,
+  );
+  assert.equal(
+    conversation.socialView.encounteredRecords[0]?.provenance.sourceExcerpt,
+    conversation.nextTurn.prompt,
+  );
+  const openingMemory = conversation.actor.memories.find(
+    memory => memory.kind === "npc_utterance" && memory.turnId === conversation.nextTurn.turnId,
+  );
+  assert.ok(openingMemory && openingMemory.kind === "npc_utterance");
+  assert.deepEqual(openingMemory.citedRecords, [{
+    recordId: openingRecord.record.recordId,
+    recordRevision: 1,
+    lastLedgerEventId: openingRecord.ledger.eventId,
+  }]);
+
+  const answered = await service.answer(
+    started.runId,
+    conversation.sessionId,
+    conversation.nextTurn.turnId,
+    { type: "choice", choiceId: conversation.nextTurn.choices[0].choiceId },
+  );
+  assert.equal(answered.socialView.encounteredRecords.length, 2);
+  const disclosedReplyRecord = answered.socialView.encounteredRecords.find(
+    entry => entry.recordId === replyRecord.record.recordId,
+  );
+  assert.equal(disclosedReplyRecord?.provenance.sourceExcerpt, answered.memoryDelta.npcLine);
+  assert.deepEqual(answered.memoryDelta.citedRecords, [{
+    recordId: replyRecord.record.recordId,
+    recordRevision: 1,
+    lastLedgerEventId: replyRecord.ledger.eventId,
+  }]);
 });
 
 test("speculative opening stays cached until current spatial facts ground an ordinary start", async () => {

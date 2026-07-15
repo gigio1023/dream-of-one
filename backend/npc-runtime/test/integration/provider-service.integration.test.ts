@@ -14,10 +14,12 @@ import {
   agentStepProposalSchemaForRequest,
   conversationJudgmentSchemaForLocale,
   conversationProposalSchemaForLocale,
+  conversationProposalSchemaForRequest,
   hearingJudgmentJsonSchema,
   hearingJudgmentSchemaForLocale,
   hearingJudgmentSchemaForRequest,
   MAX_SPEECH_RECORD_CITATIONS,
+  mergedConversationTurnSchemaForRequest,
   TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
 } from "../../src/providers/envelope.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
@@ -137,6 +139,7 @@ function conversationRequest() {
 
 const validConversation = JSON.stringify({
   utterance: "평소 주문으로 준비할까요?",
+  citedRecordIds: [],
   suggestedReplies: [
     { text: "네, 부탁합니다.", intent: "safe/local" },
     { text: "제가 뭘 주문했죠?", intent: "uncertain/repair" },
@@ -178,6 +181,7 @@ const validMergedTurn = JSON.stringify({
   meaningfulFirsthand: true,
   openQuestion: null,
   utterance: "방문 목적을 확인했습니다.",
+  citedRecordIds: [],
   suggestedReplies: [
     { text: "확인해 주셔서 감사합니다.", intent: "safe/local" },
     { text: "다음 절차를 알려 주세요.", intent: "uncertain/repair" },
@@ -2196,6 +2200,78 @@ test("provider service returns schema-validated live conversation proposals", as
   providerAuditSnapshotSchema.parse(service.auditSnapshot("session-provider-test"));
 });
 
+test("player-facing conversation cites only records visible to the resident", async () => {
+  const request = conversationRequest();
+  request.observePacket = m3rAdministrativePacket();
+  const openingProposal = {
+    ...JSON.parse(validConversation),
+    utterance: "방문 경위를 확인한 기록이 여기 있습니다.",
+    citedRecordIds: ["record-visible"],
+  };
+  const mergedProposal = {
+    ...JSON.parse(validMergedTurn),
+    utterance: "방문 경위를 확인한 기록을 기준으로 답을 들었습니다.",
+    citedRecordIds: ["record-visible"],
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(openingProposal) },
+    { text: JSON.stringify(mergedProposal) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/conversation-record-citation",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const opening = await service.proposeConversationTurn(request);
+  assert.deepEqual(opening.proposal.citedRecordIds, ["record-visible"]);
+  const openingSchema = textGen.requests[0].jsonSchema as {
+    properties: {
+      citedRecordIds: { maxItems: number; items: { enum: string[] } };
+    };
+  };
+  assert.equal(openingSchema.properties.citedRecordIds.maxItems, MAX_SPEECH_RECORD_CITATIONS);
+  assert.deepEqual(openingSchema.properties.citedRecordIds.items.enum, ["record-visible"]);
+  const openingInput = JSON.parse(textGen.requests[0].input);
+  assert.deepEqual(openingInput.groundingContract.visibleRecordFacts, [{
+    recordId: "record-visible",
+    kind: "note",
+    stateBody: "방문 경위를 확인한 기록입니다.",
+    recordRevision: 2,
+  }]);
+  assert.match(textGen.requests[0].instructions, /reply suggestions must not introduce resident-only record content/);
+
+  const merged = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    observePacket: request.observePacket,
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+  assert.deepEqual(merged.proposal.citedRecordIds, ["record-visible"]);
+  const mergedSchema = textGen.requests[1].jsonSchema as {
+    properties: {
+      citedRecordIds: { maxItems: number; items: { enum: string[] } };
+    };
+  };
+  assert.equal(mergedSchema.properties.citedRecordIds.maxItems, MAX_SPEECH_RECORD_CITATIONS);
+  assert.deepEqual(mergedSchema.properties.citedRecordIds.items.enum, ["record-visible"]);
+  assert.match(textGen.requests[1].instructions, /whyLine, openQuestion, and reply suggestions must not introduce resident-only record content/);
+
+  const hiddenCitation = { ...openingProposal, citedRecordIds: ["record-hidden"] };
+  assert.equal(
+    conversationProposalSchemaForRequest("ko-KR", ["record-visible"])
+      .safeParse(hiddenCitation).success,
+    false,
+  );
+  assert.equal(
+    mergedConversationTurnSchemaForRequest("ko-KR", ["record-visible"])
+      .safeParse({ ...mergedProposal, citedRecordIds: ["record-hidden"] }).success,
+    false,
+  );
+});
+
 test("conversation openings keep resident, player, third-party speech, and locations structurally separate", async () => {
   const request = conversationRequest();
   request.actorId = "NPC_Roaming_Liaison";
@@ -3017,6 +3093,7 @@ test("merged intent normalization never bypasses visible-text repair", async () 
     profileId: "test/merged-intent-normalization-after-repair",
     textGen,
     fallback: new RuleFallbackNpcAdapter(),
+    maxTokensPerSession: 100_000,
   });
 
   const result = await service.judgeAndProposeConversationTurn({
@@ -3242,6 +3319,7 @@ test("an invalid-envelope fallback never promotes an uncertain resident to vouch
     profileId: "test/stable-id-fallback-stance",
     textGen,
     fallback: new RuleFallbackNpcAdapter(),
+    maxTokensPerSession: 100_000,
   });
   const result = await service.judgeAndProposeConversationTurn({
     ...judgmentRequest(),

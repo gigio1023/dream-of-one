@@ -125,6 +125,8 @@ export interface SuggestedReply {
 
 export interface ConversationProposal {
   utterance: string;
+  /** Resident-visible records whose contents are meaningfully conveyed by utterance. */
+  citedRecordIds?: string[];
   suggestedReplies: [SuggestedReply, SuggestedReply, SuggestedReply];
   continueConversation: boolean;
 }
@@ -198,6 +200,8 @@ export interface MergedConversationTurn extends ConversationJudgment {
   /** Provider-authored player log entry; omitted when this exchange opens no question. */
   openQuestion?: { status: "open" | "resolved"; text: string; whyLine: string } | null;
   utterance: string;
+  /** Resident-visible records whose contents are meaningfully conveyed by utterance. */
+  citedRecordIds?: string[];
   suggestedReplies: [SuggestedReply, SuggestedReply, SuggestedReply];
   continueConversation: boolean;
 }

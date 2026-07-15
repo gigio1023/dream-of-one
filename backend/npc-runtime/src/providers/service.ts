@@ -6,12 +6,12 @@ import {
   agentStepProposalSchemaForRequest,
   conversationJudgmentJsonSchemaForLocale,
   conversationJudgmentSchemaForLocale,
-  conversationProposalJsonSchemaForLocale,
-  conversationProposalSchemaForLocale,
+  conversationProposalJsonSchemaForRequest,
+  conversationProposalSchemaForRequest,
   hearingJudgmentJsonSchemaForRequest,
   hearingJudgmentSchemaForRequest,
-  mergedConversationTurnJsonSchemaForLocale,
-  mergedConversationTurnSchemaForLocale,
+  mergedConversationTurnJsonSchemaForRequest,
+  mergedConversationTurnSchemaForRequest,
   TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
   type AgentStepRecordContracts,
 } from "./envelope.js";
@@ -304,8 +304,10 @@ function conversationGroundingContract(
       state: object.state,
     })),
     visibleRecordFacts: request.observePacket.visibleRecords.map(record => ({
+      recordId: record.recordId,
       kind: record.kind,
       stateBody: record.stateBody,
+      recordRevision: record.recordRevision,
     })),
     attributedHeardSpeech: heardSpeech.map(line => {
       const attributedNpcSpeech = /^(NPC_[A-Za-z0-9_]+):\s+([\s\S]+)$/.exec(line);
@@ -608,8 +610,15 @@ export class ProviderService implements NpcProposalPort {
   async proposeConversationTurn(
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>> {
-    const proposalSchema = conversationProposalSchemaForLocale(request.locale);
-    const proposalJsonSchema = conversationProposalJsonSchemaForLocale(request.locale);
+    const visibleRecordIds = request.observePacket.visibleRecords.map(record => record.recordId);
+    const proposalSchema = conversationProposalSchemaForRequest(
+      request.locale,
+      visibleRecordIds,
+    );
+    const proposalJsonSchema = conversationProposalJsonSchemaForRequest(
+      request.locale,
+      visibleRecordIds,
+    );
     const instructions = [
       "You are an NPC inside Dream of One, a social-suspicion game.",
       "Stay in role and use only visible context.",
@@ -621,6 +630,7 @@ export class ProviderService implements NpcProposalPort {
         "the NPC utterance and all three player reply suggestions",
       ),
       "Return one NPC utterance and exactly three short player reply suggestions.",
+      "citedRecordIds must contain every currently visible record whose content the NPC utterance meaningfully conveys, and no other id. Use [] when the utterance cites no record. The reply suggestions must not introduce resident-only record content absent from the NPC utterance or prior player speech.",
       "Use the intent labels only as a relative social-risk gradient: safe/local is the least exposing plausible answer, uncertain/repair hedges or clarifies, and risky/weird may offer a bolder cover claim or lie. They are hidden candidate metadata and never decide suspicion or game truth.",
       "Do not claim a verdict, hidden fact, or world mutation.",
       CONVERSATION_GROUNDING_SELF_CHECK,
@@ -716,7 +726,11 @@ export class ProviderService implements NpcProposalPort {
   async judgeAndProposeConversationTurn(
     request: MergedConversationTurnRequest,
   ): Promise<ResolvedProposal<MergedConversationTurn>> {
-    const proposalSchema = mergedConversationTurnSchemaForLocale(request.locale).superRefine(
+    const visibleRecordIds = request.observePacket.visibleRecords.map(record => record.recordId);
+    const proposalSchema = mergedConversationTurnSchemaForRequest(
+      request.locale,
+      visibleRecordIds,
+    ).superRefine(
       (value, context) => requireReachableSuspicionDelta(
         value,
         context,
@@ -724,7 +738,7 @@ export class ProviderService implements NpcProposalPort {
       ),
     );
     const proposalJsonSchema = withSuspicionDeltaBounds(
-      mergedConversationTurnJsonSchemaForLocale(request.locale),
+      mergedConversationTurnJsonSchemaForRequest(request.locale, visibleRecordIds),
       request.suspicionBefore,
     );
     const instructions = [
@@ -751,6 +765,7 @@ export class ProviderService implements NpcProposalPort {
       "currentOpenQuestion is the exact question tracked from the previous judged turn, if any. When the player's newest line directly answers it or honestly establishes the limit of what the player knows, return that question with status=resolved and a whyLine grounded in the answer; never leave an answered question stale by returning null or repeating it as open. Replace it with an open question only when the new question is materially different, role-supported, grounded, and useful for the player to answer.",
       "After stance becomes vouch, set continueConversation=false unless one materially different grounded question still warrants an immediate answer. If you continue, the utterance and all suggestions must advance that question: safe/local should directly answer it or state a concrete knowledge boundary, never merely promise a future record check.",
       "utterance is your next in-character line after hearing the player.",
+      "citedRecordIds must contain every currently visible record whose content the NPC utterance meaningfully conveys, and no other id. Use [] when the utterance cites no record. whyLine, openQuestion, and reply suggestions must not introduce resident-only record content absent from the NPC utterance or prior player speech.",
       "Use the intent labels only as a relative social-risk gradient: safe/local is the least exposing plausible answer, uncertain/repair hedges or clarifies, and risky/weird may offer a bolder cover claim or lie. They are hidden candidate metadata and never decide suspicion or game truth.",
       ...localeOutputInstructions(
         request.locale,

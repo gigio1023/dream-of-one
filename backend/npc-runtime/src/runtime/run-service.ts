@@ -116,6 +116,7 @@ import type {
   RunPropHandlingEvent,
   RunPropHandlingObservationMemory,
   RunRecord,
+  RunRecordCitation,
   RunRecordReadMemory,
   RunSessionAnswer,
   RunSessionAnswerResponse,
@@ -429,6 +430,7 @@ interface ConversationOpeningAttempt {
   evidenceKey: string;
   request: ConversationTurnRequest;
   resolved?: ResolvedProposal<ConversationProposal>;
+  citedRecords?: RunRecordCitation[];
   routeHoldUntilSeconds?: number;
   inFlight?: Promise<RunSessionPreloadResponse>;
 }
@@ -2061,6 +2063,15 @@ export class RunService {
 
       const sessionId = this.idFactory("sess");
       const resolved = opening.resolved;
+      const citedRecords = opening.citedRecords ?? [];
+      if (!this.committedRecordCitationsAreCurrent(run, actor.actorId, citedRecords)) {
+        actor.playerConversationReady = false;
+        run.conversationOpenings.delete(actorId);
+        throw new RunError(
+          "the preloaded conversation cites a record revision that is no longer current",
+          "conversation_not_ready",
+        );
+      }
       const procedure = contactId ? run.activeContact?.procedure ?? "ordinary" : "ordinary";
       const interrogationLedgerSeq =
         procedure === "interrogation" ? this.pendingInterrogationLedgerSeq(run) : null;
@@ -2106,6 +2117,7 @@ export class RunService {
         conversationId: sessionId,
         turnId: nextTurn.turnId,
         line: nextTurn.prompt,
+        citedRecords: clone(citedRecords),
         worldSeconds: run.elapsedSeconds,
         worldRevision: openingRevision,
         proposalMeta: clone(resolved.meta),
@@ -2136,6 +2148,12 @@ export class RunService {
       run.worldRevision = openingRevision;
       run.encounteredIdentityIds.add(actor.actorId);
       this.discloseLatestAmbientJudgment(run, actor);
+      this.discloseCitedConversationRecords(
+        run,
+        actor.actorId,
+        nextTurn.prompt,
+        citedRecords,
+      );
       return {
         runId,
         sessionId,
@@ -2182,6 +2200,14 @@ export class RunService {
       const suspicionBefore = actor.suspicion;
       const reportBefore = run.institutionalPressure;
       const currentTurnAllowsContinuation = conversation.activeTurn.continueConversation;
+      const observePacket = this.runObservePacket(
+        run,
+        actor,
+        ["player"],
+        this.conversationGoals(actor, conversation.procedure),
+        [playerLine],
+        run.spatialFacts?.actors.get(actor.actorId),
+      );
       const resolved = await this.proposalPort.judgeAndProposeConversationTurn({
         sessionId: run.runId,
         locale: run.locale,
@@ -2190,14 +2216,7 @@ export class RunService {
         actorId: actor.actorId,
         playerLine,
         conversationHistory: clone(conversation.dialogue.slice(-10)),
-        observePacket: this.runObservePacket(
-          run,
-          actor,
-          ["player"],
-          this.conversationGoals(actor, conversation.procedure),
-          [playerLine],
-          run.spatialFacts?.actors.get(actor.actorId),
-        ),
+        observePacket,
         suspicionBefore,
         reportPressureBefore: reportBefore,
         objective: this.conversationObjective(actor, conversation.procedure),
@@ -2211,6 +2230,19 @@ export class RunService {
         ),
       });
       this.trackProposal(run, resolved.meta);
+      const observedCitations = this.observedRecordCitations(
+        observePacket,
+        resolved.proposal.citedRecordIds ?? [],
+      );
+      const citedRecords = observedCitations
+        ? this.commitObservedRecordCitations(run, actor.actorId, observedCitations)
+        : null;
+      if (!citedRecords) {
+        throw new RunError(
+          "the conversation reply cited a record revision outside the current observation",
+          "invalid_answer",
+        );
+      }
 
       const suspicionAfter = clampConversationScore(
         suspicionBefore +
@@ -2258,6 +2290,7 @@ export class RunService {
         turnId,
         playerLine,
         npcLine: resolved.proposal.utterance,
+        citedRecords: clone(citedRecords),
         signals: [...signals],
         whyLine: resolved.proposal.whyLine,
         suspicionBefore,
@@ -2282,6 +2315,12 @@ export class RunService {
       actor.memories.push(memory);
       run.worldRevision = nextRevision;
       this.discloseResidentJudgment(run, actor, memory);
+      this.discloseCitedConversationRecords(
+        run,
+        actor.actorId,
+        resolved.proposal.utterance,
+        citedRecords,
+      );
       conversation.turnCount += 1;
       conversation.dialogue.push(
         { speakerId: "player", line: playerLine },
@@ -2833,6 +2872,55 @@ export class RunService {
       citations.push({ recordId, recordRevision: visible.recordRevision });
     }
     return citations;
+  }
+
+  private commitObservedRecordCitations(
+    run: RunState,
+    speakerActorId: string,
+    citations: readonly AmbientRecordCitation[],
+  ): RunRecordCitation[] | null {
+    const committed: RunRecordCitation[] = [];
+    for (const citation of citations) {
+      const record = run.records.find(candidate =>
+        candidate.recordId === citation.recordId &&
+        candidate.recordRevision === citation.recordRevision &&
+        candidate.visibleToActorIds.includes(speakerActorId)
+      );
+      const ledgerEvent = record
+        ? run.ledgerEvents.find(candidate =>
+            candidate.eventId === record.lastLedgerEventId &&
+            candidate.recordId === record.recordId &&
+            candidate.recordRevision === record.recordRevision
+          )
+        : undefined;
+      if (!record || !ledgerEvent) return null;
+      committed.push({
+        recordId: record.recordId,
+        recordRevision: record.recordRevision,
+        lastLedgerEventId: ledgerEvent.eventId,
+      });
+    }
+    return committed;
+  }
+
+  private committedRecordCitationsAreCurrent(
+    run: RunState,
+    speakerActorId: string,
+    citations: readonly RunRecordCitation[],
+  ): boolean {
+    return citations.every(citation => {
+      const record = run.records.find(candidate =>
+        candidate.recordId === citation.recordId &&
+        candidate.recordRevision === citation.recordRevision &&
+        candidate.lastLedgerEventId === citation.lastLedgerEventId &&
+        candidate.visibleToActorIds.includes(speakerActorId)
+      );
+      return record !== undefined && run.ledgerEvents.some(event =>
+        event.eventId === citation.lastLedgerEventId &&
+        event.recordId === citation.recordId &&
+        event.recordRevision === citation.recordRevision
+      );
+    });
   }
 
   private validateGoalProposal(
@@ -4887,14 +4975,39 @@ export class RunService {
         candidate.lastLedgerEventId === citation.lastLedgerEventId &&
         candidate.visibleToActorIds.includes(event.speakerActorId)
       );
-      if (record) this.discloseSpokenRecord(run, record, event);
+      if (record) {
+        this.discloseSpokenRecord(
+          run,
+          record,
+          event.speakerActorId,
+          event.line,
+        );
+      }
+    }
+  }
+
+  private discloseCitedConversationRecords(
+    run: RunState,
+    speakerActorId: string,
+    line: string,
+    citations: readonly RunRecordCitation[],
+  ): void {
+    for (const citation of citations) {
+      const record = run.records.find(candidate =>
+        candidate.recordId === citation.recordId &&
+        candidate.recordRevision === citation.recordRevision &&
+        candidate.lastLedgerEventId === citation.lastLedgerEventId &&
+        candidate.visibleToActorIds.includes(speakerActorId)
+      );
+      if (record) this.discloseSpokenRecord(run, record, speakerActorId, line);
     }
   }
 
   private discloseSpokenRecord(
     run: RunState,
     record: RunRecord,
-    event: RunAmbientSpeechEvent,
+    speakerActorId: string,
+    line: string,
   ): void {
     const existing = run.socialView.encounteredRecords.find(
       entry => entry.recordId === record.recordId,
@@ -4910,15 +5023,15 @@ export class RunService {
     if (!ledgerEvent) return;
     const provenance: RunSocialProvenance = {
       originKind: "speech",
-      originActorId: event.speakerActorId,
+      originActorId: speakerActorId,
       recipientKind: "listener",
       recipientActorId: "player",
       sourceMemoryId: null,
       recordId: record.recordId,
       recordRevision: record.recordRevision,
       ledgerEventId: ledgerEvent.eventId,
-      sourceExcerpt: normalizeSocialSourceExcerpt(event.line),
-      whyLine: normalizeSocialSourceExcerpt(event.line),
+      sourceExcerpt: normalizeSocialSourceExcerpt(line),
+      whyLine: normalizeSocialSourceExcerpt(line),
     };
     const disclosed = {
       recordId: record.recordId,
@@ -5142,7 +5255,24 @@ export class RunService {
         }
         throw new RunError("conversation opening became stale before commit", "conversation_not_ready");
       }
+      const observedCitations = this.observedRecordCitations(
+        attempt.request.observePacket,
+        resolved.proposal.citedRecordIds ?? [],
+      );
+      const citedRecords = observedCitations
+        ? this.commitObservedRecordCitations(run, actor.actorId, observedCitations)
+        : null;
+      if (!citedRecords) {
+        run.conversationOpenings.delete(actor.actorId);
+        run.preloadRequiredEvidence.delete(actor.actorId);
+        actor.playerConversationReady = false;
+        throw new RunError(
+          "conversation opening cited a record revision outside its observation",
+          "conversation_not_ready",
+        );
+      }
       attempt.resolved = clone(resolved);
+      attempt.citedRecords = citedRecords;
       // Provider latency must not make a nearby resident walk away between
       // preparation and the player's E press. Hold route cadence only; schedule
       // transitions still invalidate stale openings through the checks above.

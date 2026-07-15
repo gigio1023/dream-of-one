@@ -1965,6 +1965,11 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   assert.match(textGen.requests[0].instructions, /resident's own supplied memories/);
   assert.match(textGen.requests[0].instructions, /publicIdentity and voice guide wording only/);
   assert.match(textGen.requests[0].instructions, /derive contactBasis exactly/);
+  assert.match(textGen.requests[0].instructions, /vouch has the same bounded meaning/);
+  assert.match(
+    textGen.requests[0].instructions,
+    /supporting meaningful_firsthand player-conversation memory.*do not require an external record/,
+  );
   assert.match(textGen.requests[0].instructions, /at least four evidence-backed vouches/);
   assert.match(textGen.requests[0].instructions, /may still propose abnormal/);
   assert.match(textGen.requests[0].instructions, /run locale is ko-KR/);
@@ -2314,7 +2319,27 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   assert.deepEqual(result.proposal.suggestedReplies, mixedNaturalKoreanTurn.suggestedReplies);
   assert.equal(textGen.requests[0].purpose, "conversation_turn");
   assert.equal(textGen.requests[0].schemaName, "npc_merged_conversation_turn");
-  assert.match(textGen.requests[0].instructions, /vouch requires it/);
+  assert.match(textGen.requests[0].instructions, /Vouch requires meaningfulFirsthand/);
+  assert.match(
+    textGen.requests[0].instructions,
+    /Vouch is bounded personal testimony/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /not proof of the player's identity, booking, institutional approval/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /honestly narrows.*vouch is normally appropriate/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /do not require an external record, prior acquaintance/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /Set meaningfulFirsthand=true.*coherent handling of a role-supported question/,
+  );
   assert.match(
     textGen.requests[0].instructions,
     /actorContext and selfContext describe only this resident's authored identity/,

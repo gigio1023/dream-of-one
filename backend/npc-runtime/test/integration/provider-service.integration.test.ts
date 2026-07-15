@@ -1876,10 +1876,14 @@ test("provider service returns schema-validated live conversation proposals", as
   assert.match(textGen.requests[0].instructions, /Missing context means unknown, never absent/);
   assert.match(textGen.requests[0].instructions, /without inventing a new identity/);
   const providerInput = JSON.parse(textGen.requests[0].input);
-  assert.equal(providerInput.actor.actorId, conversationRequest().observePacket.actorId);
-  assert.equal("visibleObjects" in providerInput.actor, false);
-  assert.equal("visibleRecords" in providerInput.actor, false);
-  assert.equal("administrativeAuthority" in providerInput.actor, false);
+  assert.equal(
+    providerInput.conversationFrame.residentSpeaker.actorId,
+    conversationRequest().observePacket.actorId,
+  );
+  assert.equal(providerInput.conversationFrame.playerInterlocutor.actorId, "player");
+  assert.equal("visibleObjects" in providerInput.residentContext, false);
+  assert.equal("visibleRecords" in providerInput.residentContext, false);
+  assert.equal("administrativeAuthority" in providerInput.residentContext, false);
   assert.deepEqual(
     providerInput.groundingContract.visibleObjectFacts,
     conversationRequest().observePacket.visibleObjects.map(object => ({
@@ -1916,6 +1920,94 @@ test("provider service returns schema-validated live conversation proposals", as
     }],
   });
   providerAuditSnapshotSchema.parse(service.auditSnapshot("session-provider-test"));
+});
+
+test("conversation openings keep resident, player, third-party speech, and locations structurally separate", async () => {
+  const request = conversationRequest();
+  request.actorId = "NPC_Roaming_Liaison";
+  request.observePacket.actorId = request.actorId;
+  request.observePacket.role = "roaming_liaison";
+  request.observePacket.landmarkId = "Park";
+  request.observePacket.actorPolicy = DEFAULT_ROLE_POLICIES.roaming_liaison;
+  request.observePacket.actorMemory = {
+    actorId: request.actorId,
+    ownActionNotes: [
+      "[heard_from=NPC_Station_Officer] 외부인은 스테이션에서 확인해야 합니다.",
+      "[self_utterance] 그 방문자는 공원에서 기다리고 있었습니다.",
+      "[player_utterance] 청문회 때문에 왔습니다. / [self_reply] 이유를 알겠습니다. / [judgment_reason] 직접 설명했습니다.",
+    ],
+    observedLedgerEventIds: [],
+  };
+  request.observePacket.visibleActors = ["NPC_Station_Officer"];
+  request.observePacket.audibleActorIds = ["NPC_Station_Officer"];
+  request.observePacket.playerContact = null;
+  request.observePacket.heardSpeech = [
+    "NPC_Station_Officer: 외부인은 스테이션에서 확인해야 합니다.",
+    "방문 이유: 청문회 때문입니다.",
+  ];
+
+  const textGen = new FakeTextGen([{ text: validConversation }]);
+  const service = new ProviderService({
+    profileId: "test/conversation-role-separation",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+  await service.proposeConversationTurn(request);
+
+  const transport = textGen.requests[0];
+  assert.ok(transport);
+  const input = JSON.parse(transport.input);
+  assert.deepEqual(input.conversationFrame, {
+    phase: "opening",
+    residentSpeaker: {
+      actorId: "NPC_Roaming_Liaison",
+      role: "roaming_liaison",
+      locationId: "Park",
+    },
+    playerInterlocutor: {
+      actorId: "player",
+      role: "player",
+      locationId: null,
+      locationBasis: "not_supplied_for_opening",
+    },
+    thirdPartyActorIds: ["NPC_Station_Officer"],
+  });
+  assert.equal("actor" in input, false, "the old ambiguous actor projection must stay absent");
+  assert.deepEqual(input.residentContext.memoryEvidence, [
+    {
+      evidenceType: "heard_third_party_npc",
+      speakerActorId: "NPC_Station_Officer",
+      note: "외부인은 스테이션에서 확인해야 합니다.",
+    },
+    {
+      evidenceType: "resident_prior_utterance",
+      speakerActorId: "NPC_Roaming_Liaison",
+      note: "그 방문자는 공원에서 기다리고 있었습니다.",
+    },
+    {
+      evidenceType: "player_conversation_exchange",
+      playerSpeakerActorId: "player",
+      residentSpeakerActorId: "NPC_Roaming_Liaison",
+      playerLine: "청문회 때문에 왔습니다.",
+      residentReply: "이유를 알겠습니다.",
+      judgmentReason: "직접 설명했습니다.",
+    },
+  ]);
+  assert.deepEqual(input.groundingContract.attributedHeardSpeech, [
+    {
+      sourceType: "third_party_npc",
+      speakerActorId: "NPC_Station_Officer",
+      line: "외부인은 스테이션에서 확인해야 합니다.",
+    },
+    {
+      sourceType: "player",
+      speakerActorId: "player",
+      line: "방문 이유: 청문회 때문입니다.",
+    },
+  ]);
+  assert.match(transport.instructions, /playerInterlocutor is always the person being addressed/);
+  assert.match(transport.instructions, /residentSpeaker\.locationId belongs only to the resident/);
+  assert.match(transport.instructions, /never replay either as if it were the resident's new opening line/);
 });
 
 test("ambient reply is one schema-validated call with its own audit purpose and neutral localized fallback", async () => {
@@ -2405,8 +2497,23 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   assert.deepEqual(input.answerBinding, {
     answeredNpcLine: "오늘도 같은 걸로 드릴까요?",
   });
-  assert.equal("visibleRecords" in input.actor, false);
-  assert.equal("toolCatalog" in input.actor, false);
+  assert.equal("visibleRecords" in input.residentContext, false);
+  assert.equal("toolCatalog" in input.residentContext, false);
+  assert.deepEqual(input.conversationFrame, {
+    phase: "player_reply",
+    residentSpeaker: {
+      actorId: "NPC_Store_Clerk",
+      role: "store_clerk",
+      locationId: "Store",
+    },
+    playerInterlocutor: {
+      actorId: "player",
+      role: "player",
+      locationId: null,
+      locationBasis: "active_face_to_face_location_not_supplied",
+    },
+    thirdPartyActorIds: ["NPC_Store_Manager"],
+  });
   const mergedSchema = textGen.requests[0].jsonSchema as {
     properties?: {
       suggestedReplies?: {
@@ -2573,10 +2680,16 @@ test("player-visible stable ids get one bounded repair even when the prose conta
   assert.equal(textGen.requests[1]?.purpose, "repair");
   assert.match(textGen.requests[1]?.instructions ?? "", /rewrite the whole affected field/);
   const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
-    requestContext?: { playerLine?: string; actor?: { actorId?: string } };
+    requestContext?: {
+      playerLine?: string;
+      conversationFrame?: { residentSpeaker?: { actorId?: string } };
+    };
   };
   assert.equal(repairInput.requestContext?.playerLine, judgmentRequest().playerLine);
-  assert.equal(repairInput.requestContext?.actor?.actorId, judgmentRequest().observePacket.actorId);
+  assert.equal(
+    repairInput.requestContext?.conversationFrame?.residentSpeaker?.actorId,
+    judgmentRequest().observePacket.actorId,
+  );
   const turnSchema = textGen.requests[0]?.jsonSchema as {
     properties?: { utterance?: { description?: string } };
   };

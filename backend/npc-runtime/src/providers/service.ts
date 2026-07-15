@@ -218,6 +218,8 @@ function providerRepairValidationIssue(issue: z.ZodIssue): ProviderRepairValidat
 
 const PRIVATE_ACTOR_CONTEXT_GUIDE =
   "actorContext and selfContext describe only this resident's authored identity, voice, private motivation, and holder-local relationship knowledge. They may shape tone, priorities, and questions, but they are not observations or evidence about the player. Treat only supplied memories, heard speech, visible records, and visible facts as evidence, and never reveal a private pressure unless this resident deliberately chooses to speak about it in-fiction.";
+const CONVERSATION_PARTICIPANT_GUIDE =
+  "conversationFrame is authoritative about participation and location. The residentSpeaker is the only NPC speaking now, and the playerInterlocutor is always the person being addressed; every other actor named in residentContext, attributedHeardSpeech, or memoryEvidence is a third party, never the player. residentSpeaker.locationId belongs only to the resident. The player's location is known only when playerInterlocutor.locationId is non-null; never copy or infer the resident's location as the player's location. For an opening, write one fresh line addressed to the player. Prior resident speech and attributed NPC-to-NPC speech are evidence only: never replay either as if it were the resident's new opening line.";
 const CONVERSATION_VISIBLE_FACT_GUIDE =
   "The groundingContract is a hard validity boundary, not a style suggestion. NPC speech and player reply suggestions may mention only people, documents, records, possessions, appointments, systems, approvals, identities, roles, and past events affirmatively supplied in the request. Missing context means unknown, never absent. The NPC may ask a neutral question about an unknown, but must not claim a record or item exists, was checked, is missing, or belongs to anyone. Every suggested player reply must be speakable without inventing a new identity, job, possession, document, invitation, approval, appointment, or past action. Each suggestion must also be a self-contained player utterance: explicitly preserve the person, object, source, or claim being answered whenever omission could make a role, name, or noun phrase sound like the player's own identity or possession. Never emit a bare name, role, object, yes/no fragment, or copular noun phrase whose referent exists only in the NPC question. If no player statement supplies one, use a complete question, refusal, uncertainty, or statement about the present conversation instead.";
 const CONVERSATION_REPLY_BINDING_GUIDE =
@@ -257,11 +259,26 @@ function conversationGroundingContract(
       kind: record.kind,
       stateBody: record.stateBody,
     })),
-    heardSpeech,
+    attributedHeardSpeech: heardSpeech.map(line => {
+      const attributedNpcSpeech = /^(NPC_[A-Za-z0-9_]+):\s+([\s\S]+)$/.exec(line);
+      if (attributedNpcSpeech) {
+        return {
+          sourceType: "third_party_npc" as const,
+          speakerActorId: attributedNpcSpeech[1],
+          line: attributedNpcSpeech[2],
+        };
+      }
+      return {
+        sourceType: "player" as const,
+        speakerActorId: "player" as const,
+        line,
+      };
+    }),
     validityRules: [
       "Treat every unlisted person, identity, role, item, document, record, approval, appointment, possession, and past event as unknown.",
       "Do not convert unknown into absent, missing, checked, expected, owned, received, or completed.",
       "A suggested player reply may repeat supplied player statements or react to the present exchange; it may not add biography, possessions, paperwork, invitations, approvals, appointments, or past actions.",
+      "Attributed heard speech is prior evidence, not a line in the current player conversation; preserve its named speaker and never present it as the resident's new utterance.",
     ],
   };
 }
@@ -279,11 +296,90 @@ function residentProviderContext(packet: ObservePacket) {
   };
 }
 
-function conversationActorContext(packet: ObservePacket) {
+function conversationMemoryEvidence(packet: ObservePacket) {
+  return packet.actorMemory.ownActionNotes.map(note => {
+    const heard = /^\[heard_from=([^\]]+)\]\s*([\s\S]*)$/.exec(note);
+    if (heard) {
+      return {
+        evidenceType: "heard_third_party_npc" as const,
+        speakerActorId: heard[1],
+        note: heard[2],
+      };
+    }
+    const selfUtterance = /^\[self_utterance\]\s*([\s\S]*)$/.exec(note);
+    if (selfUtterance) {
+      return {
+        evidenceType: "resident_prior_utterance" as const,
+        speakerActorId: packet.actorId,
+        note: selfUtterance[1],
+      };
+    }
+    if (note.startsWith("[player_utterance]")) {
+      const exchange = /^\[player_utterance\]\s*([\s\S]*?)\s*\/\s*\[self_reply\]\s*([\s\S]*?)\s*\/\s*\[judgment_reason\]\s*([\s\S]*)$/.exec(note);
+      if (exchange) {
+        return {
+          evidenceType: "player_conversation_exchange" as const,
+          playerSpeakerActorId: "player" as const,
+          residentSpeakerActorId: packet.actorId,
+          playerLine: exchange[1],
+          residentReply: exchange[2],
+          judgmentReason: exchange[3],
+        };
+      }
+      return {
+        evidenceType: "player_conversation_exchange" as const,
+        playerSpeakerActorId: "player" as const,
+        residentSpeakerActorId: packet.actorId,
+        note,
+      };
+    }
+    return {
+      evidenceType: "resident_memory" as const,
+      holderActorId: packet.actorId,
+      note,
+    };
+  });
+}
+
+function conversationResidentContext(packet: ObservePacket) {
+  const { landmarkId: _landmarkId, memoryNotes: _memoryNotes, ...resident } =
+    residentProviderContext(packet);
   return {
-    ...residentProviderContext(packet),
+    ...resident,
+    memoryEvidence: conversationMemoryEvidence(packet),
     presentActorIds: packet.visibleActors,
     audibleActorIds: packet.audibleActorIds,
+  };
+}
+
+function conversationFrame(
+  packet: ObservePacket,
+  phase: "opening" | "player_reply",
+) {
+  const playerLocationId = packet.playerContact?.available
+    ? packet.playerContact.playerLocationId
+    : null;
+  return {
+    phase,
+    residentSpeaker: {
+      actorId: packet.actorId,
+      role: packet.role,
+      locationId: packet.landmarkId,
+    },
+    playerInterlocutor: {
+      actorId: "player" as const,
+      role: "player" as const,
+      locationId: playerLocationId,
+      locationBasis: playerLocationId !== null
+        ? "engine_grounded_player_contact"
+        : phase === "player_reply"
+          ? "active_face_to_face_location_not_supplied"
+          : "not_supplied_for_opening",
+    },
+    thirdPartyActorIds: [...new Set([
+      ...packet.visibleActors,
+      ...packet.audibleActorIds,
+    ].filter(actorId => actorId !== packet.actorId && actorId !== "player"))],
   };
 }
 
@@ -451,6 +547,7 @@ export class ProviderService implements NpcProposalPort {
     const instructions = [
       "You are an NPC inside Dream of One, a social-suspicion game.",
       "Stay in role and use only visible context.",
+      CONVERSATION_PARTICIPANT_GUIDE,
       PRIVATE_ACTOR_CONTEXT_GUIDE,
       CONVERSATION_VISIBLE_FACT_GUIDE,
       ...localeOutputInstructions(
@@ -465,7 +562,8 @@ export class ProviderService implements NpcProposalPort {
     ].join(" ");
     const requestContext = {
       objective: request.objective,
-      actor: conversationActorContext(request.observePacket),
+      conversationFrame: conversationFrame(request.observePacket, "opening"),
+      residentContext: conversationResidentContext(request.observePacket),
       conversationHistory: request.conversationHistory.slice(-6),
       groundingContract: conversationGroundingContract(request),
     };
@@ -492,6 +590,7 @@ export class ProviderService implements NpcProposalPort {
       "You are the judging mind of one NPC inside Dream of One, a social-suspicion game.",
       "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
+      CONVERSATION_PARTICIPANT_GUIDE,
       CONVERSATION_REPLY_BINDING_GUIDE,
       PRIVATE_ACTOR_CONTEXT_GUIDE,
       CONVERSATION_VISIBLE_FACT_GUIDE,
@@ -510,7 +609,8 @@ export class ProviderService implements NpcProposalPort {
       answerBinding: {
         answeredNpcLine: latestNpcLine(request.conversationHistory),
       },
-      actor: conversationActorContext(request.observePacket),
+      conversationFrame: conversationFrame(request.observePacket, "player_reply"),
+      residentContext: conversationResidentContext(request.observePacket),
       suspicionBefore: request.suspicionBefore,
       reportPressureBefore: request.reportPressureBefore,
       groundingContract: conversationGroundingContract(request, request.playerLine),
@@ -538,6 +638,7 @@ export class ProviderService implements NpcProposalPort {
       "You are one NPC inside Dream of One, a social-suspicion game.",
       "In one response, judge the player's newest line AND write your next spoken reply with exactly three short player reply suggestions.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
+      CONVERSATION_PARTICIPANT_GUIDE,
       CONVERSATION_REPLY_BINDING_GUIDE,
       PRIVATE_ACTOR_CONTEXT_GUIDE,
       CONVERSATION_VISIBLE_FACT_GUIDE,
@@ -572,7 +673,8 @@ export class ProviderService implements NpcProposalPort {
         answeredNpcLine: latestNpcLine(request.conversationHistory),
       },
       objective: request.objective,
-      actor: conversationActorContext(request.observePacket),
+      conversationFrame: conversationFrame(request.observePacket, "player_reply"),
+      residentContext: conversationResidentContext(request.observePacket),
       suspicionBefore: request.suspicionBefore,
       reportPressureBefore: request.reportPressureBefore,
       stanceBefore: request.stanceBefore,

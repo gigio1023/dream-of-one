@@ -103,6 +103,17 @@ fact. This boundary is repeated in the provider instructions and retained in
 the one repair request; model-authored wording remains free inside that factual
 boundary.
 
+The provider projection also gives every player conversation an explicit
+`conversationFrame`: one resident speaker, the player interlocutor, and any
+third-party actor ids. The resident's location never doubles as an inferred
+player location; a speculative opening keeps the player location unknown, while
+an active reply identifies only the face-to-face basis unless an engine-grounded
+player-contact packet supplies the actual location. Prior resident
+speech and NPC-to-NPC speech remain available as typed, attributed memory
+evidence, but are marked as past evidence rather than lines in the current
+exchange. This prevents an opening from silently recasting a heard resident as
+the player or replaying an ambient utterance as the current speaker's new line.
+
 For each agent-step request, `ProviderService` derives a strict JSON schema
 from that request's effective tool catalog and current observe packet. Only
 the offered tool branches and their currently reachable, visible, audible, or

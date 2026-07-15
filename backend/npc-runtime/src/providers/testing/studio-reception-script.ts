@@ -158,6 +158,8 @@ function nextStep(request: AgentStepRequest): AgentStepProposal {
           },
         },
       },
+      utterance: "이 진술은 접수 확인 기록으로 남겨 두겠습니다.",
+      citedRecordIds: [],
       rationale: "직접 들은 의심 진술을 권한 안에서 기록합니다.",
       done: true,
     };

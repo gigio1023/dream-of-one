@@ -1175,12 +1175,20 @@ test("provider run observations bound recent history without deleting runtime or
   adapter.proposeNextStep = async request => {
     if (request.observePacket.actorId === actorId) capturedRequest = structuredClone(request);
     return {
-      proposal: {
-        toolCall: null,
-        utterance: null,
-        rationale: "현재 확인한 정보 안에서 행동을 멈춥니다.",
-        done: true,
-      },
+      proposal: request.requireToolCall
+        ? {
+            toolCall: { tool: "wait", args: { reason: "추가 확인 전에는 기록하지 않습니다." } },
+            utterance: "추가 확인 전에는 이 내용을 기록하지 않겠습니다.",
+            citedRecordIds: [],
+            rationale: "현재 확인한 정보만으로는 기록하지 않습니다.",
+            done: true,
+          }
+        : {
+            toolCall: null,
+            utterance: null,
+            rationale: "현재 확인한 정보 안에서 행동을 멈춥니다.",
+            done: true,
+          },
       meta: {
         profileId: "scripted/studio-reception",
         transport: "scripted",
@@ -1328,7 +1336,7 @@ test("provider run observations bound recent history without deleting runtime or
   });
   assert.equal(service.snapshot(started.runId).actors.find(
     actor => actor.actorId === actorId
-  )?.memories.length, historyCount + 1);
+  )?.memories.length, historyCount + 2);
 });
 
 test("visible reachable player facts outside a conversation zone stay valid but cannot open contact", async () => {

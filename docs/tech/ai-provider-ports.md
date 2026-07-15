@@ -185,8 +185,13 @@ administrative packets receive only the M3R branch. When a report-bearing
 source reaches a writable procedure, the request still offers both
 `write_record` and `wait` but removes the nullable completion branch: the model
 must make one explicit tool choice without the runtime preferring either one.
-An explicit wait therefore carries its own reason into resident memory instead
-of escaping through a generic `done` response. Locale and request
+It also removes the nullable utterance branch for that request. The model must
+say one concise, localized, in-fiction sentence that makes its chosen write or
+deferral understandable without exposing stable ids. An explicit wait
+therefore carries both its reason into resident memory and its natural wording
+into the ordinary audible-speech path instead of escaping through a generic
+`done` response. This requirement communicates the model's decision; it does
+not make either branch more likely. Locale and request
 validation report field-specific paths to the single repair attempt, and
 repair must return a complete replacement JSON value. Runtime validation still
 rechecks fresh visibility, audibility, role authority, record ownership,

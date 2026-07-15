@@ -216,6 +216,10 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
       ? request.requiredToolCall.actorId
       : undefined;
     const requiresPlayerApproach = request.requiredToolCall?.tool === "move_to";
+    const requiresExplicitWait =
+      request.requiredToolCall === undefined &&
+      request.requireToolCall === true &&
+      request.observePacket.toolCatalog.includes("wait");
     const allowedTalkTargets = request.allowedTalkActorIds === undefined
       ? null
       : new Set(request.allowedTalkActorIds);
@@ -240,6 +244,16 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
           rationale: content.talkRationale,
           done: true,
         }
+      : requiresExplicitWait
+        ? {
+            toolCall: { tool: "wait", args: { reason: content.previousResultWaitReason } },
+            ...(request.requireUtterance
+              ? { utterance: content.administrativeWaitUtterance }
+              : {}),
+            citedRecordIds: [],
+            rationale: content.previousResultRationale,
+            done: true,
+          }
       : request.previousResult
       ? {
           toolCall: { tool: "wait", args: { reason: content.previousResultWaitReason } },

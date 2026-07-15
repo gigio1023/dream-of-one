@@ -346,6 +346,8 @@ interface GoalDecisionAttempt {
   state: "unclaimed" | "resolving" | "queued" | "completed" | "terminal";
   observation: GoalObservation | null;
   resolvedAction: GoalAction | null;
+  resolvedUtterance: string | null;
+  resolvedUtteranceCitations: RunRecordCitation[];
   actionMeta: ProposalMeta | null;
   policyAction: "budget_reserved_interrogation" | null;
   providerMetas: ProposalMeta[];
@@ -357,6 +359,14 @@ interface GoalDecisionAttempt {
   response?: RunNpcDecisionResponse;
   deliveredViaSessionEnd?: boolean;
   inFlight?: Promise<RunNpcDecisionResponse>;
+}
+
+interface GoalAdministrativeSpeechContext {
+  line: string;
+  citedRecords: RunRecordCitation[];
+  volume: RunAudibilityVolume;
+  speakerPosition: readonly [number, number, number];
+  listenerActorIds: string[];
 }
 
 interface GoalAdmissionState {
@@ -1964,6 +1974,8 @@ export class RunService {
           state: "terminal",
           observation: null,
           resolvedAction: null,
+          resolvedUtterance: null,
+          resolvedUtteranceCitations: [],
           actionMeta: null,
           policyAction: null,
           providerMetas: [],
@@ -2010,6 +2022,8 @@ export class RunService {
         state: "unclaimed",
         observation: null,
         resolvedAction: null,
+        resolvedUtterance: null,
+        resolvedUtteranceCitations: [],
         actionMeta: null,
         policyAction: null,
         providerMetas: [],
@@ -2642,7 +2656,11 @@ export class RunService {
     let synthesizedRuntimeFallback = false;
     try {
       const initialRun = this.requireRun(runId);
-      const loop = await runBoundedProposalLoop<GoalAction>({
+      const loop = await runBoundedProposalLoop<{
+        action: GoalAction;
+        administrativeUtterance: string | null;
+        administrativeCitations: RunRecordCitation[];
+      }>({
         sessionId: runId,
         locale: initialRun.locale,
         actorId: attempt.actorId,
@@ -2656,7 +2674,7 @@ export class RunService {
           ? { requiredToolCall: { tool: "move_to" as const, targetId: "player" as const } }
           : {}),
         ...(observation.administrativeDecisionSourceMemoryId !== null
-          ? { requireToolCall: true }
+          ? { requireToolCall: true, requireUtterance: true }
           : {}),
         budgetCeiling: {
           maxCalls: runAmbientCallCeiling(initialRun),
@@ -2704,7 +2722,13 @@ export class RunService {
           if (validated.action) {
             return {
               status: "accepted",
-              value: validated.action,
+              value: {
+                action: validated.action,
+                administrativeUtterance:
+                  validated.administrativeSpeech?.line ?? null,
+                administrativeCitations:
+                  clone(validated.administrativeSpeech?.citedRecords ?? []),
+              },
               validation: { ok: true, note: `validated ${validated.action.tool}` },
               nextStepChange: "validated action is ready for fresh commit revalidation",
             };
@@ -2721,7 +2745,12 @@ export class RunService {
           };
         },
       });
-      attempt.resolvedAction = loop.accepted[0] ?? null;
+      const accepted = loop.accepted[0];
+      attempt.resolvedAction = accepted?.action ?? null;
+      attempt.resolvedUtterance = accepted?.administrativeUtterance ?? null;
+      attempt.resolvedUtteranceCitations = clone(
+        accepted?.administrativeCitations ?? [],
+      );
       attempt.actionMeta = loop.accepted.length > 0 ? clone(loop.metas.at(-1) as ProposalMeta) : null;
       attempt.policyAction = null;
     } catch (error) {
@@ -2784,6 +2813,11 @@ export class RunService {
               contactReason: fallbackContent(this.requireRun(runId).locale).whyLines.none,
             }
           : { tool: "wait", reason: "bounded goal fallback" };
+      if (observation.administrativeDecisionSourceMemoryId !== null) {
+        attempt.resolvedUtterance =
+          fallbackContent(this.requireRun(runId).locale).agent.administrativeWaitUtterance;
+        attempt.resolvedUtteranceCitations = [];
+      }
       const fallbackMeta = this.goalFallbackMeta("invalid_envelope");
       attempt.actionMeta = fallbackMeta;
       attempt.policyAction = null;
@@ -3086,7 +3120,12 @@ export class RunService {
     run: RunState,
     observation: GoalObservation,
     proposal: AgentStepProposal,
-  ): { action?: GoalAction; reason?: string; detail?: string } {
+  ): {
+    action?: GoalAction;
+    administrativeSpeech?: { line: string; citedRecords: RunRecordCitation[] };
+    reason?: string;
+    detail?: string;
+  } {
     const parsed = agentStepProposalSchema.safeParse({
       toolCall: proposal.toolCall ?? null,
       utterance: proposal.utterance ?? null,
@@ -3098,6 +3137,33 @@ export class RunService {
       return { reason: "invalid_args", detail: "agent step envelope is invalid" };
     }
     const step = parsed.data;
+    const requiresAdministrativeSpeech =
+      observation.administrativeDecisionSourceMemoryId !== null;
+    let administrativeSpeech:
+      | { line: string; citedRecords: RunRecordCitation[] }
+      | undefined;
+    if (requiresAdministrativeSpeech) {
+      if (!step.utterance) {
+        return {
+          reason: "invalid_args",
+          detail: "an administrative choice requires one in-fiction utterance",
+        };
+      }
+      const observedCitations = this.observedRecordCitations(
+        observation.observePacket,
+        step.citedRecordIds,
+      );
+      const citedRecords = observedCitations
+        ? this.commitObservedRecordCitations(run, observation.actorId, observedCitations)
+        : null;
+      if (!citedRecords) {
+        return {
+          reason: "not_visible",
+          detail: "administrative speech cited a record revision outside the current observation",
+        };
+      }
+      administrativeSpeech = { line: step.utterance, citedRecords };
+    }
     if (step.done && !step.toolCall) {
       if (observation.procedure === "interrogation") {
         return {
@@ -3105,10 +3171,22 @@ export class RunService {
           detail: "the pending Station interrogation requires a grounded move_to player action",
         };
       }
+      if (requiresAdministrativeSpeech) {
+        return {
+          reason: "invalid_args",
+          detail: "an administrative choice requires an explicit offered tool action",
+        };
+      }
       return { action: { tool: "wait", reason: step.rationale } };
     }
     const call = step.toolCall;
     if (!call) return { reason: "invalid_args", detail: "goal step requires a tool or done" };
+    if (!observation.observePacket.toolCatalog.includes(call.tool)) {
+      return {
+        reason: "role_authority_exceeded",
+        detail: `${call.tool} was not offered for this grounded goal`,
+      };
+    }
     if (
       observation.procedure === "interrogation" &&
       !(call.tool === "move_to" && call.args.targetId === "player")
@@ -3146,6 +3224,7 @@ export class RunService {
             tool: "wait",
             reason: asId(call.args.reason) ?? step.rationale,
           },
+          ...(administrativeSpeech ? { administrativeSpeech } : {}),
         };
       case "look": {
         const targetId = asId(call.args.targetId);
@@ -3306,6 +3385,7 @@ export class RunService {
               this.recordVisibility(run, observation.actorId, recordKind),
             openQuestion,
           },
+          ...(administrativeSpeech ? { administrativeSpeech } : {}),
         };
       }
       case "read_record": {
@@ -3508,6 +3588,8 @@ export class RunService {
         current.activeAmbientConversation = null;
       }
       attempt.resolvedAction = null;
+      attempt.resolvedUtterance = null;
+      attempt.resolvedUtteranceCitations = [];
       attempt.actionMeta = null;
       attempt.policyAction = null;
       attempt.conversationId = null;
@@ -3670,6 +3752,14 @@ export class RunService {
     const movementDeltas: RunMovementDelta[] = [];
     const readinessDeltas: RunActorReadinessDelta[] = [];
     const action = attempt.resolvedAction;
+    const requiresAdministrativeSpeech =
+      attempt.observation.administrativeDecisionSourceMemoryId !== null;
+    const administrativeSpeech = requiresAdministrativeSpeech
+      ? this.prepareGoalAdministrativeSpeech(run, attempt)
+      : null;
+    if (requiresAdministrativeSpeech && !administrativeSpeech) {
+      return this.finishGoalAttempt(run, attempt, "stale");
+    }
     if (action.tool === "look") {
       actionDeltas.push({
         kind: "look",
@@ -3766,6 +3856,22 @@ export class RunService {
           this.reconcileConversationOpening(run, this.requireActor(run, holderId), readinessDeltas);
         }
       }
+    }
+    if (administrativeSpeech) {
+      const event = this.commitGoalAdministrativeSpeech(run, attempt, administrativeSpeech);
+      actionDeltas.push({ kind: "speech", speechEvent: clone(event) });
+      for (const holderId of [event.speakerActorId, ...event.listenerActorIds]) {
+        this.reconcileConversationOpening(
+          run,
+          this.requireActor(run, holderId),
+          readinessDeltas,
+        );
+      }
+      // The speaker's own announced decision belongs to the goal just
+      // completed; baseline that new self-memory so it cannot wake the same
+      // resident merely to react to its own sentence. Actual NPC listeners
+      // remain eligible to respond through their independently changed memory.
+      this.rememberPostCommitParticipantGoals(run, [event.speakerActorId]);
     }
     for (const readinessDelta of readinessDeltas) {
       actionDeltas.push({ kind: "readiness", readinessDelta: clone(readinessDelta) });
@@ -4041,6 +4147,101 @@ export class RunService {
       )
       .map(facts => facts.actorId)
       .sort();
+  }
+
+  private prepareGoalAdministrativeSpeech(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+  ): GoalAdministrativeSpeechContext | null {
+    if (
+      !attempt.observation ||
+      !attempt.resolvedUtterance ||
+      !attempt.actionMeta ||
+      attempt.observation.administrativeDecisionSourceMemoryId === null
+    ) {
+      return null;
+    }
+    const facts = run.spatialFacts?.actors.get(attempt.actorId);
+    if (
+      !facts ||
+      !this.committedRecordCitationsAreCurrent(
+        run,
+        attempt.actorId,
+        attempt.resolvedUtteranceCitations,
+      )
+    ) {
+      return null;
+    }
+    const volume = this.layout.audibilityVolumes.find(candidate =>
+      volumeContains(candidate, facts.position)
+    );
+    if (!volume) return null;
+    return {
+      line: attempt.resolvedUtterance,
+      citedRecords: clone(attempt.resolvedUtteranceCitations),
+      volume,
+      speakerPosition: [facts.position[0], facts.position[1], facts.position[2]],
+      listenerActorIds: this.spatialNpcListeners(
+        run,
+        attempt.actorId,
+        volume,
+        facts.position,
+      ),
+    };
+  }
+
+  private commitGoalAdministrativeSpeech(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+    context: GoalAdministrativeSpeechContext,
+  ): RunAmbientSpeechEvent {
+    if (!attempt.observation || !attempt.actionMeta) {
+      throw new Error("validated administrative speech lost its observation or proposal metadata");
+    }
+    const seq = run.ambientSpeechCursor + 1;
+    const worldRevision = run.worldRevision + 1;
+    const conversationId = `administration:${attempt.request.wakeId}`;
+    const event: RunAmbientSpeechEvent = {
+      seq,
+      eventId: `speech:${run.runId}:${seq}`,
+      wakeId: attempt.request.wakeId,
+      conversationId,
+      turnId: `${conversationId}#0`,
+      speakerActorId: attempt.actorId,
+      targetActorId: attempt.actorId,
+      listenerActorIds: clone(context.listenerActorIds),
+      line: context.line,
+      citedRecords: clone(context.citedRecords),
+      worldSeconds: run.elapsedSeconds,
+      observedWorldRevision: attempt.observation.factRevision,
+      worldRevision,
+      audibility: {
+        volumeId: context.volume.volumeId,
+        maxSpeechDistanceM: context.volume.maxSpeechDistanceM,
+        speakerPosition: [
+          context.speakerPosition[0],
+          context.speakerPosition[1],
+          context.speakerPosition[2],
+        ],
+      },
+      proposalMeta: clone(attempt.actionMeta),
+    };
+    for (const holderActorId of new Set([
+      attempt.actorId,
+      ...context.listenerActorIds,
+    ])) {
+      const memory: RunAmbientUtteranceMemory = {
+        ...clone(event),
+        memoryId: this.idFactory("mem"),
+        kind: "ambient_utterance",
+      };
+      this.requireActor(run, holderActorId).memories.push(memory);
+    }
+    run.ambientSpeechCursor = seq;
+    run.ambientSpeechEvents.push(event);
+    run.lastGoalSpeechAt.set(attempt.actorId, run.elapsedSeconds);
+    run.worldRevision = worldRevision;
+    return event;
   }
 
   private spatialAudibilityVolume(

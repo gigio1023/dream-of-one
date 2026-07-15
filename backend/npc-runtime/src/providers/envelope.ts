@@ -1816,13 +1816,14 @@ export function agentStepProposalJsonSchemaForTools(
       }
       targetIdSchema.const = constraints.requiredToolCall.targetId;
     }
-    if (
-      constraints.requiredToolCall.tool === "talk_to" ||
-      constraints.requireUtterance === true
-    ) {
-      properties.utterance = structuredClone(playerVisibleJsonString);
-    }
     properties.done = { type: "boolean", const: true };
+  }
+
+  if (
+    constraints.requiredToolCall?.tool === "talk_to" ||
+    constraints.requireUtterance === true
+  ) {
+    properties.utterance = structuredClone(playerVisibleJsonString);
   }
 
   toolCallSchema.anyOf = narrowedBranches;

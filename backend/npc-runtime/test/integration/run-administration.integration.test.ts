@@ -128,6 +128,7 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
     ) {
       administrativeChoices += 1;
       assert.equal(request.requireToolCall, true);
+      assert.equal(request.requireUtterance, true);
       assert.deepEqual(request.observePacket.toolCatalog, ["write_record", "wait"]);
       assert.match(request.goal, /report-inclination change of 25/);
       assert.match(request.goal, /A positive change favors preserving/);
@@ -140,7 +141,7 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
               reason: "접수 담당자 정책상 외부 확인 전에는 단독 진술을 기록하지 않고 보류합니다.",
             },
           },
-          utterance: null,
+          utterance: "외부 확인 전까지는 이 진술을 기록하지 않고 보류하겠습니다.",
           citedRecordIds: [],
           rationale: "접수 담당자의 확인 정책 때문에 이번 단독 진술은 보류합니다.",
           done: true,
@@ -215,11 +216,35 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
   });
   assert.equal(resolved.status, "completed");
   assert.equal(administrativeChoices, 1);
-  assert.deepEqual(resolved.actionDeltas, []);
-  const snapshot = service.snapshot(started.runId);
+  assert.equal(resolved.speechEvents.length, 1);
+  assert.equal(
+    resolved.speechEvents[0]?.line,
+    "외부 확인 전까지는 이 진술을 기록하지 않고 보류하겠습니다.",
+  );
+  assert.deepEqual(resolved.speechEvents[0]?.listenerActorIds, []);
+  assert.equal(resolved.actionDeltas[0]?.kind, "speech");
+  assert.ok(resolved.actionDeltas.some(delta => delta.kind === "readiness"));
+  let snapshot = service.snapshot(started.runId);
   assert.deepEqual(snapshot.records, []);
   assert.deepEqual(snapshot.ledgerEvents, []);
   assert.equal(snapshot.institutionalPressure, 0);
+
+  const quietAfterAnnouncement = await service.advance({
+    runId: started.runId,
+    advanceId: "admin-provider-declines:announcement-settled",
+    observedWorldRevision: snapshot.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: snapshot.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: spatialActors(snapshot),
+    },
+  });
+  assert.ok(quietAfterAnnouncement.scheduleWakes.every(
+    candidate => candidate.kind !== "goal" || candidate.actorIds[0] !== STUDIO_RECEPTIONIST_ID,
+  ));
+  snapshot = service.snapshot(started.runId);
 
   receptionist.memories.push({
     memoryId: "admin-provider-declines:later-contact",
@@ -313,7 +338,7 @@ test("one stale administrative choice retries after the scene settles, then stay
     return {
       proposal: {
         toolCall: { tool: "wait", args: { reason: "이 출처는 기록하지 않기로 최종 판단했습니다." } },
-        utterance: null,
+        utterance: "이 출처는 기록하지 않기로 최종 판단했습니다.",
         citedRecordIds: [],
         rationale: "기록으로 남길 근거가 충분하지 않습니다.",
         done: true,
@@ -411,7 +436,10 @@ test("one stale administrative choice retries after the scene settles, then stay
   });
   assert.equal(completed.status, "completed");
   assert.equal(administrativeCalls, 2);
-  assert.deepEqual(completed.actionDeltas, []);
+  assert.equal(completed.speechEvents.length, 1);
+  assert.equal(completed.speechEvents[0]?.line, "이 출처는 기록하지 않기로 최종 판단했습니다.");
+  assert.equal(completed.actionDeltas[0]?.kind, "speech");
+  assert.ok(completed.actionDeltas.some(delta => delta.kind === "readiness"));
 
   const settled = service.snapshot(started.runId);
   const unchanged = await service.advance({
@@ -444,6 +472,7 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
     const derivedSource = request.observePacket.administrativeSources.find(
       source => source.kind === "record_read",
     );
+    const derivedVisibleRecordId = request.observePacket.visibleRecords[0]?.recordId;
     const derivedRecordKind = request.observePacket.administrativeAuthority.allowedRecordKinds[0];
     const derivedSurfaceId = request.observePacket.administrativeAuthority.writableTextSurfaceIds[0];
     if (derivedSource && derivedRecordKind && derivedSurfaceId) {
@@ -460,6 +489,8 @@ test("provider-owned administration is sourced, clamped, exactly-once, and discl
             openQuestion: null,
           },
         },
+        utterance: "읽은 접수 내용을 후속 확인 기록으로 남기겠습니다.",
+        citedRecordIds: derivedVisibleRecordId ? [derivedVisibleRecordId] : [],
         rationale: "읽은 기록을 권한 안에서 후속 기록으로 전파합니다.",
         done: true,
       };

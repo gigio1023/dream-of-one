@@ -413,7 +413,14 @@ the provider must deliberately preserve one grounded source or give it a
 final unwritten disposition instead of deferring the choice through unrelated
 movement or speech. The provider envelope removes its nullable completion
 branch for this decision, so `wait` remains model-owned but must be explicit
-and reasoned rather than the cheapest generic `done` shape. The packet repeats
+and reasoned rather than the cheapest generic `done` shape. The same proposal
+must include one short, localized, in-fiction utterance that makes the choice
+legible in the world. A fresh commit applies that utterance through the normal
+ambient-speech stream together with the write or unwritten disposition; a
+stale result applies neither. This may be a true self-utterance with no NPC
+listener. Player audibility still comes only from the authored volume,
+distance, and the client's encounter acknowledgement, while any resident who
+is actually in range receives the ordinary attributed speech memory. The packet repeats
 the earlier model-authored report
 inclination and why-line: a positive change favors recording, a negative change
 favors leaving it unwritten, and reversing that direction asks for a current

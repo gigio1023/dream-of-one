@@ -89,6 +89,7 @@ const localizedFallbackContentSchema = z
       .object({
         previousResultWaitReason: nonEmpty,
         previousResultRationale: nonEmpty,
+        administrativeWaitUtterance: nonEmpty,
         heardUtterance: nonEmpty,
         talkUtterance: nonEmpty,
         talkRationale: nonEmpty,

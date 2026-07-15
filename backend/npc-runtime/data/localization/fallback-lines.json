@@ -46,6 +46,7 @@
     "agent": {
       "previousResultWaitReason": "방금 결과를 다시 살핍니다",
       "previousResultRationale": "방금 행동의 결과를 확인하고 잠시 기다립니다.",
+      "administrativeWaitUtterance": "이 내용은 지금 기록하지 않고 보류하겠습니다.",
       "heardUtterance": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
       "talkUtterance": "잠시 이야기 나눌 수 있을까요? 지금 확인한 내용을 서로 맞춰 보고 싶습니다.",
       "talkRationale": "곁에 있는 주민과 직접 말을 나눕니다.",
@@ -102,6 +103,7 @@
     "agent": {
       "previousResultWaitReason": "review the latest result",
       "previousResultRationale": "I review the result of the last action and wait briefly.",
+      "administrativeWaitUtterance": "I will leave this unrecorded for now and hold it for review.",
       "heardUtterance": "I understand what you said. I will remember separately what I confirmed myself.",
       "talkUtterance": "Could we talk for a moment? I would like to compare what we have each confirmed.",
       "talkRationale": "I speak directly with the nearby resident.",
@@ -158,6 +160,7 @@
     "agent": {
       "previousResultWaitReason": "riesaminare l'ultimo risultato",
       "previousResultRationale": "Controllo il risultato dell'ultima azione e aspetto un momento.",
+      "administrativeWaitUtterance": "Per ora non registrerò questo contenuto e lo lascerò in sospeso.",
       "heardUtterance": "Ho capito ciò che ha detto. Terrò separato il ricordo di quello che ho verificato personalmente.",
       "talkUtterance": "Possiamo parlare un momento? Vorrei confrontare ciò che abbiamo verificato.",
       "talkRationale": "Parlo direttamente con la persona qui vicino.",
@@ -214,6 +217,7 @@
     "agent": {
       "previousResultWaitReason": "重新查看刚才的结果",
       "previousResultRationale": "我确认刚才行动的结果，并稍等片刻。",
+      "administrativeWaitUtterance": "这件事暂不记录，先搁置待查。",
       "heardUtterance": "我明白您说的内容。我会把自己亲自确认的事另外记清楚。",
       "talkUtterance": "可以聊一会儿吗？我想核对一下我们各自确认到的情况。",
       "talkRationale": "我与身边的居民直接交谈。",
@@ -270,6 +274,7 @@
     "agent": {
       "previousResultWaitReason": "réexaminer le dernier résultat",
       "previousResultRationale": "J'examine le résultat de ma dernière action et j'attends un instant.",
+      "administrativeWaitUtterance": "Je ne consignerai pas cela pour l'instant et le laisserai en attente.",
       "heardUtterance": "J'ai compris ce que vous avez dit. Je garderai séparément le souvenir de ce que j'ai vérifié moi-même.",
       "talkUtterance": "Pouvons-nous parler un instant ? J'aimerais comparer ce que nous avons chacun vérifié.",
       "talkRationale": "Je parle directement à la personne qui se trouve près de moi.",
@@ -326,6 +331,7 @@
     "agent": {
       "previousResultWaitReason": "直前の結果を見直す",
       "previousResultRationale": "直前の行動結果を確認して、少し待ちます。",
+      "administrativeWaitUtterance": "この件は今は記録せず、保留にします。",
       "heardUtterance": "お話の内容は分かりました。自分で確認したことは別に覚えておきます。",
       "talkUtterance": "少し話せますか。お互いに確認したことを照らし合わせたいです。",
       "talkRationale": "近くにいる住民と直接話します。",

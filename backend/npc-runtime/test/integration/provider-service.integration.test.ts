@@ -853,7 +853,7 @@ test("an explicit offered-tool decision cannot escape through a null completion"
       tool: "wait",
       args: { reason: "역할 정책상 외부 확인 전에는 이 출처를 기록하지 않습니다." },
     },
-    utterance: null,
+    utterance: "외부 확인 전에는 이 출처를 기록하지 않겠습니다.",
     citedRecordIds: [],
     rationale: "기록 보류를 명시적으로 선택합니다.",
     done: true,
@@ -876,6 +876,7 @@ test("an explicit offered-tool decision cannot escape through a null completion"
     observePacket: packet,
     blockedSignatures: [],
     requireToolCall: true,
+    requireUtterance: true,
   });
 
   assert.equal(result.meta.transport, "live");
@@ -886,19 +887,23 @@ test("an explicit offered-tool decision cannot escape through a null completion"
   const properties = firstSchema.properties as Record<string, Record<string, unknown>>;
   const toolCallBranches = properties.toolCall?.anyOf as Array<Record<string, unknown>>;
   assert.ok(toolCallBranches.every(branch => branch.type !== "null"));
+  assert.equal(properties.utterance?.type, "string");
   assert.match(
     textGen.requests[0]?.instructions ?? "",
     /Choose one explicit non-null toolCall/,
   );
   const input = JSON.parse(textGen.requests[0]?.input ?? "{}") as {
     requireToolCall?: boolean;
+    requireUtterance?: boolean;
   };
   assert.equal(input.requireToolCall, true);
+  assert.equal(input.requireUtterance, true);
   const constraints = {
     effectiveTools: ["write_record", "wait"] as const,
     observePacket: packet,
     recordContracts: { write_record: "m3r" as const },
     requireToolCall: true,
+    requireUtterance: true,
   };
   assert.equal(
     agentStepProposalSchemaForRequest("ko-KR", constraints).safeParse(nullCompletion).success,
@@ -906,6 +911,38 @@ test("an explicit offered-tool decision cannot escape through a null completion"
   );
   assert.equal(
     agentStepProposalSchemaForRequest("ko-KR", constraints).safeParse(explicitWait).success,
+    true,
+  );
+});
+
+test("deterministic fallback makes an administrative deferral audible in the run locale", async () => {
+  const packet = m3rAdministrativePacket();
+  packet.toolCatalog = ["write_record", "wait"];
+  const fallback = new RuleFallbackNpcAdapter();
+  const result = await fallback.proposeNextStep({
+    sessionId: "run-fallback-administrative-utterance",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "기록하거나 명시적으로 보류한다.",
+    observePacket: packet,
+    blockedSignatures: [],
+    requireToolCall: true,
+    requireUtterance: true,
+  });
+
+  assert.equal(result.proposal.toolCall?.tool, "wait");
+  assert.equal(
+    result.proposal.utterance,
+    fallbackContent("ko-KR").agent.administrativeWaitUtterance,
+  );
+  assert.equal(
+    agentStepProposalSchemaForRequest("ko-KR", {
+      effectiveTools: ["write_record", "wait"],
+      observePacket: packet,
+      recordContracts: { write_record: "m3r" },
+      requireToolCall: true,
+      requireUtterance: true,
+    }).safeParse(result.proposal).success,
     true,
   );
 });

@@ -352,7 +352,9 @@ export const runAmbientSpeechEventSchema = z
     turnId: nonEmpty,
     speakerActorId: nonEmpty,
     targetActorId: nonEmpty,
-    listenerActorIds: z.array(nonEmpty).min(1),
+    // A resident may speak aloud while working even when no other resident is
+    // present. Player audibility is resolved independently from world geometry.
+    listenerActorIds: z.array(nonEmpty),
     line: nonEmpty,
     citedRecords: z.array(runRecordCitationSchema).default([]),
     worldSeconds: z.number().nonnegative(),

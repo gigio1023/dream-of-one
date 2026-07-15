@@ -883,7 +883,9 @@ export class ProviderService implements NpcProposalPort {
             ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall and utterance must both be non-null. Do not add top-level keys."
             : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall must be non-null; utterance may be null. Do not add top-level keys."
         : request.requireToolCall
-          ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Choose one explicit non-null toolCall from the offered branches; this requires a decision but does not prefer any branch. Use null only for absent speech and [] for no citation. Do not add top-level keys."
+          ? request.requireUtterance
+            ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Choose one explicit non-null toolCall from the offered branches and one non-null in-fiction utterance explaining that choice; this requires a decision but does not prefer any branch. Use [] for no citation. Do not add top-level keys."
+            : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Choose one explicit non-null toolCall from the offered branches; this requires a decision but does not prefer any branch. Use null only for absent speech and [] for no citation. Do not add top-level keys."
           : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Never omit toolCall, utterance, or citedRecordIds; use null for absent speech and [] for no citation. Do not add top-level keys.",
       "Stable ids may appear in identifier-valued toolCall.args fields and internal rationale. Never copy an actor, object, record, memory, text-surface, or landmark id into utterance or other player-visible prose.",
       ...(effectiveTools.includes("move_to")
@@ -914,7 +916,12 @@ export class ProviderService implements NpcProposalPort {
       ...(request.requiredToolCall
         ? []
         : request.requireToolCall
-          ? ["This wake requires one explicit offered tool action. Do not use toolCall=null as a shortcut; wait remains available when deliberate inaction is the judged choice."]
+          ? [
+              "This wake requires one explicit offered tool action. Do not use toolCall=null as a shortcut; wait remains available when deliberate inaction is the judged choice.",
+              ...(request.requireUtterance
+                ? ["State the chosen action as one concise, natural sentence spoken by the resident in the world. For wait, give the concrete in-fiction reason for deferring; for write_record, say what the resident is about to preserve without reciting internal ids."]
+                : []),
+            ]
           : ["Return done=true with toolCall=null when the goal is complete or no useful action remains."]),
       toolGuideForTools(effectiveTools, recordContracts),
       "Return only JSON matching the supplied schema.",

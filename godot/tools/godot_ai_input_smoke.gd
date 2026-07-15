@@ -105,6 +105,25 @@ func _run() -> void:
 		if is_equal_approx(player.rotation.y, yaw_before):
 			_failures.append("first-person camera ignored absolute Godot AI mouse motion")
 
+	var return_look := Vector2(0.25, -0.12)
+	player.call("set_look_orientation", return_look)
+	player.call("release_mouse")
+	player.call("capture_mouse")
+	var capture_warp := InputEventMouseMotion.new()
+	capture_warp.position = Vector2(512.0, 384.0)
+	capture_warp.relative = Vector2(-204.0, 17.0)
+	capture_warp.screen_relative = capture_warp.relative
+	player.call("_apply_captured_mouse_motion", capture_warp)
+	if (player.call("look_orientation") as Vector2).distance_to(return_look) > 0.001:
+		_failures.append("capturing the mouse applied its cursor warp as player look")
+	var resumed_mouse_motion := InputEventMouseMotion.new()
+	resumed_mouse_motion.position = Vector2(522.0, 384.0)
+	resumed_mouse_motion.relative = Vector2(10.0, 0.0)
+	resumed_mouse_motion.screen_relative = resumed_mouse_motion.relative
+	player.call("_apply_captured_mouse_motion", resumed_mouse_motion)
+	if (player.call("look_orientation") as Vector2).distance_to(return_look) < 0.001:
+		_failures.append("mouse capture suppression swallowed resumed player look")
+
 	var key_result: Dictionary = helper.call("_game_input_key", {
 		"key": NATIVE_SAMPLE,
 		"pressed": true,
@@ -419,5 +438,5 @@ func _finish(probe: Node, player: Node) -> void:
 			push_error(failure)
 		quit(1)
 		return
-	print("Godot AI input smoke passed: mouse look, Unicode, camera framing, assisted preload aim, gated E, unfocused owner handoff, safe focus grace, and bounded ready-NPC aim assist")
+	print("Godot AI input smoke passed: mouse look, capture-warp suppression, Unicode, camera framing, assisted preload aim, gated E, unfocused owner handoff, safe focus grace, and bounded ready-NPC aim assist")
 	quit()

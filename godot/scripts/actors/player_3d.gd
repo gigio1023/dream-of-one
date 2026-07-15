@@ -49,6 +49,7 @@ var _respawn_transform: Transform3D
 var _respawn_pitch := 0.0
 var _synthetic_mouse_position := Vector2.ZERO
 var _has_synthetic_mouse_position := false
+var _discard_next_captured_mouse_motion := false
 
 
 func _ready() -> void:
@@ -70,7 +71,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		_apply_mouse_look(event as InputEventMouseMotion)
+		_apply_captured_mouse_motion(event as InputEventMouseMotion)
 		get_viewport().set_input_as_handled()
 		return
 
@@ -183,6 +184,17 @@ func _apply_mouse_look(event: InputEventMouseMotion) -> void:
 	else:
 		_head.rotation.x -= pitch_delta
 	_head.rotation.x = clampf(_head.rotation.x, -MAX_PITCH_RADIANS, MAX_PITCH_RADIANS)
+
+
+func _apply_captured_mouse_motion(event: InputEventMouseMotion) -> void:
+	if _discard_next_captured_mouse_motion:
+		# Capturing a visible cursor may emit one relative warp from its UI
+		# position to the viewport center. It is not player look intent.
+		_discard_next_captured_mouse_motion = false
+		_synthetic_mouse_position = event.position
+		_has_synthetic_mouse_position = true
+		return
+	_apply_mouse_look(event)
 
 
 func _interactable_collider() -> Node:
@@ -576,12 +588,16 @@ func set_look_settings(sensitivity: float, inverted: bool, fov: float) -> void:
 
 
 func capture_mouse() -> void:
+	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		return
 	_reset_synthetic_mouse_baseline()
+	_discard_next_captured_mouse_motion = true
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 func release_mouse() -> void:
 	_reset_synthetic_mouse_baseline()
+	_discard_next_captured_mouse_motion = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 

@@ -464,9 +464,15 @@ func focused_interactable() -> Node:
 	if is_instance_valid(_focused_target):
 		if (
 			_is_npc_interactable(_focused_target)
-			and global_position.distance_to(
-				(_focused_target as Node3D).global_position
-			) > NPC_INTERACTION_MAX_CENTER_DISTANCE_M
+			and (
+				global_position.distance_to(
+					(_focused_target as Node3D).global_position
+				) > NPC_INTERACTION_MAX_CENTER_DISTANCE_M
+				or not _npc_focus_target_is_current(
+					_focused_target as Node3D,
+					false
+				)
+			)
 		):
 			_set_focused_target(null)
 		else:
@@ -519,6 +525,8 @@ func _is_npc_interactable(target: Node) -> bool:
 
 
 func _recent_npc_target_is_visible() -> bool:
+	if not _npc_focus_target_is_current(_recent_npc_target, true):
+		return false
 	var target_position := _npc_interaction_aim_position(_recent_npc_target)
 	var to_target := target_position - _camera.global_position
 	if to_target.is_zero_approx():
@@ -527,6 +535,24 @@ func _recent_npc_target_is_visible() -> bool:
 	if camera_forward.dot(to_target.normalized()) < NPC_FOCUS_GRACE_MIN_FORWARD_DOT:
 		return false
 	return _npc_has_interaction_line_of_sight(_recent_npc_target, target_position)
+
+
+func _npc_focus_target_is_current(target: Node3D, require_ready: bool) -> bool:
+	if not target.is_visible_in_tree():
+		return false
+	if target.has_method("is_interaction_focusable"):
+		if not bool(target.call("is_interaction_focusable")):
+			return false
+	elif (
+		target.has_method("is_interaction_enabled")
+		and not bool(target.call("is_interaction_enabled"))
+	):
+		return false
+	return (
+		not require_ready
+		or not target.has_method("is_interaction_enabled")
+		or bool(target.call("is_interaction_enabled"))
+	)
 
 
 func _npc_interaction_aim_position(target: Node3D) -> Vector3:

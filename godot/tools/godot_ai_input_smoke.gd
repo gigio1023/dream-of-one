@@ -24,6 +24,7 @@ class FocusNpc:
 	extends StaticBody3D
 	var interaction_count := 0
 	var interaction_enabled := true
+	var interaction_focusable := true
 	var active_contact := false
 
 	func get_interaction_label_key() -> StringName:
@@ -32,6 +33,9 @@ class FocusNpc:
 	func is_interaction_enabled() -> bool:
 		return interaction_enabled
 
+	func is_interaction_focusable() -> bool:
+		return interaction_focusable
+
 	func get_interaction_aim_position() -> Vector3:
 		return global_position + Vector3.UP * 1.35
 
@@ -39,6 +43,8 @@ class FocusNpc:
 		return active_contact
 
 	func interact(_player: Node) -> void:
+		if not interaction_focusable:
+			return
 		interaction_count += 1
 
 
@@ -139,6 +145,7 @@ func _run() -> void:
 
 	var focus_npc := FocusNpc.new()
 	focus_npc.interaction_enabled = false
+	focus_npc.interaction_focusable = false
 	focus_npc.add_to_group(&"npc_actors")
 	focus_npc.position = Vector3(0.0, 0.0, -2.0)
 	var npc_shape := CollisionShape3D.new()
@@ -178,19 +185,40 @@ func _run() -> void:
 			"Player3D face_position did not frame a higher target from an existing pitch"
 		)
 	player.call("set_look_orientation", initial_look)
-	if player.call("preload_intent_target") != focus_npc:
-		_failures.append("disabled NPC did not remain visible to raw preload aim")
-	if _last_preload_intent_target != focus_npc:
-		_failures.append("raw preload aim did not emit its independent intent signal")
+	if player.call("preload_intent_target") != null:
+		_failures.append("unavailable NPC leaked into provider-preload intent")
+	if _last_preload_intent_target != null:
+		_failures.append("unavailable NPC emitted a provider-preload intent signal")
 	if player.call("focused_interactable") != null:
-		_failures.append("disabled NPC leaked into the gated HUD/E focus path")
+		_failures.append("unavailable NPC leaked into the gated HUD/E focus path")
 	if bool(player.call("interact_focused")) or focus_npc.interaction_count != 0:
-		_failures.append("disabled NPC accepted gated E interaction")
+		_failures.append("unavailable NPC accepted gated E interaction")
+
+	# A resident whose conversation exists but whose opening is still resolving
+	# remains a readable target. E reasserts preload demand without claiming the
+	# runtime-ready conversation has already started.
+	focus_npc.interaction_focusable = true
+	await physics_frame
+	await physics_frame
+	if player.call("preload_intent_target") != focus_npc:
+		_failures.append("preparing NPC did not receive provider-preload intent")
+	if player.call("focused_interactable") != focus_npc:
+		_failures.append("preparing NPC was missing from the HUD/E focus path")
+	var preparing_interaction_count := focus_npc.interaction_count
+	if (
+		not bool(player.call("interact_focused"))
+		or focus_npc.interaction_count != preparing_interaction_count + 1
+	):
+		_failures.append("preparing NPC did not accept one preload-demand interaction")
 	focus_npc.interaction_enabled = true
 	await physics_frame
+	var moving_interaction_count := focus_npc.interaction_count
 	player.call("_set_focused_target", focus_npc)
 	player.call("_set_focused_target", null)
-	if not bool(player.call("interact_focused")) or focus_npc.interaction_count != 1:
+	if (
+		not bool(player.call("interact_focused"))
+		or focus_npc.interaction_count != moving_interaction_count + 1
+	):
 		_failures.append("first-person interaction lost a recently focused moving NPC")
 	player.call("_set_focused_target", focus_npc)
 	player.call("_set_focused_target", null)
@@ -225,7 +253,11 @@ func _run() -> void:
 		_failures.append("NPC aim assist did not recover nearby provider-preload intent")
 	if player.call("focused_interactable") != focus_npc:
 		_failures.append("ready NPC inside the narrow aim assist was not acquired")
-	if not bool(player.call("interact_focused")) or focus_npc.interaction_count != 2:
+	var assisted_interaction_count := focus_npc.interaction_count
+	if (
+		not bool(player.call("interact_focused"))
+		or focus_npc.interaction_count != assisted_interaction_count + 1
+	):
 		_failures.append("ready NPC aim assist did not reach the normal interaction path")
 
 	# A ready resident in front of an inspectable board wins the social focus,
@@ -291,9 +323,15 @@ func _run() -> void:
 	await physics_frame
 	await physics_frame
 	if player.call("preload_intent_target") != focus_npc:
-		_failures.append("unready nearby NPC did not receive assisted preload intent")
-	if player.call("focused_interactable") != null or bool(player.call("interact_focused")):
-		_failures.append("unready NPC leaked into aim-assist interaction")
+		_failures.append("preparing nearby NPC did not receive assisted preload intent")
+	if player.call("focused_interactable") != focus_npc:
+		_failures.append("preparing NPC was missing from aim-assist interaction")
+	var repeated_preparing_count := focus_npc.interaction_count
+	if (
+		not bool(player.call("interact_focused"))
+		or focus_npc.interaction_count != repeated_preparing_count + 1
+	):
+		_failures.append("preparing NPC did not reassert preload demand through E")
 
 	focus_npc.interaction_enabled = true
 	focus_npc.visible = false

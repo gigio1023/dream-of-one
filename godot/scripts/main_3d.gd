@@ -1254,6 +1254,11 @@ func _handle_conversation_start_result(
 				# final opening race. Keep that lease pending while the authoritative
 				# rebase and one bounded explicit-demand preload repair the opening.
 				_pending_contact_ready_id = _conversation_contact_id
+			# The world changed after a ready prompt but before the serialized
+			# start. Return directly to exploration with the localized preparation
+			# cue; an empty error modal would hide the useful retry state.
+			_finish_conversation_modal()
+			return
 		if str(result.get("error", "")) == "conversation_start_retry_required":
 			_conversation_start_retry_required = true
 			_hud.show_conversation_start_retry()

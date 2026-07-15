@@ -1046,6 +1046,7 @@ func _check_conversation_start_not_ready_recovery_contract(
 		))
 		or instance.get("_conversation_target") != null
 		or str(instance.get("_pending_contact_ready_id")) != start_error_contact_id
+		or hud.conversation_visible()
 	):
 		_failures.append(
 			"%s final conversation_not_ready did not enter recoverable rebase state" % label

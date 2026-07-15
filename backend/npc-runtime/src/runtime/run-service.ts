@@ -2041,8 +2041,7 @@ export class RunService {
         !opening?.resolved ||
         opening.evidenceKey !== evidenceKey ||
         opening.interactionZoneId !== interactionZoneId ||
-        run.consumedConversationEvidence.get(actorId) === evidenceKey ||
-        run.scheduler.actors.get(actorId)?.pendingMovement
+        run.consumedConversationEvidence.get(actorId) === evidenceKey
       ) {
         actor.playerConversationReady = false;
         run.conversationOpenings.delete(actorId);
@@ -2061,6 +2060,11 @@ export class RunService {
       if (!confirmedAnchorRef) {
         throw new RunError("actor has no confirmed conversation position", "conversation_not_ready");
       }
+      // The player accepted a still-grounded, ready opening. A route or goal
+      // movement issued between the latest advance and this serialized start
+      // must yield to that explicit input rather than destroying the opening
+      // after the HUD already offered E. alignActorForPlayerConversation marks
+      // any pending movement superseded so a late Godot arrival cannot commit.
       alignActorForPlayerConversation(
         this.layout,
         run.scheduler,

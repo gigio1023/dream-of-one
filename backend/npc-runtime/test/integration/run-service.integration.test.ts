@@ -6,6 +6,10 @@ import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { loadProviderConfig } from "../../src/providers/registry.js";
 import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import {
+  issueActorGoalMovement,
+  type RunSchedulerRuntime,
+} from "../../src/runtime/run-scheduler.js";
+import {
   appendProviderRuntimeTrace,
   MAX_PROVIDER_RUNTIME_TRACE_ENTRIES,
   PLAYER_CONVERSATION_APPROACH_HOLD_DISTANCE_M,
@@ -208,6 +212,65 @@ test("a ready resident keeps its route anchor while the player approaches in gro
       movement => movement.actorId === STUDIO_RECEPTIONIST_ID,
     ).length,
     1,
+  );
+});
+
+test("player E atomically claims a grounded opening over a newly issued movement", async () => {
+  const layout = loadRunLayout();
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds(),
+    layout,
+  });
+  const started = service.start("run-ready-opening-movement-race", "ko-KR");
+  await preloadReceptionist(service, started.runId);
+  await groundOrdinaryConversation(
+    service,
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-ready-opening-movement-race",
+  );
+
+  type MutableRun = { elapsedSeconds: number; scheduler: RunSchedulerRuntime };
+  const runs = Reflect.get(service, "runs") as Map<string, MutableRun>;
+  const run = runs.get(started.runId);
+  assert.ok(run);
+  const movement = issueActorGoalMovement({
+    runId: started.runId,
+    layout,
+    runtime: run.scheduler,
+    actorId: STUDIO_RECEPTIONIST_ID,
+    targetAnchorRef: "Studio.reception_desk",
+    elapsedSeconds: 60,
+  });
+  assert.ok(movement, "the race fixture must issue a real scheduler movement");
+  assert.ok(
+    service.snapshot(started.runId).scheduler.actors.find(
+      actor => actor.actorId === STUDIO_RECEPTIONIST_ID,
+    )?.pendingMovement,
+  );
+  assert.equal(
+    service.snapshot(started.runId).actors.find(
+      actor => actor.actorId === STUDIO_RECEPTIONIST_ID,
+    )?.playerConversationReady,
+    true,
+    "the client may still be showing E before the concurrent movement delta arrives",
+  );
+
+  const conversation = await service.startConversation(
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+
+  assert.ok(conversation.nextTurn.prompt.length > 0);
+  assert.equal(
+    service.snapshot(started.runId).scheduler.actors.find(
+      actor => actor.actorId === STUDIO_RECEPTIONIST_ID,
+    )?.pendingMovement,
+    null,
   );
 });
 

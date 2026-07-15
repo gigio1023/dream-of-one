@@ -34,8 +34,9 @@ and recap, not only menu chrome.
    `oppose`/`uncertain`/`vouch`; four of six vouches are necessary (not
    sufficient) for the model-judged hearing to classify the player as
    ordinary. The scheduled hearing is the only run-ending verdict;
-   interrogation before it stays survivable. Target: 30–60 minutes per run,
-   one sitting.
+   interrogation before it stays survivable. The 15-minute unpaused world
+   boundary lands around 20–30 minutes of wall time once modal conversations
+   and their provider waits are included; one sitting.
 4. **Time**: continuous world time, fully paused only while the player is in a
    modal conversation, including its merged LLM wait. Ambient provider work
    never pauses free exploration and revalidates against the fresh world
@@ -197,9 +198,11 @@ can overhear with subtitles.
   over it.
 - A run-scoped runtime above conversation sessions: `runId`, six memories,
   stances, records/ledger, world clock, scheduler state, and shared provider
-  accounting. Initial timing data sets a 90-world-second grace period and a
-  hearing after 30 minutes of unpaused world time; final Qwen live play may
-  tune the numbers without changing the continuous-time model.
+  accounting. Timing data sets a 90-world-second grace period and a hearing
+  after 15 minutes of unpaused world time. This was tuned from a complete
+  1,800-second Qwen run where the background reserve closed at 947 seconds
+  and left the final half of the run without enough interaction to pass the
+  fun gate; modal conversation still pauses the continuous world clock.
 - Event-driven NPC scheduler: wake events (schedule, arrival, observation,
   goal, conversation), policy movement between wakes, and stale-result
   revision checks. Initial guardrails, tuned only from measured Qwen runs:
@@ -308,7 +311,7 @@ can overhear with subtitles.
       preserve readable glyphs/layout at 100% and 150% UI scale, and accept
       Korean/Chinese/Japanese IME composition where text entry is offered.
       Each locale completes one bounded Qwen-live opening → answer → why-line
-      plus ambient/fallback language check; six full 30–60 minute runs are not
+      plus ambient/fallback language check; six full 20–30 minute runs are not
       required.
 - [ ] `bun run --cwd backend/npc-runtime check`, headless import, and scene
       smoke pass; the fun gate is answered honestly in the PR.

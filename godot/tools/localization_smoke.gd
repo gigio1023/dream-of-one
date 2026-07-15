@@ -520,7 +520,7 @@ func _check_provenance_log(
 	var hidden_record_id := "localization-hidden-record-id-%s" % presentation_id
 	hud.call("set_social_view", {
 		"revision": revision,
-		"hearing": {"due": false, "atSeconds": 1800.0},
+		"hearing": {"due": false, "atSeconds": 900.0},
 		"pressure": {"band": "low", "latestEncounteredWhyLine": null},
 		"encounteredResidents": [{
 			"actorId": "NPC_Studio_Receptionist",

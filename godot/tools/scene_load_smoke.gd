@@ -1260,7 +1260,7 @@ func _check_monotonic_grace_clock_rebase_contract(label: String, instance: Node)
 		"worldClock": {
 			"elapsedSeconds": 159.0,
 			"graceEndsAtSeconds": 90.0,
-			"hearingAtSeconds": 1800.0,
+			"hearingAtSeconds": 900.0,
 			"paused": false,
 			"graceEnded": true,
 		},
@@ -1271,7 +1271,7 @@ func _check_monotonic_grace_clock_rebase_contract(label: String, instance: Node)
 		"worldClock": {
 			"elapsedSeconds": 177.0,
 			"graceEndsAtSeconds": 90.0,
-			"hearingAtSeconds": 1800.0,
+			"hearingAtSeconds": 900.0,
 			"paused": false,
 		},
 	}, true)
@@ -1291,7 +1291,7 @@ func _check_monotonic_grace_clock_rebase_contract(label: String, instance: Node)
 		"worldClock": {
 			"elapsedSeconds": 0.0,
 			"graceEndsAtSeconds": 90.0,
-			"hearingAtSeconds": 1800.0,
+			"hearingAtSeconds": 900.0,
 			"paused": false,
 		},
 	}, true)
@@ -1617,7 +1617,7 @@ func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 		return
 	var sample_view := {
 		"revision": 2,
-		"hearing": {"atSeconds": 1800, "due": false},
+		"hearing": {"atSeconds": 900, "due": false},
 		"pressure": {
 			"band": "raised",
 			"latestEncounteredWhyLine": "접수 기록이 검토 대기 상태입니다.",
@@ -1678,7 +1678,7 @@ func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 		"Overlay/EncounteredStancePanel/EncounteredStanceMargin/EncounteredStanceLabel"
 	) as Label
 	var first_hearing_text := frame_label.text if frame_label != null else ""
-	if not first_hearing_text.contains("30"):
+	if not first_hearing_text.contains("15"):
 		_failures.append("%s hearing frame does not show one fixed scheduled time" % label)
 	if first_hearing_text.contains("접수 기록이 검토 대기 상태입니다."):
 		_failures.append("%s permanent pressure frame leaked its encountered reason" % label)

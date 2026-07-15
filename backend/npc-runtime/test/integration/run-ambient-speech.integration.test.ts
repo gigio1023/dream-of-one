@@ -240,8 +240,8 @@ test("an active meeting owns participant social goals while an unrelated contact
   assert.equal(meetingOwnsActorGoal("NPC_Park_Caretaker", 460), true);
   assert.equal(meetingOwnsActorGoal("NPC_Office_Worker", 700), true);
   assert.equal(meetingOwnsActorGoal("NPC_Roaming_Liaison", 700), true);
-  assert.equal(meetingOwnsActorGoal("NPC_Station_Officer", 1060), true);
-  assert.equal(meetingOwnsActorGoal("NPC_Roaming_Liaison", 1060), true);
+  assert.equal(meetingOwnsActorGoal("NPC_Station_Officer", 580), true);
+  assert.equal(meetingOwnsActorGoal("NPC_Roaming_Liaison", 580), true);
   const decisionStatuses: Array<{
     wakeKind: string;
     actorIds: string[];

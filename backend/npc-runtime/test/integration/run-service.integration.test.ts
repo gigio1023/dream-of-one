@@ -48,7 +48,7 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
   assert.equal(snapshot.worldRevision, 0);
   assert.equal(snapshot.worldClock.graceEndsAtSeconds, 90);
   assert.equal(snapshot.worldClock.graceEnded, false);
-  assert.equal(snapshot.worldClock.hearingAtSeconds, 1800);
+  assert.equal(snapshot.worldClock.hearingAtSeconds, 900);
   assert.equal(snapshot.worldClock.paused, false);
   const providerConfig = loadProviderConfig();
   assert.equal(snapshot.providerBudget.callLimit, providerConfig.runtime.maxCallsPerSession);

@@ -76,6 +76,33 @@ authority, schema compatibility, the provider boundary, or a player-visible
 consequence. No coverage padding. No test-only slices without naming the game
 consequence they protect.
 
+### Headless-first Godot workflow
+
+- Keep the game stopped during ordinary implementation. Use files, the Godot
+  CLI with `--headless`, and non-running Godot AI editor/session inspection by
+  default; do not call `project_run` merely to check that code or a scene loads.
+- Headless evidence may prove imports, scene and script loading, deterministic
+  physics/collision/navigation consequences, scripted input delivery, sidecar
+  HTTP behavior, scheduler/hearing state, provider metadata and budgets,
+  localization parity, and bundled font coverage.
+- Headless evidence does not prove pixels or player feel: rendered composition,
+  character readability, lighting/materials, animation appearance, camera and
+  movement feel, real mouse capture/focus, native OS IME composition, frame
+  pacing, and the fun gate all require a rendered interactive run.
+- The vendored Godot AI editor plugin is disabled by default under the headless
+  display driver. A direct helper-autoload smoke exercises code paths only; it
+  is not an MCP play session, framebuffer capture, or hands-on evidence. Do not
+  use `GODOT_AI_ALLOW_HEADLESS` to promote an empty dummy-renderer result into
+  visual proof.
+- Reserve windowed Godot AI play for the smallest final route that genuinely
+  needs pixels, native input, or player judgment. Before any command or MCP
+  operation that may open or focus a game window, tell the user; otherwise do
+  not interrupt their desktop work.
+
+The exact evidence boundary and maintained commands live in
+[`docs/tech/verification.md`](docs/tech/verification.md). `CLAUDE.md` is a
+symlink to this file, so this policy is shared by Codex and Claude Code.
+
 ## Path Portability
 
 - No machine-specific absolute paths in tracked files. Use `GODOT_BIN` and

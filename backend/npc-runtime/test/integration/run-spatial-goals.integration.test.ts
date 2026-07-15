@@ -61,17 +61,18 @@ function pendingArrivals(snapshot: RunSnapshot) {
     : []);
 }
 
-function stationaryLayout() {
+function stationaryLayout(hearingAtSeconds = loadRunLayout().hearingAtSeconds) {
   const baseLayout = loadRunLayout();
   return {
     ...baseLayout,
+    hearingAtSeconds,
     meetingWindows: [],
     actors: baseLayout.actors.map(actor => ({
       ...actor,
       scheduleBlocks: [{
         blockId: `test-still-${actor.actorId}`,
         startSeconds: 0,
-        endSeconds: baseLayout.hearingAtSeconds,
+        endSeconds: hearingAtSeconds,
         activity: "test_still",
         target: { kind: "anchor" as const, id: actor.spawnAnchorRef },
       }],
@@ -711,7 +712,7 @@ test("a delayed pending goal starts its spatial refresh window when provider wor
   const service = new RunService({
     proposalPort: adapter,
     idFactory: deterministicIds("delayed-claim"),
-    layout: stationaryLayout(),
+    layout: stationaryLayout(2_000),
   });
   const started = service.start("delayed-claim-start", "ko-KR");
   const actors = spatialActors(started);

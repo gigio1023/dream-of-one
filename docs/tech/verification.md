@@ -44,6 +44,28 @@ Godot AI route for `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`; it must
 not add a second locale-specific smoke harness or weaken the
 Qwen/zero-fallback requirements.
 
+### Headless evidence boundary
+
+Headless is the default implementation-time route so automated work does not
+open or focus a game window. It can prove imports and scene loads, scripted
+input delivery, deterministic physics/collision/navigation consequences,
+sidecar HTTP parity, scheduler and hearing state transitions, provider
+metadata and budgets, localization key/placeholder parity, and bundled font
+coverage. A live Qwen provider smoke remains real provider evidence when its
+returned metadata passes the requirements below, even though it is not play
+evidence.
+
+Headless does **not** prove rendered composition, character readability,
+lighting/materials, camera or movement feel, real mouse capture and focus
+behavior, OS IME composition, frame pacing, or the fun gate. The vendored
+Godot AI editor plugin is disabled by default when Godot uses the headless
+display driver; direct helper-autoload smokes may exercise its normal input
+code path, but they do not create an MCP play session, a framebuffer capture,
+or hands-on evidence. `GODOT_AI_ALLOW_HEADLESS` must not be used to relabel an
+empty dummy-renderer viewport as visual proof. Keep the game stopped during
+ordinary implementation and reserve a rendered Godot AI run for the smallest
+final acceptance route that needs pixels, native input, or player judgment.
+
 ## Commands (engineering)
 
 ```bash

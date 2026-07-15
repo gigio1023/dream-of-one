@@ -650,30 +650,30 @@ test("modal conversations pause clock and clock-only progress never reopens rece
 test("hearing clamps one final batch and exact retry wins over terminal state", async () => {
   const service = createService();
   const started = service.start("start-hearing", "ko-KR");
-  const atSeventeenNinetyFive = await advanceTo(
+  const atEightNinetyFive = await advanceTo(
     service,
     started.runId,
     started,
-    1795,
+    895,
     "hearing-prelude",
   );
   const request = {
     runId: started.runId,
     advanceId: "hearing-final",
-    observedWorldRevision: atSeventeenNinetyFive.worldRevision,
+    observedWorldRevision: atEightNinetyFive.worldRevision,
     elapsedSeconds: 10,
     arrivals: [],
   };
   const final = await service.advance(request);
-  assert.equal(atSeventeenNinetyFive.socialView.hearing.due, false);
+  assert.equal(atEightNinetyFive.socialView.hearing.due, false);
   assert.equal(final.clock.requestedElapsedSeconds, 10);
   assert.equal(final.clock.appliedElapsedSeconds, 5);
-  assert.equal(final.clock.toSeconds, 1800);
+  assert.equal(final.clock.toSeconds, 900);
   assert.equal(final.clock.hearingDue, true);
   assert.equal(final.socialView.hearing.due, true);
   assert.equal(
     final.socialView.revision,
-    atSeventeenNinetyFive.socialView.revision + 1,
+    atEightNinetyFive.socialView.revision + 1,
     "hearing publication must advance player-knowledge revision exactly once",
   );
   assert.equal(final.scheduleWakes.filter(wake => wake.kind === "hearing").length, 1);
@@ -681,12 +681,12 @@ test("hearing clamps one final batch and exact retry wins over terminal state", 
   assert.deepEqual(service.snapshot(started.runId).socialView, final.socialView);
   const delayedOlderResponse = await service.advance({
     runId: started.runId,
-    advanceId: "hearing-prelude-180",
-    observedWorldRevision: atSeventeenNinetyFive.previousWorldRevision,
+    advanceId: "hearing-prelude-90",
+    observedWorldRevision: atEightNinetyFive.previousWorldRevision,
     elapsedSeconds: 5,
     arrivals: [],
   });
-  assert.deepEqual(delayedOlderResponse, atSeventeenNinetyFive);
+  assert.deepEqual(delayedOlderResponse, atEightNinetyFive);
   assert.ok(delayedOlderResponse.socialView.revision < final.socialView.revision);
   await assert.rejects(
     service.advance({

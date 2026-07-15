@@ -765,6 +765,7 @@ func _check_long_locale_hud(
 		"ConversationInputRow",
 		"ConversationFreeInput",
 		"ConversationSubmitButton",
+		"ConversationStatusLabel",
 	]:
 		var control := hud.find_child(control_name, true, false) as Control
 		_check_visible_and_in_viewport(
@@ -780,6 +781,29 @@ func _check_long_locale_hud(
 			)
 	if input == null or input.text != str(text.get("input", "")):
 		_failures.append("%s Unicode LineEdit round-trip failed at %d%%" % [presentation_id, roundi(scale * 100.0)])
+	if input != null:
+		input.text = "한".repeat(input.max_length + 8)
+		await process_frame
+		var status := hud.find_child("ConversationStatusLabel", true, false) as Label
+		var expected_limit_warning := str(localization.call(
+			"content_message",
+			presentation_id,
+			"hud.m3r.conversation.input_limit_reached"
+		)).format({"limit": input.max_length})
+		if input.text.length() != input.max_length:
+			_failures.append(
+				"%s conversation input did not retain the explicit %d-character boundary"
+				% [presentation_id, input.max_length]
+			)
+		if (
+			status == null
+			or not status.visible
+			or status.text != expected_limit_warning
+		):
+			_failures.append(
+				"%s conversation input truncated overflow without localized feedback"
+				% presentation_id
+			)
 	_check_no_visible_raw_keys(
 		hud,
 		"%s conversation at %d%%" % [presentation_id, roundi(scale * 100.0)]

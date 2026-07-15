@@ -102,6 +102,7 @@ var _conversation_actor_id := ""
 var _current_turn: Dictionary = {}
 var _current_stance := ""
 var _last_why_line := ""
+var _input_limit_rejected := false
 var _provider_meta: Dictionary = {}
 var _choice_ids: Array[String] = ["", "", ""]
 var _choice_buttons: Array[Button] = []
@@ -147,6 +148,8 @@ func _ready() -> void:
 		_choice_buttons[index].pressed.connect(_on_choice_pressed.bind(index))
 	_conversation_submit_button.pressed.connect(_submit_free_input)
 	_conversation_free_input.text_submitted.connect(_on_free_input_text_submitted)
+	_conversation_free_input.text_changed.connect(_on_free_input_text_changed)
+	_conversation_free_input.text_change_rejected.connect(_on_free_input_text_change_rejected)
 	_end_conversation_button.pressed.connect(_on_end_conversation_retry_pressed)
 	_close_log_button.pressed.connect(close_log)
 	_restart_button.pressed.connect(_on_restart_pressed)
@@ -606,6 +609,7 @@ func begin_conversation(actor: Dictionary) -> void:
 	_current_turn.clear()
 	_reset_hesitation_timer()
 	_last_why_line = ""
+	_input_limit_rejected = false
 	_provider_meta = {}
 	_choice_ids = ["", "", ""]
 	_conversation_speaker_label.text = _actor_label(_conversation_actor_id)
@@ -666,7 +670,10 @@ func show_turn(turn: Dictionary) -> bool:
 		_choice_buttons[index].text = str(choice.get("line", ""))
 		_choice_buttons[index].visible = true
 	_conversation_input_row.visible = accepts_free_input
+	_input_limit_rejected = false
 	_conversation_free_input.clear()
+	if accepts_free_input:
+		_refresh_input_feedback()
 	_configure_hesitation_timer(turn)
 	set_conversation_busy(false)
 	if hearing_turn:
@@ -892,6 +899,19 @@ func _on_choice_pressed(index: int) -> void:
 
 func _on_free_input_text_submitted(_text: String) -> void:
 	_submit_free_input()
+
+
+func _on_free_input_text_changed(new_text: String) -> void:
+	if new_text.length() < _conversation_free_input.max_length:
+		_input_limit_rejected = false
+	_refresh_input_feedback()
+
+
+func _on_free_input_text_change_rejected(rejected_substring: String) -> void:
+	if rejected_substring.is_empty():
+		return
+	_input_limit_rejected = true
+	_refresh_input_feedback()
 
 
 func _submit_free_input() -> void:
@@ -1136,8 +1156,11 @@ func _apply_localized_text() -> void:
 	_refresh_thinking_label()
 	if _hesitation_active:
 		_refresh_hesitation_timer_text()
-	_conversation_free_input.placeholder_text = tr(&"hud.m3r.conversation.input_placeholder")
+	_conversation_free_input.placeholder_text = str(
+		tr(&"hud.m3r.conversation.input_placeholder")
+	).format({"limit": _conversation_free_input.max_length})
 	_conversation_submit_button.text = tr(&"hud.m3r.conversation.submit")
+	_refresh_input_feedback()
 	_refresh_retry_button_text()
 	_refresh_stance_label()
 	_refresh_provider_label()
@@ -1171,6 +1194,21 @@ func _typewrite_prompt(text: String) -> void:
 func _set_status(text: String) -> void:
 	_conversation_status_label.text = text
 	_conversation_status_label.visible = not text.is_empty()
+
+
+func _refresh_input_feedback() -> void:
+	if not is_instance_valid(_conversation_free_input) or not _conversation_input_row.visible:
+		return
+	var limit := _conversation_free_input.max_length
+	var key := (
+		&"hud.m3r.conversation.input_limit_reached"
+		if _input_limit_rejected
+		else &"hud.m3r.conversation.input_count"
+	)
+	_set_status(str(tr(key)).format({
+		"count": _conversation_free_input.text.length(),
+		"limit": limit,
+	}))
 
 
 func _refresh_retry_button_text() -> void:

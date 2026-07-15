@@ -329,7 +329,9 @@ audibility snapshot marks hearable is exactly what gets a direction cue and
 exactly what the runtime may record. The public-center speech radius is 13m,
 which includes both slots of the first scheduled park meeting from the authored
 player spawn; the scene smoke protects that first two-minute social beat from
-falling just outside the semantic boundary. Short spatial murmurs/blips make in-range
+falling just outside the semantic boundary. Free-world utterances are capped at
+64 Unicode code points before presentation so a queued subtitle can be read
+within its 2.4–6.0 second lifetime. Short spatial murmurs/blips make in-range
 speech audible without adding TTS. The current `AudioFeedback` baseline
 deterministically synthesizes two footstep variants, prop impact, record
 scribble, park ambience, and one shared interior tone at startup, all on the

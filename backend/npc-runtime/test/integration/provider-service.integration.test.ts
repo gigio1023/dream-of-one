@@ -17,6 +17,7 @@ import {
   hearingJudgmentJsonSchema,
   hearingJudgmentSchemaForLocale,
   hearingJudgmentSchemaForRequest,
+  TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
 } from "../../src/providers/envelope.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import {
@@ -1511,6 +1512,32 @@ test("ambient reply schema keeps the exact talk target and all listener judgment
     ...valid,
     utterance: "mem-ambient-1을 읽어 보세요.",
   }).success, false, "player-visible speech must not expose a memory id");
+  assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...valid,
+    utterance: "가".repeat(TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS + 1),
+  }).success, false, "transient ambient speech must fit its subtitle lifetime");
+  const ambientProperties = ambientReplyJudgmentJsonSchema.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  assert.equal(
+    ambientProperties.utterance.maxLength,
+    TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
+  );
+  const agentStepProperties = agentStepProposalJsonSchema.properties as Record<
+    string,
+    Record<string, unknown>
+  >;
+  assert.equal(
+    agentStepProperties.utterance.maxLength,
+    TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
+  );
+  assert.equal(agentStepProposalSchemaForLocale("ko-KR").safeParse({
+    toolCall: { tool: "talk_to", args: { actorId: "NPC_Store_Manager" } },
+    utterance: "가".repeat(TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS + 1),
+    rationale: "짧은 대답을 전합니다.",
+    done: true,
+  }).success, false, "all free-world NPC speech uses the same transient cap");
 
   const requestSchema = ambientReplyJudgmentJsonSchemaForTarget("NPC_Store_Manager");
   const requestProperties = requestSchema.properties as Record<string, Record<string, unknown>>;
@@ -2203,6 +2230,10 @@ test("ambient reply is one schema-validated call with its own audit purpose and 
   assert.equal(textGen.requests[0]?.purpose, "ambient_reply");
   assert.equal(textGen.requests[0]?.schemaName, "npc_ambient_reply_judgment");
   assert.match(textGen.requests[0]?.instructions ?? "", /NPC hearsay, not a new player answer/);
+  assert.match(
+    textGen.requests[0]?.instructions ?? "",
+    new RegExp(`no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points`),
+  );
   const input = JSON.parse(textGen.requests[0]?.input ?? "{}");
   assert.equal(input.sourceUtterance, request.sourceUtterance);
   assert.equal(input.listenerActorId, request.listenerActorId);
@@ -2234,6 +2265,33 @@ test("ambient reply is one schema-validated call with its own audit purpose and 
     fallbackContent("ko-KR").agent.ambientNoChangeWhy,
   );
   assert.doesNotMatch(fallback.proposal.whyLine, /답변/);
+});
+
+test("an overlong transient ambient reply is repaired before it reaches the subtitle queue", async () => {
+  const overlong = {
+    ...JSON.parse(validAmbientReply),
+    utterance: "가".repeat(TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS + 1),
+  };
+  const repaired = JSON.parse(validAmbientReply);
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(overlong) },
+    { text: JSON.stringify(repaired) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/ambient-subtitle-length-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeAndProposeAmbientReply(ambientReplyRequest());
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.utterance, repaired.utterance);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), [
+    "ambient_reply",
+    "repair",
+  ]);
 });
 
 test("provider service returns one live evidence-grounded hearing judgment", async () => {

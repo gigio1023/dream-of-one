@@ -12,6 +12,7 @@ import {
   hearingJudgmentSchemaForRequest,
   mergedConversationTurnJsonSchemaForLocale,
   mergedConversationTurnSchemaForLocale,
+  TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
   type AgentStepRecordContracts,
 } from "./envelope.js";
 import {
@@ -758,6 +759,7 @@ export class ProviderService implements NpcProposalPort {
       "After a successful action completes the goal, return done=true on the next iteration. Never repeat an identical successful tool call.",
       "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
+      `Every non-null utterance appears as a transient world subtitle. Use one concise sentence no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points.`,
       request.requiredToolCall
         ? request.requiredToolCall.tool === "talk_to"
           ? "Return exactly four top-level keys: toolCall, utterance, rationale, and done. For this required reply, toolCall and utterance must both be non-null. Do not add top-level keys."
@@ -839,6 +841,7 @@ export class ProviderService implements NpcProposalPort {
       "If the exact speech gives no grounded reason to change an opinion of the player, return suspicionDelta=0, preserve stanceBefore as proposedStance, and explain the no-change judgment in whyLine.",
       "A positive vouch requires the listener's existing meaningful firsthand conversation with the player. This ambient exchange can never create firsthand provenance.",
       `toolCall must be exactly talk_to with actorId ${request.targetActorId}; utterance is the listener's one in-character reply and done must be true.`,
+      `Keep utterance to one concise sentence no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points because it appears as a transient world subtitle.`,
       "openQuestion is null unless this exact exchange creates or resolves one concise question the player may later learn when meeting this listener.",
       ...localeOutputInstructions(
         request.locale,

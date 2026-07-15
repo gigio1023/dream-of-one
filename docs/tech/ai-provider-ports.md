@@ -194,7 +194,11 @@ observe packet: it has no player-answer signals, report-pressure delta,
 record mutation, or verdict authority. The runtime stores the exact source
 speech memory before applying the listener judgment, clamps suspicion, and
 never lets hearsay create meaningful-firsthand provenance. This replaces the
-old second `proposeNextStep`; it does not add another provider call.
+old second `proposeNextStep`; it does not add another provider call. Agent-step
+and ambient-reply utterances are transient world subtitles, so their transport
+schemas cap them at 64 Unicode code points and repair an overlong line before
+it reaches the client. Modal conversation and hearing prose keep their separate
+surfaces and are not subject to this transient cap.
 
 `HearingJudgment` contains exactly six resident assessments, a proposed
 ordinary/abnormal verdict, the Station officer's final line, and record/ledger

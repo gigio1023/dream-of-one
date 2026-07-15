@@ -21,6 +21,21 @@ import {
 import type { RequiredAgentToolCall } from "./ports.js";
 
 const nonEmpty = z.string().trim().min(1);
+export const TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS = 64;
+const transientWorldUtterance = nonEmpty.refine(
+  value => [...value].length <= TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
+  {
+    message:
+      `transient world utterance must not exceed ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points`,
+  },
+);
+const optionalTransientWorldUtterance = z.string().refine(
+  value => [...value.trim()].length <= TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
+  {
+    message:
+      `transient world utterance must not exceed ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points`,
+  },
+);
 const requiredPlayerVisibleHangul = /\p{Script=Hangul}/u;
 const forbiddenKoreanPlayerVisibleKana = /[\p{Script=Hiragana}\p{Script=Katakana}]/u;
 const forbiddenKoreanPlayerVisibleChineseFragments =
@@ -80,6 +95,18 @@ const nullablePlayerVisibleJsonString = {
   type: ["string", "null"],
   description:
     "Player-visible natural-language prose only when non-null. Obey the request groundingContract when present; never invent a player or world fact. Stay entirely in fiction: never call anyone a player, user, or NPC, and never mention games, AI, language models, prompts, or system messages. Never include an internal stable id, identifier token, or underscore name.",
+} as const;
+const transientWorldUtteranceJsonString = {
+  ...playerVisibleJsonString,
+  maxLength: TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
+  description:
+    `${playerVisibleJsonString.description} This line appears as a transient in-world subtitle, so keep it to one concise sentence of at most ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points.`,
+} as const;
+const nullableTransientWorldUtteranceJsonString = {
+  ...nullablePlayerVisibleJsonString,
+  maxLength: TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
+  description:
+    `${nullablePlayerVisibleJsonString.description} When non-null, this line appears as a transient in-world subtitle, so keep it to one concise sentence of at most ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points.`,
 } as const;
 
 function addSuggestedReplyIntentIssues(
@@ -270,7 +297,7 @@ export const ambientReplyJudgmentSchema = z
         args: z.object({ actorId: nonEmpty }).strict(),
       })
       .strict(),
-    utterance: nonEmpty,
+    utterance: transientWorldUtterance,
     rationale: nonEmpty,
     done: z.literal(true),
     suspicionDelta: z.number().int(),
@@ -344,7 +371,7 @@ const toolCallSchema = z
 export const agentStepProposalSchema = z
   .object({
     toolCall: toolCallSchema.nullable(),
-    utterance: z.string().nullable(),
+    utterance: optionalTransientWorldUtterance.nullable(),
     rationale: nonEmpty,
     done: z.boolean(),
   })
@@ -1114,7 +1141,7 @@ export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
         },
       },
     },
-    utterance: playerVisibleJsonString,
+    utterance: transientWorldUtteranceJsonString,
     rationale: { type: "string", minLength: 1 },
     done: { type: "boolean", const: true },
     suspicionDelta: { type: "integer" },
@@ -1369,7 +1396,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
         })),
       ],
     },
-    utterance: nullablePlayerVisibleJsonString,
+    utterance: nullableTransientWorldUtteranceJsonString,
     rationale: { type: "string", minLength: 1 },
     done: { type: "boolean" },
   },

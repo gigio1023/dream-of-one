@@ -22,7 +22,9 @@ loop (per NPC, per beat, budgeted):
                  bounded deterministic fallback when provider work fails
                  (one tool call + optional utterance, schema-bound)
   3. validate  — runtime checks the tool call against the catalog,
-                 role permissions, visibility, object state, budget
+                 role permissions, visibility, object state, budget;
+                 at most eight speech citations name only speaker-visible
+                 record revisions
   4. apply     — valid → world mutation + civic ledger event
                  invalid/blocked → structured failure result
   5. read      — the NPC reads the result (success, blocked, busy, refused)

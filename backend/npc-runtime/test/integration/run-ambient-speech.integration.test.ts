@@ -14,8 +14,11 @@ import { RunError, RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/
 import type {
   RunActorSpatialFacts,
   RunAdvanceResponse,
+  RunAmbientSpeechEvent,
+  RunLedgerEvent,
   RunMemory,
   RunNpcDecisionRequest,
+  RunRecord,
   RunScheduleWake,
   RunSnapshot,
 } from "../../src/runtime/run-schema.js";
@@ -1569,6 +1572,276 @@ test("player speech encounter acknowledgements prove audibility without leaking 
     }),
     (error: unknown) => error instanceof RunError && error.code === "encounter_not_visible",
   );
+});
+
+test("provider-cited visible records survive ambient commit and disclose only after the player hears them", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalNextStep = adapter.proposeNextStep.bind(adapter);
+  adapter.proposeNextStep = async request => {
+    if (
+      request.requiredToolCall?.tool === "talk_to" &&
+      request.observePacket.visibleRecords.some(
+        record => record.recordId === "record:ambient:cited",
+      )
+    ) {
+      return {
+        proposal: {
+          toolCall: {
+            tool: "talk_to",
+            args: { actorId: request.requiredToolCall.actorId },
+          },
+          utterance: "방문자가 접수 경위를 설명했다는 기록이 있습니다.",
+          citedRecordIds: ["record:ambient:cited"],
+          rationale: "현재 보이는 기록의 내용을 상대에게 전합니다.",
+          done: true,
+        },
+        meta: {
+          profileId: "scripted/ambient-cited-record",
+          transport: "scripted",
+          usedFallback: false,
+        },
+      };
+    }
+    const resolved = await originalNextStep(request);
+    if (resolved.proposal.utterance && request.observePacket.visibleRecords.some(
+      record => record.recordId === "record:ambient:cited",
+    )) {
+      resolved.proposal.citedRecordIds = ["record:ambient:cited"];
+    }
+    return resolved;
+  };
+  const originalReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
+  adapter.judgeAndProposeAmbientReply = async request => {
+    const resolved = await originalReply(request);
+    if (request.observePacket.visibleRecords.some(
+      record => record.recordId === "record:ambient:cited",
+    )) {
+      resolved.proposal.citedRecordIds = ["record:ambient:cited"];
+    }
+    return resolved;
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("ambient-cited-record"),
+  });
+  const meeting = await readyFirstMeeting(service, "ambient-cited-record");
+  type MutableRun = {
+    records: RunRecord[];
+    ledgerEvents: RunLedgerEvent[];
+  };
+  const runs = Reflect.get(service, "runs") as Map<string, MutableRun>;
+  const run = runs.get(meeting.started.runId);
+  assert.ok(run);
+  const record: RunRecord = {
+    recordId: "record:ambient:cited",
+    kind: "note",
+    authorActorId: STUDIO_RECEPTIONIST_ID,
+    authorRole: "studio_receptionist",
+    targetId: "player",
+    stateBody: "방문자가 접수 경위를 설명했다는 기록입니다.",
+    visibleToActorIds: [...new Set(["player", ...meeting.wake.actorIds])],
+    sourceRefs: [{ sourceMemoryId: "mem:ambient:cited", originActorId: "player" }],
+    textSurfaceId: "TS_Studio_ReviewRecords",
+    createdWorldSeconds: 1,
+    createdWorldRevision: 1,
+    recordRevision: 1,
+    lastLedgerEventId: "ledger:ambient:cited",
+  };
+  const ledgerEvent: RunLedgerEvent = {
+    eventId: record.lastLedgerEventId,
+    seq: 1,
+    kind: "record_written",
+    actorId: record.authorActorId,
+    actorRole: record.authorRole,
+    recordId: record.recordId,
+    sourceMemoryId: record.sourceRefs[0]!.sourceMemoryId,
+    recordRevision: record.recordRevision,
+    pressureBefore: 0,
+    pressureDelta: 0,
+    pressureAfter: 0,
+    visibleToActorIds: [...record.visibleToActorIds],
+    whyLine: "접수 경위를 기록했습니다.",
+    openQuestion: null,
+    worldSeconds: 1,
+    worldRevision: 1,
+  };
+  run.records.push(record);
+  run.ledgerEvents.push(ledgerEvent);
+
+  const decision = await service.decision(meeting.request);
+  assert.equal(decision.status, "completed");
+  assert.equal(decision.speechEvents.length, 2);
+  assert.ok(decision.speechEvents.every(event =>
+    event.citedRecords[0]?.recordId === record.recordId &&
+    event.citedRecords[0]?.recordRevision === record.recordRevision &&
+    event.citedRecords[0]?.lastLedgerEventId === record.lastLedgerEventId
+  ));
+  assert.deepEqual(
+    service.snapshot(meeting.started.runId).socialView.encounteredRecords,
+    [],
+    "off-screen committed speech is not yet player knowledge",
+  );
+  const event = decision.speechEvents[0];
+  assert.ok(event);
+  const heard = await service.encounter({
+    runId: meeting.started.runId,
+    encounterId: "heard-provider-cited-record",
+    encounter: {
+      kind: "speech",
+      speechEventId: event.eventId,
+      playerPosition: [...event.audibility.speakerPosition],
+    },
+  });
+  assert.equal(heard.socialView.encounteredRecords[0]?.recordId, record.recordId);
+  assert.equal(heard.socialView.encounteredRecords[0]?.provenance.originKind, "speech");
+  assert.equal(heard.socialView.encounteredRecords[0]?.provenance.sourceExcerpt, event.line);
+});
+
+test("audible record citations disclose only the frozen revision and direct inspection upgrades provenance", async () => {
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds("spoken-record"),
+  });
+  const started = service.start("spoken-record-start", "ko-KR");
+  const layout = loadRunLayout();
+  const volume = layout.audibilityVolumes[0];
+  const box = volume?.boxes[0];
+  const surface = layout.recordSurfaces.find(
+    candidate => candidate.surfaceId === "TS_Studio_ReviewRecords",
+  );
+  const surfacePosition = surface ? layout.anchorPositions[surface.anchorRef] : undefined;
+  assert.ok(volume && box && surface && surfacePosition);
+
+  const record: RunRecord = {
+    recordId: "record:spoken:1",
+    kind: "note",
+    authorActorId: STUDIO_RECEPTIONIST_ID,
+    authorRole: "studio_receptionist",
+    targetId: "player",
+    stateBody: "방문자가 접수 경위를 설명했다는 기록입니다.",
+    visibleToActorIds: [STUDIO_RECEPTIONIST_ID, "player"],
+    sourceRefs: [{ sourceMemoryId: "mem:spoken:source", originActorId: "player" }],
+    textSurfaceId: surface.surfaceId,
+    createdWorldSeconds: 1,
+    createdWorldRevision: 1,
+    recordRevision: 1,
+    lastLedgerEventId: "ledger:spoken:1",
+  };
+  const ledgerEvent: RunLedgerEvent = {
+    eventId: record.lastLedgerEventId,
+    seq: 1,
+    kind: "record_written",
+    actorId: STUDIO_RECEPTIONIST_ID,
+    actorRole: "studio_receptionist",
+    recordId: record.recordId,
+    sourceMemoryId: record.sourceRefs[0]!.sourceMemoryId,
+    recordRevision: record.recordRevision,
+    pressureBefore: 0,
+    pressureDelta: 25,
+    pressureAfter: 25,
+    visibleToActorIds: [...record.visibleToActorIds],
+    whyLine: "접수 경위가 기록으로 남았습니다.",
+    openQuestion: {
+      status: "open",
+      text: "기록에 남은 방문 경위는 무엇인가?",
+      whyLine: "직접 기록을 확인했습니다.",
+    },
+    worldSeconds: 1,
+    worldRevision: 1,
+  };
+  const event = (eventId: string, seq: number, recordRevision: number): RunAmbientSpeechEvent => ({
+    seq,
+    eventId,
+    wakeId: "wake:spoken-record",
+    conversationId: "ambient:spoken-record",
+    turnId: `ambient:spoken-record#${seq}`,
+    speakerActorId: STUDIO_RECEPTIONIST_ID,
+    targetActorId: "NPC_Studio_Manager",
+    listenerActorIds: ["NPC_Studio_Manager"],
+    line: "방문자가 접수 경위를 설명했다는 기록이 있습니다.",
+    citedRecords: [{
+      recordId: record.recordId,
+      recordRevision,
+      lastLedgerEventId: record.lastLedgerEventId,
+    }],
+    worldSeconds: 1,
+    observedWorldRevision: 0,
+    worldRevision: 1,
+    audibility: {
+      volumeId: volume.volumeId,
+      maxSpeechDistanceM: volume.maxSpeechDistanceM,
+      speakerPosition: [box.center[0], box.center[1], box.center[2]],
+    },
+    proposalMeta: {
+      profileId: "scripted/spoken-record",
+      transport: "scripted",
+      usedFallback: false,
+    },
+  });
+  type MutableRun = {
+    records: RunRecord[];
+    ledgerEvents: RunLedgerEvent[];
+    ambientSpeechEvents: RunAmbientSpeechEvent[];
+  };
+  const runs = Reflect.get(service, "runs") as Map<string, MutableRun>;
+  const run = runs.get(started.runId);
+  assert.ok(run);
+  run.records.push(record);
+  run.ledgerEvents.push(ledgerEvent);
+  const staleEvent = event("speech:spoken:stale", 1, 2);
+  const exactEvent = event("speech:spoken:exact", 2, 1);
+  run.ambientSpeechEvents.push(staleEvent, exactEvent);
+
+  const playerPosition: [number, number, number] = [
+    box.center[0],
+    box.center[1],
+    box.center[2],
+  ];
+  const stale = await service.encounter({
+    runId: started.runId,
+    encounterId: "heard-stale-record-citation",
+    encounter: {
+      kind: "speech",
+      speechEventId: staleEvent.eventId,
+      playerPosition,
+    },
+  });
+  assert.deepEqual(stale.socialView.encounteredRecords, []);
+
+  const heard = await service.encounter({
+    runId: started.runId,
+    encounterId: "heard-exact-record-citation",
+    encounter: {
+      kind: "speech",
+      speechEventId: exactEvent.eventId,
+      playerPosition,
+    },
+  });
+  const spokenRecord = heard.socialView.encounteredRecords[0];
+  assert.ok(spokenRecord);
+  assert.equal(spokenRecord.stateBody, record.stateBody);
+  assert.equal(spokenRecord.provenance.originKind, "speech");
+  assert.equal(spokenRecord.provenance.originActorId, STUDIO_RECEPTIONIST_ID);
+  assert.equal(spokenRecord.provenance.recipientKind, "listener");
+  assert.equal(spokenRecord.provenance.recipientActorId, "player");
+  assert.equal(spokenRecord.provenance.sourceExcerpt, exactEvent.line);
+  assert.equal(heard.socialView.pressure.band, "low");
+  assert.deepEqual(heard.socialView.openQuestions, []);
+
+  const inspected = await service.encounter({
+    runId: started.runId,
+    encounterId: "inspect-spoken-record",
+    encounter: {
+      kind: "record_surface",
+      textSurfaceId: surface.surfaceId,
+      playerPosition: [surfacePosition[0], surfacePosition[1], surfacePosition[2]],
+    },
+  });
+  const inspectedRecord = inspected.socialView.encounteredRecords[0];
+  assert.ok(inspectedRecord);
+  assert.equal(inspectedRecord.provenance.originKind, "record");
+  assert.equal(inspected.socialView.pressure.band, "raised");
+  assert.equal(inspected.socialView.openQuestions[0]?.text, ledgerEvent.openQuestion?.text);
 });
 
 test("player opening context includes a listener's ambient memory but never leaks it to an uninvolved actor", async () => {

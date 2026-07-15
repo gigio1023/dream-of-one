@@ -825,13 +825,14 @@ export class ProviderService implements NpcProposalPort {
       "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
       `Every non-null utterance appears as a transient world subtitle. Use one concise sentence no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points.`,
+      "citedRecordIds must contain every visible record whose content the utterance meaningfully conveys, and no other id. Use [] when the utterance cites no record or is null. A citation authorizes later disclosure only if the player actually hears the line, so make the cited content understandable in the utterance itself.",
       request.requiredToolCall
         ? request.requiredToolCall.tool === "talk_to"
-          ? "Return exactly four top-level keys: toolCall, utterance, rationale, and done. For this required reply, toolCall and utterance must both be non-null. Do not add top-level keys."
+          ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required reply, toolCall and utterance must both be non-null. Do not add top-level keys."
           : request.requireUtterance
-            ? "Return exactly four top-level keys: toolCall, utterance, rationale, and done. For this required movement, toolCall and utterance must both be non-null. Do not add top-level keys."
-            : "Return exactly four top-level keys: toolCall, utterance, rationale, and done. For this required movement, toolCall must be non-null; utterance may be null. Do not add top-level keys."
-        : "Return exactly four top-level keys: toolCall, utterance, rationale, and done. Never omit toolCall or utterance; use null when either is absent. Do not add top-level keys.",
+            ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall and utterance must both be non-null. Do not add top-level keys."
+            : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall must be non-null; utterance may be null. Do not add top-level keys."
+        : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Never omit toolCall, utterance, or citedRecordIds; use null for absent speech and [] for no citation. Do not add top-level keys.",
       "Stable ids may appear in identifier-valued toolCall.args fields and internal rationale. Never copy an actor, object, record, memory, text-surface, or landmark id into utterance or other player-visible prose.",
       ...(effectiveTools.includes("move_to")
         ? ["playerContact is offered to only one runtime-selected resident at a time. Choose move_to(player) only when your role goal or remembered facts warrant initiating a face-to-face question; otherwise choose another valid action or stop."]
@@ -898,6 +899,7 @@ export class ProviderService implements NpcProposalPort {
     const jsonSchema = ambientReplyJudgmentJsonSchemaForTarget(
       request.targetActorId,
       request.locale,
+      request.observePacket.visibleRecords.map(record => record.recordId),
     );
     const instructions = [
       "You are one resident listening to another resident inside Dream of One, a social-suspicion game.",
@@ -910,6 +912,7 @@ export class ProviderService implements NpcProposalPort {
       "A positive vouch requires the listener's existing meaningful firsthand conversation with the player. This ambient exchange can never create firsthand provenance.",
       `toolCall must be exactly talk_to with actorId ${request.targetActorId}; utterance is the listener's one in-character reply and done must be true.`,
       `Keep utterance to one concise sentence no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points because it appears as a transient world subtitle.`,
+      "citedRecordIds must contain every listener-visible record whose content this reply meaningfully conveys, and no other id. Use [] when the reply cites no record. A citation can disclose that record only if the player actually hears this line, so make the cited content understandable in the utterance itself.",
       "openQuestion is null unless this exact exchange creates or resolves one concise question the player may later learn when meeting this listener.",
       ...localeOutputInstructions(
         request.locale,
@@ -938,7 +941,11 @@ export class ProviderService implements NpcProposalPort {
         schemaName: "npc_ambient_reply_judgment",
         jsonSchema,
       },
-      schema: ambientReplyJudgmentSchemaForRequest(request.locale, request.targetActorId),
+      schema: ambientReplyJudgmentSchemaForRequest(
+        request.locale,
+        request.targetActorId,
+        request.observePacket.visibleRecords.map(record => record.recordId),
+      ),
       repairContext: requestContext,
       budgetCeiling: request.budgetCeiling,
       fallback: () => this.options.fallback.judgeAndProposeAmbientReply(request),

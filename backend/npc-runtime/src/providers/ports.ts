@@ -132,6 +132,8 @@ export interface ConversationProposal {
 export interface AgentStepProposal {
   toolCall?: ToolCall;
   utterance?: string;
+  /** Visible record ids whose contents are meaningfully conveyed by utterance. */
+  citedRecordIds?: string[];
   rationale: string;
   done: boolean;
 }
@@ -145,6 +147,8 @@ export interface AgentStepProposal {
 export interface AmbientReplyJudgment {
   toolCall: { tool: "talk_to"; args: { actorId: string } };
   utterance: string;
+  /** Listener-visible record ids whose contents are meaningfully conveyed by utterance. */
+  citedRecordIds?: string[];
   rationale: string;
   done: true;
   suspicionDelta: number;

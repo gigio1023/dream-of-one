@@ -472,6 +472,17 @@ copy the newest undisclosed material judgment into `socialView`, preserving
 diagnostic memory, and preload or overhearing alone does not reveal another
 resident's internal opinion.
 
+Free-world speech has a separate record-disclosure path. The provider returns
+at most eight speaker-visible `citedRecordIds`; the runtime freezes each cited revision,
+revalidates speaker visibility and the current ledger link at serialized
+speech commit, and stores the exact citations on the speech event. Nothing is
+added to `socialView` merely because NPCs spoke off-screen. Only an idempotent
+player speech encounter inside the authored audibility volume discloses the
+still-matching cited record, with `speaker → player → spoken line` provenance.
+A later record update cannot be exposed retroactively through an older line,
+and direct inspection of the text surface upgrades speech provenance to full
+record/ledger provenance, including its pressure band and authored question.
+
 The runtime verifies provenance and procedure; the selected live model judges
 meaning. At the scheduled hearing it enforces four evidenced vouches out of
 six as the eligibility floor, then asks the model to reassess the final

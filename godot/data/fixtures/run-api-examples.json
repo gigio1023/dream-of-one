@@ -2638,6 +2638,7 @@
               "NPC_Roaming_Liaison"
             ],
             "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
+            "citedRecords": [],
             "worldSeconds": 90,
             "observedWorldRevision": 18,
             "worldRevision": 19,
@@ -2669,6 +2670,7 @@
               "NPC_Roaming_Liaison"
             ],
             "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+            "citedRecords": [],
             "worldSeconds": 90,
             "observedWorldRevision": 18,
             "worldRevision": 20,
@@ -2721,6 +2723,7 @@
                 "NPC_Roaming_Liaison"
               ],
               "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 90,
               "observedWorldRevision": 18,
               "worldRevision": 19,
@@ -2755,6 +2758,7 @@
                 "NPC_Roaming_Liaison"
               ],
               "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+              "citedRecords": [],
               "worldSeconds": 90,
               "observedWorldRevision": 18,
               "worldRevision": 20,
@@ -3520,6 +3524,7 @@
                 "NPC_Roaming_Liaison"
               ],
               "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 90,
               "observedWorldRevision": 18,
               "worldRevision": 19,
@@ -3551,6 +3556,7 @@
                 "NPC_Roaming_Liaison"
               ],
               "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+              "citedRecords": [],
               "worldSeconds": 90,
               "observedWorldRevision": 18,
               "worldRevision": 20,
@@ -3603,6 +3609,7 @@
                   "NPC_Roaming_Liaison"
                 ],
                 "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
                 "worldRevision": 19,
@@ -3637,6 +3644,7 @@
                   "NPC_Roaming_Liaison"
                 ],
                 "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+                "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
                 "worldRevision": 20,
@@ -5708,6 +5716,7 @@
                   "NPC_Roaming_Liaison"
                 ],
                 "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
                 "worldRevision": 19,
@@ -5741,6 +5750,7 @@
                   "NPC_Roaming_Liaison"
                 ],
                 "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+                "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
                 "worldRevision": 20,
@@ -5795,6 +5805,7 @@
                   "NPC_Roaming_Liaison"
                 ],
                 "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
                 "worldRevision": 19,
@@ -5828,6 +5839,7 @@
                   "NPC_Roaming_Liaison"
                 ],
                 "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+                "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
                 "worldRevision": 20,
@@ -5907,6 +5919,7 @@
                   "NPC_Roaming_Liaison"
                 ],
                 "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
+                "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
                 "worldRevision": 19,
@@ -5940,6 +5953,7 @@
                   "NPC_Roaming_Liaison"
                 ],
                 "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+                "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
                 "worldRevision": 20,
@@ -6103,6 +6117,7 @@
                 "NPC_Roaming_Liaison"
               ],
               "line": "오늘 공원 일정은 예정대로 진행하겠습니다. 서로 확인할 일이 있으면 지금 말씀해 주세요.",
+              "citedRecords": [],
               "worldSeconds": 90,
               "observedWorldRevision": 18,
               "worldRevision": 19,
@@ -6134,6 +6149,7 @@
                 "NPC_Roaming_Liaison"
               ],
               "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+              "citedRecords": [],
               "worldSeconds": 90,
               "observedWorldRevision": 18,
               "worldRevision": 20,

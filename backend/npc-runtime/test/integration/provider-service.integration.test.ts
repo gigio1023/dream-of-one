@@ -17,6 +17,7 @@ import {
   hearingJudgmentJsonSchema,
   hearingJudgmentSchemaForLocale,
   hearingJudgmentSchemaForRequest,
+  MAX_SPEECH_RECORD_CITATIONS,
   TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
 } from "../../src/providers/envelope.js";
 import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
@@ -210,6 +211,7 @@ function ambientReplyRequest(locale = "ko-KR"): AmbientReplyRequest {
 const validAmbientReply = JSON.stringify({
   toolCall: { tool: "talk_to", args: { actorId: "NPC_Store_Manager" } },
   utterance: "그 설명이 왜 달랐는지 직접 확인해 보겠습니다.",
+  citedRecordIds: [],
   rationale: "관리자에게 들은 구체적인 말이 방문자에 대한 의문을 키웠습니다.",
   done: true,
   suspicionDelta: 18,
@@ -386,7 +388,7 @@ test("required talk_to narrows transport and Zod contracts and repairs an invali
   assert.equal(result.meta.usedFallback, false);
   assert.equal(result.proposal.utterance, repairedReply.utterance);
   assert.deepEqual(textGen.requests.map(request => request.purpose), ["agent_step", "repair"]);
-  assert.match(textGen.requests[0].instructions, /exactly four top-level keys/);
+  assert.match(textGen.requests[0].instructions, /exactly five top-level keys/);
   assert.match(textGen.requests[0].instructions, /toolCall and utterance must both be non-null/);
   assert.match(textGen.requests[0].instructions, /Never copy an actor, object, record/);
   assert.match(textGen.requests[0].instructions, /Tool argument guide for the currently offered branches/);
@@ -443,7 +445,7 @@ test("required talk_to narrows transport and Zod contracts and repairs an invali
   assertEveryObjectPropertyIsRequired(schema);
   assert.deepEqual(
     Object.keys((textGen.requests[0].jsonSchema as { properties: Record<string, unknown> }).properties),
-    ["toolCall", "utterance", "rationale", "done"],
+    ["toolCall", "utterance", "citedRecordIds", "rationale", "done"],
   );
   assert.deepEqual(
     schema.properties.toolCall.anyOf.map(branch =>
@@ -1563,6 +1565,83 @@ test("ambient reply schema keeps the exact talk target and all listener judgment
     }).success,
     false,
   );
+});
+
+test("free-world speech cites only records visible to its current speaker", () => {
+  const packet = m3rAdministrativePacket();
+  packet.visibleActors = ["NPC_Store_Manager"];
+  packet.audibleActorIds = ["NPC_Store_Manager"];
+  packet.toolCatalog = ["talk_to"];
+  const constraints = {
+    effectiveTools: ["talk_to" as const],
+    observePacket: packet,
+    recordContracts: {},
+    requiredToolCall: { tool: "talk_to" as const, actorId: "NPC_Store_Manager" },
+    requireUtterance: true,
+  };
+  const stepSchema = agentStepProposalSchemaForRequest("ko-KR", constraints);
+  const validStep = {
+    toolCall: { tool: "talk_to", args: { actorId: "NPC_Store_Manager" } },
+    utterance: "방문 경위를 확인한 기록이 여기 있습니다.",
+    citedRecordIds: ["record-visible"],
+    rationale: "현재 보이는 기록의 내용을 상대에게 전합니다.",
+    done: true,
+  };
+  assert.equal(stepSchema.safeParse(validStep).success, true);
+  assert.equal(stepSchema.safeParse({
+    ...validStep,
+    citedRecordIds: ["record-hidden"],
+  }).success, false);
+  assert.equal(stepSchema.safeParse({
+    ...validStep,
+    utterance: null,
+  }).success, false);
+  const excessiveCitations = Array.from(
+    { length: MAX_SPEECH_RECORD_CITATIONS + 1 },
+    (_, index) => `record-${index}`,
+  );
+  assert.equal(agentStepProposalSchemaForLocale("ko-KR").safeParse({
+    ...validStep,
+    citedRecordIds: excessiveCitations,
+  }).success, false);
+
+  const ambient = JSON.parse(validAmbientReply);
+  const ambientSchema = ambientReplyJudgmentSchemaForRequest(
+    "ko-KR",
+    "NPC_Store_Manager",
+    ["record-visible"],
+  );
+  assert.equal(ambientSchema.safeParse({
+    ...ambient,
+    citedRecordIds: ["record-visible"],
+  }).success, true);
+  assert.equal(ambientSchema.safeParse({
+    ...ambient,
+    citedRecordIds: ["record-hidden"],
+  }).success, false);
+  assert.equal(ambientReplyJudgmentSchemaForLocale("ko-KR").safeParse({
+    ...ambient,
+    citedRecordIds: excessiveCitations,
+  }).success, false);
+
+  const stepJson = agentStepProposalJsonSchemaForTools(constraints);
+  const stepProperties = stepJson.properties as Record<string, Record<string, unknown>>;
+  assert.deepEqual(
+    (stepProperties.citedRecordIds.items as Record<string, unknown>).enum,
+    ["record-visible"],
+  );
+  assert.equal(stepProperties.citedRecordIds.maxItems, MAX_SPEECH_RECORD_CITATIONS);
+  const ambientJson = ambientReplyJudgmentJsonSchemaForTarget(
+    "NPC_Store_Manager",
+    "ko-KR",
+    ["record-visible"],
+  );
+  const ambientProperties = ambientJson.properties as Record<string, Record<string, unknown>>;
+  assert.deepEqual(
+    (ambientProperties.citedRecordIds.items as Record<string, unknown>).enum,
+    ["record-visible"],
+  );
+  assert.equal(ambientProperties.citedRecordIds.maxItems, MAX_SPEECH_RECORD_CITATIONS);
 });
 
 test("ambient reply repairs one wrong nonempty target then succeeds or falls back", async () => {

@@ -162,8 +162,11 @@ Station interrogation is already a runtime-mandated grounded approach, so its
 request is likewise narrowed to exactly `move_to(player)` and `done=true`;
 unlike ambient speech, that movement requires no utterance. The envelope
 always contains exactly
-`toolCall`, `utterance`, `rationale`, and `done`, using `null` for an absent
-nullable value. The same effective-tool constraint is enforced by the local
+`toolCall`, `utterance`, `citedRecordIds`, `rationale`, and `done`, using `null`
+for absent speech and `[]` for no record citation. A free-world utterance may
+cite at most eight records visible to its current speaker, and must cite every
+record whose content it meaningfully conveys. The same effective-tool
+constraint is enforced by the local
 Zod parse instead of trusting transport-side structured output. `move_to`,
 `look`, ordinary `talk_to`, `read_record`, and administrative writes therefore
 reject hidden or unavailable ids before a proposal enters the multi-step

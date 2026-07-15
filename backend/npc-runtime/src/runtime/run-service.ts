@@ -263,10 +263,16 @@ interface AmbientListenerJudgment extends AmbientListenerState {
   openQuestion: RunOpenQuestion | null;
 }
 
+interface AmbientRecordCitation {
+  recordId: string;
+  recordRevision: number;
+}
+
 interface AmbientResolvedTurn {
   speakerActorId: string;
   targetActorId: string;
   line: string;
+  citedRecords: AmbientRecordCitation[];
   meta: ProposalMeta;
   listenerJudgment?: AmbientListenerJudgment;
 }
@@ -307,7 +313,12 @@ interface CanonicalSpatialFacts {
 type GoalAction =
   | { tool: "wait"; reason: string }
   | { tool: "look"; targetKind: "actor" | "object" | "record"; targetId: string }
-  | { tool: "talk_to"; targetActorId: string; utterance: string }
+  | {
+      tool: "talk_to";
+      targetActorId: string;
+      utterance: string;
+      citedRecords: AmbientRecordCitation[];
+    }
   | { tool: "move_to"; targetAnchorRef: string }
   | { tool: "move_to_player"; contactReason: string }
   | ValidatedAdministrativeAction;
@@ -2806,6 +2817,24 @@ export class RunService {
     return null;
   }
 
+  private observedRecordCitations(
+    packet: ObservePacket,
+    recordIds: readonly string[],
+  ): AmbientRecordCitation[] | null {
+    if (new Set(recordIds).size !== recordIds.length) return null;
+    const citations: AmbientRecordCitation[] = [];
+    for (const recordId of recordIds) {
+      const visible = packet.visibleRecords.find(record =>
+        record.recordId === recordId &&
+        Number.isInteger(record.recordRevision) &&
+        (record.recordRevision ?? 0) > 0
+      );
+      if (!visible?.recordRevision) return null;
+      citations.push({ recordId, recordRevision: visible.recordRevision });
+    }
+    return citations;
+  }
+
   private validateGoalProposal(
     run: RunState,
     observation: GoalObservation,
@@ -2814,6 +2843,7 @@ export class RunService {
     const parsed = agentStepProposalSchema.safeParse({
       toolCall: proposal.toolCall ?? null,
       utterance: proposal.utterance ?? null,
+      citedRecordIds: proposal.citedRecordIds ?? [],
       rationale: proposal.rationale,
       done: proposal.done,
     });
@@ -2889,6 +2919,16 @@ export class RunService {
         if (!targetActorId || !step.utterance) {
           return { reason: "invalid_args", detail: "talk_to requires actorId and utterance" };
         }
+        const citedRecords = this.observedRecordCitations(
+          observation.observePacket,
+          step.citedRecordIds,
+        );
+        if (!citedRecords) {
+          return {
+            reason: "not_visible",
+            detail: "speech cited a record revision outside the current observation",
+          };
+        }
         if (
           run.activeAmbientConversation !== null ||
           !observation.observePacket.visibleActors.includes(targetActorId) ||
@@ -2916,7 +2956,14 @@ export class RunService {
             detail: `${targetActorId} has no authored audibility volume shared with the speaker`,
           };
         }
-        return { action: { tool: "talk_to", targetActorId, utterance: step.utterance } };
+        return {
+          action: {
+            tool: "talk_to",
+            targetActorId,
+            utterance: step.utterance,
+            citedRecords,
+          },
+        };
       }
       case "move_to": {
         const targetAnchorRef = asId(call.args.targetId);
@@ -3289,6 +3336,7 @@ export class RunService {
       speakerActorId: attempt.actorId,
       targetActorId: action.targetActorId,
       line: action.utterance,
+      citedRecords: clone(action.citedRecords),
       meta: clone(attempt.actionMeta),
     }];
     run.activeAmbientConversation = {
@@ -3602,6 +3650,21 @@ export class RunService {
       const turn = options.turns[turnIndex];
       const audibility = resolvedAudibility[turnIndex];
       if (!turn || !audibility) return null;
+      const citedRecords = turn.citedRecords.map(citation => {
+        const record = run.records.find(candidate =>
+          candidate.recordId === citation.recordId &&
+          candidate.recordRevision === citation.recordRevision &&
+          candidate.visibleToActorIds.includes(turn.speakerActorId)
+        );
+        return record
+          ? {
+              recordId: record.recordId,
+              recordRevision: record.recordRevision,
+              lastLedgerEventId: record.lastLedgerEventId,
+            }
+          : null;
+      });
+      if (citedRecords.some(citation => citation === null)) return null;
       const seq = baseSeq + turnIndex + 1;
       const worldRevision = baseRevision + turnIndex + 1;
       const event: RunAmbientSpeechEvent = {
@@ -3614,6 +3677,7 @@ export class RunService {
         targetActorId: turn.targetActorId,
         listenerActorIds: clone(audibility.listenerActorIds),
         line: turn.line,
+        citedRecords: clone(citedRecords) as RunAmbientSpeechEvent["citedRecords"],
         worldSeconds: run.elapsedSeconds,
         observedWorldRevision: options.observedWorldRevision,
         worldRevision,
@@ -4048,12 +4112,13 @@ export class RunService {
               }),
             );
             resolvedMeta = resolved.meta;
-            const line = this.validatedAmbientLine(resolved, observePacket, targetActorId);
-            if (line) {
+            const speech = this.validatedAmbientLine(resolved, observePacket, targetActorId);
+            if (speech) {
               resolvedTurn = {
                 speakerActorId,
                 targetActorId,
-                line,
+                line: speech.line,
+                citedRecords: speech.citedRecords,
                 meta: clone(resolved.meta),
               };
             }
@@ -4408,7 +4473,7 @@ export class RunService {
     resolved: ResolvedProposal<AgentStepProposal>,
     observePacket: ObservePacket,
     targetActorId: string,
-  ): string | null {
+  ): { line: string; citedRecords: AmbientRecordCitation[] } | null {
     const parsed = agentStepProposalSchema.safeParse(resolved.proposal);
     if (!parsed.success) return null;
     const proposal = parsed.data;
@@ -4419,8 +4484,13 @@ export class RunService {
     ) {
       return null;
     }
-    return observePacket.visibleActors.includes(targetActorId)
-      ? proposal.utterance.trim()
+    if (!observePacket.visibleActors.includes(targetActorId)) return null;
+    const citedRecords = this.observedRecordCitations(
+      observePacket,
+      proposal.citedRecordIds,
+    );
+    return citedRecords
+      ? { line: proposal.utterance.trim(), citedRecords }
       : null;
   }
 
@@ -4451,10 +4521,16 @@ export class RunService {
     ) {
       return null;
     }
+    const citedRecords = this.observedRecordCitations(
+      context.observePacket,
+      proposal.citedRecordIds,
+    );
+    if (!citedRecords) return null;
     return {
       speakerActorId: context.listenerActorId,
       targetActorId: context.targetActorId,
       line: proposal.utterance.trim(),
+      citedRecords,
       meta: clone(resolved.meta),
       listenerJudgment: {
         ...clone(context.listenerState),
@@ -4804,6 +4880,62 @@ export class RunService {
     // administrative proposal must author that player-log content.
     if (run.encounteredSpeechEventIds.has(event.eventId)) return;
     run.encounteredSpeechEventIds.add(event.eventId);
+    for (const citation of event.citedRecords) {
+      const record = run.records.find(candidate =>
+        candidate.recordId === citation.recordId &&
+        candidate.recordRevision === citation.recordRevision &&
+        candidate.lastLedgerEventId === citation.lastLedgerEventId &&
+        candidate.visibleToActorIds.includes(event.speakerActorId)
+      );
+      if (record) this.discloseSpokenRecord(run, record, event);
+    }
+  }
+
+  private discloseSpokenRecord(
+    run: RunState,
+    record: RunRecord,
+    event: RunAmbientSpeechEvent,
+  ): void {
+    const existing = run.socialView.encounteredRecords.find(
+      entry => entry.recordId === record.recordId,
+    );
+    if (
+      existing &&
+      existing.recordRevision === record.recordRevision &&
+      existing.lastLedgerEventId === record.lastLedgerEventId
+    ) return;
+    const ledgerEvent = run.ledgerEvents.find(
+      candidate => candidate.eventId === record.lastLedgerEventId,
+    );
+    if (!ledgerEvent) return;
+    const provenance: RunSocialProvenance = {
+      originKind: "speech",
+      originActorId: event.speakerActorId,
+      recipientKind: "listener",
+      recipientActorId: "player",
+      sourceMemoryId: null,
+      recordId: record.recordId,
+      recordRevision: record.recordRevision,
+      ledgerEventId: ledgerEvent.eventId,
+      sourceExcerpt: normalizeSocialSourceExcerpt(event.line),
+      whyLine: normalizeSocialSourceExcerpt(event.line),
+    };
+    const disclosed = {
+      recordId: record.recordId,
+      kind: record.kind,
+      authorActorId: record.authorActorId,
+      targetId: record.targetId,
+      stateBody: record.stateBody,
+      recordRevision: record.recordRevision,
+      lastLedgerEventId: record.lastLedgerEventId,
+      provenance,
+    };
+    const index = run.socialView.encounteredRecords.findIndex(
+      entry => entry.recordId === record.recordId,
+    );
+    if (index >= 0) run.socialView.encounteredRecords[index] = disclosed;
+    else run.socialView.encounteredRecords.push(disclosed);
+    this.bumpSocialRevision(run);
   }
 
   private discloseRecord(run: RunState, record: RunRecord): void {
@@ -4813,7 +4945,8 @@ export class RunService {
     if (
       existing &&
       existing.recordRevision === record.recordRevision &&
-      existing.lastLedgerEventId === record.lastLedgerEventId
+      existing.lastLedgerEventId === record.lastLedgerEventId &&
+      existing.provenance.originKind === "record"
     ) return;
     const event = run.ledgerEvents.find(candidate => candidate.eventId === record.lastLedgerEventId);
     if (!event) return;

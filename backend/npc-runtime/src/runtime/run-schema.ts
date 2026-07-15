@@ -346,6 +346,11 @@ export const runAmbientSpeechEventSchema = z
     targetActorId: nonEmpty,
     listenerActorIds: z.array(nonEmpty).min(1),
     line: nonEmpty,
+    citedRecords: z.array(z.object({
+      recordId: nonEmpty,
+      recordRevision: z.number().int().positive(),
+      lastLedgerEventId: nonEmpty,
+    }).strict()).default([]),
     worldSeconds: z.number().nonnegative(),
     observedWorldRevision: z.number().int().nonnegative(),
     worldRevision: z.number().int().positive(),

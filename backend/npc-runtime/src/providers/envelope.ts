@@ -306,6 +306,26 @@ export const mergedConversationTurnSchema = z
     addSuggestedReplyIntentIssues(context, value.suggestedReplies);
   });
 
+function addUniqueIdListIssues(
+  ids: readonly string[],
+  context: z.RefinementCtx,
+): void {
+  if (new Set(ids).size !== ids.length) {
+    context.addIssue({
+      code: "custom",
+      message: "citation ids must be unique",
+    });
+  }
+}
+
+const uniqueIdListSchema = z.array(nonEmpty).superRefine(addUniqueIdListIssues);
+
+export const MAX_SPEECH_RECORD_CITATIONS = 8;
+const speechRecordCitationIdsSchema = z
+  .array(nonEmpty)
+  .max(MAX_SPEECH_RECORD_CITATIONS)
+  .superRefine(addUniqueIdListIssues);
+
 export const ambientReplyJudgmentSchema = z
   .object({
     toolCall: z
@@ -315,6 +335,7 @@ export const ambientReplyJudgmentSchema = z
       })
       .strict(),
     utterance: transientWorldUtterance,
+    citedRecordIds: speechRecordCitationIdsSchema.default([]),
     rationale: nonEmpty,
     done: z.literal(true),
     suspicionDelta: z.number().int(),
@@ -330,15 +351,6 @@ export const ambientReplyJudgmentSchema = z
       .nullable(),
   })
   .strict();
-
-const uniqueIdListSchema = z.array(nonEmpty).superRefine((ids, context) => {
-  if (new Set(ids).size !== ids.length) {
-    context.addIssue({
-      code: "custom",
-      message: "citation ids must be unique",
-    });
-  }
-});
 
 const hearingResidentAssessmentSchema = z
   .object({
@@ -389,6 +401,7 @@ export const agentStepProposalSchema = z
   .object({
     toolCall: toolCallSchema.nullable(),
     utterance: optionalTransientWorldUtterance.nullable(),
+    citedRecordIds: speechRecordCitationIdsSchema.default([]),
     rationale: nonEmpty,
     done: z.boolean(),
   })
@@ -396,6 +409,7 @@ export const agentStepProposalSchema = z
   .transform(value => ({
     toolCall: value.toolCall ?? undefined,
     utterance: value.utterance?.trim() || undefined,
+    citedRecordIds: [...value.citedRecordIds],
     rationale: value.rationale,
     done: value.done,
   }))
@@ -473,6 +487,7 @@ export function ambientReplyJudgmentSchemaForLocale(locale: string) {
 export function ambientReplyJudgmentSchemaForRequest(
   locale: string,
   targetActorId: string,
+  visibleRecordIds: readonly string[] = [],
 ) {
   return ambientReplyJudgmentSchemaForLocale(locale).superRefine((value, context) => {
     if (value.toolCall.args.actorId !== targetActorId) {
@@ -482,6 +497,16 @@ export function ambientReplyJudgmentSchemaForRequest(
         message: `ambient reply actorId must equal ${targetActorId}`,
       });
     }
+    const visible = new Set(visibleRecordIds);
+    value.citedRecordIds.forEach((recordId, index) => {
+      if (!visible.has(recordId)) {
+        context.addIssue({
+          code: "custom",
+          path: ["citedRecordIds", index],
+          message: `ambient reply citation ${recordId} is not visible to the speaker`,
+        });
+      }
+    });
   });
 }
 
@@ -1003,6 +1028,23 @@ export function agentStepProposalSchemaForRequest(
         message: "required utterance must be nonempty",
       });
     }
+    if (!value.utterance && value.citedRecordIds.length > 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["citedRecordIds"],
+        message: "record citations require a spoken utterance",
+      });
+    }
+    const visibleCitations = new Set(visibleRecordIds(constraints.observePacket, undefined));
+    value.citedRecordIds.forEach((recordId, index) => {
+      if (!visibleCitations.has(recordId)) {
+        context.addIssue({
+          code: "custom",
+          path: ["citedRecordIds", index],
+          message: `speech citation ${recordId} is not visible in this observation`,
+        });
+      }
+    });
   });
 }
 
@@ -1136,6 +1178,7 @@ export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
   required: [
     "toolCall",
     "utterance",
+    "citedRecordIds",
     "rationale",
     "done",
     "suspicionDelta",
@@ -1159,6 +1202,12 @@ export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
       },
     },
     utterance: transientWorldUtteranceJsonString,
+    citedRecordIds: {
+      type: "array",
+      maxItems: MAX_SPEECH_RECORD_CITATIONS,
+      uniqueItems: true,
+      items: { type: "string", minLength: 1 },
+    },
     rationale: { type: "string", minLength: 1 },
     done: { type: "boolean", const: true },
     suspicionDelta: { type: "integer" },
@@ -1185,6 +1234,7 @@ export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
 export function ambientReplyJudgmentJsonSchemaForTarget(
   targetActorId: string,
   locale?: string,
+  visibleRecordIds: readonly string[] = [],
 ): Record<string, unknown> {
   const schema = structuredClone(ambientReplyJudgmentJsonSchema);
   const properties = schema.properties as Record<string, Record<string, unknown>>;
@@ -1197,6 +1247,11 @@ export function ambientReplyJudgmentJsonSchemaForTarget(
     Record<string, unknown>
   >;
   argsProperties.actorId.const = targetActorId;
+  const citedRecordIds = properties.citedRecordIds;
+  const citedItems = citedRecordIds.items as Record<string, unknown>;
+  const visible = uniqueStrings(visibleRecordIds);
+  if (visible.length === 0) citedRecordIds.maxItems = 0;
+  else citedItems.enum = visible;
   if (locale) annotatePlayerVisibleDescriptions(schema, locale);
   return schema;
 }
@@ -1289,7 +1344,7 @@ const administrativeOpenQuestionJsonSchema: Record<string, unknown> = {
 export const agentStepProposalJsonSchema: Record<string, unknown> = {
   type: "object",
   additionalProperties: false,
-  required: ["toolCall", "utterance", "rationale", "done"],
+  required: ["toolCall", "utterance", "citedRecordIds", "rationale", "done"],
   properties: {
     toolCall: {
       anyOf: [
@@ -1414,6 +1469,12 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
       ],
     },
     utterance: nullableTransientWorldUtteranceJsonString,
+    citedRecordIds: {
+      type: "array",
+      maxItems: MAX_SPEECH_RECORD_CITATIONS,
+      uniqueItems: true,
+      items: { type: "string", minLength: 1 },
+    },
     rationale: { type: "string", minLength: 1 },
     done: { type: "boolean" },
   },
@@ -1426,6 +1487,11 @@ export function agentStepProposalJsonSchemaForTools(
   const schema = structuredClone(agentStepProposalJsonSchema);
   const properties = schema.properties as Record<string, Record<string, unknown>>;
   const toolCallSchema = properties.toolCall;
+  const citedRecordIds = properties.citedRecordIds;
+  const citedItems = citedRecordIds.items as Record<string, unknown>;
+  const visibleCitations = visibleRecordIds(constraints.observePacket, undefined);
+  if (visibleCitations.length === 0) citedRecordIds.maxItems = 0;
+  else citedItems.enum = visibleCitations;
   const branches = toolCallSchema?.anyOf;
   if (!Array.isArray(branches)) {
     throw new Error("agent-step JSON schema is missing toolCall variants");

@@ -243,7 +243,10 @@ replies, and ambient work. It adds no synthetic proposal metadata, provider
 audit resolution, runtime-trace entry, speech, or world delta; an exact retry
 returns the cached result without another attempt. Evidence from an earlier
 successful turn is retained, and genuine provider hard-budget fallback remains
-visible in both provider surfaces.
+visible in both provider surfaces. The configured hard token cap must match the
+run snapshot constant. `reservedTokens` is not extra spend: it is subtracted
+from the autonomous-work ceiling, so increasing late player/hearing headroom
+does not silently buy more background chatter.
 
 The landed surface includes `POST /v1/run/start`, `POST /v1/run/advance`,
 `GET /v1/run/snapshot`, `POST /v1/run/encounter`, `POST /v1/session/preload`,

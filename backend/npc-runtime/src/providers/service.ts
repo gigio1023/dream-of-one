@@ -20,6 +20,7 @@ import {
   supportedLocaleEntry,
 } from "../localization/supported-locales.js";
 import type { ToolName } from "../agentloop/tools.js";
+import type { ObservePacket } from "../agentloop/context.js";
 import { ProviderBudgetReservedError } from "./ports.js";
 import type {
   AmbientReplyJudgment,
@@ -239,6 +240,11 @@ function conversationGroundingContract(
     .filter(line => line.speakerId === "player")
     .map(line => line.line);
   if (newestPlayerLine !== undefined) playerStatements.push(newestPlayerLine);
+  const heardSpeech = [...request.observePacket.heardSpeech];
+  if (newestPlayerLine !== undefined) {
+    const duplicateIndex = heardSpeech.lastIndexOf(newestPlayerLine);
+    if (duplicateIndex >= 0) heardSpeech.splice(duplicateIndex, 1);
+  }
   return {
     knowledgeMode: "closed_world",
     suppliedSceneContext: "sceneFacts" in request ? request.sceneFacts : [],
@@ -251,12 +257,86 @@ function conversationGroundingContract(
       kind: record.kind,
       stateBody: record.stateBody,
     })),
-    heardSpeech: request.observePacket.heardSpeech,
+    heardSpeech,
     validityRules: [
       "Treat every unlisted person, identity, role, item, document, record, approval, appointment, possession, and past event as unknown.",
       "Do not convert unknown into absent, missing, checked, expected, owned, received, or completed.",
       "A suggested player reply may repeat supplied player statements or react to the present exchange; it may not add biography, possessions, paperwork, invitations, approvals, appointments, or past actions.",
     ],
+  };
+}
+
+function residentProviderContext(packet: ObservePacket) {
+  return {
+    actorId: packet.actorId,
+    role: packet.role,
+    landmarkId: packet.landmarkId,
+    goals: packet.goals,
+    actorPolicy: packet.actorPolicy,
+    actorContext: packet.actorContext,
+    selfContext: packet.selfContext,
+    memoryNotes: packet.actorMemory.ownActionNotes,
+  };
+}
+
+function conversationActorContext(packet: ObservePacket) {
+  return {
+    ...residentProviderContext(packet),
+    presentActorIds: packet.visibleActors,
+    audibleActorIds: packet.audibleActorIds,
+  };
+}
+
+function agentObserveContext(packet: ObservePacket, tools: readonly ToolName[]) {
+  const toolSet = new Set(tools);
+  const needsActors =
+    toolSet.has("move_to") ||
+    toolSet.has("look") ||
+    toolSet.has("talk_to") ||
+    toolSet.has("request");
+  const needsObjects = toolSet.has("look") || toolSet.has("use_object");
+  const needsRecords =
+    toolSet.has("look") || toolSet.has("read_record") || toolSet.has("write_record");
+  const needsAdministration = toolSet.has("read_record") || toolSet.has("write_record");
+  return {
+    resident: residentProviderContext(packet),
+    heardSpeech: packet.heardSpeech,
+    ...(needsActors
+      ? {
+          visibleActorIds: packet.visibleActors,
+          audibleActorIds: packet.audibleActorIds,
+        }
+      : {}),
+    ...(toolSet.has("move_to")
+      ? {
+          reachableAnchorRefs: packet.reachableAnchorRefs,
+          playerContact: packet.playerContact,
+        }
+      : {}),
+    ...(needsObjects ? { visibleObjects: packet.visibleObjects } : {}),
+    ...(needsRecords ? { visibleRecords: packet.visibleRecords } : {}),
+    ...(toolSet.has("use_object") || needsAdministration
+      ? { visibleLedgerEvents: packet.visibleLedgerEvents }
+      : {}),
+    ...(needsAdministration
+      ? {
+          administrativeSources: packet.administrativeSources,
+          administrativeAuthority: packet.administrativeAuthority,
+        }
+      : {}),
+  };
+}
+
+function ambientListenerContext(request: AmbientReplyRequest) {
+  const heardSpeech = [...request.observePacket.heardSpeech];
+  const exactSource = `${request.sourceSpeakerActorId}: ${request.sourceUtterance}`;
+  const duplicateIndex = heardSpeech.lastIndexOf(exactSource);
+  if (duplicateIndex >= 0) heardSpeech.splice(duplicateIndex, 1);
+  return {
+    ...residentProviderContext(request.observePacket),
+    presentActorIds: request.observePacket.visibleActors,
+    audibleActorIds: request.observePacket.audibleActorIds,
+    otherHeardSpeech: heardSpeech,
   };
 }
 
@@ -385,12 +465,9 @@ export class ProviderService implements NpcProposalPort {
     ].join(" ");
     const requestContext = {
       objective: request.objective,
-      sceneFacts: request.sceneFacts,
-      actor: request.observePacket,
+      actor: conversationActorContext(request.observePacket),
       conversationHistory: request.conversationHistory.slice(-6),
       groundingContract: conversationGroundingContract(request),
-      beatId: request.beatId,
-      locale: request.locale,
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<ConversationProposal>({
@@ -432,14 +509,11 @@ export class ProviderService implements NpcProposalPort {
       conversationHistory: request.conversationHistory.slice(-10),
       answerBinding: {
         answeredNpcLine: latestNpcLine(request.conversationHistory),
-        playerLine: request.playerLine,
       },
-      actor: request.observePacket,
+      actor: conversationActorContext(request.observePacket),
       suspicionBefore: request.suspicionBefore,
       reportPressureBefore: request.reportPressureBefore,
       groundingContract: conversationGroundingContract(request, request.playerLine),
-      beatId: request.beatId,
-      locale: request.locale,
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<ConversationJudgment>({
@@ -496,19 +570,15 @@ export class ProviderService implements NpcProposalPort {
       conversationHistory: request.conversationHistory.slice(-10),
       answerBinding: {
         answeredNpcLine: latestNpcLine(request.conversationHistory),
-        playerLine: request.playerLine,
       },
       objective: request.objective,
-      sceneFacts: request.sceneFacts,
-      actor: request.observePacket,
+      actor: conversationActorContext(request.observePacket),
       suspicionBefore: request.suspicionBefore,
       reportPressureBefore: request.reportPressureBefore,
       stanceBefore: request.stanceBefore,
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
       currentOpenQuestion: request.currentOpenQuestion ?? null,
       groundingContract: conversationGroundingContract(request, request.playerLine),
-      beatId: request.beatId,
-      locale: request.locale,
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<MergedConversationTurn>({
@@ -595,13 +665,12 @@ export class ProviderService implements NpcProposalPort {
     const requestContext = {
       goal: request.goal,
       iteration: request.iteration,
-      observe: request.observePacket,
+      observe: agentObserveContext(request.observePacket, effectiveTools),
       previousResult: request.previousResult ?? null,
       blockedSignatures: request.blockedSignatures,
       allowedTalkActorIds: allowedTalkActorIds ?? null,
       requiredToolCall: request.requiredToolCall ?? null,
       requireUtterance: request.requireUtterance ?? false,
-      locale: request.locale,
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<AgentStepProposal>({
@@ -642,9 +711,6 @@ export class ProviderService implements NpcProposalPort {
       "Do not decide a verdict or mutate the world. Return only JSON matching the supplied schema.",
     ].join(" ");
     const requestContext = {
-      runId: request.sessionId,
-      wakeId: request.wakeId,
-      conversationId: request.conversationId,
       sourceSpeakerActorId: request.sourceSpeakerActorId,
       sourceUtterance: request.sourceUtterance,
       listenerActorId: request.listenerActorId,
@@ -652,8 +718,7 @@ export class ProviderService implements NpcProposalPort {
       stanceBefore: request.stanceBefore,
       suspicionBefore: request.suspicionBefore,
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
-      listener: request.observePacket,
-      locale: request.locale,
+      listener: ambientListenerContext(request),
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<AmbientReplyJudgment>({
@@ -698,9 +763,6 @@ export class ProviderService implements NpcProposalPort {
       "Return only JSON matching the supplied schema.",
     ].join(" ");
     const requestContext = {
-      runId: request.runId,
-      hearingId: request.hearingId,
-      locale: request.locale,
       finalDefense: request.finalDefense,
       institutionalPressure: request.institutionalPressure,
       residents: request.residents,

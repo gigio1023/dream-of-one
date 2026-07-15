@@ -32,9 +32,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -900,9 +900,9 @@
         },
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -1381,9 +1381,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -2321,9 +2321,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -5581,9 +5581,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -7681,9 +7681,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -8299,9 +8299,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -9364,9 +9364,9 @@
         "institutionalPressure": 15,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -12985,9 +12985,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -13590,9 +13590,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -14453,9 +14453,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -15058,9 +15058,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -15933,9 +15933,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -16542,9 +16542,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -17407,9 +17407,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },
@@ -18012,9 +18012,9 @@
         "institutionalPressure": 0,
         "providerBudget": {
           "callLimit": 120,
-          "tokenLimit": 300000,
+          "tokenLimit": 450000,
           "reservedCalls": 20,
-          "reservedTokens": 50000,
+          "reservedTokens": 200000,
           "callsUsed": 0,
           "tokensUsed": 0
         },

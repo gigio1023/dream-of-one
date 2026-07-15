@@ -53,6 +53,13 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
   const providerConfig = loadProviderConfig();
   assert.equal(snapshot.providerBudget.callLimit, providerConfig.runtime.maxCallsPerSession);
   assert.equal(snapshot.providerBudget.tokenLimit, providerConfig.runtime.maxTokensPerSession);
+  assert.equal(snapshot.providerBudget.tokenLimit, 450_000);
+  assert.equal(snapshot.providerBudget.reservedTokens, 200_000);
+  assert.equal(
+    snapshot.providerBudget.tokenLimit - snapshot.providerBudget.reservedTokens,
+    250_000,
+    "the richer foreground budget must not increase autonomous provider spend",
+  );
   assert.equal(snapshot.actors.length, 6);
   assert.deepEqual(
     snapshot.actors.map(actor => actor.actorId),

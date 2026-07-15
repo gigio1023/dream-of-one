@@ -42,6 +42,6 @@
   "runtime": {
     "timeoutMs": 12000,
     "maxCallsPerSession": 120,
-    "maxTokensPerSession": 300000
+    "maxTokensPerSession": 450000
   }
 }

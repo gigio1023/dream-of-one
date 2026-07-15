@@ -399,6 +399,14 @@ test("required talk_to narrows transport and Zod contracts and repairs an invali
   );
   assert.match(textGen.requests[1].instructions, /complete replacement JSON value/);
 
+  const firstInput = JSON.parse(textGen.requests[0].input);
+  assert.equal(firstInput.observe.resident.actorId, packet.actorId);
+  assert.deepEqual(firstInput.observe.visibleActorIds, packet.visibleActors);
+  assert.deepEqual(firstInput.observe.audibleActorIds, packet.audibleActorIds);
+  assert.equal("visibleObjects" in firstInput.observe, false);
+  assert.equal("visibleRecords" in firstInput.observe, false);
+  assert.equal("administrativeSources" in firstInput.observe, false);
+
   const repairInput = JSON.parse(textGen.requests[1].input) as {
     validationIssues: Array<{ path: string; message: string }>;
   };
@@ -1867,6 +1875,18 @@ test("provider service returns schema-validated live conversation proposals", as
   assert.equal(textGen.requests[0].schemaName, "npc_conversation_turn");
   assert.match(textGen.requests[0].instructions, /Missing context means unknown, never absent/);
   assert.match(textGen.requests[0].instructions, /without inventing a new identity/);
+  const providerInput = JSON.parse(textGen.requests[0].input);
+  assert.equal(providerInput.actor.actorId, conversationRequest().observePacket.actorId);
+  assert.equal("visibleObjects" in providerInput.actor, false);
+  assert.equal("visibleRecords" in providerInput.actor, false);
+  assert.equal("administrativeAuthority" in providerInput.actor, false);
+  assert.deepEqual(
+    providerInput.groundingContract.visibleObjectFacts,
+    conversationRequest().observePacket.visibleObjects.map(object => ({
+      label: object.label,
+      state: object.state,
+    })),
+  );
   assert.deepEqual(service.auditSnapshot("session-provider-test"), {
     callsUsed: 1,
     tokensUsed: 50,
@@ -1930,6 +1950,10 @@ test("ambient reply is one schema-validated call with its own audit purpose and 
   const input = JSON.parse(textGen.requests[0]?.input ?? "{}");
   assert.equal(input.sourceUtterance, request.sourceUtterance);
   assert.equal(input.listenerActorId, request.listenerActorId);
+  assert.deepEqual(input.listener.otherHeardSpeech, []);
+  assert.equal("visibleRecords" in input.listener, false);
+  assert.equal("administrativeSources" in input.listener, false);
+  assert.equal("reachableAnchorRefs" in input.listener, false);
   assert.deepEqual(service.auditSnapshot(request.sessionId).resolutions, [{
     seq: 1,
     purpose: "ambient_reply",
@@ -2380,8 +2404,9 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   assert.ok(input.groundingContract.validityRules.length >= 3);
   assert.deepEqual(input.answerBinding, {
     answeredNpcLine: "오늘도 같은 걸로 드릴까요?",
-    playerLine: judgmentRequest().playerLine,
   });
+  assert.equal("visibleRecords" in input.actor, false);
+  assert.equal("toolCatalog" in input.actor, false);
   const mergedSchema = textGen.requests[0].jsonSchema as {
     properties?: {
       suggestedReplies?: {
@@ -2711,7 +2736,7 @@ test("provider prompts and validation follow a non-Korean run locale without ano
   assert.match(textGen.requests[0].instructions, /natural American English/);
   assert.match(textGen.requests[0].instructions, /never copy stable ids/i);
   assert.doesNotMatch(textGen.requests[0].instructions, /Hangul code point/);
-  assert.equal(JSON.parse(textGen.requests[0].input).locale, "en-US");
+  assert.equal("locale" in JSON.parse(textGen.requests[0].input), false);
 });
 
 test("invalid provider JSON gets one bounded repair attempt", async () => {

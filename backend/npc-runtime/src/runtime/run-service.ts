@@ -133,9 +133,11 @@ import type {
 export const STUDIO_RECEPTIONIST_ID = "NPC_Studio_Receptionist";
 export const RUN_PROVIDER_BUDGET = {
   callLimit: 120,
-  tokenLimit: 300_000,
+  tokenLimit: 450_000,
   reservedCalls: 20,
-  reservedTokens: 50_000,
+  // Keep autonomous goals and ambient speech at the proven 250k ceiling;
+  // late player conversations and the memory-heavy hearing share the rest.
+  reservedTokens: 200_000,
 } as const;
 
 /**

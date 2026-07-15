@@ -48,6 +48,9 @@ const nullablePlayerVisibleJsonString = {
     "Player-visible natural-language prose only when non-null. Obey the request groundingContract when present; never invent a player or world fact. Never include an internal stable id, identifier token, or underscore name.",
 } as const;
 
+const KOREAN_PLAYER_VISIBLE_JSON_SCHEMA_SUFFIX =
+  " This request uses Korean player-visible text. Write Hangul-dominant natural Korean. Do not copy lowercase Latin words from machine-readable context: translate public place and role labels into Korean, and transliterate non-acronym names when necessary.";
+
 function isKoreanLocale(locale: string): boolean {
   return supportedLocaleEntry(locale).presentationId === "ko";
 }
@@ -1247,6 +1250,7 @@ export const agentStepProposalJsonSchema: Record<string, unknown> = {
 
 export function agentStepProposalJsonSchemaForTools(
   constraints: AgentStepRequestSchemaConstraints,
+  locale?: string,
 ): Record<string, unknown> {
   const schema = structuredClone(agentStepProposalJsonSchema);
   const properties = schema.properties as Record<string, Record<string, unknown>>;
@@ -1484,5 +1488,26 @@ export function agentStepProposalJsonSchemaForTools(
   }
 
   toolCallSchema.anyOf = narrowedBranches;
+  if (locale && isKoreanLocale(locale)) {
+    annotateKoreanPlayerVisibleDescriptions(schema);
+  }
   return schema;
+}
+
+function annotateKoreanPlayerVisibleDescriptions(value: unknown): void {
+  if (!value || typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    value.forEach(annotateKoreanPlayerVisibleDescriptions);
+    return;
+  }
+  const record = value as Record<string, unknown>;
+  const description = record.description;
+  if (
+    typeof description === "string" &&
+    description.includes("Player-visible natural-language prose") &&
+    !description.includes(KOREAN_PLAYER_VISIBLE_JSON_SCHEMA_SUFFIX)
+  ) {
+    record.description = description + KOREAN_PLAYER_VISIBLE_JSON_SCHEMA_SUFFIX;
+  }
+  Object.values(record).forEach(annotateKoreanPlayerVisibleDescriptions);
 }

@@ -248,6 +248,7 @@ function localeOutputInstructions(locale: string, fields: string): string[] {
     instructions.push(
       "Write natural Korean prose in every player-visible text field, and include at least one Hangul code point in each nonempty field.",
       "Latin-script names, established acronyms such as AI or QR, numerals, and occasional Hanja are allowed when natural, but they cannot replace Korean prose. Never mix Japanese hiragana or katakana, Simplified Chinese forms, or Chinese function words and clauses into Korean player-visible text.",
+      "Do not copy lowercase Latin place, role, or name tokens from machine-readable context into player-visible prose. Render public labels in Korean—for example Studio as 스튜디오, Office as 사무실, Station as 스테이션, and Park as 공원—and transliterate non-acronym names when needed.",
     );
   }
   return instructions;
@@ -514,7 +515,7 @@ export class ProviderService implements NpcProposalPort {
       requiredToolCall: request.requiredToolCall,
       requireUtterance: request.requireUtterance,
     };
-    const jsonSchema = agentStepProposalJsonSchemaForTools(schemaConstraints);
+    const jsonSchema = agentStepProposalJsonSchemaForTools(schemaConstraints, request.locale);
     const instructions = [
       "You choose one next action for a bounded NPC agent loop.",
       "Read the previous tool result before acting. A failed or blocked call must change the next attempt.",
@@ -764,7 +765,7 @@ export class ProviderService implements NpcProposalPort {
       const repairRequest: TextGenRequest = {
         ...input.request,
         purpose: "repair",
-        instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary. Always rewrite the whole affected field when it is player-visible, using natural in-fiction prose in the immutable run language; do not preserve a rejected foreign-language fragment. For Korean, use Hangul-dominant Korean and translate lowercase Latin prose, Simplified Chinese forms, Chinese function words or clauses, hiragana, and katakana; retain only natural title-case names, short uppercase acronyms, numerals, and occasional Hanja. When a player-visible field exposes an internal stable id, never repeat the identifier, an underscore token, or an internal id-shaped substitute.`,
+        instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary. Always rewrite the whole affected field when it is player-visible, using natural in-fiction prose in the immutable run language; do not preserve a rejected foreign-language fragment. For Korean, use Hangul-dominant Korean and translate lowercase Latin prose, Simplified Chinese forms, Chinese function words or clauses, hiragana, and katakana; retain only natural title-case names, short uppercase acronyms, numerals, and occasional Hanja. If a Korean validation issue cites Latin script, rewrite that entire field from scratch without copying any lowercase Latin token. Render machine-context place labels as Korean, for example Studio as 스튜디오, Office as 사무실, Station as 스테이션, and Park as 공원, and transliterate non-acronym names when necessary. When a player-visible field exposes an internal stable id, never repeat the identifier, an underscore token, or an internal id-shaped substitute.`,
         input: JSON.stringify({
           ...(input.repairContext === undefined
             ? {}

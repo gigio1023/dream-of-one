@@ -451,6 +451,7 @@ test("required talk_to narrows transport and Zod contracts and repairs an invali
   assert.equal(utteranceSchema.type, "string");
   assert.equal(utteranceSchema.minLength, 1);
   assert.match(String(utteranceSchema.description), /Never include an internal stable id/);
+  assert.match(String(utteranceSchema.description), /Hangul-dominant natural Korean/);
   const doneSchema = (
     textGen.requests[0].jsonSchema as { properties: { done: Record<string, unknown> } }
   ).properties.done;
@@ -498,6 +499,59 @@ test("required talk_to narrows transport and Zod contracts and repairs an invali
     fallbackReason: null,
     callSeqs: [1, 2],
   }]);
+});
+
+test("Korean agent-step repair rewrites a lowercase Latin utterance instead of falling back", async () => {
+  const targetActorId = "NPC_Store_Manager";
+  const invalidReply = {
+    toolCall: { tool: "talk_to", args: { actorId: targetActorId } },
+    utterance: "studio에서 확인한 내용을 전하겠습니다.",
+    rationale: "확인한 내용을 관리자에게 전달합니다.",
+    done: true,
+  };
+  const repairedReply = {
+    ...invalidReply,
+    utterance: "스튜디오에서 확인한 내용을 전하겠습니다.",
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(invalidReply) },
+    { text: JSON.stringify(repairedReply) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/agent-step-korean-utterance-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.proposeNextStep({
+    sessionId: "run-agent-step-korean-utterance-repair",
+    locale: "ko-KR",
+    iteration: 0,
+    goal: "지정된 주민에게 확인 내용을 한 번 말한다.",
+    observePacket: observePacket(),
+    blockedSignatures: [],
+    requiredToolCall: { tool: "talk_to", actorId: targetActorId },
+    requireUtterance: true,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.utterance, repairedReply.utterance);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), ["agent_step", "repair"]);
+  assert.match(textGen.requests[0].instructions, /Studio as 스튜디오/);
+  assert.match(textGen.requests[1].instructions, /rewrite that entire field from scratch/);
+  const repairInput = JSON.parse(textGen.requests[1].input) as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "utterance",
+    message:
+      "player-visible Korean text may use Latin script only for title-case names or short uppercase acronyms",
+  }]);
+  const schema = textGen.requests[0].jsonSchema as {
+    properties: { utterance: { description?: string } };
+  };
+  assert.match(schema.properties.utterance.description ?? "", /Hangul-dominant natural Korean/);
 });
 
 test("required move_to player narrows transport and Zod contracts without requiring speech", async () => {

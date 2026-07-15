@@ -195,7 +195,8 @@ list.
 - Interactable kinds and their verbs: NPC → conversation, prop → pick up
   (then place/throw), record surface → inspect.
 - A ready NPC that walks just out of the ray keeps a 1.5-second interaction
-  grace while remaining within 3.25 m, inside a 30° camera cone, and directly
+  grace while remaining within the runtime's 2.85 m actor-center boundary,
+  inside a 30° camera cone, and directly
   visible through a physics ray. This catches an intended E press without
   extending the visible prompt, allowing through-wall/behind-camera input, or
   bypassing the runtime's fresh spatial start validation.
@@ -403,7 +404,8 @@ the dev machine with all six NPC loops live.
   a visible NPC inside a 5 m, 32-degree camera-relative approach cone. That
   assisted look may recover a stale provider opening and holds only that
   resident's local wander while the player closes the distance. The NPC becomes
-  an `E` target only when ready and inside 3 m. A ready NPC inside that
+  an `E` target only when ready and within the runtime's 2.85 m actor-center
+  boundary. A ready NPC inside that
   cone outranks an exact static record surface; that thin inspectable overlay
   alone does not occlude either the NPC torso check or the engine spatial sight
   fact used to ground conversation. Walls, held props, and exact NPC or

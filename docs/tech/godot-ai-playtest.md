@@ -134,7 +134,8 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   proven, but Slice 4 remains incomplete. Resume with one fresh bounded run
   that first holds an aimed resident between 3 m and 5 m and records
   `playerPreloadIntent=true`, `playerAttentionHeld=true`, and
-  `playerFocused=false`; then close to 3 m, submit one displayed answer, inspect
+  `playerFocused=false`; then close to the 2.85 m runtime boundary, submit one
+  displayed answer, inspect
   the next response, and proceed to the remaining M3R hearing/fallback/locale
   acceptance routes. Do not repeat the already-proven close-focus `E` path as
   a standalone task.
@@ -289,8 +290,9 @@ titles, kinds, and world positions. NPC entries separate backend conversation
 readiness from current player focus and preload intent, expose the scene-local
 `playerAttentionHeld` presentation flag, and include current player distance.
 This lets a play run distinguish a prepared resident at 3–5 m from an actual
-focus/`E` target inside 3 m without reading private nodes. It does not expose
-hidden NPC knowledge, unreadable records, projected routes, or provider secrets.
+focus/`E` target inside the 2.85 m runtime boundary without reading private
+nodes. It does not expose hidden NPC knowledge, unreadable records, projected
+routes, or provider secrets.
 
 The adapter must return copies, not references to mutable dictionaries. Missing
 nodes produce explicit availability fields rather than runtime errors.

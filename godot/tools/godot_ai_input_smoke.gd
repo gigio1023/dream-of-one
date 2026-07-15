@@ -321,13 +321,51 @@ func _run() -> void:
 		_failures.append("Player3D directly routed an unfocused E to a guessed contact target")
 	focus_npc.active_contact = false
 
+	# The runtime accepts an ordinary conversation only at a 2.85 m actor-root
+	# center distance. The wider 5 m look still prepares an opening, but neither
+	# aim assist nor the recent-focus grace may advertise an E press outside the
+	# authoritative start boundary.
+	var inside_conversation_z := -sqrt(2.84 * 2.84 - 0.3 * 0.3)
+	var outside_conversation_z := -sqrt(2.90 * 2.90 - 0.3 * 0.3)
+	player.global_position = Vector3.ZERO
+	player.velocity = Vector3.ZERO
+	focus_npc.position = Vector3(0.3, 0.0, inside_conversation_z)
+	player.call("_set_focused_target", null)
+	player.call("_clear_recent_npc_focus")
+	await physics_frame
+	await physics_frame
+	if player.call("preload_intent_target") != focus_npc:
+		_failures.append("NPC conversation boundary lost the wider preload intent")
+	if player.call("focused_interactable") != focus_npc:
+		_failures.append("ready NPC inside the 2.85 meter runtime boundary was not acquired")
+	var boundary_interaction_count := focus_npc.interaction_count
+	player.call("_set_focused_target", null)
+	focus_npc.position = Vector3(0.3, 0.0, outside_conversation_z)
+	if bool(player.call("interact_focused")):
+		_failures.append("NPC focus grace leaked E beyond the 2.85 meter runtime boundary")
+	elif focus_npc.interaction_count != boundary_interaction_count:
+		_failures.append("out-of-range NPC focus grace reached the interaction callback")
+	await physics_frame
+	await physics_frame
+	if player.call("preload_intent_target") != focus_npc:
+		_failures.append("out-of-range ready NPC lost its valid preload intent")
+	if player.call("focused_interactable") != null or bool(player.call("interact_focused")):
+		_failures.append("ready NPC outside the 2.85 meter runtime boundary exposed E")
+	focus_npc.position = Vector3(0.3, 0.0, inside_conversation_z)
+	await physics_frame
+	await physics_frame
+	if not bool(player.call("interact_focused")):
+		_failures.append("ready NPC inside the 2.85 meter runtime boundary rejected E")
+	elif focus_npc.interaction_count != boundary_interaction_count + 1:
+		_failures.append("in-range NPC boundary interaction did not reach its callback once")
+
 	focus_npc.position = Vector3(0.0, 0.0, -3.2)
 	await physics_frame
 	await physics_frame
 	if player.call("preload_intent_target") != focus_npc:
 		_failures.append("NPC approach intent did not extend beyond the E acquisition bound")
 	if player.call("focused_interactable") != null or bool(player.call("interact_focused")):
-		_failures.append("NPC aim assist exceeded its 3 meter acquisition bound")
+		_failures.append("NPC aim assist exceeded its 2.85 meter runtime boundary")
 	focus_npc.position = Vector3(0.0, 0.0, -5.2)
 	await physics_frame
 	await physics_frame

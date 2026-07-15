@@ -15,7 +15,11 @@ const MIN_FIELD_OF_VIEW := 60.0
 const MAX_FIELD_OF_VIEW := 100.0
 const MAX_PITCH_RADIANS := deg_to_rad(85.0)
 const NPC_FOCUS_GRACE_MSEC := 1500
-const NPC_FOCUS_GRACE_DISTANCE_M := 3.25
+## Keep this root-to-root boundary aligned with RunService's authoritative
+## PLAYER_CONVERSATION_MAX_CENTER_DISTANCE_M. The 5 m preload look may prepare
+## an opening, but the client must not advertise an E press the runtime will
+## deterministically reject.
+const NPC_INTERACTION_MAX_CENTER_DISTANCE_M := 2.85
 const NPC_FOCUS_GRACE_MIN_FORWARD_DOT := 0.8660254
 const NPC_AIM_ASSIST_DISTANCE_M := 3.0
 const NPC_PRELOAD_AIM_ASSIST_DISTANCE_M := 5.0
@@ -252,6 +256,12 @@ func _npc_aim_assist(
 		var distance := to_target.length()
 		if distance <= 0.001 or distance > max_distance_m:
 			continue
+		if (
+			require_interaction_ready
+			and global_position.distance_to(candidate.global_position)
+			> NPC_INTERACTION_MAX_CENTER_DISTANCE_M
+		):
+			continue
 		var target_direction := to_target / distance
 		var forward_amount := target_direction.dot(camera_forward)
 		if forward_amount <= 0.0:
@@ -403,14 +413,20 @@ func camera_relative_direction(target_position: Vector3) -> StringName:
 
 func focused_interactable() -> Node:
 	if is_instance_valid(_focused_target):
-		return _focused_target
+		if (
+			_is_npc_interactable(_focused_target)
+			and global_position.distance_to(
+				(_focused_target as Node3D).global_position
+			) > NPC_INTERACTION_MAX_CENTER_DISTANCE_M
+		):
+			_set_focused_target(null)
+		else:
+			return _focused_target
 	if (
 		is_instance_valid(_recent_npc_target)
 		and Time.get_ticks_msec() <= _recent_npc_focus_expires_msec
-		and _horizontal_distance(
-			global_position,
-			_recent_npc_target.global_position
-		) <= NPC_FOCUS_GRACE_DISTANCE_M
+		and global_position.distance_to(_recent_npc_target.global_position)
+		<= NPC_INTERACTION_MAX_CENTER_DISTANCE_M
 		and _recent_npc_target_is_visible()
 		and (
 			not _recent_npc_target.has_method("is_interaction_enabled")

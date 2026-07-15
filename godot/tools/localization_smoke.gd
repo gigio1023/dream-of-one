@@ -563,8 +563,16 @@ func _check_provenance_log(
 	))
 	if speech_source.is_empty() or not log_text.contains(speech_source):
 		_failures.append("%s log omitted its localized speech excerpt" % presentation_id)
+	elif log_text.count(speech_source) != 2:
+		# The stance summary owns one copy; its provenance must not repeat an
+		# identical why-line as though it were a second source.
+		_failures.append("%s log repeated identical speech provenance" % presentation_id)
 	if record_source.is_empty() or not log_text.contains(record_source):
 		_failures.append("%s log omitted its localized record excerpt" % presentation_id)
+	elif log_text.count(record_source) != 2:
+		# The record body owns one copy; its provenance must not echo the same
+		# why-line a third time.
+		_failures.append("%s log repeated identical record provenance" % presentation_id)
 	if log_text.contains(hidden_speech_id) or log_text.contains(hidden_record_id):
 		_failures.append("%s log leaked a raw provenance id" % presentation_id)
 	hud.call("close_log")

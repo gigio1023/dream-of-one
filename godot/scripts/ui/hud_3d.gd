@@ -1519,12 +1519,17 @@ func _provenance_text(provenance: Dictionary) -> String:
 	var origin_kind := str(provenance.get("originKind", ""))
 	if origin_kind not in ["speech", "record"]:
 		return ""
+	var source := str(provenance.get("sourceExcerpt", "")).strip_edges()
+	var why := str(provenance.get("whyLine", "")).strip_edges()
+	var reason := ""
+	if not why.is_empty() and why != source:
+		reason = str(tr(&"hud.m3r.log.provenance.reason")).format({"why": why})
 	return str(tr("hud.m3r.log.provenance.%s" % origin_kind)).format({
 		"origin": _actor_label(str(provenance.get("originActorId", ""))),
 		"recipient": _actor_label(str(provenance.get("recipientActorId", ""))),
-		"source": str(provenance.get("sourceExcerpt", "")),
-		"why": str(provenance.get("whyLine", "")),
-	})
+		"source": source,
+		"reason": reason,
+	}).strip_edges()
 
 
 func _disclosed_stance(actor_id: String) -> String:

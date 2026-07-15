@@ -1,6 +1,7 @@
 {
   "fr": {
     "hud.interaction.npc": "E — Parler",
+    "hud.m3r.interaction.npc_preparing": "Préparation de la conversation…",
     "hud.interaction.door": "E — Ouvrir / fermer la porte",
     "hud.interaction.record": "E — Consulter les registres",
     "hud.m3r.interaction.prop_pick_up": "E — Prendre l'objet",
@@ -68,6 +69,11 @@
     "hud.m3r.stance.oppose": "Opposition",
     "hud.m3r.stance.uncertain": "Avis réservé",
     "hud.m3r.stance.vouch": "Se porte caution",
+    "hud.m3r.stance.transition": "Attitude modifiée · {before} → {after}",
+    "hud.m3r.stance.shift.more_trusting": "Attitude modifiée · {stance} (davantage en confiance)",
+    "hud.m3r.stance.shift.more_wary": "Attitude modifiée · {stance} (davantage sur ses gardes)",
+    "hud.m3r.stance.shift.unchanged": "Attitude maintenue · {stance}",
+    "hud.m3r.stance.latest": "Dernier jugement · {actor}\n{shift}",
     "hud.m3r.why_line.header": "Motif du jugement",
     "hud.m3r.why_line.format": "Motif · {reason}",
     "hud.m3r.encountered_stances.title": "Positions connues",

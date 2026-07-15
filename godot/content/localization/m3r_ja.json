@@ -1,6 +1,7 @@
 {
   "ja": {
     "hud.interaction.npc": "E — 話す",
+    "hud.m3r.interaction.npc_preparing": "会話を準備中…",
     "hud.interaction.door": "E — ドアを開ける / 閉める",
     "hud.interaction.record": "E — 記録を調べる",
     "hud.m3r.interaction.prop_pick_up": "E — 物を持つ",
@@ -68,6 +69,11 @@
     "hud.m3r.stance.oppose": "反対",
     "hud.m3r.stance.uncertain": "保留",
     "hud.m3r.stance.vouch": "保証",
+    "hud.m3r.stance.transition": "態度の変化 · {before} → {after}",
+    "hud.m3r.stance.shift.more_trusting": "態度の変化 · {stance}（信頼が高まった）",
+    "hud.m3r.stance.shift.more_wary": "態度の変化 · {stance}（警戒が強まった）",
+    "hud.m3r.stance.shift.unchanged": "態度を維持 · {stance}",
+    "hud.m3r.stance.latest": "直近の判断 · {actor}\n{shift}",
     "hud.m3r.why_line.header": "判断理由",
     "hud.m3r.why_line.format": "理由 · {reason}",
     "hud.m3r.encountered_stances.title": "確認済みの態度",

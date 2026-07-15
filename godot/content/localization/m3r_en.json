@@ -1,6 +1,7 @@
 {
   "en": {
     "hud.interaction.npc": "E — Talk",
+    "hud.m3r.interaction.npc_preparing": "Preparing conversation…",
     "hud.interaction.door": "E — Open / close door",
     "hud.interaction.record": "E — Inspect records",
     "hud.m3r.interaction.prop_pick_up": "E — Pick up object",
@@ -68,6 +69,11 @@
     "hud.m3r.stance.oppose": "Oppose",
     "hud.m3r.stance.uncertain": "Uncertain",
     "hud.m3r.stance.vouch": "Vouch",
+    "hud.m3r.stance.transition": "Stance changed · {before} → {after}",
+    "hud.m3r.stance.shift.more_trusting": "Stance shifted · {stance} (more trusting)",
+    "hud.m3r.stance.shift.more_wary": "Stance shifted · {stance} (more wary)",
+    "hud.m3r.stance.shift.unchanged": "Stance held · {stance}",
+    "hud.m3r.stance.latest": "Latest judgment · {actor}\n{shift}",
     "hud.m3r.why_line.header": "Reason for judgment",
     "hud.m3r.why_line.format": "Reason · {reason}",
     "hud.m3r.encountered_stances.title": "Known stances",

@@ -5,7 +5,7 @@ const DEFAULT_UI_SCALE := 1.0
 const DEFAULT_MASTER_VOLUME := 0.8
 const DEFAULT_SFX_VOLUME := 0.8
 const CONVERSATION_ERROR_HOLD_SECONDS := 1.5
-const CONVERSATION_END_HOLD_SECONDS := 0.35
+const CONVERSATION_END_HOLD_SECONDS := 2.0
 const CONVERSATION_START_RETRY_ATTEMPTS := 3
 const CONVERSATION_PRELOAD_MAX_IN_FLIGHT := 1
 const CONVERSATION_PRELOAD_MAX_RETRIES := 3
@@ -906,7 +906,7 @@ func _enter_hearing_due() -> void:
 	for actor_value in get_tree().get_nodes_in_group(&"npc_actors"):
 		if actor_value is NPC3D:
 			var actor := actor_value as NPC3D
-			actor.conversation_enabled = false
+			actor.set_conversation_state(false, false)
 			actor.stop()
 	for surface_value in get_tree().get_nodes_in_group(&"record_surfaces"):
 		if surface_value is Node and (surface_value as Node).has_method(
@@ -1139,6 +1139,12 @@ func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
 			_hud.show_contact_approach(contact_id, str(actor_id))
 			call_deferred("_queue_nearby_conversation_preloads")
 			return
+	if not bool(_actor_view(str(actor_id)).get("playerConversationReady", false)):
+		# A pending resident remains focusable so the player gets a localized
+		# preparation prompt. Reassert the explicit raw-aim demand without opening
+		# a modal the runtime would reject as not ready.
+		call_deferred("_queue_nearby_conversation_preloads")
+		return
 	_begin_conversation(actor_id, target, contact_id)
 
 
@@ -1986,6 +1992,7 @@ func _mark_conversation_preload_recovery_required(
 	_conversation_preload_requeue_requested.erase(actor_id)
 	_conversation_preload_requeue_cycle_kinds.erase(actor_id)
 	_conversation_preload_recovery_required[actor_id] = reason
+	_apply_actor_conversation_readiness(_actor_view(actor_id))
 	# Passive proximity remains spent after the first dispatch. A currently
 	# aimed actor or active contact may consume one recovery for its current
 	# demand epoch; another cycle needs a new aim/contact episode.
@@ -2011,6 +2018,7 @@ func _handle_recoverable_conversation_preload_error(
 	_conversation_preload_retry_queued.erase(actor_id)
 	_conversation_preload_recovery_required.erase(actor_id)
 	_conversation_preload_invalidated[actor_id] = true
+	_apply_actor_conversation_readiness(_actor_view(actor_id))
 	_advance_needs_rebase = true
 	return true
 
@@ -3147,6 +3155,7 @@ func _apply_readiness_deltas(deltas: Array) -> void:
 			_clear_conversation_preload_failure_state(actor_id)
 			_conversation_preload_invalidated.erase(actor_id)
 	if should_refresh_priority:
+		_apply_all_conversation_readiness()
 		call_deferred("_queue_nearby_conversation_preloads")
 
 
@@ -3689,9 +3698,34 @@ func _apply_actor_conversation_readiness(actor: Dictionary) -> void:
 	var actor_id := str(actor.get("actorId", ""))
 	var node := _town.get_node_or_null("Actors/%s" % actor_id)
 	if node is NPC3D:
-		(node as NPC3D).conversation_enabled = bool(
-			actor.get("playerConversationReady", false)
+		(node as NPC3D).set_conversation_state(
+			_actor_conversation_focus_available(actor),
+			bool(actor.get("playerConversationReady", false))
 		)
+
+
+func _actor_conversation_focus_available(actor: Dictionary) -> bool:
+	var actor_id := str(actor.get("actorId", ""))
+	if _run_status != "active" or actor_id.is_empty():
+		return false
+	if bool(actor.get("playerConversationReady", false)):
+		return true
+	if actor_id == str(_active_contact.get("actorId", "")):
+		return true
+	if (
+		_conversation_preload_invalidated.has(actor_id)
+		or _conversation_preload_recovery_required.has(actor_id)
+		or _conversation_preload_in_flight.has(actor_id)
+		or _conversation_preload_queued.has(actor_id)
+	):
+		return true
+	for resident_value in _array_or_empty(_social_view.get("encounteredResidents")):
+		if (
+			resident_value is Dictionary
+			and str((resident_value as Dictionary).get("actorId", "")) == actor_id
+		):
+			return false
+	return true
 
 
 func _finish_conversation_modal() -> void:

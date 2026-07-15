@@ -1,6 +1,7 @@
 {
   "zh": {
     "hud.interaction.npc": "E — 交谈",
+    "hud.m3r.interaction.npc_preparing": "正在准备对话……",
     "hud.interaction.door": "E — 开门 / 关门",
     "hud.interaction.record": "E — 查阅记录",
     "hud.m3r.interaction.prop_pick_up": "E — 拿起物品",
@@ -68,6 +69,11 @@
     "hud.m3r.stance.oppose": "反对",
     "hud.m3r.stance.uncertain": "尚未确定",
     "hud.m3r.stance.vouch": "愿意作保",
+    "hud.m3r.stance.transition": "态度变化 · {before} → {after}",
+    "hud.m3r.stance.shift.more_trusting": "态度变化 · {stance}（更加信任）",
+    "hud.m3r.stance.shift.more_wary": "态度变化 · {stance}（更加警惕）",
+    "hud.m3r.stance.shift.unchanged": "态度维持 · {stance}",
+    "hud.m3r.stance.latest": "最近判断 · {actor}\n{shift}",
     "hud.m3r.why_line.header": "判断理由",
     "hud.m3r.why_line.format": "理由 · {reason}",
     "hud.m3r.encountered_stances.title": "已确认的态度",

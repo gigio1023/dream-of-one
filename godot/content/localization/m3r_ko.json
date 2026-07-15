@@ -1,6 +1,7 @@
 {
   "ko": {
     "hud.interaction.npc": "E — 말 걸기",
+    "hud.m3r.interaction.npc_preparing": "대화 준비 중…",
     "hud.interaction.door": "E — 문 열기 / 닫기",
     "hud.interaction.record": "E — 기록 살펴보기",
     "hud.m3r.interaction.prop_pick_up": "E — 물건 집기",
@@ -68,6 +69,11 @@
     "hud.m3r.stance.oppose": "반대",
     "hud.m3r.stance.uncertain": "판단 보류",
     "hud.m3r.stance.vouch": "보증",
+    "hud.m3r.stance.transition": "태도 변화 · {before} → {after}",
+    "hud.m3r.stance.shift.more_trusting": "태도 변화 · {stance} (신뢰가 높아짐)",
+    "hud.m3r.stance.shift.more_wary": "태도 변화 · {stance} (경계가 커짐)",
+    "hud.m3r.stance.shift.unchanged": "태도 유지 · {stance}",
+    "hud.m3r.stance.latest": "최근 판단 · {actor}\n{shift}",
     "hud.m3r.why_line.header": "판단 사유",
     "hud.m3r.why_line.format": "사유 · {reason}",
     "hud.m3r.encountered_stances.title": "확인한 태도",

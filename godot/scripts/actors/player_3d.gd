@@ -152,7 +152,10 @@ func _physics_process(delta: float) -> void:
 	if focus_target == null and _control_enabled:
 		focus_target = _interactable_collider()
 	if _control_enabled and _ready_npc_may_override(focus_target):
-		var assisted_npc := _ready_npc_aim_assist()
+		# Keep a resident focusable during its provider-backed opening preload.
+		# The HUD then says that speech is being prepared instead of making E
+		# appear broken. The authoritative ready gate still lives in Main/runtime.
+		var assisted_npc := _npc_aim_assist(false, NPC_AIM_ASSIST_DISTANCE_M)
 		if assisted_npc != null:
 			focus_target = assisted_npc
 	_set_focused_target(focus_target)
@@ -215,6 +218,11 @@ func _aimed_npc_actor() -> Node:
 	var candidate := collider as Node
 	while candidate != null and candidate != self:
 		if candidate.is_in_group(&"npc_actors"):
+			if (
+				candidate.has_method("is_interaction_focusable")
+				and not bool(candidate.call("is_interaction_focusable"))
+			):
+				return null
 			return candidate
 		candidate = candidate.get_parent()
 	return null
@@ -257,6 +265,10 @@ func _npc_aim_assist(
 			or not candidate.has_method("get_interaction_label_key")
 			or not candidate.has_method("interact")
 			or not candidate.has_method("is_interaction_enabled")
+			or (
+				candidate.has_method("is_interaction_focusable")
+				and not bool(candidate.call("is_interaction_focusable"))
+			)
 			or (
 				require_interaction_ready
 				and not bool(candidate.call("is_interaction_enabled"))
@@ -325,7 +337,14 @@ func _find_interactable(start: Node) -> Node:
 			and candidate.has_method("interact")
 		):
 			if (
-				candidate.has_method("is_interaction_enabled")
+				candidate.has_method("is_interaction_focusable")
+				and not bool(candidate.call("is_interaction_focusable"))
+			):
+				candidate = candidate.get_parent()
+				continue
+			if (
+				not candidate.has_method("is_interaction_focusable")
+				and candidate.has_method("is_interaction_enabled")
 				and not bool(candidate.call("is_interaction_enabled"))
 			):
 				candidate = candidate.get_parent()

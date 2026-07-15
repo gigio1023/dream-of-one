@@ -67,6 +67,10 @@ const INTERACTION_AIM_HEIGHT_M := 1.35
 @export var accent := Color(0.82, 0.82, 0.82)
 @export var character_scene: PackedScene
 @export var conversation_enabled := false
+## A resident can remain a valid interaction target while its provider-backed
+## opening is still preparing. Main owns this lifecycle flag; the actor only
+## presents the ready/pending distinction and never decides eligibility.
+@export var conversation_available := false
 @export_range(0.1, 8.0, 0.1, "or_greater") var walk_speed := 2.2
 @export var ambient_wander_enabled := true
 @export_range(0.8, 4.0, 0.1, "or_greater") var ambient_wander_radius := 1.8
@@ -429,7 +433,11 @@ func policy_state() -> StringName:
 
 
 func get_interaction_label_key() -> StringName:
-	return &"hud.interaction.npc"
+	return (
+		&"hud.interaction.npc"
+		if is_interaction_enabled()
+		else &"hud.m3r.interaction.npc_preparing"
+	)
 
 
 func get_interaction_aim_position() -> Vector3:
@@ -444,6 +452,19 @@ func interaction_kind() -> StringName:
 	return &"npc"
 
 
+func set_conversation_state(available: bool, ready: bool) -> void:
+	conversation_available = available
+	conversation_enabled = available and ready
+
+
+func is_interaction_focusable() -> bool:
+	if not conversation_available:
+		return false
+	if _contact_id.is_empty():
+		return true
+	return player_contact_is_ready(_contact_id)
+
+
 func is_interaction_enabled() -> bool:
 	if _contact_id.is_empty():
 		return conversation_enabled
@@ -451,7 +472,7 @@ func is_interaction_enabled() -> bool:
 
 
 func interact(_interactor: Node3D) -> void:
-	if not is_interaction_enabled():
+	if not is_interaction_focusable():
 		return
 	conversation_requested.emit(actor_id)
 

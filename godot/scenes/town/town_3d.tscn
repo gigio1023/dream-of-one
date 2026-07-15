@@ -60,6 +60,7 @@
 [ext_resource type="PackedScene" path="res://assets/kaykit/city_builder_bits/trash_b.gltf" id="51_city_trash_b"]
 [ext_resource type="PackedScene" path="res://scenes/props/physical_props_3d.tscn" id="52_physical_props"]
 [ext_resource type="PackedScene" path="res://scenes/town/town_density_dressing_3d.tscn" id="53_density_pass"]
+[ext_resource type="FontFile" path="res://assets/fonts/noto_sans_cjk/NotoSansKR-Regular.otf" id="54_sign_font"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_s1wib"]
 sky_top_color = Color(0.56078434, 0.7137255, 0.83137256, 1)
@@ -932,6 +933,44 @@ scale = Vector3(5, 5, 5)
 
 [node name="BuildingTrim" type="Node3D" parent="Props/ExteriorDressing"]
 editor_description = "Commercial-kit trim stays on solid wall spans and never covers an open portal."
+
+[node name="BuildingSigns" type="Node3D" parent="Props/ExteriorDressing"]
+editor_description = "Localized entrance labels keep all three permanently open buildings legible from the park."
+
+[node name="StudioSign" type="Label3D" parent="Props/ExteriorDressing/BuildingSigns"]
+position = Vector3(0, 2.42, -11.82)
+auto_translate_mode = 1
+text = "world.location.studio"
+font = ExtResource("54_sign_font")
+font_size = 64
+outline_size = 14
+modulate = Color(0.98, 0.94, 0.82, 1)
+outline_modulate = Color(0.12, 0.09, 0.16, 1)
+pixel_size = 0.006
+
+[node name="OfficeSign" type="Label3D" parent="Props/ExteriorDressing/BuildingSigns"]
+position = Vector3(-11.82, 2.42, 0)
+rotation = Vector3(0, 1.5707963, 0)
+auto_translate_mode = 1
+text = "world.location.office"
+font = ExtResource("54_sign_font")
+font_size = 64
+outline_size = 14
+modulate = Color(0.98, 0.94, 0.82, 1)
+outline_modulate = Color(0.08, 0.12, 0.18, 1)
+pixel_size = 0.006
+
+[node name="StationSign" type="Label3D" parent="Props/ExteriorDressing/BuildingSigns"]
+position = Vector3(11.82, 2.42, 0)
+rotation = Vector3(0, -1.5707963, 0)
+auto_translate_mode = 1
+text = "world.location.station"
+font = ExtResource("54_sign_font")
+font_size = 64
+outline_size = 14
+modulate = Color(0.98, 0.94, 0.82, 1)
+outline_modulate = Color(0.18, 0.1, 0.06, 1)
+pixel_size = 0.006
 
 [node name="StudioAwningLeft" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("32_awning")]
 position = Vector3(-3.2, 1.05, -12.05)

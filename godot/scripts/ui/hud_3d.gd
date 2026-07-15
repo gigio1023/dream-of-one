@@ -102,6 +102,7 @@ var _conversation_actor_id := ""
 var _current_turn: Dictionary = {}
 var _current_stance := ""
 var _last_why_line := ""
+var _last_stance_judgment: Dictionary = {}
 var _input_limit_rejected := false
 var _provider_meta: Dictionary = {}
 var _choice_ids: Array[String] = ["", "", ""]
@@ -609,6 +610,7 @@ func begin_conversation(actor: Dictionary) -> void:
 	_current_turn.clear()
 	_reset_hesitation_timer()
 	_last_why_line = ""
+	_last_stance_judgment = {}
 	_input_limit_rejected = false
 	_provider_meta = {}
 	_choice_ids = ["", "", ""]
@@ -700,11 +702,18 @@ func show_provider(meta: Dictionary) -> void:
 	_refresh_provider_label()
 
 
-func show_judgment(_judgment: Dictionary) -> void:
+func show_judgment(judgment: Dictionary) -> void:
 	var disclosed := _disclosed_resident(_conversation_actor_id)
 	_last_why_line = str(disclosed.get("whyLine", "")).strip_edges()
 	_current_stance = _disclosed_stance(_conversation_actor_id)
+	_last_stance_judgment = {
+		"actorId": _conversation_actor_id,
+		"stanceBefore": str(judgment.get("stanceBefore", _current_stance)),
+		"stanceAfter": str(judgment.get("stanceAfter", _current_stance)),
+		"suspicionDelta": int(judgment.get("suspicionDelta", 0)),
+	}
 	_refresh_stance_label()
+	_refresh_encountered_stances()
 	if not _last_why_line.is_empty():
 		_conversation_why_line_label.text = str(
 			tr(&"hud.m3r.why_line.format")
@@ -784,6 +793,7 @@ func presentation_snapshot() -> Dictionary:
 		"languageAppliesNextRun": _language_applies_next_run,
 		"exportFont": _dictionary_or_empty(_localization.call("font_selection_snapshot")),
 		"currentTurn": _current_turn.duplicate(true),
+		"stanceJudgment": _last_stance_judgment.duplicate(true),
 		"encounteredStances": _encountered_stance_snapshot(),
 		"socialView": _social_view.duplicate(true),
 		"hearing": _dictionary_or_empty(_social_view.get("hearing")),
@@ -1227,10 +1237,30 @@ func _refresh_stance_label() -> void:
 		_conversation_stance_label.text = ""
 		return
 	_conversation_stance_label.visible = true
-	_conversation_stance_label.text = "%s · %s" % [
-		tr(&"hud.m3r.stance.header"),
-		_stance_text(_current_stance),
-	]
+	if _last_stance_judgment.is_empty():
+		_conversation_stance_label.text = "%s · %s" % [
+			tr(&"hud.m3r.stance.header"),
+			_stance_text(_current_stance),
+		]
+		return
+	_conversation_stance_label.text = _stance_judgment_text(_last_stance_judgment)
+
+
+func _stance_judgment_text(judgment: Dictionary) -> String:
+	var before := str(judgment.get("stanceBefore", _current_stance))
+	var after := str(judgment.get("stanceAfter", _current_stance))
+	if before != after:
+		return str(tr(&"hud.m3r.stance.transition")).format({
+			"before": _stance_text(before),
+			"after": _stance_text(after),
+		})
+	var shift_key := &"hud.m3r.stance.shift.unchanged"
+	var suspicion_delta := int(judgment.get("suspicionDelta", 0))
+	if suspicion_delta < 0:
+		shift_key = &"hud.m3r.stance.shift.more_trusting"
+	elif suspicion_delta > 0:
+		shift_key = &"hud.m3r.stance.shift.more_wary"
+	return str(tr(shift_key)).format({"stance": _stance_text(after)})
 
 
 func _refresh_thinking_label() -> void:
@@ -1293,6 +1323,12 @@ func _refresh_encountered_stances() -> void:
 				"stance": _stance_text(str(resident.get("stance", "uncertain"))),
 			})
 		)
+	if not _last_stance_judgment.is_empty():
+		lines.append("")
+		lines.append(str(tr(&"hud.m3r.stance.latest")).format({
+			"actor": _actor_label(str(_last_stance_judgment.get("actorId", ""))),
+			"shift": _stance_judgment_text(_last_stance_judgment),
+		}))
 	lines.append("")
 	lines.append(str(tr(&"hud.m3r.log.hint")))
 	_encountered_stance_label.text = "\n".join(lines)

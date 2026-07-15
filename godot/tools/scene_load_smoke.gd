@@ -336,6 +336,18 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 					or stream.data.is_empty()
 				):
 					_failures.append("npc_3d speech blip PCM contract drifted")
+			var npc := instance as NPC3D
+			npc.set_conversation_state(true, false)
+			if (
+				not npc.is_interaction_focusable()
+				or npc.is_interaction_enabled()
+				or npc.get_interaction_label_key()
+				!= &"hud.m3r.interaction.npc_preparing"
+			):
+				_failures.append("npc_3d does not expose its pending conversation state")
+			npc.set_conversation_state(false, false)
+			if npc.is_interaction_focusable():
+				_failures.append("npc_3d remains focusable after conversation eligibility ends")
 		"hud_3d":
 			_require_node(label, instance, "Overlay/Reticle")
 			_require_node(label, instance, "Overlay/PromptPanel")
@@ -355,6 +367,9 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			_require_node(label, instance, "Environment/WorldEnvironment")
 			_require_node(label, instance, "Geometry/Ground/TownGround/Collision")
 			_require_node(label, instance, "Actors/Player3D")
+			_require_node(label, instance, "Props/ExteriorDressing/BuildingSigns/StudioSign")
+			_require_node(label, instance, "Props/ExteriorDressing/BuildingSigns/OfficeSign")
+			_require_node(label, instance, "Props/ExteriorDressing/BuildingSigns/StationSign")
 			var physical_doors := instance.get_node_or_null("Doors")
 			if physical_doors != null and physical_doors.get_child_count() > 0:
 				_failures.append("town_3d still contains physical doors")
@@ -3940,7 +3955,8 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 	hud.choice_submitted.emit(str((first_choice as Dictionary).get("choiceId", "")))
 
 	var ended := false
-	for _frame in range(180):
+	var conversation_end_deadline_msec := Time.get_ticks_msec() + 5000
+	while Time.get_ticks_msec() < conversation_end_deadline_msec:
 		await process_frame
 		var hud_snapshot := hud.presentation_snapshot()
 		if str(hud_snapshot.get("modalSurface", "")) == "none" and not paused:
@@ -3960,7 +3976,24 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 		_failures.append("%s conversation did not restore the player's prior view" % label)
 	if receptionist.is_interaction_enabled():
 		_failures.append("%s leaves a false receptionist re-conversation prompt" % label)
+	if receptionist.is_interaction_focusable():
+		_failures.append("%s leaves a pending prompt after the clean receptionist session" % label)
 	var main_snapshot: Dictionary = instance.call("presentation_snapshot")
+	var stance_judgment: Dictionary = (
+		hud.presentation_snapshot().get("stanceJudgment", {}) as Dictionary
+	)
+	if (
+		str(stance_judgment.get("actorId", ""))
+		!= "NPC_Studio_Receptionist"
+		or str(stance_judgment.get("stanceBefore", "")).is_empty()
+		or str(stance_judgment.get("stanceAfter", "")).is_empty()
+		or (
+			str(stance_judgment.get("stanceBefore", ""))
+			== str(stance_judgment.get("stanceAfter", ""))
+			and int(stance_judgment.get("suspicionDelta", 0)) == 0
+		)
+	):
+		_failures.append("%s does not retain a legible receptionist judgment shift" % label)
 	var advance_diagnostics: Dictionary = main_snapshot.get("advance", {})
 	var adapter_diagnostics: Dictionary = advance_diagnostics.get("adapter", {})
 	var expected_end_revision := int(adapter_diagnostics.get("fixtureSessionEndRevision", -1))

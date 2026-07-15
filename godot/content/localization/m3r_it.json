@@ -1,6 +1,7 @@
 {
   "it": {
     "hud.interaction.npc": "E — Parla",
+    "hud.m3r.interaction.npc_preparing": "Preparazione della conversazione…",
     "hud.interaction.door": "E — Apri / chiudi la porta",
     "hud.interaction.record": "E — Consulta i registri",
     "hud.m3r.interaction.prop_pick_up": "E — Prendi l'oggetto",
@@ -68,6 +69,11 @@
     "hud.m3r.stance.oppose": "Si oppone",
     "hud.m3r.stance.uncertain": "In dubbio",
     "hud.m3r.stance.vouch": "Si fa garante",
+    "hud.m3r.stance.transition": "Atteggiamento cambiato · {before} → {after}",
+    "hud.m3r.stance.shift.more_trusting": "Atteggiamento variato · {stance} (più fiducia)",
+    "hud.m3r.stance.shift.more_wary": "Atteggiamento variato · {stance} (più diffidenza)",
+    "hud.m3r.stance.shift.unchanged": "Atteggiamento invariato · {stance}",
+    "hud.m3r.stance.latest": "Ultimo giudizio · {actor}\n{shift}",
     "hud.m3r.why_line.header": "Motivo del giudizio",
     "hud.m3r.why_line.format": "Motivo · {reason}",
     "hud.m3r.encountered_stances.title": "Atteggiamenti noti",

@@ -836,6 +836,9 @@ export class ProviderService implements NpcProposalPort {
       ...(effectiveTools.includes("move_to")
         ? ["playerContact is offered to only one runtime-selected resident at a time. Choose move_to(player) only when your role goal or remembered facts warrant initiating a face-to-face question; otherwise choose another valid action or stop."]
         : []),
+      ...(effectiveTools.includes("write_record")
+        ? ["administrativeSources[].reportDelta is the source NPC's private report inclination from that remembered event. Use it as evidence for whether a record action is warranted, while independently judging institutionalPressureDelta direction and magnitude from the whole supplied context; it never mandates a write or a maximum delta."]
+        : []),
       ...(request.requiredToolCall?.tool === "talk_to"
         ? [
             `This wake permits only talk_to targeting the exact actor id ${request.requiredToolCall.actorId}.`,

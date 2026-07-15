@@ -950,6 +950,8 @@ test("agent-step record contracts select only M3R or legacy schemas and guides",
   assert.match(textGen.requests[0].instructions, /Judge both direction and magnitude from the supplied evidence/);
   assert.match(textGen.requests[0].instructions, /no direction is preferred/);
   assert.match(textGen.requests[0].instructions, /One independent non-record source may create positive pressure only once/);
+  assert.match(textGen.requests[0].instructions, /administrativeSources\[\]\.reportDelta is the source NPC's private report inclination/);
+  assert.match(textGen.requests[0].instructions, /it never mandates a write or a maximum delta/);
 
   const m3rToolBranches = (
     (m3rSchema.properties as Record<string, Record<string, unknown>>).toolCall.anyOf

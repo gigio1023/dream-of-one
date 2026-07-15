@@ -1035,7 +1035,7 @@ test("a caller-reserved mandatory interrogation creates grounded contact without
   assert.equal(interrogationAttempts, 1);
 });
 
-test("high-pressure Station interrogation is grounded, hesitation-only, survivable, and once per ledger escalation", async () => {
+test("high-pressure Station interrogation is grounded, recoverable, survivable, and once per ledger escalation", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   const ordinaryNextStep = adapter.proposeNextStep.bind(adapter);
   const ordinaryMergedTurn = adapter.judgeAndProposeConversationTurn.bind(adapter);
@@ -1046,7 +1046,7 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
       interrogationAnswerGoals = [...request.observePacket.goals];
       resolved.proposal.signals = [];
       resolved.proposal.meaningfulFirsthand = true;
-      resolved.proposal.stance = "vouch";
+      resolved.proposal.stance = "oppose";
     }
     return resolved;
   };
@@ -1108,7 +1108,15 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
   });
   const started = service.start("start-interrogation", "ko-KR");
   const layout = loadRunLayout();
-  const pressureActors = service.snapshot(started.runId).actors.slice(0, 4);
+  const startingActors = service.snapshot(started.runId).actors;
+  const stationPressureActor = startingActors.find(
+    actor => actor.actorId === "NPC_Station_Officer",
+  );
+  assert.ok(stationPressureActor);
+  const pressureActors = [
+    ...startingActors.filter(actor => actor.actorId !== stationPressureActor.actorId).slice(0, 3),
+    stationPressureActor,
+  ];
 
   for (const [index, actor] of pressureActors.entries()) {
     const zone = conversationZoneFor(layout, actor.actorId, actor.locationId);
@@ -1266,7 +1274,11 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
   assert.equal(answered.judgment.meaningfulFirsthand, false);
   assert.equal(answered.memoryDelta.meaningfulFirsthand, false);
   assert.notEqual(answered.actor.stance, "vouch");
-  assert.equal(answered.actor.hasMeaningfulFirsthandConversation, false);
+  assert.equal(
+    answered.actor.hasMeaningfulFirsthandConversation,
+    true,
+    "hesitation does not erase the officer's earlier direct conversation",
+  );
   assert.ok(interrogationAnswerGoals?.some(goal =>
     goal.includes("Conduct one survivable Station interrogation")
   ));
@@ -1418,4 +1430,74 @@ test("high-pressure Station interrogation is grounded, hesitation-only, survivab
     traceCountBeforeExhaustion + 1,
     "one budget-exhausted provider packet contributes exactly one runtime-trace entry",
   );
+
+  const recoveryContact = reserveContact.activeContact;
+  assert.ok(recoveryContact);
+  const recoveryPreload = await service.preloadConversation(
+    started.runId,
+    recoveryContact.actorId,
+    recoveryContact.interactionZoneId,
+    "ko-KR",
+  );
+  const recoveryFacts = spatialActors(service.snapshot(started.runId));
+  const recoveryOfficer = recoveryFacts.find(
+    facts => facts.actorId === "NPC_Station_Officer",
+  );
+  assert.ok(recoveryOfficer);
+  recoveryOfficer.position = [stationPosition[0], stationPosition[1], stationPosition[2]];
+  recoveryOfficer.playerVisible = true;
+  recoveryOfficer.playerAudible = true;
+  recoveryOfficer.playerReachable = true;
+  recoveryOfficer.playerInteractionZoneId = "StationIntakeConversation";
+  await service.advance({
+    runId: started.runId,
+    advanceId: "interrogation-recovery-spatial-refresh",
+    observedWorldRevision: recoveryPreload.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: recoveryPreload.worldRevision,
+      player: {
+        position: [stationPosition[0], stationPosition[1], stationPosition[2]],
+        locationId: "Station",
+      },
+      actors: recoveryFacts,
+    },
+  });
+  const recoveryConversation = await service.startConversation(
+    started.runId,
+    recoveryContact.actorId,
+    recoveryContact.interactionZoneId,
+    "ko-KR",
+    recoveryContact.contactId,
+  );
+  const repairChoice = recoveryConversation.nextTurn.choices.find(
+    choice => choice.intent === "safe/local",
+  );
+  assert.ok(repairChoice);
+  const suspicionBeforeRecovery = service.snapshot(started.runId).actors.find(
+    actor => actor.actorId === "NPC_Station_Officer",
+  )?.suspicion;
+  assert.ok(suspicionBeforeRecovery !== undefined && suspicionBeforeRecovery > 0);
+  const recovered = await service.answer(
+    started.runId,
+    recoveryConversation.sessionId,
+    recoveryConversation.nextTurn.turnId,
+    { type: "choice", choiceId: repairChoice.choiceId },
+  );
+  assert.ok(recovered.judgment.suspicionDelta < 0);
+  assert.ok(recovered.actor.suspicion < suspicionBeforeRecovery);
+  assert.equal(recovered.judgment.stanceAfter, "vouch");
+  const recoveredView = recovered.socialView.encounteredResidents.find(
+    resident => resident.actorId === "NPC_Station_Officer",
+  );
+  assert.ok(recoveredView);
+  assert.equal(recoveredView.whyLine, recovered.judgment.whyLine);
+  assert.equal("suspicion" in recoveredView, false);
+  const recoveryEnded = await service.endConversation(
+    started.runId,
+    recoveryConversation.sessionId,
+  );
+  assert.equal(recoveryEnded.ended, true);
+  assert.equal(service.snapshot(started.runId).runStatus, "active");
 });

@@ -38,11 +38,15 @@ game:
   Sol may run them, but they are engineering evidence only and never prove the
   LLM game experience.
 
-The currently landed spend-bearing live-provider smoke exercises `ko-KR`.
-M3R's final locale acceptance must parameterize this same provider/adapter and
-Godot AI route for `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`; it must
-not add a second locale-specific smoke harness or weaken the
-Qwen/zero-fallback requirements.
+The existing spend-bearing live-provider smoke has now passed all six locales
+at commit `7ad18d9d` (2026-07-15). The latest `ko-KR` round used two calls and
+7,769 charged tokens; the sequential `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and
+`ja-JP` rounds used ten calls and 35,454 charged tokens in total. Every call
+used `modelscope/qwen3.7-plus`, returned `transport=live`, and had no repair,
+fallback, failure, dropped result, truncation, or in-flight remainder. This is
+provider/language evidence only: the final Godot AI route still supplies the
+rendered layout, IME, and play evidence, without adding a locale-specific
+smoke harness or weakening the Qwen/zero-fallback requirements.
 
 ### Headless evidence boundary
 

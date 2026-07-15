@@ -4,9 +4,9 @@ import {
   ambientReplyJudgmentSchemaForRequest,
   agentStepProposalJsonSchemaForTools,
   agentStepProposalSchemaForRequest,
-  conversationJudgmentJsonSchema,
+  conversationJudgmentJsonSchemaForLocale,
   conversationJudgmentSchemaForLocale,
-  conversationProposalJsonSchema,
+  conversationProposalJsonSchemaForLocale,
   conversationProposalSchemaForLocale,
   hearingJudgmentJsonSchemaForRequest,
   hearingJudgmentSchemaForRequest,
@@ -221,9 +221,11 @@ const PRIVATE_ACTOR_CONTEXT_GUIDE =
 const CONVERSATION_PARTICIPANT_GUIDE =
   "conversationFrame is authoritative about participation and location. The residentSpeaker is the only NPC speaking now, and the playerInterlocutor is always the person being addressed; every other actor named in residentContext, attributedHeardSpeech, or memoryEvidence is a third party, never the player. residentSpeaker.locationId belongs only to the resident. The player's location is known only when playerInterlocutor.locationId is non-null; never copy or infer the resident's location as the player's location. For an opening, write one fresh line addressed to the player. Prior resident speech and attributed NPC-to-NPC speech are evidence only: never replay either as if it were the resident's new opening line.";
 const CONVERSATION_VISIBLE_FACT_GUIDE =
-  "The groundingContract is a hard validity boundary, not a style suggestion. NPC speech and player reply suggestions may mention only people, documents, records, possessions, appointments, systems, approvals, identities, roles, and past events affirmatively supplied in the request. Missing context means unknown, never absent. The NPC may ask a neutral question about an unknown, but must not claim a record or item exists, was checked, is missing, or belongs to anyone. Every suggested player reply must be speakable without inventing a new identity, job, possession, document, invitation, approval, appointment, or past action. Each suggestion must also be a self-contained player utterance: explicitly preserve the person, object, source, or claim being answered whenever omission could make a role, name, or noun phrase sound like the player's own identity or possession. Never emit a bare name, role, object, yes/no fragment, or copular noun phrase whose referent exists only in the NPC question. If no player statement supplies one, use a complete question, refusal, uncertainty, or statement about the present conversation instead.";
+  "The groundingContract is a hard validity boundary for NPC speech, judgment reasons, questions, and every concrete claim about the player or world; it is not a style suggestion. Missing context means unknown, never absent. The resident's public role may ground generic job topics and ordinary capabilities when phrased without a concrete claim: a receptionist may conditionally ask whether the visit concerns a schedule or paperwork and may offer general reception guidance. It does not establish that this visitor has an appointment, that a particular document or record exists, or that anything was checked, missing, required, approved, owned, received, or completed. objective, goals, policy, and private motivation explain priorities but are not evidence of those concrete facts. A question can still make an invalid presupposition: 'Who arranged this appointment?' and localized equivalents assert that the interlocutor has an appointment, so they are invalid until the player or visible evidence establishes one. Ask the purpose first; only after the player establishes a concrete schedule, booking, document, or procedure may the resident narrow its source or details. The NPC may ask a neutral or conditional question about an unknown, but must not claim a specific record or item exists, was checked, is missing, is required, or belongs to anyone. Suggested player replies are different: they are uncommitted possible utterances, not observations, world facts, or statements the player has already made. safe/local is the least exposing plausible answer and may use a modest cover claim; uncertain/repair may hedge, qualify, or expose uncertainty; risky/weird may offer a bolder unsupported cover claim or lie so the player can choose that social risk. Never use any candidate suggestion as evidence in the NPC utterance, whyLine, openQuestion, or another suggestion, and never imply that it was selected. Each suggestion must be a self-contained in-character utterance that can be spoken verbatim: never narrate what the player says or label the speaker, and explicitly preserve the person, object, source, or claim being answered whenever omission could make a role, name, or noun phrase sound like the player's own identity or possession. Never emit a bare name, role, object, yes/no fragment, or copular noun phrase whose referent exists only in the NPC question.";
 const CONVERSATION_REPLY_BINDING_GUIDE =
   "Interpret playerLine as a direct answer to answerBinding.answeredNpcLine, not as an isolated sentence. Preserve the semantic slot and referent established by that NPC question. Ellipsis in a displayed or typed answer fills the requested slot; it does not become a claim about the player's identity, job, possession, or biography unless the player explicitly says so. Judge the contextual proposition that the two lines express together.";
+const CONVERSATION_GROUNDING_SELF_CHECK =
+  "Before final JSON, silently perform this grounding check: (1) in NPC speech, why-lines, open questions, and every concrete world claim, identify each person-specific appointment, booking, required step, document, record, reference number, possession, past action, and claimed access to a specific institutional resource; (2) locate the exact supplied scene fact, player statement, visible fact, record, heard line, or memory that supports it; (3) if no support exists, make the NPC wording generic or conditional without claiming the fact applies to this visitor; (4) inspect suggestions separately as uncommitted literal candidate speech, make their relative social risk legible, and ensure no other field treats any suggestion as selected or true. A statement that the visitor wants to confirm steps before a hearing establishes that purpose and the hearing, but not a concrete appointment, reference number, notice, dossier, paperwork, visitor record, or a completed check.";
 
 function latestNpcLine(
   history: readonly { speakerId: string; line: string }[],
@@ -277,7 +279,10 @@ function conversationGroundingContract(
     validityRules: [
       "Treat every unlisted person, identity, role, item, document, record, approval, appointment, possession, and past event as unknown.",
       "Do not convert unknown into absent, missing, checked, expected, owned, received, or completed.",
-      "A suggested player reply may repeat supplied player statements or react to the present exchange; it may not add biography, possessions, paperwork, invitations, approvals, appointments, or past actions.",
+      "A public role may support generic job topics and ordinary capabilities, but objectives, goals, and private context do not establish that a concrete procedure, register entry, required document, appointment, approval, or next step exists for this visitor.",
+      "A question must not presuppose an unknown fact: asking who arranged 'this appointment' is invalid until the player or visible evidence establishes that an appointment exists and concerns the player.",
+      "Generic role guidance may be offered conditionally, but do not state that the resident checked or can access a specific unsupplied record, document, system, or institutional resource.",
+      "Suggested replies are uncommitted candidate speech, not evidence: safe/local is least exposing, uncertain/repair may hedge, and risky/weird may offer a bolder cover claim or lie. Only the one the player selects or types becomes a supplied player statement.",
       "Attributed heard speech is prior evidence, not a line in the current player conversation; preserve its named speaker and never present it as the resident's new utterance.",
     ],
   };
@@ -440,16 +445,29 @@ function localeOutputInstructions(locale: string, fields: string): string[] {
   const supportedLocale = requireSupportedGameplayLocale(locale);
   const instructions = [
     `The immutable run locale is ${supportedLocale}. Write ${fields} in ${providerLanguageName(supportedLocale)}.`,
+    "Stay entirely inside the fiction. Never call anyone a player, user, or NPC, and never mention a game, AI, language model, prompt, system message, provider, or model response in player-visible prose.",
     "Keep stable ids, intent labels, tool names, and tool argument keys unchanged in machine-readable fields; never copy stable ids into player-visible text.",
   ];
   if (supportedLocaleEntry(supportedLocale).presentationId === "ko") {
     instructions.push(
       "Write natural Korean prose in every player-visible text field, and include at least one Hangul code point in each nonempty field.",
-      "Latin-script names, established acronyms such as AI or QR, numerals, and occasional Hanja are allowed when natural, but they cannot replace Korean prose. Never mix Japanese hiragana or katakana, Simplified Chinese forms, or Chinese function words and clauses into Korean player-visible text.",
+      "Latin-script names, established in-fiction acronyms such as QR or ID, numerals, and occasional Hanja are allowed when natural, but they cannot replace Korean prose. Never mix Japanese hiragana or katakana, Simplified Chinese forms, or Chinese function words and clauses into Korean player-visible text.",
       "Do not copy lowercase Latin place, role, or name tokens from machine-readable context into player-visible prose. Render public labels in Korean—for example Studio as 스튜디오, Office as 사무실, Station as 스테이션, and Park as 공원—and transliterate non-acronym names when needed.",
     );
   }
   return instructions;
+}
+
+function playerVisibleOutputContract(locale: string) {
+  const supportedLocale = requireSupportedGameplayLocale(locale);
+  return {
+    immutableRunLocale: supportedLocale,
+    requiredLanguage: providerLanguageName(supportedLocale),
+    sourceContextHandling:
+      "Actor and scenario context may be authored in another language. Preserve its meaning and voice, but translate or naturally re-express it; never copy source-language prose into a player-visible field unless it already matches requiredLanguage.",
+    finalCheck:
+      "Before returning JSON, reread every player-visible field and rewrite any field that is not wholly natural in requiredLanguage.",
+  };
 }
 
 interface SessionBudget {
@@ -544,6 +562,8 @@ export class ProviderService implements NpcProposalPort {
   async proposeConversationTurn(
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>> {
+    const proposalSchema = conversationProposalSchemaForLocale(request.locale);
+    const proposalJsonSchema = conversationProposalJsonSchemaForLocale(request.locale);
     const instructions = [
       "You are an NPC inside Dream of One, a social-suspicion game.",
       "Stay in role and use only visible context.",
@@ -555,9 +575,10 @@ export class ProviderService implements NpcProposalPort {
         "the NPC utterance and all three player reply suggestions",
       ),
       "Return one NPC utterance and exactly three short player reply suggestions.",
-      "The reply intent labels shape variety only; they never decide suspicion or game truth.",
+      "Use the intent labels only as a relative social-risk gradient: safe/local is the least exposing plausible answer, uncertain/repair hedges or clarifies, and risky/weird may offer a bolder cover claim or lie. They are hidden candidate metadata and never decide suspicion or game truth.",
       "Do not claim a verdict, hidden fact, or world mutation.",
-      "Before returning JSON, remove every player or world claim that the groundingContract does not affirmatively support.",
+      CONVERSATION_GROUNDING_SELF_CHECK,
+      "Before returning JSON, remove every unsupported concrete world claim from NPC-authored speech and questions. Do not erase a candidate cover claim; keep it clearly confined to that unselected suggestion.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
     const requestContext = {
@@ -566,6 +587,7 @@ export class ProviderService implements NpcProposalPort {
       residentContext: conversationResidentContext(request.observePacket),
       conversationHistory: request.conversationHistory.slice(-6),
       groundingContract: conversationGroundingContract(request),
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<ConversationProposal>({
@@ -575,9 +597,9 @@ export class ProviderService implements NpcProposalPort {
         instructions,
         input,
         schemaName: "npc_conversation_turn",
-        jsonSchema: conversationProposalJsonSchema,
+        jsonSchema: proposalJsonSchema,
       },
-      schema: conversationProposalSchemaForLocale(request.locale),
+      schema: proposalSchema,
       repairContext: requestContext,
       fallback: () => this.options.fallback.proposeConversationTurn(request),
     });
@@ -586,6 +608,8 @@ export class ProviderService implements NpcProposalPort {
   async judgeConversationTurn(
     request: ConversationJudgmentRequest,
   ): Promise<ResolvedProposal<ConversationJudgment>> {
+    const proposalSchema = conversationJudgmentSchemaForLocale(request.locale);
+    const proposalJsonSchema = conversationJudgmentJsonSchemaForLocale(request.locale);
     const instructions = [
       "You are the judging mind of one NPC inside Dream of One, a social-suspicion game.",
       "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
@@ -601,6 +625,7 @@ export class ProviderService implements NpcProposalPort {
       "whyLine is one in-world sentence the player will read as the reason suspicion moved.",
       ...localeOutputInstructions(request.locale, "whyLine"),
       "Do not decide any verdict or session outcome.",
+      CONVERSATION_GROUNDING_SELF_CHECK,
       "Return only JSON matching the supplied schema.",
     ].join(" ");
     const requestContext = {
@@ -614,6 +639,7 @@ export class ProviderService implements NpcProposalPort {
       suspicionBefore: request.suspicionBefore,
       reportPressureBefore: request.reportPressureBefore,
       groundingContract: conversationGroundingContract(request, request.playerLine),
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<ConversationJudgment>({
@@ -623,9 +649,9 @@ export class ProviderService implements NpcProposalPort {
         instructions,
         input,
         schemaName: "npc_conversation_judgment",
-        jsonSchema: conversationJudgmentJsonSchema,
+        jsonSchema: proposalJsonSchema,
       },
-      schema: conversationJudgmentSchemaForLocale(request.locale),
+      schema: proposalSchema,
       repairContext: requestContext,
       fallback: () => this.options.fallback.judgeConversationTurn(request),
     });
@@ -634,6 +660,8 @@ export class ProviderService implements NpcProposalPort {
   async judgeAndProposeConversationTurn(
     request: MergedConversationTurnRequest,
   ): Promise<ResolvedProposal<MergedConversationTurn>> {
+    const proposalSchema = mergedConversationTurnSchemaForLocale(request.locale);
+    const proposalJsonSchema = mergedConversationTurnJsonSchemaForLocale(request.locale);
     const instructions = [
       "You are one NPC inside Dream of One, a social-suspicion game.",
       "In one response, judge the player's newest line AND write your next spoken reply with exactly three short player reply suggestions.",
@@ -657,13 +685,14 @@ export class ProviderService implements NpcProposalPort {
       "currentOpenQuestion is the exact question tracked from the previous judged turn, if any. When the player's newest line directly answers it or honestly establishes the limit of what the player knows, return that question with status=resolved and a whyLine grounded in the answer; never leave an answered question stale by returning null or repeating it as open. Replace it with an open question only when the new question is materially different, role-supported, grounded, and useful for the player to answer.",
       "After stance becomes vouch, set continueConversation=false unless one materially different grounded question still warrants an immediate answer. If you continue, the utterance and all suggestions must advance that question: safe/local should directly answer it or state a concrete knowledge boundary, never merely promise a future record check.",
       "utterance is your next in-character line after hearing the player.",
-      "The reply intent labels shape variety only; they never decide suspicion or game truth.",
+      "Use the intent labels only as a relative social-risk gradient: safe/local is the least exposing plausible answer, uncertain/repair hedges or clarifies, and risky/weird may offer a bolder cover claim or lie. They are hidden candidate metadata and never decide suspicion or game truth.",
       ...localeOutputInstructions(
         request.locale,
         "whyLine, openQuestion text/whyLine, utterance, and all three suggestion texts",
       ),
       "Do not decide any verdict or session outcome, and do not claim a hidden fact or world mutation.",
-      "Before returning JSON, remove every player or world claim that the groundingContract does not affirmatively support.",
+      CONVERSATION_GROUNDING_SELF_CHECK,
+      "Before returning JSON, remove every unsupported concrete world claim from NPC-authored speech, reasons, and questions. Do not erase a candidate cover claim; keep it clearly confined to that unselected suggestion.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
     const requestContext = {
@@ -681,6 +710,7 @@ export class ProviderService implements NpcProposalPort {
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
       currentOpenQuestion: request.currentOpenQuestion ?? null,
       groundingContract: conversationGroundingContract(request, request.playerLine),
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<MergedConversationTurn>({
@@ -690,9 +720,9 @@ export class ProviderService implements NpcProposalPort {
         instructions,
         input,
         schemaName: "npc_merged_conversation_turn",
-        jsonSchema: mergedConversationTurnJsonSchemaForLocale(request.locale),
+        jsonSchema: proposalJsonSchema,
       },
-      schema: mergedConversationTurnSchemaForLocale(request.locale),
+      schema: proposalSchema,
       repairContext: requestContext,
       fallback: () => this.options.fallback.judgeAndProposeConversationTurn(request),
     });
@@ -773,6 +803,7 @@ export class ProviderService implements NpcProposalPort {
       allowedTalkActorIds: allowedTalkActorIds ?? null,
       requiredToolCall: request.requiredToolCall ?? null,
       requireUtterance: request.requireUtterance ?? false,
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<AgentStepProposal>({
@@ -794,7 +825,10 @@ export class ProviderService implements NpcProposalPort {
   async judgeAndProposeAmbientReply(
     request: AmbientReplyRequest,
   ): Promise<ResolvedProposal<AmbientReplyJudgment>> {
-    const jsonSchema = ambientReplyJudgmentJsonSchemaForTarget(request.targetActorId);
+    const jsonSchema = ambientReplyJudgmentJsonSchemaForTarget(
+      request.targetActorId,
+      request.locale,
+    );
     const instructions = [
       "You are one resident listening to another resident inside Dream of One, a social-suspicion game.",
       "Reply once to the exact source utterance AND judge whether that remembered speech changes your personal opinion of the player.",
@@ -821,6 +855,7 @@ export class ProviderService implements NpcProposalPort {
       suspicionBefore: request.suspicionBefore,
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
       listener: ambientListenerContext(request),
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<AmbientReplyJudgment>({
@@ -870,6 +905,7 @@ export class ProviderService implements NpcProposalPort {
       residents: request.residents,
       records: request.records,
       ledgerEvents: request.ledgerEvents,
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
     const input = JSON.stringify(requestContext);
     return this.resolveValidated<HearingJudgment>({
@@ -948,64 +984,64 @@ export class ProviderService implements NpcProposalPort {
         input.budgetCeiling,
       );
       const parsed = this.parseJson(input.schema, first.text);
+      let candidate: T;
+      let combinedUsage = first.usage;
       if (parsed.success) {
-        return {
-          ok: true,
-          value: parsed.data,
-          meta: this.liveMeta(first.usage),
-          callSeqs,
+        candidate = parsed.data;
+      } else {
+        const repairRequest: TextGenRequest = {
+          ...input.request,
+          purpose: "repair",
+          instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary. Read requestContext.playerVisibleOutputContract and use exactly its requiredLanguage for every player-visible field, even when actor or scenario source text is Korean or another language. Always rewrite the whole affected field when it is player-visible; translate or naturally re-express its meaning and never preserve a rejected foreign-language fragment. For Korean, use Hangul-dominant Korean and translate invalid Latin prose, Simplified Chinese forms, Chinese function words or clauses, hiragana, and katakana; retain only natural title-case names, short uppercase in-fiction acronyms, numerals, and occasional Hanja. When a Korean validation issue includes offendingLatinTokens, remove, translate, or transliterate every listed token in its affected field, rewrite that entire field from scratch, and recheck every Latin token rather than only lowercase words. Render machine-context place labels as Korean, for example Studio as 스튜디오, Office as 사무실, Station as 스테이션, and Park as 공원, and transliterate non-acronym names when necessary. When a player-visible field exposes an internal stable id, never repeat the identifier, an underscore token, or an internal id-shaped substitute.`,
+          input: JSON.stringify({
+            ...(input.repairContext === undefined
+              ? {}
+              : { requestContext: input.repairContext }),
+            invalidOutput: first.text,
+            validationIssues: parsed.error.issues.map(providerRepairValidationIssue),
+          }),
         };
+        const repairAdmission = this.budgetAdmission(
+          input.sessionId,
+          repairRequest,
+          input.budgetCeiling,
+        );
+        if (repairAdmission !== "admitted") {
+          // A live first call must remain linked to one resolution. If only the
+          // repair no longer fits the caller reserve, retain the existing
+          // deterministic fallback resolution rather than orphaning that call.
+          return { ok: false, reason: "budget_exhausted", callSeqs };
+        }
+        const repair = await this.generateOne(
+          input.sessionId,
+          repairRequest,
+          callSeqs,
+          input.budgetCeiling,
+        );
+        const repaired = this.parseJson(input.schema, repair.text);
+        if (!repaired.success) {
+          const sensitiveFragments = [
+            ...outputStringFragments(first.text),
+            ...outputStringFragments(repair.text),
+          ];
+          console.warn({
+            event: "provider_invalid_envelope_after_repair",
+            purpose: input.request.purpose,
+            firstIssues: sanitizedValidationIssues(parsed.error, sensitiveFragments),
+            repairIssues: sanitizedValidationIssues(repaired.error, sensitiveFragments),
+          });
+          return { ok: false, reason: "invalid_envelope", callSeqs };
+        }
+        candidate = repaired.data;
+        combinedUsage = this.combineUsage(first.usage, repair.usage);
       }
 
-      const repairRequest: TextGenRequest = {
-        ...input.request,
-        purpose: "repair",
-        instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary. Always rewrite the whole affected field when it is player-visible, using natural in-fiction prose in the immutable run language; do not preserve a rejected foreign-language fragment. For Korean, use Hangul-dominant Korean and translate invalid Latin prose, Simplified Chinese forms, Chinese function words or clauses, hiragana, and katakana; retain only natural title-case names, short uppercase acronyms, numerals, and occasional Hanja. When a Korean validation issue includes offendingLatinTokens, remove, translate, or transliterate every listed token in its affected field, rewrite that entire field from scratch, and recheck every Latin token rather than only lowercase words. Render machine-context place labels as Korean, for example Studio as 스튜디오, Office as 사무실, Station as 스테이션, and Park as 공원, and transliterate non-acronym names when necessary. When a player-visible field exposes an internal stable id, never repeat the identifier, an underscore token, or an internal id-shaped substitute.`,
-        input: JSON.stringify({
-          ...(input.repairContext === undefined
-            ? {}
-            : { requestContext: input.repairContext }),
-          invalidOutput: first.text,
-          validationIssues: parsed.error.issues.map(providerRepairValidationIssue),
-        }),
-      };
-      const repairAdmission = this.budgetAdmission(
-        input.sessionId,
-        repairRequest,
-        input.budgetCeiling,
-      );
-      if (repairAdmission !== "admitted") {
-        // A live first call must remain linked to one resolution. If only the
-        // repair no longer fits the caller reserve, retain the existing
-        // deterministic fallback resolution rather than orphaning that call.
-        return { ok: false, reason: "budget_exhausted", callSeqs };
-      }
-      const repair = await this.generateOne(
-        input.sessionId,
-        repairRequest,
+      return {
+        ok: true,
+        value: candidate,
+        meta: this.liveMeta(combinedUsage),
         callSeqs,
-        input.budgetCeiling,
-      );
-      const repaired = this.parseJson(input.schema, repair.text);
-      if (repaired.success) {
-        return {
-          ok: true,
-          value: repaired.data,
-          meta: this.liveMeta(this.combineUsage(first.usage, repair.usage)),
-          callSeqs,
-        };
-      }
-      const sensitiveFragments = [
-        ...outputStringFragments(first.text),
-        ...outputStringFragments(repair.text),
-      ];
-      console.warn({
-        event: "provider_invalid_envelope_after_repair",
-        purpose: input.request.purpose,
-        firstIssues: sanitizedValidationIssues(parsed.error, sensitiveFragments),
-        repairIssues: sanitizedValidationIssues(repaired.error, sensitiveFragments),
-      });
-      return { ok: false, reason: "invalid_envelope", callSeqs };
+      };
     } catch (error) {
       if (error instanceof ProviderBudgetReservedError) {
         if (callSeqs.length === 0) throw error;

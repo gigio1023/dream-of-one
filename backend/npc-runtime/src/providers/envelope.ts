@@ -5,6 +5,7 @@ import {
   CONVERSATION_SUSPICION_SIGNALS,
   HEARING_CONTACT_BASES,
 } from "../contracts/types.js";
+import type { ConversationChoiceIntent } from "../contracts/types.js";
 import type { ObservePacket } from "../agentloop/context.js";
 import { TOOL_NAMES, type ToolName } from "../agentloop/tools.js";
 import { RECORD_KINDS, WORLD_ROLES } from "../runtime/world/index.js";
@@ -13,7 +14,10 @@ import {
   validateHearingJudgment,
   type HearingJudgmentRequest,
 } from "../runtime/run-hearing.js";
-import { supportedLocaleEntry } from "../localization/supported-locales.js";
+import {
+  providerLanguageName,
+  supportedLocaleEntry,
+} from "../localization/supported-locales.js";
 import type { RequiredAgentToolCall } from "./ports.js";
 
 const nonEmpty = z.string().trim().min(1);
@@ -22,6 +26,13 @@ const forbiddenKoreanPlayerVisibleKana = /[\p{Script=Hiragana}\p{Script=Katakana
 const forbiddenKoreanPlayerVisibleChineseFragments =
   /(?:为何|为什么|因为|所以|没有|不是|已经|可以|需要|如果|但是|这个|那个|他们|我们|你们)/u;
 const koreanPlayerVisibleLatinWords = /\p{Script=Latin}+/gu;
+const requiredPlayerVisibleScriptByPresentationId: Record<string, RegExp> = {
+  en: /\p{Script=Latin}/u,
+  it: /\p{Script=Latin}/u,
+  zh: /\p{Script=Han}/u,
+  fr: /\p{Script=Latin}/u,
+  ja: /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u,
+};
 const MAX_REPORTED_INVALID_LATIN_TOKENS = 16;
 const MAX_REPORTED_INVALID_LATIN_TOKEN_LENGTH = 80;
 const forbiddenPlayerVisibleStableIds = [
@@ -31,24 +42,54 @@ const forbiddenPlayerVisibleStableIds = [
   /\b(?:provider-smoke|mem|sess|rec|led|record|ledger|wake|mov|contact|run|session|conversation|turn|beat|question|speech|event|goal|hearing|ambient|spatial):[A-Za-z0-9_.:#-]+\b/u,
   /\b(?:Park|Studio|Office|Station)\.[A-Za-z0-9_.-]+\b/u,
 ] as const;
+const forbiddenPlayerVisibleGlobalMeta =
+  /\b(?:NPC|ChatGPT|Claude|OpenAI|Qwen|ModelScope)\b/iu;
+const forbiddenPlayerVisibleUppercaseAi = /\bAI\b/u;
+const forbiddenPlayerVisibleMetaByPresentationId: Record<string, RegExp> = {
+  ko: /(?:플레이어|사용자|인공지능|언어\s*모델|프롬프트|시스템\s*메시지|비디오\s*게임)/u,
+  en: /\b(?:player|user|artificial intelligence|language model|prompt|system message|video game)\b/iu,
+  it: /\b(?:giocatore|giocatrice|utente|intelligenza artificiale|modello linguistico|prompt|messaggio di sistema|videogioco)\b/iu,
+  zh: /(?:玩家|用户|人工智能|语言模型|提示词|系统提示|电子游戏)/u,
+  fr: /\b(?:joueur|joueuse|utilisateur|utilisatrice|intelligence artificielle|modèle de langage|prompt|message système|jeu vidéo)\b/iu,
+  ja: /(?:プレイヤー|ユーザー|人工知能|言語モデル|プロンプト|システムメッセージ|ビデオゲーム)/u,
+};
 const intentSchema = z.enum(CONVERSATION_CHOICE_INTENTS);
 const suggestedReplySchema = z.object({ text: nonEmpty, intent: intentSchema }).strict();
 const playerVisibleJsonString = {
   type: "string",
   minLength: 1,
   description:
-    "Player-visible natural-language prose only. Obey the request groundingContract when present; never invent a player or world fact. Never include an internal stable id, identifier token, or underscore name.",
+    "Player-visible natural-language prose only. Obey the request groundingContract when present; never invent a player or world fact. Stay entirely in fiction: never call anyone a player, user, or NPC, and never mention games, AI, language models, prompts, or system messages. Never include an internal stable id, identifier token, or underscore name.",
 } as const;
 const suggestedReplyJsonString = {
   ...playerVisibleJsonString,
   description:
-    `${playerVisibleJsonString.description} The reply must be a complete, self-contained player utterance. Explicitly preserve the person, object, source, or claim being answered whenever omission could make a noun phrase sound like the player's own identity or possession; never return a bare name, role, object, yes/no fragment, or context-dependent copular noun phrase.`,
+    "Player-visible natural-language prose only. Stay entirely in fiction: never call anyone a player, user, or NPC, and never mention games, AI, language models, prompts, or system messages. Never include an internal stable id, identifier token, or underscore name. This is an uncommitted candidate utterance, not an established fact or a line the speaker has already chosen; it becomes evidence only if selected. The reply must be a complete, self-contained, in-character first-person utterance that can be spoken verbatim. Never narrate, summarize, or label the speaker. Explicitly preserve the person, object, source, or claim being answered whenever omission could make a noun phrase sound like the speaker's own identity or possession; never return a bare name, role, object, yes/no fragment, or context-dependent copular noun phrase.",
 } as const;
+const suggestedReplySetJsonDescription =
+  "Return exactly one candidate for each intent and make their relative social risk clear from the wording. safe/local is the least exposing plausible answer and may use a modest cover claim; uncertain/repair hedges, qualifies, admits uncertainty, or asks for clarification; risky/weird may make a bolder unsupported cover claim or lie. All three remain uncommitted until selected, and intent never determines the NPC judgment.";
 const nullablePlayerVisibleJsonString = {
   type: ["string", "null"],
   description:
-    "Player-visible natural-language prose only when non-null. Obey the request groundingContract when present; never invent a player or world fact. Never include an internal stable id, identifier token, or underscore name.",
+    "Player-visible natural-language prose only when non-null. Obey the request groundingContract when present; never invent a player or world fact. Stay entirely in fiction: never call anyone a player, user, or NPC, and never mention games, AI, language models, prompts, or system messages. Never include an internal stable id, identifier token, or underscore name.",
 } as const;
+
+function addSuggestedReplyIntentIssues(
+  context: z.RefinementCtx,
+  replies: readonly { intent: ConversationChoiceIntent }[],
+): void {
+  const counts = new Map<ConversationChoiceIntent, number>();
+  for (const reply of replies) {
+    counts.set(reply.intent, (counts.get(reply.intent) ?? 0) + 1);
+  }
+  if (CONVERSATION_CHOICE_INTENTS.every(intent => counts.get(intent) === 1)) return;
+  context.addIssue({
+    code: "custom",
+    path: ["suggestedReplies"],
+    message:
+      "suggested replies must contain exactly one safe/local, one uncertain/repair, and one risky/weird intent",
+  });
+}
 
 const KOREAN_PLAYER_VISIBLE_JSON_SCHEMA_SUFFIX =
   " This request uses Korean player-visible text. Write Hangul-dominant natural Korean. Do not copy lowercase Latin words from machine-readable context: translate public place and role labels into Korean, and transliterate non-acronym names when necessary.";
@@ -61,9 +102,11 @@ function addPlayerVisibleTextIssues(
   context: z.RefinementCtx,
   path: Array<string | number>,
   text: string | undefined,
-  requireHangul: boolean,
+  locale: string,
 ): void {
   if (!text) return;
+  const presentationId = supportedLocaleEntry(locale).presentationId;
+  const requireHangul = presentationId === "ko";
   if (forbiddenPlayerVisibleStableIds.some(pattern => pattern.test(text))) {
     context.addIssue({
       code: "custom",
@@ -71,11 +114,30 @@ function addPlayerVisibleTextIssues(
       message: "player-visible text must not expose an internal stable id",
     });
   }
+  const exposesMetaFraming =
+    forbiddenPlayerVisibleGlobalMeta.test(text) ||
+    forbiddenPlayerVisibleUppercaseAi.test(text) ||
+    Object.values(forbiddenPlayerVisibleMetaByPresentationId).some(pattern => pattern.test(text));
+  if (exposesMetaFraming) {
+    context.addIssue({
+      code: "custom",
+      path,
+      message: "player-visible text must remain in fiction and must not expose game or model framing",
+    });
+  }
   if (requireHangul && !requiredPlayerVisibleHangul.test(text)) {
     context.addIssue({
       code: "custom",
       path,
       message: "player-visible Korean text must contain at least one Hangul code point",
+    });
+  }
+  const requiredScript = requiredPlayerVisibleScriptByPresentationId[presentationId];
+  if (!requireHangul && requiredScript && !requiredScript.test(text)) {
+    context.addIssue({
+      code: "custom",
+      path,
+      message: "player-visible text must use the requested locale's natural writing system",
     });
   }
   if (requireHangul && forbiddenKoreanPlayerVisibleKana.test(text)) {
@@ -125,7 +187,10 @@ export const conversationProposalSchema = z
     ]),
     continueConversation: z.boolean(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, context) => {
+    addSuggestedReplyIntentIssues(context, value.suggestedReplies);
+  });
 
 // Deltas are validated as integers only; the runtime clamps them to the
 // per-turn validity caps so an over-eager model never dumps to fallback.
@@ -163,7 +228,10 @@ export const mergedConversationTurnSchema = z
     ]),
     continueConversation: z.boolean(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, context) => {
+    addSuggestedReplyIntentIssues(context, value.suggestedReplies);
+  });
 
 export const ambientReplyJudgmentSchema = z
   .object({
@@ -264,71 +332,67 @@ export const agentStepProposalSchema = z
   });
 
 export function conversationProposalSchemaForLocale(locale: string) {
-  const korean = isKoreanLocale(locale);
   return conversationProposalSchema.superRefine((value, context) => {
-    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, korean);
+    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, locale);
     value.suggestedReplies.forEach((reply, index) => {
       addPlayerVisibleTextIssues(
         context,
         ["suggestedReplies", index, "text"],
         reply.text,
-        korean,
+        locale,
       );
     });
   });
 }
 
 export function conversationJudgmentSchemaForLocale(locale: string) {
-  const korean = isKoreanLocale(locale);
   return conversationJudgmentSchema.superRefine((value, context) => {
-    addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, korean);
+    addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, locale);
   });
 }
 
 export function mergedConversationTurnSchemaForLocale(locale: string) {
-  const korean = isKoreanLocale(locale);
   return mergedConversationTurnSchema.superRefine((value, context) => {
-    addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, korean);
-    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, korean);
+    addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, locale);
+    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, locale);
     addPlayerVisibleTextIssues(
       context,
       ["openQuestion", "text"],
       value.openQuestion?.text,
-      korean,
+      locale,
     );
     addPlayerVisibleTextIssues(
       context,
       ["openQuestion", "whyLine"],
       value.openQuestion?.whyLine,
-      korean,
+      locale,
     );
     value.suggestedReplies.forEach((reply, index) => {
       addPlayerVisibleTextIssues(
         context,
         ["suggestedReplies", index, "text"],
         reply.text,
-        korean,
+        locale,
       );
     });
   });
 }
 
 export function ambientReplyJudgmentSchemaForLocale(locale: string) {
-  const korean = isKoreanLocale(locale);
   return ambientReplyJudgmentSchema.superRefine((value, context) => {
-    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, korean);
-    addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, korean);
+    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, locale);
+    addPlayerVisibleTextIssues(context, ["whyLine"], value.whyLine, locale);
     addPlayerVisibleTextIssues(
       context,
       ["openQuestion", "text"],
       value.openQuestion?.text,
-      korean,
+      locale,
     );
     addPlayerVisibleTextIssues(
       context,
       ["openQuestion", "whyLine"],
       value.openQuestion?.whyLine,
-      korean,
+      locale,
     );
   });
 }
@@ -349,23 +413,22 @@ export function ambientReplyJudgmentSchemaForRequest(
 }
 
 export function hearingJudgmentSchemaForLocale(locale: string) {
-  const korean = isKoreanLocale(locale);
   return hearingJudgmentSchema.superRefine((value, context) => {
     value.residentAssessments.forEach((assessment, index) => {
       addPlayerVisibleTextIssues(
         context,
         ["residentAssessments", index, "testimonyLine"],
         assessment.testimonyLine,
-        korean,
+        locale,
       );
     });
     addPlayerVisibleTextIssues(
       context,
       ["verdictWhyLine"],
       value.verdictWhyLine,
-      korean,
+      locale,
     );
-    addPlayerVisibleTextIssues(context, ["officerLine"], value.officerLine, korean);
+    addPlayerVisibleTextIssues(context, ["officerLine"], value.officerLine, locale);
   });
 }
 
@@ -400,9 +463,8 @@ export function hearingJudgmentSchemaForRequest(request: HearingJudgmentRequest)
 }
 
 export function agentStepProposalSchemaForLocale(locale: string) {
-  const korean = isKoreanLocale(locale);
   return agentStepProposalSchema.superRefine((value, context) => {
-    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, korean);
+    addPlayerVisibleTextIssues(context, ["utterance"], value.utterance, locale);
     const args = value.toolCall?.args;
     if (!args) return;
     const whyLine = typeof args.whyLine === "string" ? args.whyLine : undefined;
@@ -422,31 +484,31 @@ export function agentStepProposalSchemaForLocale(locale: string) {
       context,
       ["toolCall", "args", "whyLine"],
       whyLine,
-      korean,
+      locale,
     );
     addPlayerVisibleTextIssues(
       context,
       ["toolCall", "args", "record", "stateBody"],
       stateBody,
-      korean,
+      locale,
     );
     addPlayerVisibleTextIssues(
       context,
       ["toolCall", "args", "stateBody"],
       directStateBody,
-      korean,
+      locale,
     );
     addPlayerVisibleTextIssues(
       context,
       ["toolCall", "args", "openQuestion", "text"],
       openQuestionText,
-      korean,
+      locale,
     );
     addPlayerVisibleTextIssues(
       context,
       ["toolCall", "args", "openQuestion", "whyLine"],
       openQuestionWhyLine,
-      korean,
+      locale,
     );
   });
 }
@@ -881,6 +943,7 @@ export const conversationProposalJsonSchema: Record<string, unknown> = {
       type: "array",
       minItems: 3,
       maxItems: 3,
+      description: suggestedReplySetJsonDescription,
       items: {
         type: "object",
         additionalProperties: false,
@@ -894,6 +957,14 @@ export const conversationProposalJsonSchema: Record<string, unknown> = {
     continueConversation: { type: "boolean" },
   },
 };
+
+export function conversationProposalJsonSchemaForLocale(
+  locale: string,
+): Record<string, unknown> {
+  const schema = structuredClone(conversationProposalJsonSchema);
+  annotatePlayerVisibleDescriptions(schema, locale);
+  return schema;
+}
 
 export const conversationJudgmentJsonSchema: Record<string, unknown> = {
   type: "object",
@@ -909,6 +980,14 @@ export const conversationJudgmentJsonSchema: Record<string, unknown> = {
     whyLine: playerVisibleJsonString,
   },
 };
+
+export function conversationJudgmentJsonSchemaForLocale(
+  locale: string,
+): Record<string, unknown> {
+  const schema = structuredClone(conversationJudgmentJsonSchema);
+  annotatePlayerVisibleDescriptions(schema, locale);
+  return schema;
+}
 
 export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
   type: "object",
@@ -955,6 +1034,7 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
       type: "array",
       minItems: 3,
       maxItems: 3,
+      description: suggestedReplySetJsonDescription,
       items: {
         type: "object",
         additionalProperties: false,
@@ -973,9 +1053,7 @@ export function mergedConversationTurnJsonSchemaForLocale(
   locale: string,
 ): Record<string, unknown> {
   const schema = structuredClone(mergedConversationTurnJsonSchema);
-  if (isKoreanLocale(locale)) {
-    annotateKoreanPlayerVisibleDescriptions(schema);
-  }
+  annotatePlayerVisibleDescriptions(schema, locale);
   return schema;
 }
 
@@ -1033,6 +1111,7 @@ export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {
 
 export function ambientReplyJudgmentJsonSchemaForTarget(
   targetActorId: string,
+  locale?: string,
 ): Record<string, unknown> {
   const schema = structuredClone(ambientReplyJudgmentJsonSchema);
   const properties = schema.properties as Record<string, Record<string, unknown>>;
@@ -1045,6 +1124,7 @@ export function ambientReplyJudgmentJsonSchemaForTarget(
     Record<string, unknown>
   >;
   argsProperties.actorId.const = targetActorId;
+  if (locale) annotatePlayerVisibleDescriptions(schema, locale);
   return schema;
 }
 
@@ -1113,6 +1193,7 @@ export function hearingJudgmentJsonSchemaForRequest(
     const properties = schema.properties as Record<string, Record<string, unknown>>;
     properties.proposedVerdict.enum = ["abnormal"];
   }
+  annotatePlayerVisibleDescriptions(schema, request.locale);
   return schema;
 }
 
@@ -1499,32 +1580,35 @@ export function agentStepProposalJsonSchemaForTools(
       constraints.requiredToolCall.tool === "talk_to" ||
       constraints.requireUtterance === true
     ) {
-      properties.utterance = playerVisibleJsonString;
+      properties.utterance = structuredClone(playerVisibleJsonString);
     }
     properties.done = { type: "boolean", const: true };
   }
 
   toolCallSchema.anyOf = narrowedBranches;
-  if (locale && isKoreanLocale(locale)) {
-    annotateKoreanPlayerVisibleDescriptions(schema);
-  }
+  if (locale) annotatePlayerVisibleDescriptions(schema, locale);
   return schema;
 }
 
-function annotateKoreanPlayerVisibleDescriptions(value: unknown): void {
+function annotatePlayerVisibleDescriptions(value: unknown, locale: string): void {
   if (!value || typeof value !== "object") return;
   if (Array.isArray(value)) {
-    value.forEach(annotateKoreanPlayerVisibleDescriptions);
+    value.forEach(item => annotatePlayerVisibleDescriptions(item, locale));
     return;
   }
   const record = value as Record<string, unknown>;
   const description = record.description;
   if (
     typeof description === "string" &&
-    description.includes("Player-visible natural-language prose") &&
-    !description.includes(KOREAN_PLAYER_VISIBLE_JSON_SCHEMA_SUFFIX)
+    description.includes("Player-visible natural-language prose")
   ) {
-    record.description = description + KOREAN_PLAYER_VISIBLE_JSON_SCHEMA_SUFFIX;
+    const localeSuffix =
+      ` This request uses ${providerLanguageName(locale)} for every player-visible field. Do not copy source-language cast text when it differs from the run locale.`;
+    record.description = description.includes(localeSuffix)
+      ? description
+      : description + localeSuffix + (isKoreanLocale(locale)
+        ? KOREAN_PLAYER_VISIBLE_JSON_SCHEMA_SUFFIX
+        : "");
   }
-  Object.values(record).forEach(annotateKoreanPlayerVisibleDescriptions);
+  Object.values(record).forEach(item => annotatePlayerVisibleDescriptions(item, locale));
 }

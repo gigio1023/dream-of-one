@@ -551,6 +551,11 @@ test("a Studio answer persists model judgment and stance once across idempotent 
   assert.equal(answered.proposalMeta.transport, "scripted");
   assert.ok(mergedRequest);
   assert.deepEqual(mergedRequest.observePacket.visibleActors, ["player"]);
+  assert.equal(
+    mergedRequest.playerLine,
+    started.nextTurn.choices[0].line,
+    "only the selected candidate becomes the player's statement",
+  );
   assert.deepEqual(mergedRequest.conversationHistory, [
     {
       speakerId: STUDIO_RECEPTIONIST_ID,
@@ -568,6 +573,14 @@ test("a Studio answer persists model judgment and stance once across idempotent 
     memory => memory.kind === "player_conversation",
   );
   assert.ok(judgmentMemory && judgmentMemory.kind === "player_conversation");
+  assert.equal(judgmentMemory.playerLine, started.nextTurn.choices[0].line);
+  assert.ok(
+    started.nextTurn.choices.slice(1).every(choice =>
+      choice.line !== judgmentMemory.playerLine &&
+      !mergedRequest.conversationHistory.some(entry => entry.line === choice.line)
+    ),
+    "unselected candidates never enter judgment context or memory",
+  );
   assert.equal(judgmentMemory.whyLine, answered.judgment.whyLine);
   assert.deepEqual(judgmentMemory.proposalMeta, answered.proposalMeta);
   assert.ok(

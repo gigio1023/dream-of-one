@@ -36,8 +36,14 @@ visibility of context, tool validation, and a session that always ends.
 - **Three generated diegetic suggestions** per prompt, requested with a felt
   safety gradient: one safe, one uncertain, one risky. The gradient must be
   inferable from the fiction, never labeled. They are proposed at runtime from
-  visible context, not stored in the storylet. Choosing one is identical to
-  typing that line — either way the NPC's model reads the content.
+  visible context, not stored in the storylet. A suggestion is an uncommitted
+  possible utterance, not something the player has already said and not a world
+  fact. The three options express *relative exposure*, not truth labels: the
+  safe option is the least exposing plausible answer and may still be a modest
+  cover claim; the uncertain option hedges or asks; the risky option may make a
+  bolder lie. Only the line the player chooses becomes speech, evidence, and
+  memory. Choosing one is identical to typing that line — either way the NPC's
+  model reads the content.
 - **Typed free input** — a bounded text field ("기타…"). This is real
   conversation: the NPC understands the content and responds to it. The bound
   is ergonomics (typing fatigue) and injection surface control, not a limit on

@@ -390,7 +390,7 @@ test("all six RunService conversations show a bounded localized consequence for 
   }
 });
 
-test("all envelopes stay structural while the Hangul-specific guard applies only to ko-KR", () => {
+test("all locale envelopes enforce their writing system without language guessing", () => {
   const chineseJudgment = {
     suspicionDelta: 5,
     reportDelta: 0,
@@ -418,5 +418,35 @@ test("all envelopes stay structural while the Hangul-specific guard applies only
       whyLine: "Cette réponse laisse encore des points à vérifier.",
     }).success,
     true,
+  );
+  assert.equal(
+    conversationJudgmentSchemaForLocale("it-IT").safeParse({
+      ...chineseJudgment,
+      whyLine: "Questa risposta lascia ancora alcuni punti da verificare.",
+    }).success,
+    true,
+  );
+  assert.equal(
+    conversationJudgmentSchemaForLocale("ja-JP").safeParse({
+      ...chineseJudgment,
+      whyLine: "この回答にはまだ確認すべき点があります。",
+    }).success,
+    true,
+  );
+  assert.equal(
+    conversationJudgmentSchemaForLocale("ja-JP").safeParse({
+      ...chineseJudgment,
+      whyLine: "確認完了",
+    }).success,
+    true,
+    "valid Japanese may be written entirely in kanji",
+  );
+  assert.equal(
+    conversationJudgmentSchemaForLocale("zh-CN").safeParse({
+      ...chineseJudgment,
+      whyLine: "방문 목적을 확인했습니다.",
+    }).success,
+    false,
+    "Korean source prose must not leak unchanged into Simplified Chinese",
   );
 });

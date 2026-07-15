@@ -93,15 +93,44 @@ most one tool call, an optional utterance, and a stop flag. The runtime
 validates every tool against visibility, role authority, object state, and
 the offered catalog.
 
+The three suggestions are explicitly uncommitted candidate speech. Their intent
+labels express relative social exposure, not truth: `safe/local` is the least
+exposing plausible answer and may still be a modest cover claim,
+`uncertain/repair` hedges or clarifies, and `risky/weird` may offer a bolder lie.
+None of those candidates enters conversation history, memory, or judgment until
+the player selects it; selection is identical to typing that line. NPC
+utterances, reasons, and questions may never treat an unselected candidate as
+true or mutate the world from it.
+
 Conversation requests also carry a machine-readable `groundingContract` built
 from supplied scene context, the player's supplied statements, visible object
 and record facts, and heard speech. It is closed-world for player-visible prose:
 an unlisted identity, role, possession, document, approval, appointment, or
 past event is unknown, not missing or completed. The NPC may ask about an
-unknown, but neither its speech nor a suggested player reply may turn it into a
-fact. This boundary is repeated in the provider instructions and retained in
-the one repair request; model-authored wording remains free inside that factual
-boundary.
+unknown, but its speech, reasons, and questions may not turn it into a fact.
+Suggested replies follow the separate uncommitted-candidate rule above. This
+boundary is repeated in the provider instructions and retained in the one
+repair request; model-authored wording remains free inside that factual boundary.
+
+The resident's public role may support generic job topics and ordinary
+capabilities: a receptionist can conditionally ask whether a visit concerns a
+schedule or paperwork and offer general reception guidance. Objectives, role
+goals, policy, and private motivation remain non-evidence for concrete facts;
+they cannot imply that this visitor has a register entry, required document,
+appointment, approval, or completed next step. Questions are checked by the
+same rule:
+“who arranged this appointment?” presupposes that an appointment exists and
+concerns the player, so the resident must establish that link before narrowing
+its source or details.
+
+Conversation generation repeats this boundary as a final silent self-check.
+The provider reviews visitor-specific nouns and claimed access to concrete
+records in NPC speech, reasons, questions, and world claims against an exact
+supplied fact. It reviews suggestions separately so their relative exposure is
+legible and every cover claim stays confined to unselected candidate speech. A request to learn
+the steps before a hearing establishes that purpose and the hearing, but not an
+appointment, reference number, notice, dossier, paperwork, visitor record, or
+the resident's ability to check one.
 
 The provider projection also gives every player conversation an explicit
 `conversationFrame`: one resident speaker, the player interlocutor, and any
@@ -254,10 +283,23 @@ wording and style remain provider-owned and content-review owned. An independent
 all-locale guard rejects canonical internal stable-ID
 shapes such as actor, memory, record-surface, movement, and semantic-anchor ids
 from every player-visible field while leaving tool arguments and internal
-rationale untouched. Other locales keep structural and locale instructions
-without adding a second language detector. Either mismatch uses the existing
-single repair attempt. Supported gameplay locales are `ko-KR`, `en-US`,
-`it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`.
+rationale untouched. The same validity layer rejects explicit game/model framing
+(`player`, `user`, `NPC`, AI/model/prompt terminology, and localized equivalents)
+so a resident cannot expose the simulation while remaining schema-valid. Every
+locale also annotates each player-visible JSON Schema field with the requested
+language and requires at least one code point from that locale's permitted
+writing systems. This lightweight mismatch guard catches unchanged Hangul cast
+text in non-Korean requests; it is not a language classifier. English, Italian,
+and French share Latin script, while Han is valid in both Chinese and Japanese,
+so exact language and wording remain provider-owned. A failed guard uses the
+existing single repair attempt. Supported gameplay locales are `ko-KR`,
+`en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`.
+
+Each provider request also carries a final `playerVisibleOutputContract` after
+the Korean-authored actor context. It repeats the immutable gameplay locale,
+names the required output language, and tells the provider to translate or
+naturally re-express source-language voice instead of copying it. Repair calls
+retain that contract and point to it explicitly.
 
 A run fixes its locale at creation. That tag is part of opening-cache and
 request-idempotency signatures and flows through conversation, ambient agent

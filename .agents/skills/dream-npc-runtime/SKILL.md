@@ -85,10 +85,12 @@ or punctuation-only fields are invalid. This is a lightweight presence guard,
 not a style classifier: wording remains provider-owned and content review owns
 language quality. Every locale independently rejects canonical internal
 stable-ID shapes from player-visible fields; tool arguments and internal
-rationale remain exempt. Other locales keep structural validation without
-pretending a script regex can prove language quality. Fallback lines must stay
-in-fiction and use the same run locale — no goal strings, meta text, or
-cross-locale leakage into dialogue.
+rationale remain exempt. Non-Korean locales additionally require at least one
+code point from the locale's permitted writing systems. This catches obvious
+source-language leakage but does not pretend a script regex can distinguish
+English, Italian, and French or Chinese from all-kanji Japanese. Fallback
+lines must stay in-fiction and use the same run locale — no goal strings, meta
+text, or cross-locale leakage into dialogue.
 
 ## Verification
 

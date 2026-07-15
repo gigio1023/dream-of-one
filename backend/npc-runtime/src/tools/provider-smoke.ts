@@ -7,6 +7,8 @@ import {
 } from "../localization/supported-locales.js";
 import type { ProposalMeta } from "../providers/ports.js";
 import { createProviderFromEnvironment } from "../providers/registry.js";
+import { loadRunCast } from "../runtime/run-cast.js";
+import { loadRunLayout } from "../runtime/run-layout.js";
 
 const EXPECTED_PROFILE_ID = "modelscope/qwen3.7-plus";
 const PLAYER_ANSWERS: Record<string, string> = {
@@ -57,7 +59,10 @@ const { proposalPort, profileId } = createProviderFromEnvironment(env);
 const actorId = "NPC_Studio_Receptionist";
 const role = "studio_receptionist" as const;
 const rolePolicy = DEFAULT_ROLE_POLICIES[role];
-const goals = [...rolePolicy.stableGoals];
+const cast = loadRunCast(loadRunLayout());
+const castActor = cast.actors[actorId];
+if (!castActor) throw new Error(`provider smoke cast is missing ${actorId}`);
+const goals = [...castActor.stableGoals];
 const observePacket: ObservePacket = {
   actorId,
   role,
@@ -69,8 +74,24 @@ const observePacket: ObservePacket = {
     priorityShifts: [...rolePolicy.priorityShifts],
     forbiddenClaims: [...rolePolicy.forbiddenClaims],
   },
-  actorContext: null,
-  selfContext: null,
+  actorContext: {
+    sourceLocale: cast.sourceLocale,
+    publicIdentity: castActor.publicIdentity,
+    personality: [...castActor.personality],
+    voice: {
+      register: castActor.voice.register,
+      cadence: castActor.voice.cadence,
+      avoid: [...castActor.voice.avoid],
+    },
+  },
+  selfContext: {
+    selfOnlyPressures: [...castActor.selfOnlyPressures],
+    knownRelationships: castActor.knownRelationships.map(relationship => ({
+      actorId: relationship.actorId,
+      facts: [...relationship.facts],
+    })),
+    residentKnownFacts: [...cast.player.residentKnownFacts],
+  },
   actorMemory: {
     actorId,
     ownActionNotes: [],
@@ -95,11 +116,11 @@ const observePacket: ObservePacket = {
 const scopeId = `provider-smoke:${locale}`;
 const beatId = "resident_opening_studio_receptionist";
 const objective =
-  "Understand why the outsider arrived and explain the first reception step without inventing approval.";
+  `${goals.join(" ")} Speak face to face with the outsider, ask only what your role and memories support, and form a memory-based personal stance.`;
 const sceneFacts = [
   "The visitor and receptionist are face to face at the Studio reception desk.",
-  "The visitor is an outsider asking about the procedure before the scheduled hearing.",
-  "No approval, administrative record, or hidden resident belief is visible here.",
+  "The visitor has not yet stated a purpose, appointment, booking, document, or prior action.",
+  "This personal conversation cannot create an administrative record or decide the later Station hearing.",
 ];
 
 const opening = await proposalPort.proposeConversationTurn({

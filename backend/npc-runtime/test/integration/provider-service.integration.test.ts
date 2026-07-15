@@ -13,6 +13,7 @@ import {
   agentStepProposalSchemaForLocale,
   agentStepProposalSchemaForRequest,
   conversationJudgmentSchemaForLocale,
+  conversationProposalSchemaForLocale,
   hearingJudgmentJsonSchema,
   hearingJudgmentSchemaForLocale,
   hearingJudgmentSchemaForRequest,
@@ -565,6 +566,30 @@ test("Korean agent-step repair rewrites a lowercase Latin utterance instead of f
     properties: { utterance: { description?: string } };
   };
   assert.match(schema.properties.utterance.description ?? "", /Hangul-dominant natural Korean/);
+});
+
+test("locale-specific agent-step schemas do not contaminate later provider requests", () => {
+  const targetActorId = "NPC_Store_Manager";
+  const packet = requestScopedPacket();
+  packet.visibleActors = [targetActorId];
+  packet.audibleActorIds = [targetActorId];
+  packet.toolCatalog = ["talk_to"];
+  const constraints = {
+    effectiveTools: ["talk_to"] as const,
+    observePacket: packet,
+    recordContracts: {},
+    requiredToolCall: { tool: "talk_to" as const, actorId: targetActorId },
+    requireUtterance: true,
+  };
+
+  const koreanSchema = agentStepProposalJsonSchemaForTools(constraints, "ko-KR");
+  const englishSchema = agentStepProposalJsonSchemaForTools(constraints, "en-US");
+  const koreanText = JSON.stringify(koreanSchema);
+  const englishText = JSON.stringify(englishSchema);
+  assert.match(koreanText, /natural modern Korean/);
+  assert.doesNotMatch(koreanText, /natural American English/);
+  assert.match(englishText, /natural American English/);
+  assert.doesNotMatch(englishText, /natural modern Korean/);
 });
 
 test("required move_to player narrows transport and Zod contracts without requiring speech", async () => {
@@ -1689,7 +1714,23 @@ test("Korean agent-step validation covers provider-authored administrative quest
     true,
     "natural Korean may contain occasional Hanja",
   );
-  assert.equal(agentStepProposalSchemaForLocale("en-US").safeParse(proposal).success, true);
+  assert.equal(
+    agentStepProposalSchemaForLocale("en-US").safeParse(proposal).success,
+    false,
+    "Korean source prose must not pass unchanged in an English run",
+  );
+  const englishProposal = structuredClone(proposal);
+  englishProposal.toolCall.args.stateBody = "The visitor's purpose needs clarification.";
+  englishProposal.toolCall.args.whyLine = "The reception note left a question open.";
+  englishProposal.toolCall.args.openQuestion = {
+    status: "open",
+    text: "Why did the visitor come here?",
+    whyLine: "The reason for the visit still needs clarification.",
+  };
+  assert.equal(
+    agentStepProposalSchemaForLocale("en-US").safeParse(englishProposal).success,
+    true,
+  );
   proposal.toolCall.args.openQuestion = {
     status: "open",
     text: "來歷?",
@@ -1711,7 +1752,6 @@ test("Korean player-visible fields require Hangul but allow natural mixed conten
   };
   const accepted = [
     "Mira가 확인했습니다.",
-    "AI 기록을 확인했습니다.",
     "QR 표식을 확인했습니다.",
     "기록 2개를 확인했습니다.",
     "방문자의 來歷을 확인했습니다.",
@@ -1793,8 +1833,81 @@ test("Korean player-visible fields require Hangul but allow natural mixed conten
     }
     assert.equal(
       conversationJudgmentSchemaForLocale("en-US").safeParse({ ...base, whyLine }).success,
+      whyLine === "Mira checked it.",
+      `English locale writing-system guard mismatch for ${whyLine}`,
+    );
+  }
+});
+
+test("all gameplay locales reject explicit game and model framing in player-visible prose", () => {
+  const base = {
+    suspicionDelta: 0,
+    reportDelta: 0,
+    signals: [],
+  };
+  const rejected: Array<[string, string]> = [
+    ["ko-KR", "플레이어가 평범하게 답했습니다."],
+    ["en-US", "The player answered coherently."],
+    ["it-IT", "Il giocatore ha risposto con coerenza."],
+    ["zh-CN", "玩家的回答前后一致。"],
+    ["fr-FR", "Le joueur a répondu de manière cohérente."],
+    ["ja-JP", "プレイヤーの回答には一貫性があります。"],
+  ];
+  for (const [locale, whyLine] of rejected) {
+    const parsed = conversationJudgmentSchemaForLocale(locale).safeParse({
+      ...base,
+      whyLine,
+    });
+    assert.equal(parsed.success, false, `${locale}: ${whyLine}`);
+    if (!parsed.success) {
+      assert.ok(parsed.error.issues.some(issue =>
+        issue.message ===
+          "player-visible text must remain in fiction and must not expose game or model framing"
+      ));
+    }
+  }
+
+  for (const [locale, whyLine] of [
+    ["ko-KR", "Player가 평범하게 답했습니다."],
+    ["zh-CN", "The player 回答得很连贯。"],
+    ["ja-JP", "playerは一貫して答えました。"],
+  ] as const) {
+    assert.equal(
+      conversationJudgmentSchemaForLocale(locale).safeParse({ ...base, whyLine }).success,
+      false,
+      `${locale} must reject cross-language meta framing: ${whyLine}`,
+    );
+  }
+
+  assert.equal(
+    conversationJudgmentSchemaForLocale("en-US").safeParse({
+      ...base,
+      whyLine: "The visitor answered coherently.",
+    }).success,
+    true,
+  );
+  for (const [locale, whyLine] of [
+    ["fr-FR", "J'ai répondu de manière cohérente."],
+    ["it-IT", "Ho parlato ai presenti con calma."],
+  ] as const) {
+    assert.equal(
+      conversationJudgmentSchemaForLocale(locale).safeParse({ ...base, whyLine }).success,
       true,
-      `non-Korean locale behavior changed for ${whyLine}`,
+      `${locale} must not confuse ordinary lowercase 'ai' with the AI acronym`,
+    );
+  }
+  for (const locale of ["ko-KR", "en-US", "it-IT", "zh-CN", "fr-FR", "ja-JP"] as const) {
+    const whyLine = locale === "ko-KR"
+      ? "AI가 답변을 생성했습니다."
+      : locale === "zh-CN"
+        ? "AI生成了这段回答。"
+        : locale === "ja-JP"
+          ? "AIが回答を生成しました。"
+          : "AI generated this answer.";
+    assert.equal(
+      conversationJudgmentSchemaForLocale(locale).safeParse({ ...base, whyLine }).success,
+      false,
+      `${locale} must reject the uppercase AI acronym`,
     );
   }
 });
@@ -1874,7 +1987,53 @@ test("provider service returns schema-validated live conversation proposals", as
   assert.equal(result.proposal.suggestedReplies.length, 3);
   assert.equal(textGen.requests[0].schemaName, "npc_conversation_turn");
   assert.match(textGen.requests[0].instructions, /Missing context means unknown, never absent/);
-  assert.match(textGen.requests[0].instructions, /without inventing a new identity/);
+  assert.match(
+    textGen.requests[0].instructions,
+    /Suggested player replies are different: they are uncommitted possible utterances/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /risky\/weird may offer a bolder unsupported cover claim or lie/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /public role may ground generic job topics and ordinary capabilities/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /does not establish that this visitor has an appointment/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /must not claim a specific record or item exists, was checked, is missing, is required/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /silently perform this grounding check/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /but not a concrete appointment, reference number, notice, dossier, paperwork, visitor record/,
+  );
+  assert.match(
+    JSON.stringify(textGen.requests[0].jsonSchema),
+    /natural modern Korean/,
+  );
+  assert.match(
+    JSON.stringify(textGen.requests[0].jsonSchema),
+    /uncommitted candidate utterance/,
+  );
+  assert.match(
+    JSON.stringify(textGen.requests[0].jsonSchema),
+    /safe\/local is the least exposing plausible answer/,
+  );
+  const duplicateIntentProposal = JSON.parse(validConversation);
+  duplicateIntentProposal.suggestedReplies[1].intent = "safe/local";
+  assert.equal(
+    conversationProposalSchemaForLocale("ko-KR").safeParse(duplicateIntentProposal).success,
+    false,
+    "a provider must return exactly one candidate in each social-risk lane",
+  );
   const providerInput = JSON.parse(textGen.requests[0].input);
   assert.equal(
     providerInput.conversationFrame.residentSpeaker.actorId,
@@ -1890,6 +2049,11 @@ test("provider service returns schema-validated live conversation proposals", as
       label: object.label,
       state: object.state,
     })),
+  );
+  assert.ok(
+    providerInput.groundingContract.validityRules.some((rule: string) =>
+      rule.includes("Only the one the player selects or types")
+    ),
   );
   assert.deepEqual(service.auditSnapshot("session-provider-test"), {
     callsUsed: 1,
@@ -2393,7 +2557,7 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   assert.match(judgmentTextGen.requests[0].instructions, /0\.\.125 game scale/);
   assert.match(judgmentTextGen.requests[0].instructions, /not tiny 1\.\.5 ratings/);
   assert.match(judgmentTextGen.requests[0].instructions, /at least one Hangul code point/);
-  assert.match(judgmentTextGen.requests[0].instructions, /AI or QR/);
+  assert.match(judgmentTextGen.requests[0].instructions, /QR or ID/);
   assert.match(judgmentTextGen.requests[0].instructions, /never copy stable ids/i);
 
   const down = new ProviderService({
@@ -2415,11 +2579,11 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
     openQuestion: {
       status: "open",
       text: "다음 확인 대상은 누구인가요?",
-      whyLine: "Mira의 AI 기록과 2次 확인을 비교해야 합니다.",
+      whyLine: "Mira의 QR 기록과 2次 확인을 비교해야 합니다.",
     },
     suggestedReplies: [
       { text: "Mira에게 QR 기록 2개를 확인해 달라고 하겠습니다.", intent: "safe/local" },
-      { text: "AI 메모와 來歷을 함께 살펴보겠습니다.", intent: "uncertain/repair" },
+      { text: "접수 메모와 來歷을 함께 살펴보겠습니다.", intent: "uncertain/repair" },
       { text: "3번 창구에서 다시 설명하겠습니다.", intent: "risky/weird" },
     ],
   };
@@ -2514,23 +2678,21 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
     },
     thirdPartyActorIds: ["NPC_Store_Manager"],
   });
-  const mergedSchema = textGen.requests[0].jsonSchema as {
-    properties?: {
-      suggestedReplies?: {
-        items?: { properties?: { text?: { description?: string } } };
-      };
-    };
-  };
+  const mergedSchemaText = JSON.stringify(textGen.requests[0].jsonSchema);
   assert.match(
-    mergedSchema.properties?.suggestedReplies?.items?.properties?.text?.description ?? "",
-    /complete, self-contained player utterance/,
+    mergedSchemaText,
+    /complete, self-contained, in-character first-person utterance/,
   );
   assert.match(
-    mergedSchema.properties?.suggestedReplies?.items?.properties?.text?.description ?? "",
-    /player's own identity or possession/,
+    mergedSchemaText,
+    /becomes evidence only if selected/,
   );
   assert.match(
-    mergedSchema.properties?.suggestedReplies?.items?.properties?.text?.description ?? "",
+    mergedSchemaText,
+    /speaker's own identity or possession/,
+  );
+  assert.match(
+    mergedSchemaText,
     /Hangul-dominant natural Korean/,
   );
 });
@@ -2577,12 +2739,19 @@ test("merged Korean conversation repair receives every rejected Latin token", as
       offendingLatinTokens?: string[];
     }>;
   };
-  assert.deepEqual(repairInput.validationIssues, [{
-    path: "utterance",
-    message:
-      "player-visible Korean text may use Latin script only for title-case names or short uppercase acronyms",
-    offendingLatinTokens: ["studio", "OpenAI", "handler"],
-  }]);
+  assert.deepEqual(repairInput.validationIssues, [
+    {
+      path: "utterance",
+      message:
+        "player-visible text must remain in fiction and must not expose game or model framing",
+    },
+    {
+      path: "utterance",
+      message:
+        "player-visible Korean text may use Latin script only for title-case names or short uppercase acronyms",
+      offendingLatinTokens: ["studio", "OpenAI", "handler"],
+    },
+  ]);
 });
 
 test("typed multilingual player text keeps exact Unicode bytes in the provider request after edge trim", async () => {
@@ -2658,8 +2827,14 @@ test("player-visible stable ids get one bounded repair even when the prose conta
     ],
   };
   const textGen = new FakeTextGen([
-    { text: JSON.stringify(leakedStableIds) },
-    { text: validMergedTurn },
+    {
+      text: JSON.stringify(leakedStableIds),
+      usage: { inputTokens: 30, outputTokens: 20, totalTokens: 50 },
+    },
+    {
+      text: validMergedTurn,
+      usage: { inputTokens: 35, outputTokens: 15, totalTokens: 50 },
+    },
   ]);
   const service = new ProviderService({
     profileId: "test/stable-id-repair",
@@ -2849,7 +3024,27 @@ test("provider prompts and validation follow a non-Korean run locale without ano
   assert.match(textGen.requests[0].instructions, /natural American English/);
   assert.match(textGen.requests[0].instructions, /never copy stable ids/i);
   assert.doesNotMatch(textGen.requests[0].instructions, /Hangul code point/);
-  assert.equal("locale" in JSON.parse(textGen.requests[0].input), false);
+  assert.match(JSON.stringify(textGen.requests[0].jsonSchema), /natural American English/);
+  assert.doesNotMatch(JSON.stringify(textGen.requests[0].jsonSchema), /natural modern Korean/);
+  const providerInput = JSON.parse(textGen.requests[0].input) as {
+    playerVisibleOutputContract?: {
+      immutableRunLocale?: string;
+      requiredLanguage?: string;
+      sourceContextHandling?: string;
+    };
+  };
+  assert.deepEqual(
+    providerInput.playerVisibleOutputContract?.immutableRunLocale,
+    "en-US",
+  );
+  assert.deepEqual(
+    providerInput.playerVisibleOutputContract?.requiredLanguage,
+    "natural American English",
+  );
+  assert.match(
+    providerInput.playerVisibleOutputContract?.sourceContextHandling ?? "",
+    /translate or naturally re-express/,
+  );
 });
 
 test("invalid provider JSON gets one bounded repair attempt", async () => {

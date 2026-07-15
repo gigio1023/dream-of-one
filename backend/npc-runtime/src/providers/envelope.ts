@@ -35,6 +35,11 @@ const playerVisibleJsonString = {
   description:
     "Player-visible natural-language prose only. Obey the request groundingContract when present; never invent a player or world fact. Never include an internal stable id, identifier token, or underscore name.",
 } as const;
+const suggestedReplyJsonString = {
+  ...playerVisibleJsonString,
+  description:
+    `${playerVisibleJsonString.description} The reply must be a complete, self-contained player utterance. Explicitly preserve the person, object, source, or claim being answered whenever omission could make a noun phrase sound like the player's own identity or possession; never return a bare name, role, object, yes/no fragment, or context-dependent copular noun phrase.`,
+} as const;
 const nullablePlayerVisibleJsonString = {
   type: ["string", "null"],
   description:
@@ -862,7 +867,7 @@ export const conversationProposalJsonSchema: Record<string, unknown> = {
         additionalProperties: false,
         required: ["text", "intent"],
         properties: {
-          text: playerVisibleJsonString,
+          text: suggestedReplyJsonString,
           intent: { type: "string", enum: [...CONVERSATION_CHOICE_INTENTS] },
         },
       },
@@ -936,7 +941,7 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
         additionalProperties: false,
         required: ["text", "intent"],
         properties: {
-          text: playerVisibleJsonString,
+          text: suggestedReplyJsonString,
           intent: { type: "string", enum: [...CONVERSATION_CHOICE_INTENTS] },
         },
       },

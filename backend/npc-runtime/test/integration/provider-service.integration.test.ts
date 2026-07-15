@@ -2230,12 +2230,33 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   );
   assert.match(textGen.requests[0].instructions, /Missing context means unknown, never absent/);
   assert.match(textGen.requests[0].instructions, /hard validity boundary/);
+  assert.match(textGen.requests[0].instructions, /direct answer to answerBinding\.answeredNpcLine/);
+  assert.match(textGen.requests[0].instructions, /does not become a claim about the player's identity/);
   const input = JSON.parse(textGen.requests[0].input);
   assert.equal(input.stanceBefore, "uncertain");
   assert.equal(input.hasMeaningfulFirsthandConversation, false);
   assert.equal(input.groundingContract.knowledgeMode, "closed_world");
   assert.deepEqual(input.groundingContract.suppliedPlayerStatements, [judgmentRequest().playerLine]);
   assert.ok(input.groundingContract.validityRules.length >= 3);
+  assert.deepEqual(input.answerBinding, {
+    answeredNpcLine: "오늘도 같은 걸로 드릴까요?",
+    playerLine: judgmentRequest().playerLine,
+  });
+  const mergedSchema = textGen.requests[0].jsonSchema as {
+    properties?: {
+      suggestedReplies?: {
+        items?: { properties?: { text?: { description?: string } } };
+      };
+    };
+  };
+  assert.match(
+    mergedSchema.properties?.suggestedReplies?.items?.properties?.text?.description ?? "",
+    /complete, self-contained player utterance/,
+  );
+  assert.match(
+    mergedSchema.properties?.suggestedReplies?.items?.properties?.text?.description ?? "",
+    /player's own identity or possession/,
+  );
 });
 
 test("typed multilingual player text keeps exact Unicode bytes in the provider request after edge trim", async () => {

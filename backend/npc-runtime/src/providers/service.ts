@@ -196,7 +196,15 @@ function sanitizedValidationIssues(
 const PRIVATE_ACTOR_CONTEXT_GUIDE =
   "actorContext and selfContext describe only this resident's authored identity, voice, private motivation, and holder-local relationship knowledge. They may shape tone, priorities, and questions, but they are not observations or evidence about the player. Treat only supplied memories, heard speech, visible records, and visible facts as evidence, and never reveal a private pressure unless this resident deliberately chooses to speak about it in-fiction.";
 const CONVERSATION_VISIBLE_FACT_GUIDE =
-  "The groundingContract is a hard validity boundary, not a style suggestion. NPC speech and player reply suggestions may mention only people, documents, records, possessions, appointments, systems, approvals, identities, roles, and past events affirmatively supplied in the request. Missing context means unknown, never absent. The NPC may ask a neutral question about an unknown, but must not claim a record or item exists, was checked, is missing, or belongs to anyone. Every suggested player reply must be speakable without inventing a new identity, job, possession, document, invitation, approval, appointment, or past action. If no player statement supplies one, use a question, refusal, uncertainty, or a statement about the present conversation instead.";
+  "The groundingContract is a hard validity boundary, not a style suggestion. NPC speech and player reply suggestions may mention only people, documents, records, possessions, appointments, systems, approvals, identities, roles, and past events affirmatively supplied in the request. Missing context means unknown, never absent. The NPC may ask a neutral question about an unknown, but must not claim a record or item exists, was checked, is missing, or belongs to anyone. Every suggested player reply must be speakable without inventing a new identity, job, possession, document, invitation, approval, appointment, or past action. Each suggestion must also be a self-contained player utterance: explicitly preserve the person, object, source, or claim being answered whenever omission could make a role, name, or noun phrase sound like the player's own identity or possession. Never emit a bare name, role, object, yes/no fragment, or copular noun phrase whose referent exists only in the NPC question. If no player statement supplies one, use a complete question, refusal, uncertainty, or statement about the present conversation instead.";
+const CONVERSATION_REPLY_BINDING_GUIDE =
+  "Interpret playerLine as a direct answer to answerBinding.answeredNpcLine, not as an isolated sentence. Preserve the semantic slot and referent established by that NPC question. Ellipsis in a displayed or typed answer fills the requested slot; it does not become a claim about the player's identity, job, possession, or biography unless the player explicitly says so. Judge the contextual proposition that the two lines express together.";
+
+function latestNpcLine(
+  history: readonly { speakerId: string; line: string }[],
+): string | null {
+  return [...history].reverse().find(entry => entry.speakerId !== "player")?.line ?? null;
+}
 
 function conversationGroundingContract(
   request:
@@ -383,6 +391,7 @@ export class ProviderService implements NpcProposalPort {
       "You are the judging mind of one NPC inside Dream of One, a social-suspicion game.",
       "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
+      CONVERSATION_REPLY_BINDING_GUIDE,
       PRIVATE_ACTOR_CONTEXT_GUIDE,
       CONVERSATION_VISIBLE_FACT_GUIDE,
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
@@ -397,6 +406,10 @@ export class ProviderService implements NpcProposalPort {
     const requestContext = {
       playerLine: request.playerLine,
       conversationHistory: request.conversationHistory.slice(-10),
+      answerBinding: {
+        answeredNpcLine: latestNpcLine(request.conversationHistory),
+        playerLine: request.playerLine,
+      },
       actor: request.observePacket,
       suspicionBefore: request.suspicionBefore,
       reportPressureBefore: request.reportPressureBefore,
@@ -427,6 +440,7 @@ export class ProviderService implements NpcProposalPort {
       "You are one NPC inside Dream of One, a social-suspicion game.",
       "In one response, judge the player's newest line AND write your next spoken reply with exactly three short player reply suggestions.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
+      CONVERSATION_REPLY_BINDING_GUIDE,
       PRIVATE_ACTOR_CONTEXT_GUIDE,
       CONVERSATION_VISIBLE_FACT_GUIDE,
       "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
@@ -450,6 +464,10 @@ export class ProviderService implements NpcProposalPort {
     const requestContext = {
       playerLine: request.playerLine,
       conversationHistory: request.conversationHistory.slice(-10),
+      answerBinding: {
+        answeredNpcLine: latestNpcLine(request.conversationHistory),
+        playerLine: request.playerLine,
+      },
       objective: request.objective,
       sceneFacts: request.sceneFacts,
       actor: request.observePacket,

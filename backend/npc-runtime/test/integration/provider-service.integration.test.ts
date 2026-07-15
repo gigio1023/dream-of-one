@@ -2353,6 +2353,14 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   );
   assert.match(
     textGen.requests[0].instructions,
+    /never leave an answered question stale/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
+    /After stance becomes vouch, set continueConversation=false/,
+  );
+  assert.match(
+    textGen.requests[0].instructions,
     /Set meaningfulFirsthand=true.*coherent handling of a role-supported question/,
   );
   assert.match(
@@ -2366,6 +2374,7 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   const input = JSON.parse(textGen.requests[0].input);
   assert.equal(input.stanceBefore, "uncertain");
   assert.equal(input.hasMeaningfulFirsthandConversation, false);
+  assert.equal(input.currentOpenQuestion, null);
   assert.equal(input.groundingContract.knowledgeMode, "closed_world");
   assert.deepEqual(input.groundingContract.suppliedPlayerStatements, [judgmentRequest().playerLine]);
   assert.ok(input.groundingContract.validityRules.length >= 3);

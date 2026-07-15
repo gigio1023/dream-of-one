@@ -2187,6 +2187,11 @@ export class RunService {
         sceneFacts: this.conversationSceneFacts(actor, conversation.procedure),
         stanceBefore,
         hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
+        currentOpenQuestion: clone(
+          conversation.lastMemory?.kind === "player_conversation"
+            ? conversation.lastMemory.openQuestion
+            : null,
+        ),
       });
       this.trackProposal(run, resolved.meta);
 

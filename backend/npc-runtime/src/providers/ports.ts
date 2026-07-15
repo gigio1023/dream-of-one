@@ -219,6 +219,12 @@ export interface MergedConversationTurnRequest extends ConversationJudgmentReque
   sceneFacts: string[];
   stanceBefore?: CoarseStance;
   hasMeaningfulFirsthandConversation?: boolean;
+  /** Exact question tracked from this conversation's previous judged turn. */
+  currentOpenQuestion?: {
+    status: "open" | "resolved";
+    text: string;
+    whyLine: string;
+  } | null;
 }
 
 export interface AgentToolResult {

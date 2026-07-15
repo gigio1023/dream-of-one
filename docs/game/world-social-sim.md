@@ -90,6 +90,12 @@ memories after the player's final defense, and the runtime only validates
 provenance, counts the quorum, and guarantees procedure. The
 open-questions/rumor-log surface shows the player which stances and open
 doubts they have actually encountered — never hidden content.
+Each judged follow-up receives the exact question tracked from the prior turn.
+A direct answer or an honest statement of the player's knowledge limit resolves
+that question; it may stay open only when the exchange leaves it materially
+unanswered, and it may be replaced only by a different grounded question. A
+vouch closes the conversation unless such a question still warrants an
+immediate answer, so a stale doubt cannot force filler turns.
 
 ## Propagation (how information travels)
 

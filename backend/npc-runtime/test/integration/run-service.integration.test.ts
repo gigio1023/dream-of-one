@@ -638,6 +638,12 @@ test("vouch provenance is clamped and speech cannot silently move institutional 
 
 test("a direct multi-turn conversation can visibly recover from oppose and high suspicion", async () => {
   let turn = 0;
+  const trackedQuestion = {
+    status: "open" as const,
+    text: "숨긴 방문 경위는 무엇인가요?",
+    whyLine: "처음 설명에서 중요한 사실을 숨겼습니다.",
+  };
+  const receivedCurrentQuestions: unknown[] = [];
   const adapter = new ScriptedNpcAdapter({
     conversation: () => ({
       utterance: "방문 목적을 정확히 설명해 주세요.",
@@ -648,7 +654,8 @@ test("a direct multi-turn conversation can visibly recover from oppose and high 
       ],
       continueConversation: true,
     }),
-    mergedTurn: () => {
+    mergedTurn: request => {
+      receivedCurrentQuestions.push(structuredClone(request.currentOpenQuestion ?? null));
       turn += 1;
       return turn === 1
         ? {
@@ -658,7 +665,7 @@ test("a direct multi-turn conversation can visibly recover from oppose and high 
             whyLine: "처음 설명에서 중요한 사실을 숨겨 강하게 경계하게 됐습니다.",
             stance: "oppose",
             meaningfulFirsthand: true,
-            openQuestion: null,
+            openQuestion: trackedQuestion,
             utterance: "숨긴 사실이 무엇인지 지금 분명히 말해 주세요.",
             suggestedReplies: [
               { text: "두려워서 방문 경위를 숨겼습니다.", intent: "safe/local" },
@@ -674,7 +681,11 @@ test("a direct multi-turn conversation can visibly recover from oppose and high 
             whyLine: "숨긴 이유와 방문 경위를 구체적으로 바로잡아 의심이 크게 줄었습니다.",
             stance: "vouch",
             meaningfulFirsthand: true,
-            openQuestion: null,
+            openQuestion: {
+              ...trackedQuestion,
+              status: "resolved",
+              whyLine: "플레이어가 숨긴 방문 경위와 이유를 직접 설명했습니다.",
+            },
             utterance: "이제 설명이 앞뒤가 맞습니다. 제가 직접 들은 내용으로 보증하겠습니다.",
             suggestedReplies: [
               { text: "고맙습니다.", intent: "safe/local" },
@@ -711,6 +722,12 @@ test("a direct multi-turn conversation can visibly recover from oppose and high 
   assert.equal(first.actor.suspicion, 90);
   assert.equal(first.actor.stance, "oppose");
   assert.ok(first.nextTurn);
+  assert.deepEqual(receivedCurrentQuestions, [null]);
+  const firstQuestion = first.socialView.openQuestions.find(
+    question => question.subjectActorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(firstQuestion);
+  assert.equal(firstQuestion.status, "open");
   const waryView = first.socialView.encounteredResidents.find(
     resident => resident.actorId === STUDIO_RECEPTIONIST_ID,
   );
@@ -728,6 +745,12 @@ test("a direct multi-turn conversation can visibly recover from oppose and high 
   assert.equal(second.actor.suspicion, 20);
   assert.equal(second.actor.stance, "vouch");
   assert.ok(second.actor.suspicion < first.actor.suspicion);
+  assert.deepEqual(receivedCurrentQuestions, [null, trackedQuestion]);
+  const resolvedQuestion = second.socialView.openQuestions.find(
+    question => question.subjectActorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(resolvedQuestion);
+  assert.equal(resolvedQuestion.status, "resolved");
   const recoveredView = second.socialView.encounteredResidents.find(
     resident => resident.actorId === STUDIO_RECEPTIONIST_ID,
   );

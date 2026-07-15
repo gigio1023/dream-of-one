@@ -479,6 +479,8 @@ export class ProviderService implements NpcProposalPort {
       "Politeness, repetition, lack of hostility, or merely lowering suspicion without addressing a material question is not substantive; keep uncertain or oppose while a role-supported question remains materially open.",
       "Set meaningfulFirsthand=true when this direct exchange gives the NPC a relevant basis it can later cite, including firsthand evidence of the player's coherent handling of a role-supported question; it need not prove identity or an external fact. Vouch requires meaningfulFirsthand.",
       "openQuestion is either null or one concise player-log question authored from this exchange, with its own open/resolved status, text, and whyLine.",
+      "currentOpenQuestion is the exact question tracked from the previous judged turn, if any. When the player's newest line directly answers it or honestly establishes the limit of what the player knows, return that question with status=resolved and a whyLine grounded in the answer; never leave an answered question stale by returning null or repeating it as open. Replace it with an open question only when the new question is materially different, role-supported, grounded, and useful for the player to answer.",
+      "After stance becomes vouch, set continueConversation=false unless one materially different grounded question still warrants an immediate answer. If you continue, the utterance and all suggestions must advance that question: safe/local should directly answer it or state a concrete knowledge boundary, never merely promise a future record check.",
       "utterance is your next in-character line after hearing the player.",
       "The reply intent labels shape variety only; they never decide suspicion or game truth.",
       ...localeOutputInstructions(
@@ -503,6 +505,7 @@ export class ProviderService implements NpcProposalPort {
       reportPressureBefore: request.reportPressureBefore,
       stanceBefore: request.stanceBefore,
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
+      currentOpenQuestion: request.currentOpenQuestion ?? null,
       groundingContract: conversationGroundingContract(request, request.playerLine),
       beatId: request.beatId,
       locale: request.locale,

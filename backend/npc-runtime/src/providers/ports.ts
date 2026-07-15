@@ -197,8 +197,8 @@ export interface MergedConversationTurn extends ConversationJudgment {
   stance: CoarseStance;
   /** Whether the exchange contained enough firsthand substance to support a vouch. */
   meaningfulFirsthand: boolean;
-  /** Provider-authored player log entry; omitted when this exchange opens no question. */
-  openQuestion?: { status: "open" | "resolved"; text: string; whyLine: string } | null;
+  /** Provider-authored player log entry; null when this exchange opens no question. */
+  openQuestion: { status: "open" | "resolved"; text: string; whyLine: string } | null;
   utterance: string;
   /** Resident-visible records whose contents are meaningfully conveyed by utterance. */
   citedRecordIds?: string[];

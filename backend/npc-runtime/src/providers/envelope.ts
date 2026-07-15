@@ -83,6 +83,7 @@ const mergedSuggestedReplySchema = z.preprocess(
 const playerVisibleJsonString = {
   type: "string",
   minLength: 1,
+  pattern: "\\S",
   description:
     "Player-visible natural-language prose only. Obey the request groundingContract when present; never invent a player or world fact. Stay entirely in fiction: never call anyone a player, user, or NPC, and never mention games, AI, language models, prompts, or system messages. Never include an internal stable id, identifier token, or underscore name.",
 } as const;
@@ -316,8 +317,7 @@ export const mergedConversationTurnSchema = z
         whyLine: nonEmpty,
       })
       .strict()
-      .nullable()
-      .optional(),
+      .nullable(),
     utterance: nonEmpty,
     citedRecordIds: speechRecordCitationIdsSchema.default([]),
     suggestedReplies: mergedSuggestedReplySchema,
@@ -1197,11 +1197,18 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
     stance: { type: "string", enum: [...COARSE_STANCES] },
     meaningfulFirsthand: { type: "boolean" },
     openQuestion: {
+      description:
+        "Either null, or one complete in-world question. If an object is returned, status, text, and whyLine are all required; text and whyLine must each be a nonempty natural-language string. Use null for the whole field rather than null or empty required children.",
       anyOf: [
-        { type: "null" },
+        {
+          type: "null",
+          description: "Use null when this exchange creates or resolves no concrete question.",
+        },
         {
           type: "object",
           additionalProperties: false,
+          description:
+            "A complete question object. Never use null, an empty string, or whitespace for text or whyLine.",
           required: ["status", "text", "whyLine"],
           properties: {
             status: { type: "string", enum: ["open", "resolved"] },

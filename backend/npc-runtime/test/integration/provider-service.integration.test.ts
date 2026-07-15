@@ -2963,6 +2963,95 @@ test("merged conversation repair rewrites meta-framed open-question reasons in f
   }]);
 });
 
+test("merged conversation repair completes nullable open-question objects with nonempty text", async () => {
+  const invalidTurn = {
+    ...JSON.parse(validMergedTurn),
+    stance: "uncertain",
+    openQuestion: {
+      status: "open",
+      text: null,
+      whyLine: "방문 목적을 아직 확인하지 못했습니다.",
+    },
+    continueConversation: true,
+  };
+  const repairedTurn = {
+    ...invalidTurn,
+    openQuestion: {
+      status: "open",
+      text: "이곳을 찾아온 목적은 무엇인가요?",
+      whyLine: "방문 목적을 아직 확인하지 못했습니다.",
+    },
+  };
+  const textGen = new FakeTextGen([
+    {
+      text: JSON.stringify(invalidTurn),
+      usage: { inputTokens: 60, outputTokens: 40, totalTokens: 100 },
+    },
+    {
+      text: JSON.stringify(repairedTurn),
+      usage: { inputTokens: 70, outputTokens: 30, totalTokens: 100 },
+    },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/complete-open-question-repair",
+    textGen,
+    fallback: new RuleFallbackNpcAdapter(),
+  });
+
+  const result = await service.judgeAndProposeConversationTurn({
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["스튜디오 접수대에서 직접 대화하고 있다."],
+    stanceBefore: "uncertain",
+    hasMeaningfulFirsthandConversation: false,
+  });
+
+  assert.equal(result.meta.transport, "live");
+  assert.equal(result.meta.usedFallback, false);
+  assert.equal(result.proposal.openQuestion?.text, repairedTurn.openQuestion.text);
+  assert.deepEqual(textGen.requests.map(request => request.purpose), [
+    "conversation_turn",
+    "repair",
+  ]);
+  assert.match(
+    textGen.requests[0].instructions,
+    /If openQuestion is an object, text and whyLine must each be a nonempty natural-language string/,
+  );
+  assert.match(
+    textGen.requests[1].instructions,
+    /when returning the object, populate every required child with its schema-valid type/,
+  );
+  assert.match(
+    textGen.requests[1].instructions,
+    /return the whole field as null instead of a partial object/,
+  );
+  assert.match(
+    textGen.requests[1].instructions,
+    /If any validation issue path begins with openQuestion, replace the entire openQuestion value/,
+  );
+  const initialSchema = textGen.requests[0].jsonSchema as {
+    properties: {
+      openQuestion: {
+        description: string;
+        anyOf: Array<Record<string, unknown>>;
+      };
+    };
+  };
+  assert.match(initialSchema.properties.openQuestion.description, /complete in-world question/);
+  const objectBranch = initialSchema.properties.openQuestion.anyOf.find(
+    branch => branch.type === "object",
+  ) as { properties: { text: { minLength: number }; whyLine: { minLength: number } } };
+  assert.equal(objectBranch.properties.text.minLength, 1);
+  assert.equal(objectBranch.properties.whyLine.minLength, 1);
+  const repairInput = JSON.parse(textGen.requests[1].input) as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "openQuestion.text",
+    message: "Invalid input: expected string, received null",
+  }]);
+});
+
 test("the one blocking merged call returns model-owned stance with firsthand grounding", async () => {
   const mixedNaturalKoreanTurn = {
     ...JSON.parse(validMergedTurn),

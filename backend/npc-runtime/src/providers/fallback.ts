@@ -189,6 +189,7 @@ export class RuleFallbackNpcAdapter implements NpcProposalPort {
           exactFallbackIntent,
         ),
         meaningfulFirsthand,
+        openQuestion: null,
         utterance: proposed.proposal.utterance,
         citedRecordIds: proposed.proposal.citedRecordIds ?? [],
         suggestedReplies: proposed.proposal.suggestedReplies,

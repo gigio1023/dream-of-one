@@ -45,6 +45,40 @@ function spatialActors(snapshot: RunSnapshot): RunActorSpatialFacts[] {
   });
 }
 
+function reportBearingPlayerMemory(memoryId: string): RunMemory {
+  return {
+    memoryId,
+    kind: "player_conversation",
+    sourceActorId: "player",
+    listenerActorId: STUDIO_RECEPTIONIST_ID,
+    conversationId: `${memoryId}:conversation`,
+    turnId: `${memoryId}:turn`,
+    playerLine: "접수 기록을 위조했습니다.",
+    npcLine: "그 말은 그냥 넘길 수 없어요.",
+    citedRecords: [],
+    signals: [],
+    whyLine: "방문자가 기록 위조를 직접 말했다.",
+    suspicionBefore: 0,
+    suspicionAfter: 25,
+    suspicionDelta: 25,
+    reportPressureBefore: 0,
+    reportPressureAfter: 0,
+    reportDelta: 25,
+    institutionalPressureDelta: 0,
+    proposedStance: "oppose",
+    appliedStance: "oppose",
+    meaningfulFirsthand: true,
+    openQuestion: null,
+    worldSeconds: 0,
+    worldRevision: 0,
+    proposalMeta: {
+      profileId: "scripted/studio-reception",
+      transport: "scripted",
+      usedFallback: false,
+    },
+  };
+}
+
 test("social source excerpts remove unsafe controls and truncate by Unicode code point", () => {
   assert.equal(
     normalizeSocialSourceExcerpt("  first\tsecond\r\nthird  "),
@@ -84,7 +118,9 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
   const adapter = createStudioReceptionScriptedAdapter();
   const originalNextStep = adapter.proposeNextStep.bind(adapter);
   let administrativeChoices = 0;
+  const requests: Parameters<typeof adapter.proposeNextStep>[0][] = [];
   adapter.proposeNextStep = async request => {
+    requests.push(structuredClone(request));
     if (
       request.observePacket.actorId === STUDIO_RECEPTIONIST_ID &&
       request.observePacket.administrativeSources.some(source => source.reportDelta !== 0) &&
@@ -120,37 +156,7 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
   const receptionist = internalRuns.get(started.runId)?.actors.get(STUDIO_RECEPTIONIST_ID);
   assert.ok(receptionist);
   receptionist.locationId = "";
-  receptionist.memories.push({
-    memoryId: "admin-provider-declines:source",
-    kind: "player_conversation",
-    sourceActorId: "player",
-    listenerActorId: STUDIO_RECEPTIONIST_ID,
-    conversationId: "admin-provider-declines:conversation",
-    turnId: "admin-provider-declines:turn",
-    playerLine: "접수 기록을 위조했습니다.",
-    npcLine: "그 말은 그냥 넘길 수 없어요.",
-    citedRecords: [],
-    signals: [],
-    whyLine: "방문자가 기록 위조를 직접 말했다.",
-    suspicionBefore: 0,
-    suspicionAfter: 25,
-    suspicionDelta: 25,
-    reportPressureBefore: 0,
-    reportPressureAfter: 0,
-    reportDelta: 25,
-    institutionalPressureDelta: 0,
-    proposedStance: "oppose",
-    appliedStance: "oppose",
-    meaningfulFirsthand: true,
-    openQuestion: null,
-    worldSeconds: 0,
-    worldRevision: 0,
-    proposalMeta: {
-      profileId: adapter.profileId,
-      transport: "scripted",
-      usedFallback: false,
-    },
-  });
+  receptionist.memories.push(reportBearingPlayerMemory("admin-provider-declines:source"));
   const advanced = await service.advance({
     runId: started.runId,
     advanceId: "admin-provider-declines:spatial",
@@ -206,6 +212,54 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
   assert.deepEqual(snapshot.ledgerEvents, []);
   assert.equal(snapshot.institutionalPressure, 0);
 
+  receptionist.memories.push({
+    memoryId: "admin-provider-declines:later-contact",
+    kind: "player_contact_outcome",
+    sourceActorId: "player",
+    listenerActorId: STUDIO_RECEPTIONIST_ID,
+    contactId: "admin-provider-declines:later-contact",
+    outcome: "not_engaged",
+    contactReason: "방문자가 나중의 질문에는 응하지 않았습니다.",
+    interactionZoneId: "StudioReceptionConversation",
+    originAnchorRef: "Studio.reception",
+    worldSeconds: snapshot.worldClock.elapsedSeconds,
+    worldRevision: snapshot.worldRevision,
+  });
+  const reconsidered = await service.advance({
+    runId: started.runId,
+    advanceId: "admin-provider-declines:later-semantic-event",
+    observedWorldRevision: snapshot.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: snapshot.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: spatialActors(snapshot),
+    },
+  });
+  const laterWake = reconsidered.scheduleWakes.find(
+    candidate => candidate.kind === "goal" && candidate.actorIds[0] === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(laterWake, "a genuinely new memory still admits ordinary resident work");
+  const laterDecision = await service.decision({
+    runId: started.runId,
+    wakeId: laterWake.wakeId,
+    observedWorldRevision: laterWake.observedWorldRevision,
+  });
+  assert.equal(laterDecision.status, "completed");
+  assert.equal(administrativeChoices, 1, "the same declined source is never reconsidered");
+  const laterRequest = requests.at(-1);
+  assert.ok(laterRequest);
+  assert.ok(laterRequest.observePacket.administrativeSources.every(
+    source => source.memoryId !== "admin-provider-declines:source",
+  ));
+  assert.ok(laterRequest.observePacket.actorMemory.ownActionNotes.some(
+    note =>
+      note.includes("administrative_wait") &&
+      note.includes("admin-provider-declines:source") &&
+      note.includes("기록하지 않고 보류합니다"),
+  ));
+
   receptionist.locationId = "";
   const beforeLeaving = service.snapshot(started.runId);
   const leftSurface = await service.advance({
@@ -223,6 +277,150 @@ test("a report-bearing writable goal asks for an explicit provider choice withou
   assert.ok(leftSurface.scheduleWakes.every(
     candidate => candidate.kind !== "goal" || candidate.actorIds[0] !== STUDIO_RECEPTIONIST_ID,
   ));
+});
+
+test("one stale administrative choice retries after the scene settles, then stays final", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalNextStep = adapter.proposeNextStep.bind(adapter);
+  let administrativeCalls = 0;
+  let markStarted: (() => void) | null = null;
+  const providerStarted = new Promise<void>(resolve => {
+    markStarted = resolve;
+  });
+  let releaseProvider: (() => void) | null = null;
+  const providerReleased = new Promise<void>(resolve => {
+    releaseProvider = resolve;
+  });
+  adapter.proposeNextStep = async request => {
+    const source = request.observePacket.administrativeSources.find(
+      candidate => candidate.reportDelta !== 0,
+    );
+    if (!source) return originalNextStep(request);
+    administrativeCalls += 1;
+    if (administrativeCalls === 1) {
+      markStarted?.();
+      await providerReleased;
+    }
+    return {
+      proposal: {
+        toolCall: { tool: "wait", args: { reason: "이 출처는 기록하지 않기로 최종 판단했습니다." } },
+        utterance: null,
+        citedRecordIds: [],
+        rationale: "기록으로 남길 근거가 충분하지 않습니다.",
+        done: true,
+      },
+      meta: {
+        profileId: adapter.profileId,
+        transport: "scripted" as const,
+        usedFallback: false,
+      },
+    };
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds(),
+  });
+  const started = service.start("admin-stale-retry", "ko-KR");
+  type MutableActor = { memories: RunMemory[] };
+  type MutableRun = { actors: Map<string, MutableActor> };
+  const internalRuns = Reflect.get(service, "runs") as Map<string, MutableRun>;
+  const receptionist = internalRuns.get(started.runId)?.actors.get(STUDIO_RECEPTIONIST_ID);
+  assert.ok(receptionist);
+  receptionist.memories.push(reportBearingPlayerMemory("admin-stale-retry:source"));
+
+  const initialActors = spatialActors(started);
+  const initial = await service.advance({
+    runId: started.runId,
+    advanceId: "admin-stale-retry:initial",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: started.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: initialActors,
+    },
+  });
+  const firstWake = initial.scheduleWakes.find(
+    candidate => candidate.kind === "goal" && candidate.actorIds[0] === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(firstWake);
+  const firstDecision = service.decision({
+    runId: started.runId,
+    wakeId: firstWake.wakeId,
+    observedWorldRevision: firstWake.observedWorldRevision,
+  });
+  await providerStarted;
+
+  const changedActors = initialActors.map(actor => structuredClone(actor));
+  const changedReceptionist = changedActors.find(
+    actor => actor.actorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(changedReceptionist);
+  changedReceptionist.visibleActorIds = ["NPC_Studio_Manager"];
+  const changed = await service.advance({
+    runId: started.runId,
+    advanceId: "admin-stale-retry:changed-during-provider",
+    observedWorldRevision: initial.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: initial.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: changedActors,
+    },
+  });
+  assert.ok(changed.scheduleWakes.every(
+    candidate => candidate.kind !== "goal" || candidate.actorIds[0] !== STUDIO_RECEPTIONIST_ID,
+  ));
+  releaseProvider?.();
+  const stale = await firstDecision;
+  assert.equal(stale.status, "stale");
+  assert.deepEqual(stale.actionDeltas, []);
+
+  const beforeRetry = service.snapshot(started.runId);
+  const retried = await service.advance({
+    runId: started.runId,
+    advanceId: "admin-stale-retry:settled",
+    observedWorldRevision: beforeRetry.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: beforeRetry.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: changedActors,
+    },
+  });
+  const retryWake = retried.scheduleWakes.find(
+    candidate => candidate.kind === "goal" && candidate.actorIds[0] === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(retryWake, "a stale administrative choice gets one event-driven retry");
+  const completed = await service.decision({
+    runId: started.runId,
+    wakeId: retryWake.wakeId,
+    observedWorldRevision: retryWake.observedWorldRevision,
+  });
+  assert.equal(completed.status, "completed");
+  assert.equal(administrativeCalls, 2);
+  assert.deepEqual(completed.actionDeltas, []);
+
+  const settled = service.snapshot(started.runId);
+  const unchanged = await service.advance({
+    runId: started.runId,
+    advanceId: "admin-stale-retry:unchanged",
+    observedWorldRevision: settled.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    spatialFacts: {
+      observedWorldRevision: settled.worldRevision,
+      player: { position: [8, 0.05, 5], locationId: "" },
+      actors: changedActors,
+    },
+  });
+  assert.ok(unchanged.scheduleWakes.every(
+    candidate => candidate.kind !== "goal" || candidate.actorIds[0] !== STUDIO_RECEPTIONIST_ID,
+  ));
+  assert.equal(administrativeCalls, 2);
 });
 
 test("provider-owned administration is sourced, clamped, exactly-once, and disclosed only on encounter", async () => {

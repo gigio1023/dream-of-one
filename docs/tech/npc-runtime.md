@@ -409,9 +409,14 @@ run lease.
 A nonzero report inclination still does not mandate a record. When its holder
 has an authorized writable surface, that gained opportunity enters the
 semantic key once and the bounded goal offers only `write_record` and `wait`:
-the provider must deliberately preserve one grounded source or leave it
-unwritten instead of deferring the choice through unrelated movement or
-speech. Leaving the surface is non-actionable. If caller-side budget
+the provider must deliberately preserve one grounded source or give it a
+final unwritten disposition instead of deferring the choice through unrelated
+movement or speech. That disposition removes only the cited source from later
+administrative packets and remains in the resident's own action notes, so a
+new social event cannot silently reopen the same decision. Leaving the surface
+is non-actionable. One result invalidated by changing spatial facts is
+re-admitted after the scene settles; a second stale result ends that retry so
+an unstable scene cannot become a provider treadmill. If caller-side budget
 reservation interrupts the choice or the second turn of a proposed
 conversation, the runtime commits no partial consequence and does not mark the
 semantic goal complete. It re-admits once only after exact provider accounting

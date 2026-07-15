@@ -195,6 +195,7 @@ const SPATIAL_GOAL_REFRESH_SECONDS = 600;
 export const RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT = 12;
 export const RUN_OBSERVE_HEARD_SPEECH_LIMIT = 8;
 export const RUN_OBSERVE_ADMINISTRATIVE_SOURCE_LIMIT = 8;
+const RUN_OBSERVE_ADMINISTRATIVE_DISPOSITION_NOTE_LIMIT = 4;
 const CONTACT_OPPORTUNITY_EPOCH_SECONDS = 75;
 const CONTACT_COOLDOWN_SECONDS = 75;
 const CONTACT_LIFETIME_SECONDS = 30;
@@ -331,6 +332,7 @@ interface GoalObservation {
   factSignature: string;
   observePacket: ObservePacket;
   allowedTalkActorIds: string[];
+  administrativeDecisionSourceMemoryId: string | null;
   goal: string;
   procedure: "ordinary" | "interrogation";
 }
@@ -370,6 +372,12 @@ interface DeferredGoalBudgetState {
   semanticGoalKey: string;
   callsUsed: number;
   tokensUsed: number;
+}
+
+interface DeferredAdministrativeGoalState {
+  semanticGoalKey: string;
+  retryUsed: boolean;
+  needsRetry: boolean;
 }
 
 interface SupersededGoalWake {
@@ -485,6 +493,7 @@ interface RunState {
   completedGoalKeys: Set<string>;
   goalAdmissions: Map<string, GoalAdmissionState>;
   deferredGoalBudgets: Map<string, DeferredGoalBudgetState>;
+  deferredAdministrativeGoals: Map<string, DeferredAdministrativeGoalState>;
   supersededGoalWakes: Map<string, SupersededGoalWake>;
   lastGoalSpeechAt: Map<string, number>;
   agentTranscript: TranscriptStore;
@@ -495,6 +504,7 @@ interface RunState {
   records: RunSnapshot["records"];
   ledgerEvents: RunSnapshot["ledgerEvents"];
   positiveAdministrativeRootIds: Set<string>;
+  declinedAdministrativeSources: Map<string, string>;
   socialView: RunSocialView;
   activeContact: RunActiveContact | null;
   contactCooldownUntil: Map<string, number>;
@@ -866,6 +876,7 @@ export class RunService {
       completedGoalKeys: new Set(),
       goalAdmissions: new Map(),
       deferredGoalBudgets: new Map(),
+      deferredAdministrativeGoals: new Map(),
       supersededGoalWakes: new Map(),
       lastGoalSpeechAt: new Map(),
       agentTranscript: new TranscriptStore(),
@@ -876,6 +887,7 @@ export class RunService {
       records: [],
       ledgerEvents: [],
       positiveAdministrativeRootIds: new Set(),
+      declinedAdministrativeSources: new Map(),
       socialView: {
         revision: 0,
         hearing: { atSeconds: this.layout.hearingAtSeconds, due: false },
@@ -1622,6 +1634,7 @@ export class RunService {
           ) {
             this.retirePendingGoalWakes(run, actor.actorId);
             run.deferredGoalBudgets.delete(actor.actorId);
+            run.deferredAdministrativeGoals.delete(actor.actorId);
             run.goalAdmissions.set(actor.actorId, {
               semanticGoalKey,
               nonContactSemanticGoalKey,
@@ -1649,11 +1662,29 @@ export class RunService {
             deferred.callsUsed = run.providerBudget.callsUsed;
             deferred.tokensUsed = run.providerBudget.tokensUsed;
           }
+          const deferredAdministrative = run.deferredAdministrativeGoals.get(actor.actorId);
+          if (
+            deferredAdministrative &&
+            (
+              deferredAdministrative.semanticGoalKey !== semanticGoalKey ||
+              administrativeOpportunityKey === null
+            )
+          ) {
+            run.deferredAdministrativeGoals.delete(actor.actorId);
+          }
+          const deferredAdministrativeEligible = Boolean(
+            deferredAdministrative &&
+            deferredAdministrative.semanticGoalKey === semanticGoalKey &&
+            deferredAdministrative.needsRetry &&
+            !deferredAdministrative.retryUsed &&
+            administrativeOpportunityKey !== null,
+          );
           const semanticChanged =
             nonContactSemanticChanged ||
             contactOpportunityGainedOrAdvanced ||
             administrativeOpportunityGained ||
-            deferredBudgetEligible;
+            deferredBudgetEligible ||
+            deferredAdministrativeEligible;
           const spatialRefreshDue = Boolean(
             priorAdmission &&
             priorAdmission.spatialSignature !== spatialSignature &&
@@ -1686,6 +1717,10 @@ export class RunService {
             admittedAtSeconds: toSeconds,
           });
           if (deferredBudgetEligible) run.deferredGoalBudgets.delete(actor.actorId);
+          if (deferredAdministrativeEligible && deferredAdministrative) {
+            deferredAdministrative.retryUsed = true;
+            deferredAdministrative.needsRetry = false;
+          }
           const goalAlreadyCompleted = run.completedGoalKeys.has(`${actor.actorId}:${goalKey}`);
           if (goalAlreadyCompleted) continue;
           emitRunWake(
@@ -2887,15 +2922,18 @@ export class RunService {
       [],
       facts,
     );
+    const administrativeDecisionSource = observePacket.administrativeSources.find(
+      source => source.reportDelta !== 0,
+    ) ?? null;
     const hasPendingAdministrativeDecision = Boolean(
-      observePacket.administrativeSources.some(source => source.reportDelta !== 0) &&
+      administrativeDecisionSource &&
       observePacket.administrativeAuthority.allowedRecordKinds.length > 0 &&
       observePacket.administrativeAuthority.writableTextSurfaceIds.length > 0,
     );
     if (hasPendingAdministrativeDecision) {
       goal = [
         goal,
-        "A fresh unadministered source carries a nonzero, model-authored report inclination and a writable procedure is available. Before unrelated movement, observation, or speech, judge whether to preserve one source with write_record or deliberately leave it unwritten with wait. The inclination is evidence for this decision, never a deterministic mandate to write.",
+        `Administrative source ${administrativeDecisionSource?.memoryId ?? "unknown"} carries a nonzero, model-authored report inclination and a writable procedure is available. Before unrelated movement, observation, or speech, judge whether to preserve this source with write_record or give it a final unwritten disposition with wait. If waiting, explain what makes a record unwarranted in the rationale. The inclination is evidence for this decision, never a deterministic mandate to write.`,
       ].join(" ");
       observePacket.goals = [goal];
     }
@@ -2958,6 +2996,9 @@ export class RunService {
       factSignature,
       observePacket,
       allowedTalkActorIds,
+      administrativeDecisionSourceMemoryId: hasPendingAdministrativeDecision
+        ? administrativeDecisionSource?.memoryId ?? null
+        : null,
       goal,
       procedure: interrogationOpportunity ? "interrogation" : "ordinary",
     };
@@ -3725,6 +3766,19 @@ export class RunService {
     }
 
     run.deferredGoalBudgets.delete(actor.actorId);
+    run.deferredAdministrativeGoals.delete(actor.actorId);
+    if (
+      action.tool === "wait" &&
+      attempt.observation.administrativeDecisionSourceMemoryId !== null
+    ) {
+      run.declinedAdministrativeSources.set(
+        this.administrativeDispositionKey(
+          actor.actorId,
+          attempt.observation.administrativeDecisionSourceMemoryId,
+        ),
+        normalizeSocialSourceExcerpt(action.reason),
+      );
+    }
     this.rememberCompletedGoal(run, actor.actorId, attempt.goalKey);
     attempt.state = "completed";
     finishRunWake(run.scheduler, attempt.request.wakeId, "completed");
@@ -4006,6 +4060,24 @@ export class RunService {
     completeGoalKey = false,
   ): RunNpcDecisionResponse {
     this.refreshProviderState(run);
+    if (status === "stale" && attempt.observation?.administrativeDecisionSourceMemoryId) {
+      const deferred = run.deferredAdministrativeGoals.get(attempt.actorId);
+      if (deferred?.semanticGoalKey === attempt.semanticGoalKey) {
+        if (deferred.retryUsed) {
+          // One stale retry is enough to prove the event remains live without
+          // turning an unstable scene into a provider treadmill.
+          run.deferredAdministrativeGoals.delete(attempt.actorId);
+        } else {
+          deferred.needsRetry = true;
+        }
+      } else {
+        run.deferredAdministrativeGoals.set(attempt.actorId, {
+          semanticGoalKey: attempt.semanticGoalKey,
+          retryUsed: false,
+          needsRetry: true,
+        });
+      }
+    }
     attempt.state = "terminal";
     if (run.activeAmbientConversation?.wakeId === attempt.request.wakeId) {
       run.activeAmbientConversation = null;
@@ -4940,6 +5012,23 @@ export class RunService {
         event.actorId === actorId &&
         event.sourceMemoryId === memoryId &&
         (event.kind === "record_written" || event.kind === "record_updated"),
+    );
+  }
+
+  private administrativeDispositionKey(actorId: string, memoryId: string): string {
+    return `${actorId}\u0000${memoryId}`;
+  }
+
+  private sourceAdministrativeDecisionComplete(
+    run: RunState,
+    actorId: string,
+    memoryId: string,
+  ): boolean {
+    return (
+      this.sourceAlreadyAdministered(run, actorId, memoryId) ||
+      run.declinedAdministrativeSources.has(
+        this.administrativeDispositionKey(actorId, memoryId),
+      )
     );
   }
 
@@ -6232,7 +6321,7 @@ export class RunService {
         memory =>
           memory.kind === "player_conversation" &&
           memory.reportDelta !== 0 &&
-          !this.sourceAlreadyAdministered(run, actor.actorId, memory.memoryId),
+          !this.sourceAdministrativeDecisionComplete(run, actor.actorId, memory.memoryId),
       )
       .map(memory => memory.memoryId)
       .sort();
@@ -6330,7 +6419,7 @@ export class RunService {
         sourceMemoryId: record.sourceRefs[0]?.sourceMemoryId,
         textSurfaceId: record.textSurfaceId,
       }));
-    const ownActionNotes = selectRecentChronological(
+    const memoryActionNotes = selectRecentChronological(
       actor.memories,
       RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT,
     ).map(memory => {
@@ -6369,6 +6458,17 @@ export class RunService {
       }
       return `[record_read=${memory.recordId}@${memory.recordRevision}] ${memory.stateBody}`;
     });
+    const dispositionPrefix = `${actor.actorId}\u0000`;
+    const administrativeDispositionNotes = [...run.declinedAdministrativeSources.entries()]
+      .filter(([key]) => key.startsWith(dispositionPrefix))
+      .map(([key, reason]) =>
+        `[administrative_wait;source=${key.slice(dispositionPrefix.length)}] ${reason}`
+      )
+      .slice(-RUN_OBSERVE_ADMINISTRATIVE_DISPOSITION_NOTE_LIMIT);
+    const ownActionNotes = [
+      ...memoryActionNotes,
+      ...administrativeDispositionNotes,
+    ].slice(-RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT);
     const heardSpeech = selectRecentChronological(
       actor.memories.flatMap(memory => {
         if (memory.kind === "player_conversation") return [memory.playerLine];
@@ -6443,7 +6543,7 @@ export class RunService {
         actor.memories.filter(memory =>
           memory.kind !== "prop_handling_observation" &&
           memory.kind !== "ambient_stance_judgment" &&
-          !this.sourceAlreadyAdministered(run, actor.actorId, memory.memoryId)
+          !this.sourceAdministrativeDecisionComplete(run, actor.actorId, memory.memoryId)
         ),
         RUN_OBSERVE_ADMINISTRATIVE_SOURCE_LIMIT,
       ).map(memory => {

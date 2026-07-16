@@ -1,8 +1,10 @@
 # M3R — First-Person Town
 
-**Status: active (2026-07-11).** Created at the direction-conversion boundary
-that killed the 2D M3 ([`roadmap.md`](roadmap.md) history). Direction source:
-the owner-approved interview closure (2026-07-11) recorded in
+**Status: acceptance closure active (2026-07-16).** Created at the
+direction-conversion boundary that killed the 2D M3
+([`roadmap.md`](roadmap.md) history). The implementation is substantially
+complete; the ordered closure slices below are the remaining work. Direction
+source: the owner-approved interview closure (2026-07-11) recorded in
 [`../vision/design-pillars.md`](../vision/design-pillars.md) and
 [`../vision/pitch.md`](../vision/pitch.md).
 
@@ -263,6 +265,123 @@ can overhear with subtitles.
   and placeholder-key parity is checked without accepting Korean fallback as
   a missing translation; the HUD has a licensed Latin/Hangul/Han/kana font
   fallback and wraps long Italian/French text without a locale-specific scene.
+
+## Current implementation checkpoint (2026-07-16)
+
+This is the restart point for the milestone. It records current build truth,
+not a substitute for the acceptance checklist below.
+
+### Landed and mechanically verified
+
+- The default game is the seamless first-person 3D town: park, Studio,
+  Office, and Station share one world and navigation map; all three building
+  portals are permanently open. Mouse look, grounded jump, interaction,
+  collision recovery, three physical props, settings, onboarding, procedural
+  SFX, and the six-resident presentation are implemented.
+- All six residents have ordinary non-LLM local wander, authored schedules,
+  NavMesh movement, avoidance, meeting slots, and bounded obstruction
+  recovery. Their provider work remains event-driven rather than per-frame or
+  per-tick.
+- `RunService` owns the persistent run clock, memories, stances, records,
+  ledger, institutional pressure, contacts, interrogation, hearing, terminal
+  result, and provider budget. Player and NPC-to-NPC conversations use the
+  same provider port, grounding, validation, memory, provenance, and fallback
+  boundaries.
+- Player conversations expose generated suggestions and bounded free text,
+  model-owned suspicion/stance judgment, why-lines, open questions, and
+  encountered-only provenance. Background speech, administrative record
+  choices, contact approach, survivable interrogation, recovery, both hearing
+  verdicts, and deterministic terminal fallback have backend and fixture
+  coverage.
+- The six gameplay locales share one registry, content path, provider route,
+  fallback system, and bundled Noto CJK font setup. The client exposes exact
+  run-wide provider accounting: physical calls, repair calls, charged and
+  in-flight tokens, logical resolutions, runtime-consumed proposal metadata,
+  fallback, failures, drops, and truncation.
+- At checkpoint commit `f9a06083`, the backend check passed 264 tests. The
+  Godot 4.7 headless import plus scene, route, NPC movement, physical prop,
+  Godot AI input, localization, asset manifest, and asset-validation smokes
+  passed. The localization smoke verified 162 exact keys/placeholders across
+  all six locales at 100% and 150% UI scale. The ignored
+  `backend/npc-runtime/.env` remains the local credential source and is never
+  committed.
+
+### Latest rendered Qwen evidence
+
+A native Godot AI run on exact commit `f9a06083` used `ko-KR` and
+`modelscope/qwen3.7-plus`. It proved grounded jump, camera control, the open
+Park-to-Studio portal, multiple non-target residents moving without blocked
+movement, immediate grounded contact with Mira despite provider latency, a
+generated three-choice conversation, a visible `uncertain` stance and
+why-line, and clean control restoration after the conversation.
+
+The same run reached a complete two-utterance Manager/Caretaker meeting. Both
+utterances carried the correct listener, entered runtime history, and used
+Qwen live with no fallback. A later direct Caretaker encounter exposed the
+no-change result as `태도 유지 · 판단 보류` with a grounded why-line. The
+final provider evidence was complete and quiescent: 39 physical calls, 144,089
+charged tokens, 35 resolutions, 35 runtime-trace entries, four successful
+repair calls, and zero fallback, failed calls, dropped evidence, truncation,
+or in-flight remainder. The honest five-minute fun answer was **yes, narrowly**:
+resident circulation and generated social consequences made another five
+minutes appealing, while mandatory three-answer conversations and easy-to-miss
+ambient speech remained noticeable friction.
+
+This run does not close the first-playable checkbox by itself. It verified the
+ambient exchange and listener memory structurally, but did not capture both
+live ambient subtitles and speech blips while they were visibly on-screen.
+It also did not reach interrogation, hearing, fallback completion, or OS IME.
+Detailed live-evidence policy and prior runs remain in
+[`../tech/verification.md`](../tech/verification.md).
+
+### Ordered remaining work
+
+Complete these as playable slices. Do not add another tracker, harness, or
+evidence system; update this section and the checklist in place.
+
+1. **Close first-playable readability and route feel.** Start one Korean
+   Qwen-live run in the park, remain in earshot through the first complete
+   two-resident meeting, and capture both attributed subtitles plus the speech
+   blips before following the listener to its disclosed judgment. In the same
+   run, walk park → Studio → Office → Station → park and verify open-portal
+   steering, collision, jump, mouse capture, and absence of arbitrary invisible
+   walls. If correctly delivered ambient speech is still routinely missed,
+   tune the existing subtitle duration/queue/contrast or spatial cue and rerun
+   this exact route; do not add a second dialogue log. Separately reproduce the
+   mandatory three-answer friction and either keep it as an explicit design
+   choice or add a clean early-exit affordance only for ordinary optional
+   conversations. Station interrogation and hearing remain non-dismissible.
+2. **Complete an ordinary full run.** In one sitting, earn four meaningful
+   firsthand vouches, survive any pre-hearing interrogation, demonstrate one
+   visible recovery that lowers a wary resident's suspicion, submit the final
+   defense, and receive an ordinary verdict. Before restart, record all six
+   contact-basis labels, testimony consistency, citations, recap, and a
+   complete/quiescent Qwen audit below 120 calls and 450,000 tokens. Any live
+   fallback invalidates this acceptance run and becomes the next repair slice.
+3. **Complete an abnormal full run.** Use materially different player speech
+   and fewer than four evidenced vouches, survive rather than terminate at any
+   earlier interrogation, and reach the scheduled abnormal verdict. Confirm
+   that limited or never-conversed witnesses do not vouch, hearsay is labeled
+   correctly, and the terminal audit satisfies the same Qwen/live/no-fallback
+   and budget requirements.
+4. **Render the provider-unavailable route.** With the production provider
+   intentionally unavailable, complete a bounded run through the hearing and
+   restart. The HUD and outcome must visibly identify fallback, the run must
+   still terminate, and no scripted adapter may substitute for the production
+   fallback path. This is resilience evidence, not an LLM fun-gate run.
+5. **Close rendered localization and input.** For each of `ko-KR`, `en-US`,
+   `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`, render one opening → answer →
+   why-line round at 100% and 150% UI scale, confirm no raw key or clipped text,
+   and inspect one ambient/fallback line. The existing Qwen provider round trip
+   already covers all six locales; the remaining claim is the rendered client.
+   Verify native Korean, Simplified Chinese, and Japanese IME preedit/commit in
+   a real window. Godot AI Unicode injection and headless finalized text do not
+   count as OS IME evidence.
+6. **Close the draft PR.** Update this checkpoint and the acceptance boxes only
+   from completed evidence, attach the smallest useful rendered captures, and
+   replace the current narrow fun answer with the honest answer from the two
+   full hearing routes. M3R closes only when every acceptance item is supported
+   and no M4/M5 work has been pulled forward.
 
 ## Acceptance
 

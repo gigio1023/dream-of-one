@@ -1,11 +1,11 @@
 # Godot AI Inspection and Routed Play Control
 
-**Status: foundation, delegated inspection, and hearing-capable M3R play surface
-implemented (2026-07-13).** The vendored add-on, editor plugin/autoload,
-repository skills, editor/server/game-helper path, and scene-owned
-`AgentPlaytestSurface` are proven through native Godot AI calls. Hands-on M3R
-acceptance uses the routed live path below and remains incomplete until the
-current milestone's play gates pass.
+**Status: foundation, delegated inspection, direct-play control, and the
+hearing-capable M3R play surface implemented (2026-07-16).** The vendored
+add-on, editor plugin/autoload, repository skills, editor/server/game-helper
+path, and scene-owned `AgentPlaytestSurface` are proven through native Godot AI
+calls. Hands-on M3R acceptance uses the routed live path below and remains
+incomplete until the current milestone's remaining play gates pass.
 
 ## Reader job
 
@@ -128,17 +128,15 @@ Verified on 2026-07-12 against Godot `4.7.stable.official.5b4e0cb0f`:
   successful `modelscope/qwen3.7-plus` live calls, 10,625 charged tokens, no
   fallback or failed calls, and reconciled/quiescent accounting. No answer was
   submitted and no new editor/game error appeared.
-- That run did not capture the separate 3–5 m approach handoff: its first
-  outer-distance mouse input faced away from the resident, so preload intent
-  and attention hold were not expected to engage. The talkability slice is
-  proven, but Slice 4 remains incomplete. Resume with one fresh bounded run
-  that first holds an aimed resident between 3 m and 5 m and records
-  `playerPreloadIntent=true`, `playerAttentionHeld=true`, and
-  `playerFocused=false`; then close to the 2.85 m runtime boundary, submit one
-  displayed answer, inspect
-  the next response, and proceed to the remaining M3R hearing/fallback/locale
-  acceptance routes. Do not repeat the already-proven close-focus `E` path as
-  a standalone task.
+- The later rendered town-life run at commit `f9a06083` submitted displayed
+  answers, restored control after a complete conversation, traversed the open
+  Studio portal, observed multiple residents moving, and followed a complete
+  NPC meeting into a listener-facing no-change judgment. Its exact provider
+  accounting and remaining visual/hearing/locale limits are recorded once in
+  [`verification.md`](verification.md). Do not repeat close-focus `E` or one
+  answer as standalone tasks; the next routed play starts with the first
+  incomplete acceptance slice in
+  [`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md).
 - Stopping the agent-owned editor also stopped an externally started server in
   one observed run. Treat editor and server lifetime as coupled unless current
   session status proves otherwise; after editor shutdown, restart the server
@@ -436,13 +434,12 @@ editor, or use Computer Use without separate authority.
 - Do not use generic input in the implementation slice. Final routed play proves
   the snapshot changes without an alternate mutation API.
 
-### Slice 4 — Prove the direct-play loop — final native Sol/Qwen run
+### Slice 4 — Prove the direct-play loop — complete 2026-07-16
 
-After all M3R implementation and self-review, issue the bounded play packet
-from `verification.md`. From the unchanged lead session, spawn one native
-in-session child on the current/default GPT-5.6 Sol ultra route, give it
-exclusive ownership of the run, activate the repository skill, and pass the
-`modelscope/qwen3.7-plus` live/zero-fallback preflight:
+The rendered town-life run at `f9a06083` completed the bounded direct-control
+packet from `verification.md` through one native in-session child with
+exclusive run ownership and the `modelscope/qwen3.7-plus`
+live/zero-fallback preflight:
 
 1. select the exact editor session;
 2. launch the main project and reach `live` helper status;
@@ -456,7 +453,9 @@ exclusive ownership of the run, activate the repository skill, and pass the
 9. stop the game cleanly.
 
 The proof is the successful live workflow plus screenshots/log state, not a new
-standing report file.
+standing report file. This closes the integration slice, not the full M3R
+milestone; the remaining rendered hearing, fallback, and locale routes are
+ordered in the active milestone plan.
 
 ## Completion bars
 
@@ -477,10 +476,10 @@ The integration foundation implemented by slices 1–3 is complete when:
 - Normal non-editor launch remains provider-first and the client/runtime
   authority boundary is unchanged.
 
-The full M3R play surface is complete later when the adapter exposes the
-finished run-backed conversation/hearing surfaces and the bounded Sol/Qwen
-direct-play loop passes without Computer Use or an alternate state mutation
-path.
+The M3R play-control surface and direct-play loop are complete. The game
+milestone remains open until the acceptance routes in
+[`../plan/m3-first-person-town.md`](../plan/m3-first-person-town.md) pass; the
+integration itself is not their blocker.
 
 ## Risks and revisit rules
 

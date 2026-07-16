@@ -5,8 +5,11 @@ below is scoped so that one agent can read it plus its linked references and
 start working. If a document is not reachable from this index, it is not
 active.
 
-Status: **M3R first-person town active (2026-07-11).** The owner-approved
-direction interview converted the game to a seamless first-person 3D town;
+Status: **M3R acceptance closure active (2026-07-16).** The first-person town,
+run-scoped NPC runtime, and Qwen-backed social loop are substantially
+implemented; the active milestone now closes the remaining rendered full-run,
+fallback, and locale/IME acceptance routes. The owner-approved direction
+interview converted the game to a seamless first-person 3D town;
 the 2D M3 was killed the day it activated (kill paragraph in
 [`plan/roadmap.md`](plan/roadmap.md)). M2 closed at the owner playtest
 boundary (architecture passed, fun gate: no on immersion); M1 remains as the

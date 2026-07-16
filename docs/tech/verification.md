@@ -59,6 +59,21 @@ empty preparation modal did not recur. Its bounded fun answer was
 social loop worth continuing despite rough visuals. This proves first contact,
 not the still-pending full interrogation, recovery, hearing, or IME routes.
 
+A broader rendered town-life run at commit `f9a06083` (2026-07-16) used 39
+physical calls and 144,089 charged tokens. Its 35 resolutions matched 35
+runtime-trace entries; four repair calls completed successfully, and fallback,
+failed calls, dropped evidence, truncation, and in-flight remainder were all
+zero. The run proved jump and camera control, the open Park-to-Studio portal,
+multiple residents moving, latency-safe grounded contact, a generated Korean
+conversation with visible stance/why-line consequences, a complete
+Manager/Caretaker exchange in authoritative runtime history, and the later
+listener-facing no-change diagnostic. Its fun answer was **yes, narrowly**:
+the moving residents and generated social consequences supported another five
+minutes, but mandatory three-answer conversations and easy-to-miss ambient
+speech reduced the pull. The worker did not capture both ambient subtitles and
+speech blips while they were visibly on-screen, so the first-playable visual
+claim, full hearing routes, fallback completion, and IME remain open.
+
 ### Headless evidence boundary
 
 Headless is the default implementation-time route so automated work does not

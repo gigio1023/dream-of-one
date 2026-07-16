@@ -30,11 +30,11 @@ game:
   requests it.
 - Every real NPC/model call in those play runs pins
   `modelscope/qwen3.7-plus`. A live result counts only when the returned
-  metadata says that profile, `transport=live`, and no fallback. Missing Qwen
+  metadata says that profile, `transport=live`, and no provider interruption. Missing Qwen
   credentials block live acceptance; OpenAI, a local model, scripted output,
-  or fallback may not substitute.
+  or rule-authored output may not substitute.
 - Bun checks, fixture smokes, scripted Session API parity, headless Godot
-  smokes, and explicit fallback-completion checks make no product LLM call.
+  smokes, and explicit fail-closed interruption checks make no product LLM call.
   Sol may run them, but they are engineering evidence only and never prove the
   LLM game experience.
 
@@ -72,7 +72,7 @@ the moving residents and generated social consequences supported another five
 minutes, but mandatory three-answer conversations and easy-to-miss ambient
 speech reduced the pull. The worker did not capture both ambient subtitles and
 speech blips while they were visibly on-screen, so the first-playable visual
-claim, full hearing routes, fallback completion, and IME remain open.
+claim, full hearing routes, provider-interruption presentation, and IME remain open.
 
 ### Headless evidence boundary
 
@@ -164,8 +164,8 @@ fallback reason. `callsUsed` must equal completed calls plus in-flight calls,
 and `tokensUsed` must equal the sum of `calls[].chargedTokens` plus
 `inFlightTokens`. The adjacent `providerRuntimeTrace` must also be complete,
 untruncated, non-empty, and contain only that same Qwen/live/no-fallback
-metadata; it catches deterministic runtime replacement after a structurally
-valid live envelope fails semantic validation. For complete evidence with any
+metadata; the adjacent run-level `providerFailure` must be null, proving that
+a structurally valid live envelope was not later rejected semantically. For complete evidence with any
 recorded resolution or trace entry, the resolution count must equal the runtime
 trace entry count and both dropped counts must be zero. The Godot AI
 `providerAuditSummary.allExpectedProfileLiveNoFallback` field combines these
@@ -186,7 +186,7 @@ twice.
 - A slice ships with the narrowest check that would catch its regression —
   usually one existing smoke, occasionally one new fixture.
 - Tests protect: deterministic authority, schema compatibility, the provider
-  boundary (validation/fallback/budget), player-visible route outcomes. Tests
+  boundary (validation/failure/budget), player-visible route outcomes. Tests
   do not protect: helper scripts, formatting, internal helper structure.
 - No verification ledgers, evidence packs, proof audits, or standing status
   files. State lives in code, tests, and the PR that shipped it.

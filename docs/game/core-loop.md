@@ -62,9 +62,9 @@ The judging NPC's model receives the player's line, the conversation so far
 returns how much suspicion moved, which signal classes applied, and a
 player-visible why-line. The signal taxonomy
 (`backend/npc-runtime/src/runtime/conversation-suspicion.ts`) survives as
-shared vocabulary and as the deterministic fallback when the provider is
-unavailable — fallback judgment is visibly marked and is never the product
-experience.
+shared vocabulary and validation vocabulary, not as an outage-time judge.
+When the provider cannot return a valid judgment, the answer remains
+unapplied and the exact turn remains available for a visibly marked retry.
 
 Rules enforce validity around the judgment:
 
@@ -126,9 +126,10 @@ play lands on one of four authored endings.
   persuading, repairing. Approaching the goal and risking suspicion are the
   same act; doors and selected props make the space tangible but cannot
   advance a vouch. There are no fetch-quest mechanics and no inventory.
-- A **conversation session** stays the runtime unit: it always reaches an
-  ending, and the runtime owns that guarantee. A session ending is not a run
-  ending. A cleanly ended conversation cannot be reopened against the same
+- A **conversation session** stays the runtime unit: a valid model result may
+  reach only a runtime-validated authored ending. Provider failure instead
+  leaves the exact event visibly interrupted for retry or run abandonment. A
+  session ending is not a run ending. A cleanly ended conversation cannot be reopened against the same
   unchanged evidence; that NPC becomes available again after a relevant new
   memory, goal, schedule event, or player action changes the context. This
   prevents modal pause from becoming an infinite deadline freeze without

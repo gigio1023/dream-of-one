@@ -19,8 +19,8 @@ verdict.
 
 Korean remains the source and tone-reference language. The same game path must
 support Korean, English, Italian, Simplified Chinese, French, and Japanese —
-including generated dialogue, ambient speech, why-lines, fallback, hearing,
-and recap, not only menu chrome.
+including generated dialogue, ambient speech, why-lines, hearing, recap, and
+provider-interruption UI, not only menu chrome.
 
 ## Owner decisions shaping this milestone
 
@@ -121,14 +121,16 @@ can overhear with subtitles.
   world revision, and run-level provider budget; player conversations are
   children. Records, institutional pressure, hearing, and terminal recap
   extend that same scope rather than creating another state owner. Judgment,
-  provider-port, fallback, and validity boundaries stay unchanged.
+  provider-port, fail-closed interruption, and validity boundaries stay
+  unchanged.
 - **Final live verification is owner-routed.** GPT-5.6 Sol ultra may own
   planning, implementation, diagnosis, repair, and actual play through Godot
   AI. High-volume Godot work stays in one native child with exclusive run
   ownership so the lead session remains available. Do not use the
   `lower-capability-executor-prompt` contract unless the owner explicitly asks
   for it. Every model-backed play run pins
-  `modelscope/qwen3.7-plus` and proves `transport=live` with zero fallback.
+  `modelscope/qwen3.7-plus` and proves `transport=live` with no provider
+  interruption.
   Missing Qwen credentials block live acceptance rather than authorizing a
   substitute model. Exact commands and the distinction from model-free smokes
   live in [`../tech/verification.md`](../tech/verification.md).
@@ -144,8 +146,8 @@ can overhear with subtitles.
   is later expressed through a validated in-world action.
 - **Locale work follows the playable slices instead of becoming a second
   framework.** The shared six-locale foundation now carries the selected
-  locale through the existing UI, run, session, provider, ambient, fallback,
-  and fixture paths. A run locks one locale; later setting changes apply to
+  locale through the existing UI, run, session, provider, ambient,
+  provider-interruption, and fixture paths. A run locks one locale; later setting changes apply to
   the next run or restart. Subsequent
   administrative, hearing, recap, physicality, and onboarding work adds text
   only through that path. Milestone integration verifies exact key/placeholder
@@ -164,8 +166,8 @@ can overhear with subtitles.
   (FOV, sensitivity/invert, UI scale, volume, language). The comfort
   research slice tunes the numbers, not the list; keyboard+mouse full play.
 - One six-locale settings and content path (`ko/en/it/zh/fr/ja`) whose selected
-  locale governs HUD, generated and fallback conversation, subtitles,
-  records, hearing, and recap for the whole run.
+  locale governs HUD, generated conversation, subtitles, records, hearing,
+  recap, and provider-interruption UI for the whole run.
 - The seamless town: a densely dressed park, studio reception, office,
   Station, and street connective space; all building portals remain open;
   collision and navigation remain correct. Repetition and mixed CC0 prop
@@ -255,13 +257,14 @@ can overhear with subtitles.
   opinion (`oppose`/`uncertain`/`vouch`), with firsthand provenance required
   for a vouch. The four-of-six quorum is a deterministic eligibility floor;
   the model still judges the pooled memories and final defense inside a
-  guaranteed hearing procedure with fallback.
+  hearing procedure that visibly interrupts without a verdict when the model
+  result is unavailable or invalid.
 - 3D spatial validation for `move_to`/`look`/`talk_to` (navmesh reachability,
   line of sight, audibility).
 - Provider cost/cadence research within the existing port layer (six agents,
   event-driven; per-run call/token budget proven in play).
 - A shared supported-locale contract used by Godot, run schemas, provider
-  prompts/envelopes, fallback content, and fixture generation. Exact locale
+  prompts/envelopes, provider-failure content, and fixture generation. Exact locale
   and placeholder-key parity is checked without accepting Korean fallback as
   a missing translation; the HUD has a licensed Latin/Hangul/Han/kana font
   fallback and wraps long Italian/French text without a locale-specific scene.
@@ -285,26 +288,40 @@ not a substitute for the acceptance checklist below.
 - `RunService` owns the persistent run clock, memories, stances, records,
   ledger, institutional pressure, contacts, interrogation, hearing, terminal
   result, and provider budget. Player and NPC-to-NPC conversations use the
-  same provider port, grounding, validation, memory, provenance, and fallback
+  same provider port, grounding, validation, memory, provenance, and fail-closed
   boundaries.
 - Player conversations expose generated suggestions and bounded free text,
   model-owned suspicion/stance judgment, why-lines, open questions, and
   encountered-only provenance. Background speech, administrative record
   choices, contact approach, survivable interrogation, recovery, both hearing
-  verdicts, and deterministic terminal fallback have backend and fixture
-  coverage.
+  verdicts, and visible provider interruption have backend and fixture
+  coverage. A failed operation commits no substitute speech, action, memory,
+  stance, record, testimony, or verdict and retains the exact request for retry.
 - The six gameplay locales share one registry, content path, provider route,
-  fallback system, and bundled Noto CJK font setup. The client exposes exact
+  interruption surface, and bundled Noto CJK font setup. The client exposes exact
   run-wide provider accounting: physical calls, repair calls, charged and
   in-flight tokens, logical resolutions, runtime-consumed proposal metadata,
-  fallback, failures, drops, and truncation.
-- At checkpoint commit `f9a06083`, the backend check passed 264 tests. The
-  Godot 4.7 headless import plus scene, route, NPC movement, physical prop,
-  Godot AI input, localization, asset manifest, and asset-validation smokes
-  passed. The localization smoke verified 162 exact keys/placeholders across
-  all six locales at 100% and 150% UI scale. The ignored
+  failures, drops, and truncation. Legacy fallback metadata is accepted only
+  at compatibility decoding boundaries and is rejected before simulation
+  state can change.
+- The fail-closed checkpoint described here passes all 256 backend checks.
+  Godot 4.7 headless import and the 19-scene fixture smoke pass; the localization
+  smoke verifies 168 exact keys/placeholders across all six locales at 100%
+  and 150% UI scale. Earlier route, NPC movement, physical prop, Godot AI
+  input, asset manifest, and asset-validation smokes remain recorded in the
+  verification history. The ignored
   `backend/npc-runtime/.env` remains the local credential source and is never
   committed.
+
+The original milestone contract said deterministic fallback would guarantee
+session and hearing completion. Implementation review showed that this would
+replace the LLM simulation with authored social behavior precisely when the
+simulation failed. The conservative permanent choice is now fail-closed: one
+same-model schema repair is allowed, then the exact operation visibly
+interrupts with no social or world mutation. The player may retry that exact
+operation or idempotently abandon the interrupted run and start clean; abandon
+returns no verdict or terminal result. Revisit this only if the owner changes
+the game's provider-first premise, not merely to improve availability.
 
 ### Latest rendered Qwen evidence
 
@@ -330,7 +347,8 @@ ambient speech remained noticeable friction.
 This run does not close the first-playable checkbox by itself. It verified the
 ambient exchange and listener memory structurally, but did not capture both
 live ambient subtitles and speech blips while they were visibly on-screen.
-It also did not reach interrogation, hearing, fallback completion, or OS IME.
+It also did not reach interrogation, hearing, provider-interruption
+presentation, or OS IME.
 Detailed live-evidence policy and prior runs remain in
 [`../tech/verification.md`](../tech/verification.md).
 
@@ -356,29 +374,37 @@ evidence system; update this section and the checklist in place.
    visible recovery that lowers a wary resident's suspicion, submit the final
    defense, and receive an ordinary verdict. Before restart, record all six
    contact-basis labels, testimony consistency, citations, recap, and a
-   complete/quiescent Qwen audit below 120 calls and 450,000 tokens. Any live
-   fallback invalidates this acceptance run and becomes the next repair slice.
+   complete/quiescent Qwen audit below 120 calls and 450,000 tokens. Any
+   provider interruption invalidates this acceptance run and becomes the next
+   repair slice.
 3. **Complete an abnormal full run.** Use materially different player speech
    and fewer than four evidenced vouches, survive rather than terminate at any
    earlier interrogation, and reach the scheduled abnormal verdict. Confirm
    that limited or never-conversed witnesses do not vouch, hearsay is labeled
-   correctly, and the terminal audit satisfies the same Qwen/live/no-fallback
+   correctly, and the terminal audit satisfies the same Qwen/live/no-failure
    and budget requirements.
 4. **Render the provider-unavailable route.** With the production provider
-   intentionally unavailable, complete a bounded run through the hearing and
-   restart. The HUD and outcome must visibly identify fallback, the run must
-   still terminate, and no scripted adapter may substitute for the production
-   fallback path. This is resilience evidence, not an LLM fun-gate run.
+   intentionally unavailable, trigger one player-owned model operation. The
+   HUD must visibly identify a simulation interruption, the exact request must
+   remain retryable, and no speech, judgment, action, memory, record,
+   testimony, verdict, or world delta may be invented. Restore the same
+   provider and prove that the exact retry can continue; also prove the player
+   can explicitly abandon the interrupted run and start a clean one. No
+   scripted adapter may substitute. This is failure-honesty evidence, not an
+   LLM fun-gate run.
 5. **Close rendered localization and input.** For each of `ko-KR`, `en-US`,
    `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`, render one opening → answer →
    why-line round at 100% and 150% UI scale, confirm no raw key or clipped text,
-   and inspect one ambient/fallback line. The existing Qwen provider round trip
+   and inspect the localized provider-interruption surface. The existing Qwen provider round trip
    already covers all six locales; the remaining claim is the rendered client.
    Verify native Korean, Simplified Chinese, and Japanese IME preedit/commit in
    a real window. Godot AI Unicode injection and headless finalized text do not
    count as OS IME evidence.
-6. **Close the draft PR.** Update this checkpoint and the acceptance boxes only
-   from completed evidence, attach the smallest useful rendered captures, and
+6. **Integrate each remaining acceptance slice without losing the restart
+   point.** After this checkpoint is merged, begin the next branch from updated
+   `main` and resume at item 1 rather than rebuilding completed systems. Keep
+   this checkpoint and its acceptance boxes current only from completed
+   evidence, attach the smallest useful rendered captures to the active PR, and
    replace the current narrow fun answer with the honest answer from the two
    full hearing routes. M3R closes only when every acceptance item is supported
    and no M4/M5 work has been pulled forward.
@@ -421,19 +447,20 @@ evidence system; update this section and the checklist in place.
       the player has actually encountered.
 - [ ] No timer exists outside Station interrogation; interrogation allows at
       least 40 seconds.
-- [ ] Deterministic fallback keeps a run completable (visibly marked) when
-      the provider is unavailable, including the hearing.
+- [ ] Provider failure visibly interrupts the exact operation, applies no
+      substitute social/world event, preserves exact retry, and allows an
+      explicit clean-run restart without pretending the hearing completed.
 - [ ] Every LLM-backed acceptance and fun-gate run is driven by GPT-5.6 Sol
       ultra through Godot AI with the Qwen profile pinned, and the resulting
       packets show `profileId=modelscope/qwen3.7-plus`, `transport=live`, and
-      no fallback. Fixture/scripted/fallback checks remain valid engineering
+      no provider interruption. Fixture/scripted checks remain valid engineering
       evidence but do not prove the LLM game experience.
 - [ ] `ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP` each pass exact
       player-facing key and placeholder parity, show no raw localization key,
       preserve readable glyphs/layout at 100% and 150% UI scale, and accept
       Korean/Chinese/Japanese IME composition where text entry is offered.
       Each locale completes one bounded Qwen-live opening → answer → why-line
-      plus ambient/fallback language check; six full 20–30 minute runs are not
+      plus provider-interruption language check; six full 20–30 minute runs are not
       required.
 - [ ] `bun run --cwd backend/npc-runtime check`, headless import, and scene
       smoke pass; the fun gate is answered honestly in the PR.

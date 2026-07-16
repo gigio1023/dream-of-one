@@ -87,7 +87,8 @@ and record-reading alone move nothing. A `vouch` also requires a meaningful
 first-hand conversation with the player. At the scheduled hearing, four of
 six vouches are the eligibility floor; the model still judges the pooled
 memories after the player's final defense, and the runtime only validates
-provenance, counts the quorum, and guarantees procedure. The
+provenance, counts the quorum, and validates procedure. If that live judgment
+is unavailable, the hearing visibly interrupts without a verdict. The
 open-questions/rumor-log surface shows the player which stances and open
 doubts they have actually encountered — never hidden content.
 Each judged follow-up receives the exact question tracked from the prior turn.

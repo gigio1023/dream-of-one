@@ -17,10 +17,9 @@ loop (per NPC, per beat, budgeted):
                  role, goals, policy, actor memory,
                  visible objects/records/actors, heard speech,
                  available tool catalog (from affordances)
-  2. propose   — pick the next step:
-                 provider proposal by default;
-                 bounded deterministic fallback when provider work fails
-                 (one tool call + optional utterance, schema-bound)
+  2. propose   — ask the configured provider for the next schema-bound step;
+                 if it cannot return one, retain the wake for exact retry and
+                 expose a provider interruption without applying an action
   3. validate  — runtime checks the tool call against the catalog,
                  role permissions, visibility, object state, budget;
                  at most eight speech citations name only speaker-visible
@@ -105,7 +104,7 @@ knowledge.
 |---|---|---|
 | `move_to(place_or_actor)` | Pathfind toward a navpoint/actor; `player` may be offered to one runtime-selected contact candidate | Reachability, role area permissions, current contact lease/zone/cooldown |
 | `look(target)` | Add a visible object/actor/record to context | Line of sight, visibility rules |
-| `talk_to(actor, intent)` | Open/continue conversation; provider utterance, or a marked deterministic fallback utterance | Target availability (busy/refusing), social rules; scripted lines stay fixture/test-only |
+| `talk_to(actor, intent)` | Open/continue conversation with a provider-authored utterance | Target availability (busy/refusing), social rules; scripted lines stay fixture/test-only |
 | `wait(reason)` | Yield a beat, keep intent | Always valid; consumes iteration |
 | `use_object(object, affordance)` | Trigger an object affordance (serve, mark queue, post notice, pause service) | Affordance exists for role, object state |
 | `write_record(kind, source_memory, surface, prose, why, pressure_delta)` | Create/update a provider-authored record (note, correction, report, posting, citation) | Role authority, owned source memory, authored surface, immutable target/visibility, revision check, pressure clamp; exactly one ledger event |
@@ -113,8 +112,8 @@ knowledge.
 | `request(actor, action)` | Ask another NPC to act (handoff, confirmation); retained in the generic v2 catalog but not offered by M3R until its run-scoped action contract exists | Target role can perform the action |
 
 Suspicion judgment of player speech is **not** a tool: it flows through
-`judgeConversationTurn` on the proposal port, with rules clamping the delta
-and keeping the deterministic classifier as fallback (see
+`judgeConversationTurn` on the proposal port, with rules validating and
+clamping the result (see
 [`../vision/design-pillars.md`](../vision/design-pillars.md)).
 
 ## Memory and context bounds
@@ -125,19 +124,18 @@ and keeping the deterministic classifier as fallback (see
 - **Actor policy** = stable goals, priority shifts, action-selection policy,
   forbidden claims. Deterministic data, editable per role.
 - Context assembly is a pure function of world state — the same packet shape
-  feeds the live provider, deterministic fallback, scripted test adapter, and
-  debug transcript.
+  feeds the live provider, scripted test adapter, and debug transcript.
 
 ## Provider involvement
 
 The production loop always calls the selected provider profile first (see
 [`../tech/ai-provider-ports.md`](../tech/ai-provider-ports.md)), step 2 sends
 the observe-packet and receives a `ProposalEnvelope`: at most one tool call
-from the offered catalog plus optional utterance text. Validation treats a
-provider proposal exactly like a deterministic one — no trust distinction.
-Provider unavailable, over budget, or invalid → deterministic fallback decides
-and the transcript marks the fallback reason. Scripted proposal sequences are
-test adapters only; they are never production storylet content.
+from the offered catalog plus optional utterance text. Provider unavailable,
+over budget, or invalid after one same-model repair → no proposal is accepted,
+no transcript/world effect is committed, and the run exposes a structured
+provider interruption. The exact operation may be retried. Scripted proposal
+sequences are test adapters only; they are never production storylet content.
 Suspicion judgment is model-owned with rule-clamped deltas; authority
 *procedure* (thresholds reaching an ending, verdict validity) stays
 deterministic. Different models may attempt different valid tools and therefore create
@@ -146,16 +144,17 @@ passes the same world rules.
 
 Ambient personal judgment is likewise model-owned through
 `judgeAndProposeAmbientReply`, not inferred from deterministic keywords or an
-authored gossip branch. Its deterministic fallback is an explicitly marked,
-localized no-change judgment so an outage cannot manufacture social drama.
+authored gossip branch. An outage commits no reply, no judgment, no memory,
+and no readiness change; the unresolved wake is retryable.
 
 The scheduled hearing uses the same port boundary through `judgeHearing`, not
 an authored ending table. The model receives the player's final defense and a
 normalized view of the six residents' actual memories plus run records and
 ledger events. It owns testimony wording, memory-grounded reassessment, and
 the verdict after the runtime validates actor/citation identity and the
-four-evidenced-vouch eligibility floor. Provider failure produces a marked,
-terminal fallback result; it never leaves the run suspended.
+four-evidenced-vouch eligibility floor. Provider or semantic failure applies
+no testimony or verdict, leaves the exact defense retryable, and displays a
+simulation interruption instead of terminating the run with invented content.
 
 ## Transcript (player/agent-readable)
 

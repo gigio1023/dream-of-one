@@ -49,8 +49,8 @@ LOC onto the M3R target so an agent knows what to keep, trim, or build.
 > defense without a provider wait, then `judgeHearing` reassesses exactly six
 > residents from their real memories and
 > cited run records. The runtime enforces citation ownership, structured
-> contact-basis consistency, the four-evidenced-vouch floor, terminal
-> fallback, and idempotent
+> contact-basis consistency, the four-evidenced-vouch floor, visible
+> provider interruption with exact-defense retry, and idempotent
 > `/v1/run/hearing` and `/v1/run/end`. High-pressure ledger escalation may also
 > produce one grounded, survivable Station interrogation with the game's only
 > hesitation timer; it returns to the active run and cannot issue a verdict.
@@ -65,9 +65,7 @@ src/
     run-service.ts         # M3R: run lifecycle, clock, revision, hearing
     run-schema.ts          # M3R: RunState + run-bound request schemas
     run-cast.ts            # strict backend-only cast/layout join
-    decision-service.ts   # ordered decision core (kept)
     conversation-suspicion.ts  # signal classification (kept)
-    fallback.ts           # deterministic lines (kept, feeds from line bank data)
     readiness.ts          # boot/preflight state (kept, simplified)
     telemetry.ts          # run/session telemetry (kept, + provider usage)
     world/                # M3R: memories, stances, records, ledger, visibility
@@ -89,9 +87,8 @@ data/storylets/     # compiled regression/source content from docs/scenario
 ## v1 inventory — keep / trim / retire
 
 **Keep (proven, engine-agnostic):**
-`runtime/schema.ts`, `runtime/decision-service.ts` (ordered same-NPC
-conversation turns), `runtime/conversation-suspicion.ts` + fixtures,
-`policy/reason-taxonomy.ts`, `runtime/fallback.ts`, `runtime/telemetry.ts`,
+`runtime/schema.ts`, `runtime/conversation-suspicion.ts` + fixtures,
+`policy/reason-taxonomy.ts`, `runtime/telemetry.ts`,
 `memory/actor-workspace-store.ts`, `memory/session-memory.ts`,
 `api/http-server.ts`, `godot/runtime-schema.ts`, `contracts/types.ts`.
 
@@ -115,12 +112,11 @@ Delete when the replacing module lands; don't leave both alive.
 
 1. Every packet crossing a process boundary validates against schema on both
    sides.
-2. `DecisionService` preserves ordered turns per conversation
-   (`conversation.turnId`) — no latest-wins coalescing.
-3. The deterministic suspicion classifier stays pure and fixture-tested; it
-   is the fallback for provider outages, never the product judgment path.
-   Adding a signal class requires phrasing fixtures for every currently
-   supported gameplay locale.
+2. `RunService` and the retained session harness preserve ordered turns per
+   conversation (`conversation.turnId`) — no latest-wins coalescing.
+3. The deterministic suspicion classifier remains test vocabulary for the
+   legacy regression harness, never a production outage judge. A provider
+   interruption applies no signal or score movement.
 4. World mutations happen only through validated tool application, and each
    emits exactly one civic ledger event.
 5. NPC context assembly enforces visibility. A run packet may add only the
@@ -130,10 +126,10 @@ Delete when the replacing module lands; don't leave both alive.
    evidence, a record, provenance, or a hearing citation.
 6. The model judges what player speech means (suspicion movement, why-lines)
    within rule-enforced validity: clamped deltas, visibility-checked context,
-   and a guaranteed session ending
+   and bounded lifecycle transitions
    (see [`../vision/design-pillars.md`](../vision/design-pillars.md)).
-   Providers may choose different valid attempts and wording; fallback keeps a
-   session alive but is never the default production profile.
+   Providers may choose different valid attempts and wording. Failure preserves
+   the exact request for retry and visibly interrupts the affected event.
 7. A `runId` owns the six NPC memories and stances, records, civic ledger,
    institutional pressure, unpaused world clock, hearing state, provider
    budget, and monotonically increasing `worldRevision`. Conversation
@@ -149,7 +145,7 @@ Delete when the replacing module lands; don't leave both alive.
    remembered world state.
 10. A run has one immutable gameplay locale selected from the shared supported
     registry. The same locale flows through player conversation, ambient agent
-    calls, records, hearing/recap, and deterministic fallback; stable ids and
+    calls, records, hearing/recap, and provider-interruption UI; stable ids and
     world truth remain language-neutral. The landed run and run-bound session
     schemas accept exactly `ko-KR`, `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and
     `ja-JP`; the retained Same Order regression storylet remains honestly
@@ -198,8 +194,9 @@ surface is:
 | `POST /v1/npc/decision` | Claim one pending two-actor `meeting_ready` or single-actor `goal` wake, carrying `runId`, `wakeId`, and observed `worldRevision` |
 | `GET  /v1/session/snapshot` | Renderable child-session state; never a substitute for the run snapshot |
 | `POST /v1/session/end` | End the conversation and return queued run deltas; the run continues |
-| `POST /v1/run/hearing` | Idempotently open the scheduled hearing or submit its final defense; returns a guaranteed terminal verdict |
+| `POST /v1/run/hearing` | Idempotently open the scheduled hearing or submit its final defense; returns a terminal verdict only after a valid live-provider judgment |
 | `POST /v1/run/end` | Idempotently return the terminal result and provider accounting, then close the run |
+| `POST /v1/run/abandon` | Idempotently close a nonterminal run with an unresolved provider interruption; returns failure/accounting evidence but never a verdict or terminal result |
 
 Debug-capable responses retain `ProposalMeta`, transcript deltas, and raw
 `ledgerEvents[]`. Normal player presentation reads only the sanitized
@@ -231,10 +228,9 @@ untruncated audit with no calls left in flight.
 The adjacent `providerRuntimeTrace` records every structurally resolved
 proposal metadata packet the run consumes, including a conversation opening
 whose transport completed but whose speculative semantic commit later became
-stale, and deterministic replacements created after a live envelope fails
-runtime semantic validation. Staleness still applies no opening or world
-effect. Final live acceptance checks both records; transport success alone is
-not enough to claim that the played run remained fallback-free.
+stale. Runtime semantic rejection creates no replacement metadata or world
+effect and instead sets `providerFailure`. Final live acceptance checks both
+records plus that marker; transport success alone is not enough.
 
 A request-scoped background ceiling can reject a proposal before its first
 transport call while preserving the run's foreground reserve. `RunService`
@@ -242,8 +238,8 @@ classifies the typed rejection as `budget_reserved` for ordinary goals, goal
 replies, and ambient work. It adds no synthetic proposal metadata, provider
 audit resolution, runtime-trace entry, speech, or world delta; an exact retry
 returns the cached result without another attempt. Evidence from an earlier
-successful turn is retained, and genuine provider hard-budget fallback remains
-visible in both provider surfaces. The configured hard token cap must match the
+successful turn is retained, and hard-budget exhaustion becomes a visible
+provider interruption without a proposal. The configured hard token cap must match the
 run snapshot constant. `reservedTokens` is not extra spend: it is subtracted
 from the autonomous-work ceiling, so increasing late player/hearing headroom
 does not silently buy more background chatter.
@@ -252,8 +248,12 @@ The landed surface includes `POST /v1/run/start`, `POST /v1/run/advance`,
 `GET /v1/run/snapshot`, `POST /v1/run/encounter`, `POST /v1/session/preload`,
 the run-discriminated start/answer/snapshot/end session routes,
 `POST /v1/npc/decision` for bounded ambient meetings and single-resident goal
-decisions, and the terminal `POST /v1/run/hearing` plus `POST /v1/run/end`
-transitions. Legacy
+decisions, the terminal `POST /v1/run/hearing` plus `POST /v1/run/end`
+transitions, and the failure-only `POST /v1/run/abandon` escape hatch. An
+abandonment requires an unresolved `providerFailure`, rejects concurrent
+transport, preserves that interruption in its response, releases the run
+scope, and accepts the same `abandonId` idempotently without fabricating a
+hearing result. Legacy
 `{storyletId, locale}` packets still dispatch to `SessionService`; strict
 `{runId, ...}` packets dispatch to `RunService` on the same loopback server.
 Fixture-only scripts generate byte-identical backend and Godot replay files
@@ -442,7 +442,7 @@ loss and per-tick polling.
 
 When the hearing becomes due, that background lane closes before any new
 transport may begin. Queued preload/goal work cancels as stale without a fake
-fallback trace; already active background calls and their stale cleanup drain
+provider trace; already active background calls and their stale cleanup drain
 before the one final hearing-verdict provider call starts. The localized
 hearing opening commits immediately and never fabricates provider metadata.
 
@@ -469,7 +469,7 @@ approach choice: once its runtime conditions and fresh grounded contact facts
 hold, `move_to(player)` is already the only action the validator can accept.
 That goal therefore sends a request-scoped schema containing only the exact
 player approach, with nullable utterance and `done=true`, instead of paying up
-to three doomed alternatives before deterministic fallback. Opening wording,
+to three doomed alternatives before interruption. Opening wording,
 the interrogation question, and the answer judgment remain provider-owned;
 the runtime still revalidates contact facts before both claim and commit.
 If the request-scoped background ceiling denies this mandatory approach before
@@ -478,8 +478,7 @@ interrogation policy without inventing provider metadata, an audit resolution,
 or a runtime-trace entry. This is the only metadata-free goal commit: the fresh
 Station candidate, pending pressure event, contact zone, visibility, and
 reachability must still pass the normal claim- and commit-time checks. A real
-provider fallback after transport remains visible instead of being relabeled as
-policy.
+provider failure after transport commits no policy action and remains visible.
 
 Current NPC decision responses use one typed `actionDeltas` stream: `speech`,
 `readiness`, `look`, `movement`, or validated `administration`. If a player modal owns the run when an
@@ -540,25 +539,23 @@ that resident's meaningful first-hand conversation. `ProviderService` applies
 the same request-semantic validator before accepting a hearing response as
 live, and its one repair receives the original hearing evidence packet so it
 can correct actor identity, citation ownership, contact basis, or a
-below-quorum ordinary proposal. Failure after repair is explicit fallback;
-`RunService` repeats the validation at commit and keeps final authority. Every assessment also
+below-quorum ordinary proposal. Failure after repair is an explicit provider
+interruption; `RunService` repeats the validation at commit and keeps final
+authority. Every assessment also
 declares exactly one memory-derived contact basis: `meaningful_firsthand`,
 `limited_firsthand`, or `never_conversed`. The runtime distinguishes a limited
-direct exchange from no conversation at all and treats any mismatch as
-semantic fallback. A resident without meaningful firsthand memory may still
+direct exchange from no conversation at all and treats any mismatch as a
+semantic provider failure. A resident without meaningful firsthand memory may still
 cite remembered ambient speech to oppose or remain uncertain, but cannot
 vouch. The terminal packet carries the validated basis separately so the
 client can label a never-conversed assessment without rewriting or trying to
 classify the provider's prose. Valid provider testimony wording is preserved
 when the structured basis and citations agree. Four valid vouches make an
-ordinary verdict possible but never mandatory. Invalid
-citations or provider failure use a visibly marked deterministic judgment so
-the run still terminates. The recap is assembled only from the submitted
-defense, validated testimony, and actual cited record/ledger entries. No
-earlier interrogation can end an M3R run.
-If the provider proposes ordinary below the four-vouch floor, the runtime's
-forced abnormal wording is itself marked fallback in the terminal proposal
-metadata and runtime trace; a live transport cannot hide that replacement.
+ordinary verdict possible but never mandatory. Invalid citations or provider
+failure apply no assessment, testimony, recap, or verdict; the exact defense
+remains retryable and the run visibly reports the interruption. No earlier
+interrogation can end an M3R run. An ordinary proposal below the four-vouch
+floor is rejected rather than rewritten as a forced abnormal verdict.
 
 ## Checks
 

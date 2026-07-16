@@ -79,7 +79,7 @@ sound ordinary before the Station hearing?
 | System | Owns |
 |---|---|
 | Godot | 3D presentation, movement, collisions, text surfaces, NPC placement, prompts, HUD, observed local results. |
-| NPC runtime | Schema and tool validation, scoped context, delta caps, records, civic ledger, scheduling, guaranteed session and run ending, deterministic fallback. |
+| NPC runtime | Schema and tool validation, scoped context, delta caps, records, civic ledger, scheduling, exact retry/abort lifecycle, and visible provider-interruption state. |
 | AI provider | NPC wording, suspicion and stance judgment, valid next-tool proposals, and the final hearing judgment. |
 | Scenario docs | Setting, resident identities, goals, private pressures, voice, scene facts, and outcome presentation; never fixed production replies or reaction order. |
 
@@ -93,5 +93,5 @@ change.
 
 `Same Order` remains an M1 Store regression scenario, not the M3R opening or
 production route. Its fixed beats and lines may be used only by scripted test
-adapters and bounded fallback. `Station Soft Inquest` likewise remains source
+adapters. `Station Soft Inquest` likewise remains source
 material rather than the current player-facing first loop.

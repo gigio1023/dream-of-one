@@ -12,7 +12,7 @@ flowchart LR
 
     subgraph Runtime["NPC runtime (backend/npc-runtime/, TypeScript)"]
         Decision["RunService + conversation sessions\n(deterministic authority)"]
-        Suspicion["Judgment clamps\n+ fallback taxonomy"]
+        Suspicion["Judgment validation + clamps\n+ provider interruption state"]
         World["World state: memories, stances,\nrecords, civic ledger, clock"]
         Agent["Agent-loop engine:\ncontext assembly, tool validation"]
         Ports["Provider ports\n(NpcProposalPort)"]
@@ -21,7 +21,6 @@ flowchart LR
     subgraph Providers["Adapters (config-selected profiles)"]
         CC["ChatCompletionsAdapter\nOpenAI SDK + custom baseURL\n(ModelScope, OpenRouter, local, ...)"]
         RESP["ResponsesAdapter\nOpenAI Responses API\n(gpt-5.x family)"]
-        FALLBACK["RuleFallbackNpcAdapter\n(resilience only)"]
         SCRIPTED["ScriptedNpcAdapter\n(test injection only)"]
     end
 
@@ -34,7 +33,6 @@ flowchart LR
     Agent --> Ports
     Ports --> CC
     Ports --> RESP
-    Ports --> FALLBACK
     Agent -. test injection .-> SCRIPTED
 ```
 

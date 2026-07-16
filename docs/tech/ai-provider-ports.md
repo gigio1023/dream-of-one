@@ -46,35 +46,35 @@ interface NpcProposalPort {
 `auditSnapshot` is metadata-only run accounting, not a transcript. `ProviderService`
 records each actual `TextGenPort.generate` attempt at the transport boundary,
 including failed calls and repair calls, then links those call sequence numbers
-to the final high-level live/fallback resolution. It never stores prompts,
+to a final validated live resolution. It never stores prompts,
 provider output, player text, credentials, or secrets. `callsUsed` and
 `tokensUsed` reconcile with completed call charges plus the explicitly exposed
 in-flight count/reservation. All transport calls are retained under the current
 120-call run cap; high-level resolutions retain the first 256 and mark
 `complete=false`, `truncated=true`, and `droppedCount` if that bound is exceeded.
-Direct scripted/rule adapters expose an empty complete audit, while fallback
-reached through `ProviderService` remains a recorded resolution even when it
-made zero transport calls.
+The scripted test adapter exposes an empty complete audit. A failed production
+operation creates no synthetic resolution: its failed physical calls remain in
+the audit and its structured reason is exposed separately as the run's
+`providerFailure` marker.
 Each live resolution cites at least one call: its first call purpose matches
 the resolution, later calls are ascending `repair` attempts, and a complete
 audit references every completed call exactly once. Live or scripted proposal
 metadata cannot carry a fallback reason.
 
 `RunService` separately keeps a bounded `providerRuntimeTrace` of every
-proposal metadata packet it actually consumes. This second trace catches a
-different failure class: a response can be valid provider JSON and therefore
-look live in `providerAudit`, then fail a runtime citation or tool-validity
-check and be replaced by deterministic fallback. Terminal acceptance requires
-both structures to be complete and free of fallback; a later live result
-cannot hide an earlier provider failure or runtime semantic fallback. Neither
+proposal metadata packet it actually consumes. A response that passes the
+provider envelope but fails runtime citation or tool-validity checks is not
+consumed and applies no mutation; the run exposes `providerFailure` with
+`reason=invalid_envelope` for that exact operation. Terminal acceptance
+requires both evidence structures to be complete and the interruption marker
+to be clear. Neither
 structure stores generated text. When the complete structures are non-empty,
 the client acceptance surface also requires one runtime-trace entry per
 high-level provider resolution and zero dropped entries; profile checks alone
 cannot detect a missing consumed result.
-If runtime procedure must replace otherwise valid model wording — for example,
-forcing an abnormal hearing result below the evidenced-vouch floor — the
-consumed proposal metadata becomes fallback even though the transport audit
-correctly remains live.
+Runtime procedure may reject otherwise valid model wording — for example, an
+ordinary hearing result below the evidenced-vouch floor — but it may never
+replace that wording with a fabricated verdict.
 
 `MergedConversationTurn` is judgment fields (bounded suspicion/report deltas,
 signal classes, and a player-visible why-line) plus the NPC's next utterance
@@ -88,10 +88,11 @@ valid merged turn repeats one of those hidden labels, the envelope boundary
 normalizes only the three labels by position before spending a repair call;
 model-authored text, judgment, stance, and memory inputs remain unchanged.
 Any visible-language, fiction, stable-id, shape, or other validation failure
-still makes `ProviderService` retry once with the original grounded request
-context plus field-specific issues, then fall back to composing the rule
-judgment with the canned reply set. Citation scoping narrows only which known
-record ids may be returned; it does not prescribe wording or judgment.
+makes `ProviderService` retry once with the same selected model, original
+grounded request context, and field-specific issues. If repair also fails, the
+exact turn is interrupted without applying wording, judgment, or citations.
+Citation scoping narrows only which known record ids may be returned; it does
+not prescribe wording or judgment.
 
 `ConversationProposal` contains an NPC utterance and three generated reply
 suggestions, plus the same request-scoped record citations for an opening
@@ -236,8 +237,9 @@ applies that same authoritative validation against the exact request and gives
 a semantic failure the existing single repair attempt with the original
 hearing evidence packet attached. If fewer than four residents can possibly
 supply meaningful firsthand evidence, the request JSON schema also excludes
-an ordinary proposal. A failed repair becomes explicit `invalid_envelope`
-fallback; `RunService` still repeats the validation at commit and remains the
+an ordinary proposal. A failed repair becomes an explicit
+`ProviderFailureError` with `reason=invalid_envelope`; `RunService` still
+repeats the validation at commit and remains the
 final authority. The three exact states are `meaningful_firsthand` when any player
 conversation is meaningful, `limited_firsthand` when direct conversation
 exists but none is meaningful, and `never_conversed` when no player
@@ -246,10 +248,10 @@ attributed ambient memories, but limited contact cannot claim substantive
 firsthand grounds. The provider prompt requires a never-conversed line to say
 so, while the client always presents the validated structured basis beside the
 model wording rather than pretending to semantically parse prose. A
-contact-basis mismatch or invalid semantic citation switches the whole
-judgment to visibly marked deterministic fallback and the runtime trace
-records that replacement. Four vouches do not force an ordinary result: with
-the floor met, the selected model still owns the verdict.
+contact-basis mismatch or invalid semantic citation interrupts the whole
+judgment without applying testimony, stance changes, recap, or a verdict. The
+same defense remains retryable. Four vouches do not force an ordinary result:
+with the floor met, the selected model still owns the verdict.
 
 ## Production profiles
 
@@ -278,10 +280,9 @@ its finite transport and service timeout to 30 seconds; profiles without an
 override retain the 12-second runtime default. ModelScope calls were observed
 crossing the old 12-second boundary during live play. Background calls do not
 pause the world and conversation openings are preloaded, so the extra network
-margin avoids false fallback for most traffic. A merged response after the
+margin avoids unnecessary interruptions for most traffic. A merged response after the
 player answers can still block the modal, but it now has a finite 30-second
-ceiling rather than turning ordinary ModelScope latency into mandatory
-fallback.
+ceiling rather than letting ordinary ModelScope latency wait forever.
 
 ## Live prompt calibration
 
@@ -337,12 +338,10 @@ retain that contract and point to it explicitly.
 
 A run fixes its locale at creation. That tag is part of opening-cache and
 request-idempotency signatures and flows through conversation, ambient agent
-steps, records, hearing/recap, and fallback selection. Adapters remain
+steps, records, hearing/recap, and player-visible provider interruption.
+Adapters remain
 locale-agnostic transports; no
-vendor SDK, base URL, or provider profile is added per language. Localized
-fallback is structurally bounded in all six locales, while its legacy
-keyword signal classifier remains Korean/partial-English and is not treated
-as native-quality non-Korean judgment.
+vendor SDK, base URL, or provider profile is added per language.
 
 ## Envelope and failure handling
 
@@ -351,8 +350,9 @@ zod schemas in `src/providers/envelope.ts`. Invalid JSON receives one bounded
 repair request containing the original grounded request context, the invalid
 envelope, and field-specific validation issues. Player-visible JSON-schema
 fields also describe the no-internal-ID contract so compatible structured-output
-providers can avoid the repair in the first place. The following conditions use deterministic fallback and are
-reported in `ProposalMeta`:
+providers can avoid the repair in the first place. The following conditions
+throw a metadata-only `ProviderFailureError(profileId, reason, purpose)` and
+set the run-level interruption for the exact operation:
 
 - missing credentials or unavailable profile;
 - timeout (a profile `timeoutMs` override when present, otherwise
@@ -366,12 +366,13 @@ Budget admission distinguishes the provider's hard per-session limit from a
 caller-supplied ceiling that protects foreground capacity from background
 work. Before preflight, and again immediately before reserving a transport
 call, `ProviderService` checks the projected call plus that exact request's
-token reservation. Crossing the hard limit remains a visible deterministic
-`budget_exhausted` fallback. If a caller ceiling denies the first call,
+token reservation. Crossing the hard limit raises a visible
+`budget_exhausted` provider failure. If a caller ceiling denies the first call,
 `ProviderService` instead throws `ProviderBudgetReservedError`: no transport,
-fallback adapter, audit call, or audit resolution occurred. If the first live
-call completed but its one repair no longer fits, the final fallback remains
-linked to that call sequence rather than leaving an unresolved audit call.
+audit call, provider-failure marker, or audit resolution occurred. If the first
+live call completed but its one repair no longer fits the hard budget, the
+same operation fails visibly; its first physical call remains honestly
+accounted without a fabricated resolution.
 
 If both the original envelope and its single repair fail validation,
 `ProviderService` emits one diagnostic warning containing only the request
@@ -380,28 +381,22 @@ It never logs the prompt, player line, or generated output, and the public
 audit continues to expose only `invalid_envelope`. This is enough to diagnose
 a live schema mismatch without turning provider text into a log surface.
 
-Fallback is resilience, not the production policy. For player judgment, fallback is
-the deterministic signal classifier in
-`src/runtime/conversation-suspicion.ts`; for conversation and agent steps it
-is the bounded rule adapter. A merged conversation fallback may preserve an
-already-earned stance, but it cannot promote an uncertain or opposed resident
-to `vouch`; transport or format failure is not positive social evidence. The HUD shows the selected profile,
-`live`/`fallback`/`scripted` transport, and fallback reason.
+Provider failure is not an in-fiction event. The HUD shows a persistent,
+localized simulation-interruption surface with the selected reason and an
+exact-request retry where the operation is player-owned. The runtime applies
+no NPC line, suspicion/stance movement, agent action, memory, record,
+testimony, or verdict for the failed operation. A successful exact retry
+clears that operation's marker; unrelated success does not hide it.
 The same cumulative metadata remains available run-wide as `providerAudit` and
 `providerRuntimeTrace` on snapshots, successful preload responses, every typed
 NPC-decision result, ordinary answer responses, hearing responses, and the
 terminal run-end response. Provider-bearing builders refresh accounting before
 cloning the pair; the one-second advance lane does not repeat the growing
 arrays. A structurally resolved preload is traced even if fresh semantic
-validation rejects its opening as stale. This prevents a later successful call
-from hiding an earlier error, repair, or fallback during live acceptance.
-
-Ambient-reply fallback is deliberately neutral: one localized in-fiction
-reply, zero suspicion movement, the existing stance, and a dedicated
-six-locale reason that the heard statement is insufficient to change the
-listener's view. It never reuses player-answer wording or manufactures social
-drama during an outage. Provider audit records this operation under the
-distinct `ambient_reply` purpose, including repair calls and budget fallback.
+validation rejects its opening as stale. Failed ambient work remains a
+retryable unresolved wake and commits no partial utterance or listener memory.
+This prevents a later successful call from hiding an earlier interruption
+during live acceptance.
 
 ## Scripted tests
 
@@ -431,4 +426,6 @@ answer history — that is what the regression fixtures assert. Under a live
 provider, judgment, wording, and validated world attempts are the model's, so
 neither routes nor world state are required to be identical across runs; the
 guarantees that hold everywhere are validity (visibility, tool validation,
-clamps) and a session that ends.
+clamps) and bounded lifecycle transitions. A provider interruption remains
+explicit until exact retry or run abandonment and is never counted as an
+authored session ending.

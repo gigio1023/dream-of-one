@@ -37,7 +37,7 @@ Godot route:
   session id.
 - Verify Godot 4.7.x and plugin/server 2.9.1 before stateful work.
 - Launch mode/provider: <fixture inspection | live
-  modelscope/qwen3.7-plus, zero fallback>.
+  modelscope/qwen3.7-plus, no provider interruption>.
 - This worker exclusively owns any run it starts and must stop it before exit.
 
 Actions allowed: <bounded reads, input sequence, or exact implementation scope>
@@ -48,7 +48,7 @@ Required evidence:
 - <semantic snapshot fields or UI transitions>
 - <captures, if the task makes a visual claim>
 - new editor/game errors with details
-- fixture/live provider provenance and fallback status
+- fixture/live provider provenance and provider-interruption status
 - final run stopped state
 
 Mechanical checks: <only checks relevant to this packet>

@@ -103,9 +103,11 @@ Player-visible:
 Technical:
 
 - Merged judgment+reply+suggestions schema on the proposal port, with the
-  deterministic fallback still able to satisfy it.
+  current fail-closed provider contract superseding this killed plan's former
+  deterministic-completion assumption.
 - Run-scoped state (suspicion, records, ledger, deadline clock) above the
-  conversation session; sessions keep their guaranteed ending.
+  conversation session; valid judgments reach bounded endings, while provider
+  failure remains an explicit interruption rather than a synthetic ending.
 - Background scheduling for agent actions and ambient beats that can use the
   delivered reply as context and never block an answer.
 - Per-role provider profiles and fair scheduling across concurrent NPC loops.

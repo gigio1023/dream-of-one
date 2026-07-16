@@ -1,6 +1,6 @@
 ---
 name: dream-npc-runtime
-description: Use when changing, reviewing, or diagnosing backend/npc-runtime in dream-of-one — run/session lifecycle, NPC scheduler and memory, stance/hearing judgment, records and civic ledger, provider ports/adapters/profiles, locale-aware envelopes, fallback, or runtime tests. Triggers include "RunService", "provider profile", "adapter", "envelope", "fallback", "stance", "hearing", "ledger", "tool validation", and "run/session API". NOT for Godot scene/HUD work (dream-godot-client) or authoring player-facing content (dream-content-authoring).
+description: Use when changing, reviewing, or diagnosing backend/npc-runtime in dream-of-one — run/session lifecycle, NPC scheduler and memory, stance/hearing judgment, records and civic ledger, provider ports/adapters/profiles, locale-aware envelopes, fail-visible provider interruption, or runtime tests. Triggers include "RunService", "provider profile", "adapter", "envelope", "provider failure", "stance", "hearing", "ledger", "tool validation", and "run/session API". NOT for Godot scene/HUD work (dream-godot-client) or authoring player-facing content (dream-content-authoring).
 ---
 
 # Dream of One — NPC Runtime
@@ -20,7 +20,8 @@ The model owns *meaning*; deterministic code owns *validity*.
 - Runtime-owned (never delegate): per-NPC sight/context separation, tool
   validation of every world mutation, delta and score clamps, civic-ledger
   append, run revision and scheduling validity, evidenced-vouch quorum, and
-  guaranteed conversation/run endings.
+  conversation/run lifecycle validity. Provider failure is an explicit
+  interruption, never a synthetic ending.
 
 Decision rule from `docs/vision/design-pillars.md`: if a rule decides the
 *content* of a judgment, move that decision into the model's context; if it
@@ -39,8 +40,11 @@ it.
 - Profiles are config (`backend/npc-runtime/providers.config.json`); model
   ids are opaque profile data; availability is proven by an opt-in live
   smoke, never assumed.
-- Deterministic fallback must always work and is visibly marked in
-  `ProposalMeta`. It is resilience, never the product experience.
+- Production provider failure is fail-closed and player-visible. No rule,
+  line bank, or scripted adapter may replace NPC speech, social judgment,
+  action choice, memory, testimony, or verdict. Preserve the exact request for
+  retry and apply no world or social mutation until a validated live result
+  succeeds.
 - Scripted proposal sequences live only in `src/providers/testing/`; the
   scripted adapter is injected by tests and is never selectable from
   production config.
@@ -62,8 +66,9 @@ it.
    seen, heard, or read enters its packet.
 4. World mutations happen only through validated tools, and each emits
    exactly one civic ledger event.
-5. Every session reaches an ending; the runtime owns that guarantee even
-   when the judgment inside it is the model's.
+5. A session reaches its authored ending only through a valid model result.
+   Failure preserves the exact request; the player may retry it or abandon
+   the interrupted run, but the runtime never manufactures an ending.
 6. Outcome presentation cites only ledger events that actually exist.
 7. A `runId` owns all six actor memories and stances, records, ledger,
    institutional pressure, unpaused clock, hearing state, provider budget,
@@ -111,7 +116,7 @@ compatibility, the provider boundary, or a player-visible consequence.
 
 | Doc | When |
 |---|---|
-| `docs/tech/ai-provider-ports.md` | ports, adapters, envelope, fallback, budgets |
+| `docs/tech/ai-provider-ports.md` | ports, adapters, envelope, failure, budgets |
 | `docs/tech/npc-runtime.md` | module map, invariants, sidecar API |
 | `docs/game/npc-agent-loop.md` | loop shape, tool catalog, memory bounds |
 | `docs/vision/design-pillars.md` | authority questions, unacceptable failures |
@@ -126,7 +131,7 @@ compatibility, the provider boundary, or a player-visible consequence.
 - Timeouts and token budgets are sized for judgment-grade calls; do not
   reintroduce bark-sized budgets from M1.
 - `/health/ready` is process readiness, not live-provider proof. Only response
-  metadata showing the pinned profile, live transport, and zero fallback
+  metadata showing the pinned profile, live transport, and no provider interruption
   satisfies model-backed acceptance.
 - Do not build standing trackers, evidence ledgers, or proof reports around
   this work — see `docs/history/v1-postmortem.md`.

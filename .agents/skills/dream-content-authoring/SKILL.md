@@ -38,8 +38,8 @@ Production storylets carry scene facts, actor goals, ending thresholds, and
 outcome presentation only. They never contain choice lists, NPC reply
 sequences, classification rules, or ordered social consequences — live
 wording and judgment come from the selected provider. Fixed dialogue lives
-only in scripted test adapters and the line bank that feeds bounded
-fallback.
+only in scripted test adapters. Provider failure is a visible simulation
+interruption and must never select a production line-bank response.
 
 Every suspicion movement needs a player-readable why-line (이유 문장) in the
 run locale; Korean remains the authored source. Prompt-side content must never

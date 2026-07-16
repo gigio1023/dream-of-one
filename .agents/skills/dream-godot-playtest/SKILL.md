@@ -20,7 +20,7 @@ routing lives in `docs/tech/verification.md`. Read both before starting a run.
 - Hands-on game driving is allowed only when the current verification document
   or an executable handoff packet designates this agent as the play executor.
   Apply its exact model/provider preflight; missing credentials or forbidden
-  fallback is a blocker, never permission to substitute.
+  provider interruption is a blocker, never permission to substitute.
 - A build/fix request permits in-scope editor mutations and non-destructive
   checks, but not plugin installation, client reconfiguration, provider-secret
   access, publishing, or changes to backend-owned game truth.
@@ -65,7 +65,7 @@ When the routing gate authorizes actual play:
 3. Drive generic bounded actions. Check semantic state and logs at meaningful
    transitions rather than after every frame.
 4. Require player-visible consequences plus returned provider metadata; process
-   readiness alone never proves the selected live model or zero fallback.
+   readiness alone never proves the selected live model or an uninterrupted run.
 5. Capture the exercised state, read new editor/game errors with details, and
    stop the run unless the user explicitly asked to leave it open.
 

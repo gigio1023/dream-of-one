@@ -53,8 +53,8 @@ only under the bounded worker/provider route in
   scene/Inspector inspection or mutation where appropriate, diagnostics, and a
   state-appropriate capture. Fixture-mode checks send no gameplay model call.
   Bounded acceptance play uses the same native Sol-ultra route; every in-game
-  model call must return `modelscope/qwen3.7-plus`, `transport=live`, and zero
-  fallback. Do not use the
+  model call must return `modelscope/qwen3.7-plus`, `transport=live`, with no
+  provider interruption. Do not use the
   `lower-capability-executor-prompt` contract unless the owner explicitly asks
   for it. The maintained command contract is
   [`verification.md`](verification.md).
@@ -281,7 +281,7 @@ needed to play and debug:
 - run status, hearing procedure/staging/retry state, terminal result, and the
   player-visible outcome summary. The outcome read includes the verdict,
   officer line, evidenced-vouch count, six attributed testimonies, recap
-  entries, citation counts, fallback marker, and restart state.
+  entries, citation counts, provider-interruption marker, and restart state.
 
 `semantic_targets()` returns visible/interactable actor and spatial-prop ids,
 titles, kinds, and world positions. NPC entries separate backend conversation
@@ -391,12 +391,13 @@ editor, or use Computer Use without separate authority.
   insufficient.
 - A review or status request permits reads only. A build/change request permits
   in-scope editor changes and the non-play helper handshake. Hands-on game
-  input requires the current native-child route plus Qwen live/zero-fallback
+  input requires the current native-child route plus Qwen live/no-interruption
   preflight.
 - Never use editor property mutation or runtime evaluation to manufacture the
   state that a gameplay claim is supposed to prove.
 - Do not print or store provider credentials. The play surface reports session
-  mode and fallback metadata only where the existing UI already exposes them.
+  mode and provider-interruption metadata only where the existing UI already
+  exposes them.
 - Preserve unrelated worktree changes. In particular, the initial Godot AI
   files and `project.godot` edit originated from the user and must be reviewed
   and committed intentionally, not regenerated.
@@ -439,7 +440,7 @@ editor, or use Computer Use without separate authority.
 The rendered town-life run at `f9a06083` completed the bounded direct-control
 packet from `verification.md` through one native in-session child with
 exclusive run ownership and the `modelscope/qwen3.7-plus`
-live/zero-fallback preflight:
+live/no-interruption preflight:
 
 1. select the exact editor session;
 2. launch the main project and reach `live` helper status;
@@ -454,7 +455,7 @@ live/zero-fallback preflight:
 
 The proof is the successful live workflow plus screenshots/log state, not a new
 standing report file. This closes the integration slice, not the full M3R
-milestone; the remaining rendered hearing, fallback, and locale routes are
+milestone; the remaining rendered hearing, provider-interruption, and locale routes are
 ordered in the active milestone plan.
 
 ## Completion bars

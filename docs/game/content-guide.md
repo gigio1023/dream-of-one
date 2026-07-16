@@ -17,7 +17,7 @@ block, the newer active direction wins.
 |---|---|---|
 | `scenario/content/same-order-storylet-packet.md` | `Same Order` prompts, choices, signals, and routes | M1 scripted regression adapter; not M3R layout or production dialogue policy |
 | `scenario/content/social-simulation-cards.md` | ~700 lines of social situation cards | Source for M4 storylets |
-| `scenario/content/dialogue-line-bank.md` | Reusable NPC lines by role/intent | Scripted tests and bounded fallback reference |
+| `scenario/content/dialogue-line-bank.md` | Reusable NPC lines by role/intent | Scripted tests and historical voice reference only; never production outage behavior |
 | `scenario/content/environment-affordance-map.md` | M1 object affordances per role | Source patterns for tool validation; Store-specific objects are not M3R requirements |
 | `scenario/content/location-placement-contracts.md` | Legacy placement and readability constraints | Reuse sightline/landmark principles, not the Store layout; M3R's 3D layout is newly authored |
 | `scenario/content/korean-voice-notes.md` | Korean tone/voice rules | All KO writing |
@@ -63,9 +63,9 @@ nowhere on a map.
   line's social function, evidence content, speaker role, and procedural
   distance rather than Korean word order.
 - At six-locale parity, a run fixes one gameplay locale at start. Dialogue,
-  suggestions, why-lines,
-  ambient speech, records, hearing/recap, and deterministic fallback all use
-  it; UI language changes apply on the next run or explicit restart.
+  suggestions, why-lines, ambient speech, records, hearing/recap, and visible
+  provider-interruption UI all use it; UI language changes apply on the next
+  run or explicit restart.
 - Every player-facing string belongs behind the existing localization/content
   path. Target locale files have identical keys and placeholder sets, and the
   smoke inspects each locale directly instead of passing through Korean

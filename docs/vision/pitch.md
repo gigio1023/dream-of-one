@@ -39,8 +39,9 @@ a record), read the result, and iterate — a coding agent's loop pointed at a
 social world. A swappable LLM provider layer is the NPCs' actual mind: it
 decides what they say, whom they seek out, how suspicious they become, and
 how the hearing weighs an account. Deterministic rules enforce validity —
-sight/context separation, tool validation, guaranteed endings — never the
-content of a judgment (see [`design-pillars.md`](design-pillars.md)).
+sight/context separation, tool validation, and bounded lifecycle transitions —
+never the content of a judgment or an outage ending (see
+[`design-pillars.md`](design-pillars.md)).
 
 The 2026-07 research pass found that this architecture is precisely what the
 proven-but-unshippable social-physics games (Prom Week, Versu, Elsinore)

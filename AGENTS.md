@@ -45,15 +45,16 @@ are load-bearing:
 
 | Layer | Owns | Must not own |
 |---|---|---|
-| Godot client | Presentation, input, tilemaps, HUD, scene-local interaction | Suspicion state, record semantics, verdicts, session termination |
-| NPC runtime (TS) | Validity: tool validation, sight/context separation, delta caps and clamps, records, ledger, scheduling, guaranteed session ending, fallback | Final art, camera feel, the content of a judgment when a live provider is available |
+| Godot client | Presentation, input, first-person world, HUD, scene-local interaction | Suspicion state, record semantics, verdicts, session termination |
+| NPC runtime (TS) | Validity: tool validation, sight/context separation, delta caps and clamps, records, ledger, scheduling, lifecycle, provider-interruption state | Final art, camera feel, NPC speech, social judgment, or verdict content |
 | AI provider (via ports) | NPC wording, reply suggestions, suspicion judgment with why-lines, next tool calls — all inside schemas | Any direct world mutation, conjuring unseen context, blocking session end |
 
 Provider access goes exclusively through the port-and-adapter layer defined in
 [`docs/tech/ai-provider-ports.md`](docs/tech/ai-provider-ports.md). Never
 hardcode a vendor SDK call or base URL outside an adapter. Never assume a
 specific model is available; profiles are config, availability is checked at
-runtime, and deterministic fallback must always work.
+runtime, and failure must visibly interrupt the affected event without
+rule-authored speech, judgment, action, memory, testimony, or verdict.
 
 Production gameplay is provider-first. Do not store authored choice sets, NPC
 reply sequences, or ordered social consequences in production storylets.

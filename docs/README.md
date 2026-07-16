@@ -8,7 +8,7 @@ active.
 Status: **M3R acceptance closure active (2026-07-16).** The first-person town,
 run-scoped NPC runtime, and Qwen-backed social loop are substantially
 implemented; the active milestone now closes the remaining rendered full-run,
-fallback, and locale/IME acceptance routes. The owner-approved direction
+provider-interruption, and locale/IME acceptance routes. The owner-approved direction
 interview converted the game to a seamless first-person 3D town;
 the 2D M3 was killed the day it activated (kill paragraph in
 [`plan/roadmap.md`](plan/roadmap.md)). M2 closed at the owner playtest
@@ -60,7 +60,7 @@ boundary (architecture passed, fun gate: no on immersion); M1 remains as the
 | [`tech/godot-3d-client.md`](tech/godot-3d-client.md) | M3R conversion target: scene architecture, navigation, subtitles, HUD, salvage map from the 2D client |
 | [`tech/godot-ai-playtest.md`](tech/godot-ai-playtest.md) | Pinned Godot AI inspection and routed play surface; native Sol/Qwen live-acceptance boundary |
 | [`tech/npc-runtime.md`](tech/npc-runtime.md) | Backend inventory: what carries over from v1, target module shape |
-| [`tech/ai-provider-ports.md`](tech/ai-provider-ports.md) | Port-and-adapter provider layer: Chat Completions port, Responses port, registry, fallback |
+| [`tech/ai-provider-ports.md`](tech/ai-provider-ports.md) | Port-and-adapter provider layer: Chat Completions port, Responses port, registry, failure handling |
 | [`tech/verification.md`](tech/verification.md) | Commands, smoke policy, the fun gate |
 
 ### Plan — what to build, in order

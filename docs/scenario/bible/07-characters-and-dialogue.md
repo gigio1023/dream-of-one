@@ -79,5 +79,6 @@ Reject lines that:
 Store-era barks, interrogation prompts, repair phrases, and expected answers
 belong to the `Same Order` M1 regression packet and scripted adapters. They do
 not define M3R production dialogue or a safe answer. Reuse their procedural
-distance through the line bank only when writing bounded fallback; live
-wording, judgment, and next actions remain provider-owned.
+distance only as a voice reference for provider context or scripted tests;
+live wording, judgment, and next actions remain provider-owned, and outages
+never select a line from the bank.

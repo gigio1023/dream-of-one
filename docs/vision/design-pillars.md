@@ -52,7 +52,8 @@ Deltas confirmed at the M2 close. Where this block conflicts with the
    and incidents; suspicion, records, and the ledger persist across
    conversations *within* a run and reset *between* runs. "Memory lives
    inside one session" now reads "inside one run"; a conversation session
-   stays the runtime unit with a guaranteed ending.
+   stays the runtime unit with a bounded authored ending once the model
+   returns a valid judgment. A provider interruption is not that ending.
 2. **A run has a purpose and a deadline.** The player came to town for a
    reason (sourced from scenario canon) and has limited time. Win by
    achieving the purpose in time; lose only to a definitive Station verdict.
@@ -183,13 +184,17 @@ Rules enforce *validity*, never *judgment*:
   from what it authored, observed, heard, or read. No omniscient NPCs.
 - **Tool validation** — every world mutation goes through a validated tool
   against real world state. The model cannot conjure objects or records.
-- **Session structure** — every session reaches an ending. The runtime owns
-  that guarantee even when the judgment inside it is the model's.
+- **Session structure** — the runtime validates and bounds every ending, but
+  only a valid model result supplies its social judgment. Provider failure
+  leaves the exact event interrupted until retry or explicit run abandonment.
 
-Fallback exists so a session can survive provider failure honestly (visibly
-marked), but the product experience requires a live model. Online play with a
-paid model is the current premise; local-model support is a long-term goal,
-not a design constraint today.
+Provider failure stops the affected simulation event visibly. The runtime may
+retry the exact request and may ask the same model once to repair an invalid
+schema, but it never invents replacement speech, judgment, action, memory,
+testimony, or verdict. No social or world mutation from that event is applied
+until a validated live result succeeds. Online play with a paid model is the
+current premise; local-model support is a long-term goal, not a design
+constraint today.
 
 **Decision rule:** if a rule decides the *content* of a judgment, move that
 decision into the model's context; if it protects the *validity* of the

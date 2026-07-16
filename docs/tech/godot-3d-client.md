@@ -74,7 +74,7 @@ HUD for one deterministic localized procedure prompt and a free-text final
 defense. The opening has no provider metadata; only the final `judgeHearing`
 call blocks the modal. The resulting
 terminal panel presents all six attributed testimonies, the officer line,
-vouch floor, cited record/ledger counts, recap entries, fallback status, and an
+vouch floor, cited record/ledger counts, recap entries, and an
 idempotent restart. The client displays these facts but never computes the
 verdict.
 `run/main_scene` now points to `res://scenes/main_3d.tscn`; the 2D scene remains
@@ -364,8 +364,13 @@ the dev machine with all six NPC loops live.
   record unless a later validated record action actually creates one. No
   timer exists outside Station interrogation (≥40s inside it).
 - **Consequence surfacing ≤1s** of its ledger event; no silent state change.
-- **Fallback honesty** — provider status badge and fallback reason surface in
-  play; raw ids stay behind F3 debug.
+- **Provider-failure honesty** — a persistent localized interruption panel
+  replaces the affected event, offers exact-request retry, and never presents
+  a rule-authored line or verdict as play; raw ids stay behind F3 debug. The
+  player may instead abandon that interrupted run. The client disables retry
+  and abandon against one another, reuses one idempotency id while an abandon
+  is retried, and starts a clean scene only after the runtime confirms closure
+  without a terminal result.
 - **Localization path** — all player-facing strings use the existing Godot
   `TranslationServer` path. Korean is first-authored; `en/it/zh/fr/ja` use the
   same M3R keys and placeholder sets. The selected presentation id maps once to

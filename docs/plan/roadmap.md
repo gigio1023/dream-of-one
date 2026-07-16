@@ -45,7 +45,7 @@ and vision pages rather than creating a parallel direction document.
   propagation; M4 adds per-role profiles (cheap ambient / better Station);
   M5 locks the demo's default profile + disclosure copy.
 - **Localization track:** Korean remains first-authored. M3R makes the single
-  UI/run/provider/fallback path locale-driven for `ko-KR`, `en-US`, `it-IT`,
+  UI/run/provider/interruption path locale-driven for `ko-KR`, `en-US`, `it-IT`,
   `zh-CN`, `fr-FR`, and `ja-JP`; M5 ships content parity through that path
   instead of adding language-specific implementations.
 

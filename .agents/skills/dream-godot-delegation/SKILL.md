@@ -99,7 +99,7 @@ Return a compact packet containing:
   preflight;
 - the observed state transitions relevant to the objective, with semantic
   values and capture paths when required;
-- new editor/game errors, fixture or live-provider provenance, and any fallback;
+- new editor/game errors, fixture or live-provider provenance, and any provider interruption;
 - files changed and checks run, when the packet allowed implementation;
 - whether the worker-owned run stopped cleanly;
 - a direct result: pass, fail, inconclusive, or blocked, plus the smallest next

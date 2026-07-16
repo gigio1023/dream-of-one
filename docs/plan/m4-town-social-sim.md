@@ -1,6 +1,12 @@
 # M4 — Town Social Sim
 
-**Status: queued.**
+**Status: queued — rescope required at activation (2026-07-11).** The
+first-person conversion (M3R, [`roadmap.md`](roadmap.md)) absorbed this
+milestone's multi-location town and ambient life, and continuous world time
+replaced day segments. What remains for M4 per the roadmap ladder: the
+rumor-diffusion run clock, NPC-initiated incidents, the notice board, and
+save/load. Rewrite this spec against the shipped M3R before activating; the
+body below is the pre-conversion 2D spec, kept for its still-valid ideas.
 
 ## Goal
 
@@ -14,6 +20,9 @@ game reads as a *place* that investigates you, not a scene that does.
 **World:** Park, Studio, and street scenes themed per the asset pipeline;
 location transitions; navigation across the block; notice board, review
 queue, and approval-criteria objects live with real visibility rules.
+(Owner note 2026-07-11, very low priority: the notice board is the intended
+successor to the removed in-room record props — NPCs both read *and* write
+it during ambient life.)
 
 **Cast:** Park Witness, Studio PM, and 1–2 ambient residents join the M1
 cast, each with actor policy, schedules (three day segments), and low-budget
@@ -29,13 +38,13 @@ emergent-feeling beat, now emergent for real).
 `scenario/content/social-simulation-cards.md`, placed across locations so a
 session weaves storylet beats with ambient life.
 
-**Persistence:** session save/load at beat boundaries (records, ledger,
+**Persistence:** mid-run save/load at beat boundaries (records, ledger,
 economy, NPC memory snapshots); per-role provider profiles (cheap ambient,
 better Station/Studio) through the M2 registry.
 
 ## Acceptance
 
-- [ ] A full session (open → close of a day) plays across ≥3 locations with
+- [ ] A full run day (open → close) plays across ≥3 locations with
       storylet + ambient beats interleaved.
 - [ ] Suspicion raised in the store visibly alters behavior in the park and
       studio *only* via records/economy values (no cross-scene scripting).

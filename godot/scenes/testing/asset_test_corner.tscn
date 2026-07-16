@@ -1,0 +1,136 @@
+[gd_scene load_steps=20 format=3]
+
+[ext_resource type="Script" path="res://scripts/testing/asset_test_corner.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/furniture/bench.glb" id="2_bench"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/furniture/desk.glb" id="3_desk"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/nature/tree_default.glb" id="4_tree"]
+[ext_resource type="PackedScene" path="res://assets/quaternius/men/casual_hoodie.gltf" id="5_hoodie"]
+[ext_resource type="PackedScene" path="res://assets/quaternius/men/casual_2.gltf" id="6_casual_man"]
+[ext_resource type="PackedScene" path="res://assets/quaternius/men/worker.gltf" id="7_man_worker"]
+[ext_resource type="PackedScene" path="res://assets/quaternius/women/casual.gltf" id="8_casual"]
+[ext_resource type="PackedScene" path="res://assets/quaternius/women/formal.gltf" id="9_formal"]
+[ext_resource type="PackedScene" path="res://assets/quaternius/women/worker.gltf" id="10_woman_worker"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/furniture/chair_desk.glb" id="11_chair"]
+[ext_resource type="PackedScene" path="res://assets/kenney3d/city_roads/road_straight.glb" id="12_road"]
+
+[sub_resource type="StandardMaterial3D" id="Material_floor"]
+albedo_color = Color(0.29, 0.38, 0.29, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="Mesh_floor"]
+material = SubResource("Material_floor")
+size = Vector3(14, 0.1, 10)
+
+[sub_resource type="StandardMaterial3D" id="Material_greybox"]
+albedo_color = Color(0.76, 0.72, 0.62, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="Mesh_door_post"]
+material = SubResource("Material_greybox")
+size = Vector3(0.25, 2.35, 0.25)
+
+[sub_resource type="BoxMesh" id="Mesh_door_header"]
+material = SubResource("Material_greybox")
+size = Vector3(1.6, 0.25, 0.25)
+
+[sub_resource type="CapsuleMesh" id="Mesh_scale_capsule"]
+material = SubResource("Material_greybox")
+radius = 0.3
+height = 1.8
+
+[sub_resource type="Environment" id="Environment_corner"]
+background_mode = 1
+background_color = Color(0.53, 0.68, 0.77, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.85, 0.88, 0.9, 1)
+ambient_light_energy = 0.65
+
+[node name="AssetTestCorner" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_corner")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-50, -30, 0)
+shadow_enabled = true
+
+[node name="Camera" type="Camera3D" parent="."]
+position = Vector3(0, 1.65, 13)
+current = true
+fov = 62.0
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.05, 1)
+mesh = SubResource("Mesh_floor")
+
+[node name="DoorOpening" type="Node3D" parent="."]
+position = Vector3(-5, 0, 3)
+
+[node name="LeftPost" type="MeshInstance3D" parent="DoorOpening"]
+position = Vector3(-0.675, 1.175, 0)
+mesh = SubResource("Mesh_door_post")
+
+[node name="RightPost" type="MeshInstance3D" parent="DoorOpening"]
+position = Vector3(0.675, 1.175, 0)
+mesh = SubResource("Mesh_door_post")
+
+[node name="Header" type="MeshInstance3D" parent="DoorOpening"]
+position = Vector3(0, 2.225, 0)
+mesh = SubResource("Mesh_door_header")
+
+[node name="OpeningLabel" type="Label3D" parent="DoorOpening"]
+position = Vector3(0, 2.65, 0)
+text = "1.1 m × 2.1 m doorway"
+font_size = 32
+outline_size = 6
+
+[node name="ScaleCapsule" type="MeshInstance3D" parent="."]
+position = Vector3(-2.7, 0.9, 3)
+mesh = SubResource("Mesh_scale_capsule")
+
+[node name="CapsuleLabel" type="Label3D" parent="ScaleCapsule"]
+position = Vector3(0, 1.25, 0)
+text = "1.8 m reference"
+font_size = 28
+outline_size = 5
+
+[node name="ReferenceDesk" parent="." instance=ExtResource("3_desk")]
+position = Vector3(1.4, 0, 3.1)
+scale = Vector3(2, 2, 2)
+
+[node name="ReferenceChair" parent="." instance=ExtResource("11_chair")]
+position = Vector3(1.4, 0, 1.9)
+rotation = Vector3(0, 3.14159, 0)
+scale = Vector3(2, 2, 2)
+
+[node name="ReferenceBench" parent="." instance=ExtResource("2_bench")]
+position = Vector3(4.1, 0, 2.5)
+scale = Vector3(2, 2, 2)
+
+[node name="ReferenceTree" parent="." instance=ExtResource("4_tree")]
+position = Vector3(5.1, 0, -0.6)
+scale = Vector3(2.5, 2.5, 2.5)
+
+[node name="ReferenceRoad" parent="." instance=ExtResource("12_road")]
+position = Vector3(0, 0.01, 7.5)
+scale = Vector3(5, 5, 5)
+
+[node name="CharacterWalker" parent="." instance=ExtResource("5_hoodie")]
+unique_name_in_owner = true
+position = Vector3(-5, 0, 0.4)
+
+[node name="CharacterManCasual" parent="." instance=ExtResource("6_casual_man")]
+position = Vector3(-3, 0, -1.8)
+
+[node name="CharacterManWorker" parent="." instance=ExtResource("7_man_worker")]
+position = Vector3(-1, 0, -1.8)
+
+[node name="CharacterCasual" parent="." instance=ExtResource("8_casual")]
+position = Vector3(1, 0, -1.8)
+
+[node name="CharacterFormal" parent="." instance=ExtResource("9_formal")]
+position = Vector3(3, 0, -1.8)
+
+[node name="CharacterWomanWorker" parent="." instance=ExtResource("10_woman_worker")]
+position = Vector3(5, 0, -1.8)

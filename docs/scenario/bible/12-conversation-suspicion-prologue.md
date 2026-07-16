@@ -148,7 +148,8 @@ Every conversation event must include:
 
 - Cut Studio and Park as explorable locations before cutting the Store
   conversation.
-- Cut live API provider before cutting deterministic fallback playability.
+- If live provider access is absent, show a simulation interruption; never
+  preserve apparent playability with fixed social judgment.
 - Cut free input before cutting three-choice conversation.
 - Cut visual polish before cutting NPC reaction readability.
 - Cut verdict ending before cutting report/inquest handoff.

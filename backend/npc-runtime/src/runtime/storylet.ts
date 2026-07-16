@@ -22,6 +22,8 @@ const beatSchema = z
     sceneFacts: z.array(nonEmpty).min(1),
     procedureCue: z.array(nonEmpty),
     acceptsFreeInput: z.boolean(),
+    /** Present only on Station interrogation beats; client shows a ≥40s timer. */
+    hesitationMs: z.number().int().positive().optional(),
     next: nonEmpty.nullable(),
   })
   .strict();

@@ -15,9 +15,10 @@
       "baseUrlEnv": "MODELSCOPE_BASE_URL",
       "apiKeyEnv": "MODELSCOPE_API_KEY",
       "model": "Qwen-Ambassador/Qwen3.7-Plus",
+      "timeoutMs": 30000,
       "params": {
         "temperature": 0.7,
-        "maxTokens": 500,
+        "maxTokens": 1600,
         "enableThinking": false
       },
       "structured": "json-instructed"
@@ -40,7 +41,7 @@
   },
   "runtime": {
     "timeoutMs": 12000,
-    "maxCallsPerSession": 60,
-    "maxTokensPerSession": 150000
+    "maxCallsPerSession": 120,
+    "maxTokensPerSession": 450000
   }
 }

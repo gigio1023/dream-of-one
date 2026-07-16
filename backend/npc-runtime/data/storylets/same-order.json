@@ -9,7 +9,7 @@
     "softReport": 40,
     "inquest": 90,
     "suspicionProbe": 55,
-    "hesitationMs": 6000
+    "hesitationMs": 40000
   },
   "actors": [
     { "actorId": "player", "role": "player", "name": "플레이어", "landmarkId": "Store" },
@@ -69,11 +69,12 @@
       "sceneFacts": ["담당관은 실제로 보이는 상점 기록만 인용할 수 있다.", "담당관은 인용한 기록과 진술을 근거로만 판단을 내린다."],
       "procedureCue": ["station_dossier"],
       "acceptsFreeInput": true,
+      "hesitationMs": 40000,
       "next": null
     }
   ],
   "hesitation": {
-    "thresholdMs": 6000,
+    "thresholdMs": 40000,
     "signal": "response_hesitation",
     "eventName": "response_hesitation_noted"
   },

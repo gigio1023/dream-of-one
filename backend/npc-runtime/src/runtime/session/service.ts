@@ -3,8 +3,18 @@ import { DEFAULT_ROLE_POLICIES, assembleObservePacket, type ActorMemory } from "
 import { runBeat, type NpcAction } from "../../agentloop/engine.js";
 import type { ActorContextLite } from "../../agentloop/tools.js";
 import { TranscriptStore, type TranscriptEntry } from "../../agentloop/transcript.js";
-import type { NpcProposalPort, ProposalMeta } from "../../providers/ports.js";
+import {
+  ProviderFailureError,
+  type NpcProposalPort,
+  type ProposalMeta,
+  type SuggestedReply,
+} from "../../providers/ports.js";
 import { createProviderFromEnvironment } from "../../providers/registry.js";
+import { procedureContent } from "../../localization/procedure-content.js";
+import {
+  requireSupportedGameplayLocale,
+  type GameplayLocale,
+} from "../../localization/supported-locales.js";
 import type { ConversationChoiceIntent, ConversationSuspicionSignal } from "../../contracts/types.js";
 import {
   clampConversationScore,
@@ -75,6 +85,7 @@ export interface NextTurn {
   continueConversation: boolean;
   choices: Array<{ choiceId: string; intent: ConversationChoiceIntent; line: string }>;
   proposalMeta: ProposalMeta;
+  hesitationMs?: number;
 }
 
 export interface SessionStartResult {
@@ -171,6 +182,7 @@ export class SessionError extends Error {
       | "unexpected_turn"
       | "unknown_choice"
       | "invalid_answer"
+      | "invalid_locale"
       | "storylet_not_found",
   ) {
     super(message);
@@ -180,7 +192,7 @@ export class SessionError extends Error {
 interface SessionState {
   sessionId: string;
   storylet: Storylet;
-  locale: string;
+  locale: GameplayLocale;
   world: WorldState;
   transcript: TranscriptStore;
   memory: Map<string, ActorMemory>;
@@ -198,6 +210,18 @@ interface SessionState {
   finalRoute?: RouteId;
   terminal: boolean;
   turnCount: number;
+  /** Speaker agent beat deferred until after the player-facing answer returns. */
+  pendingAftermath?: {
+    speakerId: string;
+    playerLine: string;
+    goal: string;
+  };
+  /** Latest deferred speaker beat results (tests / client drain). */
+  lastAftermath?: {
+    npcReactions: NpcReaction[];
+    ledgerEvents: LedgerEvent[];
+    transcriptDeltas: TranscriptEntry[];
+  };
 }
 
 function hashText(text: string): string {
@@ -247,16 +271,28 @@ export class SessionService {
 
   async start(storyletId: string, locale: string): Promise<SessionStartResult> {
     const storylet = this.getStorylet(storyletId);
+    let sessionLocale: GameplayLocale;
+    try {
+      sessionLocale = requireSupportedGameplayLocale(locale);
+    } catch {
+      throw new SessionError(`unsupported gameplay locale: ${locale}`, "invalid_locale");
+    }
+    if (storylet.locale !== sessionLocale) {
+      throw new SessionError(
+        `storylet ${storyletId} is authored for ${storylet.locale}, not ${sessionLocale}`,
+        "invalid_locale",
+      );
+    }
     const sessionId = `sess-${randomUUID()}`;
     const initialMeta: ProposalMeta = {
       profileId: this.proposalPort.profileId,
-      transport: "fallback",
+      transport: "live",
       usedFallback: false,
     };
     const session: SessionState = {
       sessionId,
       storylet,
-      locale,
+      locale: sessionLocale,
       world: createSameOrderWorld(),
       transcript: new TranscriptStore(),
       memory: new Map(),
@@ -274,7 +310,12 @@ export class SessionService {
       turnCount: 0,
     };
     this.sessions.set(sessionId, session);
-    session.activeTurn = await this.buildNextTurn(session);
+    try {
+      session.activeTurn = await this.buildNextTurn(session);
+    } catch (error) {
+      this.sessions.delete(sessionId);
+      throw error;
+    }
     return {
       sessionId,
       worldSnapshot: this.buildWorldSnapshot(session),
@@ -297,7 +338,36 @@ export class SessionService {
   }
 
   answer(sessionId: string, turnId: string, answer: SessionAnswer): Promise<AnswerResult> {
-    return this.serialize(sessionId, () => this.resolveAnswer(sessionId, turnId, answer));
+    const resultPromise = this.serialize(sessionId, () => this.resolveAnswer(sessionId, turnId, answer));
+    // Append the speaker agent beat onto the same serialize chain so later
+    // mutations (and session/end) wait for it, while the answer HTTP response
+    // can return as soon as the merged call finishes.
+    this.sessionChains.set(
+      sessionId,
+      resultPromise
+        .then(
+          () => this.runAnswerAftermath(sessionId),
+          () => undefined,
+        )
+        .then(
+          () => undefined,
+          () => undefined,
+        ),
+    );
+    return resultPromise;
+  }
+
+  /** Test helper: wait until the session serialize queue (including aftermath) is idle. */
+  async awaitIdle(sessionId: string): Promise<void> {
+    await this.sessionChains.get(sessionId);
+  }
+
+  /** Test helper: latest deferred speaker-beat results after awaitIdle. */
+  takeLastAftermath(sessionId: string): SessionState["lastAftermath"] {
+    const session = this.require(sessionId);
+    const value = session.lastAftermath;
+    session.lastAftermath = undefined;
+    return value;
   }
 
   private async resolveAnswer(sessionId: string, turnId: string, answer: SessionAnswer): Promise<AnswerResult> {
@@ -313,44 +383,57 @@ export class SessionService {
     }
 
     const beat = session.storylet.beats[session.beatIndex];
+    const priorContinue = session.activeTurn.continueConversation;
     const classified = this.classifyAnswer(session, answer);
-    session.processedTurnIds.add(turnId);
-    session.turnCount += 1;
     const judgmentHistory = session.dialogue.slice(-10);
-    session.dialogue.push({ speakerId: "player", line: classified.line });
 
-    // The judging NPC's model decides what the answer means. Rules only
-    // bound the movement (per-turn caps, 0..125 clamps) — owner direction.
     const actor = this.actorContext(session, beat.speakerId);
     const memory = this.memoryFor(session, beat.speakerId);
-    const judged = await this.proposalPort.judgeConversationTurn({
+    const observePacket = assembleObservePacket(session.world, {
+      actor,
+      goals: [beat.objective],
+      policy: DEFAULT_ROLE_POLICIES[actor.role],
+      memory,
+      heardSpeech: [classified.line],
+    });
+
+    // Next-beat context shapes the reply half of the merged call when the
+    // prior turn still wanted to continue; route gating still happens after.
+    const candidateNext = beat.next
+      ? session.storylet.beats.find(candidate => candidate.beatId === beat.next)
+      : undefined;
+    const proposeBeat = priorContinue && candidateNext ? candidateNext : beat;
+
+    // Single player-blocking provider call: judgment + next NPC reply + suggestions.
+    const merged = await this.proposalPort.judgeAndProposeConversationTurn({
       sessionId,
       locale: session.locale,
-      beatId: beat.beatId,
+      beatId: proposeBeat.beatId,
       promptId: beat.promptId,
       actorId: beat.speakerId,
       playerLine: classified.line,
       conversationHistory: judgmentHistory,
-      observePacket: assembleObservePacket(session.world, {
-        actor,
-        goals: [beat.objective],
-        policy: DEFAULT_ROLE_POLICIES[actor.role],
-        memory,
-        heardSpeech: [classified.line],
-      }),
+      observePacket,
       suspicionBefore: session.suspicion,
       reportPressureBefore: session.reportPressure,
+      objective: proposeBeat.objective,
+      sceneFacts: [session.storylet.scenePremise, ...proposeBeat.sceneFacts],
     });
-    this.trackProposalMeta(session, [judged.meta]);
+    this.rejectFallbackProposalMeta(merged.meta, "conversation_turn");
+    this.trackProposalMeta(session, [merged.meta]);
+    session.processedTurnIds.add(turnId);
+    session.turnCount += 1;
+    session.dialogue.push({ speakerId: "player", line: classified.line });
+
     const suspicionBefore = session.suspicion;
     const reportPressureBefore = session.reportPressure;
     session.suspicion = clampConversationScore(
-      suspicionBefore + clampJudgmentDelta(judged.proposal.suspicionDelta, JUDGMENT_SUSPICION_DELTA_CAP),
+      suspicionBefore + clampJudgmentDelta(merged.proposal.suspicionDelta, JUDGMENT_SUSPICION_DELTA_CAP),
     );
     session.reportPressure = clampConversationScore(
-      reportPressureBefore + clampJudgmentDelta(judged.proposal.reportDelta, JUDGMENT_REPORT_DELTA_CAP),
+      reportPressureBefore + clampJudgmentDelta(merged.proposal.reportDelta, JUDGMENT_REPORT_DELTA_CAP),
     );
-    for (const signal of judged.proposal.signals) session.signalsSeen.add(signal);
+    for (const signal of merged.proposal.signals) session.signalsSeen.add(signal);
     session.turns.push({
       turnId,
       promptId: beat.promptId,
@@ -358,40 +441,23 @@ export class SessionService {
       selectedChoiceId: classified.choiceId,
       freeInputHash: classified.freeInputHash,
       intent: classified.intent,
-      signals: judged.proposal.signals,
+      signals: merged.proposal.signals,
     });
 
     const projectedRoute = this.projectRoute(session);
-    const beatResult = await runBeat({
-      sessionId,
-      world: session.world,
-      actor,
-      policy: DEFAULT_ROLE_POLICIES[actor.role],
-      memory,
-      // The NPC's own perceived state only. Never leak a projected ending:
-      // what to do about the pressure is the model's decision.
-      goal: `conversation: beat=${beat.beatId} suspicion=${session.suspicion} reportPressure=${session.reportPressure}`,
-      heardSpeech: [classified.line],
-      proposalPort: this.proposalPort,
-      transcript: session.transcript,
-      budget: 3,
-    });
-    session.world = beatResult.world;
-    session.memory.set(beat.speakerId, beatResult.memory);
-    this.trackProposalMeta(session, beatResult.actions.map(action => action.proposalMeta));
-
-    const nextBeat = beat.next ? session.storylet.beats.find(candidate => candidate.beatId === beat.next) : undefined;
     const nextBeatAllowed =
-      session.activeTurn.continueConversation &&
-      !!nextBeat &&
-      (!nextBeat.onlyWhenRoute || nextBeat.onlyWhenRoute.includes(projectedRoute));
+      priorContinue &&
+      !!candidateNext &&
+      (!candidateNext.onlyWhenRoute || candidateNext.onlyWhenRoute.includes(projectedRoute));
+
     let nextTurn: NextTurn | null = null;
     let routeState: RouteState;
-    if (nextBeatAllowed && nextBeat) {
-      session.beatIndex = session.storylet.beats.indexOf(nextBeat);
-      nextTurn = await this.buildNextTurn(session);
+    if (nextBeatAllowed && candidateNext) {
+      session.beatIndex = session.storylet.beats.indexOf(candidateNext);
+      nextTurn = this.nextTurnFromMerged(session, candidateNext, merged.proposal, merged.meta);
       session.activeTurn = nextTurn;
-      routeState = this.routeState(this.stageForBeat(nextBeat), projectedRoute, false, session);
+      session.dialogue.push({ speakerId: candidateNext.speakerId, line: merged.proposal.utterance });
+      routeState = this.routeState(this.stageForBeat(candidateNext), projectedRoute, false, session);
     } else {
       session.finalRoute = projectedRoute;
       session.terminal = true;
@@ -399,29 +465,97 @@ export class SessionService {
       routeState = this.routeState("resolved", projectedRoute, true, session);
     }
 
-    const reactions = beatResult.actions.map(action => this.reactionForAction(actor.role, action));
-    if (reactions.length === 0 && nextTurn) {
-      reactions.push({
-        actorId: beat.speakerId,
-        role: actor.role,
-        kind: "speech",
-        utterance: nextTurn.prompt,
-        proposalMeta: nextTurn.proposalMeta,
-      });
-    }
+    session.pendingAftermath = {
+      speakerId: beat.speakerId,
+      playerLine: classified.line,
+      goal: `conversation: beat=${beat.beatId} suspicion=${session.suspicion} reportPressure=${session.reportPressure}`,
+    };
+
+    const reactions: NpcReaction[] = nextTurn
+      ? [
+          {
+            actorId: beat.speakerId,
+            role: actor.role,
+            kind: "speech",
+            utterance: nextTurn.prompt,
+            proposalMeta: nextTurn.proposalMeta,
+          },
+        ]
+      : [];
+
     return {
-      signals: judged.proposal.signals,
-      whyLines:
-        judged.meta.transport === "live"
-          ? [judged.proposal.whyLine]
-          : this.resolveWhyLines(session.storylet, judged.proposal.signals),
+      signals: merged.proposal.signals,
+      whyLines: [merged.proposal.whyLine],
       suspicionDelta: session.suspicion - suspicionBefore,
       reportPressure: session.reportPressure,
       npcReactions: reactions,
-      ledgerEvents: beatResult.events,
-      transcriptDeltas: beatResult.transcriptDeltas,
+      ledgerEvents: [],
+      transcriptDeltas: [],
       routeState,
       nextTurn,
+    };
+  }
+
+  private async runAnswerAftermath(sessionId: string): Promise<void> {
+    const session = this.sessions.get(sessionId);
+    if (!session?.pendingAftermath) {
+      return;
+    }
+    const pending = session.pendingAftermath;
+    session.pendingAftermath = undefined;
+    const actor = this.actorContext(session, pending.speakerId);
+    const memory = this.memoryFor(session, pending.speakerId);
+    const beatResult = await runBeat({
+      sessionId,
+      locale: session.locale,
+      world: session.world,
+      actor,
+      policy: DEFAULT_ROLE_POLICIES[actor.role],
+      memory,
+      goal: pending.goal,
+      heardSpeech: [pending.playerLine],
+      proposalPort: this.proposalPort,
+      transcript: session.transcript,
+      budget: 3,
+    });
+    session.world = beatResult.world;
+    session.memory.set(pending.speakerId, beatResult.memory);
+    this.trackProposalMeta(session, beatResult.actions.map(action => action.proposalMeta));
+    session.lastAftermath = {
+      npcReactions: beatResult.actions.map(action => this.reactionForAction(actor.role, action)),
+      ledgerEvents: beatResult.events,
+      transcriptDeltas: beatResult.transcriptDeltas,
+    };
+  }
+
+  private nextTurnFromMerged(
+    session: SessionState,
+    beat: StoryletBeat,
+    merged: {
+      utterance: string;
+      suggestedReplies: [SuggestedReply, SuggestedReply, SuggestedReply];
+      continueConversation: boolean;
+    },
+    meta: ProposalMeta,
+  ): NextTurn {
+    const choiceSetId = `${beat.promptId}.generated`;
+    const turnId = `${session.storylet.conversationId}#${session.beatIndex}#${session.turnCount}`;
+    return {
+      turnId,
+      beatId: beat.beatId,
+      promptId: beat.promptId,
+      choiceSetId,
+      speakerId: beat.speakerId,
+      prompt: merged.utterance,
+      acceptsFreeInput: beat.acceptsFreeInput,
+      continueConversation: merged.continueConversation,
+      choices: merged.suggestedReplies.map((reply, index) => ({
+        choiceId: `${beat.beatId}.generated.${index + 1}`,
+        intent: reply.intent,
+        line: reply.text,
+      })),
+      proposalMeta: meta,
+      ...(beat.hesitationMs !== undefined ? { hesitationMs: beat.hesitationMs } : {}),
     };
   }
 
@@ -444,6 +578,7 @@ export class SessionService {
       const actor = this.actorContext(session, actorId);
       const beatResult = await runBeat({
         sessionId,
+        locale: session.locale,
         world: session.world,
         actor,
         policy: DEFAULT_ROLE_POLICIES[actor.role],
@@ -498,7 +633,11 @@ export class SessionService {
     };
   }
 
-  end(sessionId: string): SessionEndResult {
+  end(sessionId: string): Promise<SessionEndResult> {
+    return this.serialize(sessionId, () => this.resolveEnd(sessionId));
+  }
+
+  private async resolveEnd(sessionId: string): Promise<SessionEndResult> {
     const session = this.require(sessionId);
     const route = session.finalRoute ?? this.projectRoute(session);
     session.finalRoute = route;
@@ -555,6 +694,7 @@ export class SessionService {
       observePacket,
       conversationHistory: session.dialogue.slice(-10),
     });
+    this.rejectFallbackProposalMeta(resolved.meta, "conversation");
     this.trackProposalMeta(session, [resolved.meta]);
     session.dialogue.push({ speakerId: beat.speakerId, line: resolved.proposal.utterance });
     const choiceSetId = `${beat.promptId}.generated`;
@@ -574,6 +714,7 @@ export class SessionService {
         line: reply.text,
       })),
       proposalMeta: resolved.meta,
+      ...(beat.hesitationMs !== undefined ? { hesitationMs: beat.hesitationMs } : {}),
     };
   }
 
@@ -593,7 +734,7 @@ export class SessionService {
       if (!text) throw new SessionError("free_input requires non-empty text", "invalid_answer");
       return { line: text, freeInputHash: hashText(text) };
     }
-    return { line: "(응답 지연)" };
+    return { line: procedureContent(session.locale).hesitationMarker };
   }
 
   private projectRoute(session: SessionState): RouteId {
@@ -602,12 +743,6 @@ export class SessionService {
     if (session.reportPressure >= softReport) return "soft_report";
     if (session.signalsSeen.size > 0 || session.suspicion > 0) return "repair_recovery";
     return "clean_cover";
-  }
-
-  private resolveWhyLines(storylet: Storylet, signals: ConversationSuspicionSignal[]): string[] {
-    return signals.length === 0
-      ? [storylet.whyLines.none]
-      : signals.map(signal => storylet.whyLines[signal] ?? storylet.whyLines.none);
   }
 
   private routeState(
@@ -673,6 +808,18 @@ export class SessionService {
       session.lastProposalMeta = meta;
       if (meta.usedFallback) session.fallbackCount += 1;
     }
+  }
+
+  private rejectFallbackProposalMeta(
+    meta: ProposalMeta,
+    purpose: ConstructorParameters<typeof ProviderFailureError>[2],
+  ): void {
+    if (meta.transport !== "fallback" && !meta.usedFallback) return;
+    throw new ProviderFailureError(
+      meta.profileId,
+      meta.fallbackReason ?? "invalid_envelope",
+      purpose,
+    );
   }
 
   private buildWorldSnapshot(session: SessionState): WorldSnapshot {

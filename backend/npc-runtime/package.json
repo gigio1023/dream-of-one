@@ -11,6 +11,7 @@
     "serve": "bun run src/index.ts",
     "validate:storylets": "bun run src/tools/validate-storylets.ts",
     "fixtures:generate": "bun run src/tools/generate-session-fixtures.ts",
+    "fixtures:run:generate": "bun run src/tools/generate-run-fixture.ts",
     "provider:smoke": "bun run src/tools/provider-smoke.ts",
     "serve:scripted": "bun run src/tools/scripted-session-server.ts",
     "start": "bun run dist/index.js",

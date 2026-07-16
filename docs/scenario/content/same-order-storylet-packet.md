@@ -410,7 +410,8 @@ Before this packet can drive M2 expansion, the current build must prove:
 - player can identify the exact line that created mismatch or repair;
 - Store record is visible before Station cites it;
 - Station uses the same record ID and selected player line;
-- provider-off fallback produces the same route events and Evidence;
+- provider-off production play interrupts without route events; the scripted
+  test adapter alone reproduces deterministic route events and Evidence;
 - clean cover, repair recovery, soft report, and inquest routes remain current;
 - a fresh player or proxy can explain the Store-to-Station cause chain.
 
@@ -481,7 +482,7 @@ Required examples:
 
 - accepted Store Clerk prompt variant with no state change.
 - rejected provider output that invents a new fact.
-- fallback Store Clerk response.
+- scripted-fixture Store Clerk response.
 - accepted Station pressure wording for a known contradiction.
 - rejected provider output that decides verdict.
 - Korean/English parity pair for the same consequence.
@@ -495,7 +496,7 @@ This packet is production-ready only when:
   and provider jobs;
 - all route outcomes have current proof;
 - Station reconciliation cites the exact Store record;
-- provider fixture examples exist or fallback-only mode is recorded;
+- provider fixture examples exist and remain explicitly test-only;
 - a fresh tester can answer why the Station cared about the Store conversation.
 - the simulator proof checklist passes before broader society, Studio, or Park
   content is approved.

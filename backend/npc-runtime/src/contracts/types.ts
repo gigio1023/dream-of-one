@@ -56,6 +56,20 @@ export const CONVERSATION_CHOICE_INTENTS = [
 
 export type ConversationChoiceIntent = (typeof CONVERSATION_CHOICE_INTENTS)[number];
 
+/** Player-facing presentation of one resident's opinion during an M3R run. */
+export const COARSE_STANCES = ["oppose", "uncertain", "vouch"] as const;
+
+export type CoarseStance = (typeof COARSE_STANCES)[number];
+
+/** Provider-declared hearing basis, checked against actual run-owned memories. */
+export const HEARING_CONTACT_BASES = [
+  "meaningful_firsthand",
+  "limited_firsthand",
+  "never_conversed",
+] as const;
+
+export type HearingContactBasis = (typeof HEARING_CONTACT_BASES)[number];
+
 export interface ConversationTurnSignal {
   conversationId: string;
   turnId: string;

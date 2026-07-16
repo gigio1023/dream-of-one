@@ -1,0 +1,35 @@
+{
+  "defaultPresentationId": "ko",
+  "locales": [
+    {
+      "presentationId": "ko",
+      "apiLocale": "ko-KR",
+      "labelKey": "hud.language.ko"
+    },
+    {
+      "presentationId": "en",
+      "apiLocale": "en-US",
+      "labelKey": "hud.language.en"
+    },
+    {
+      "presentationId": "it",
+      "apiLocale": "it-IT",
+      "labelKey": "hud.language.it"
+    },
+    {
+      "presentationId": "zh",
+      "apiLocale": "zh-CN",
+      "labelKey": "hud.language.zh"
+    },
+    {
+      "presentationId": "fr",
+      "apiLocale": "fr-FR",
+      "labelKey": "hud.language.fr"
+    },
+    {
+      "presentationId": "ja",
+      "apiLocale": "ja-JP",
+      "labelKey": "hud.language.ja"
+    }
+  ]
+}

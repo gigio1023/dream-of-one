@@ -7,7 +7,9 @@ extends Node
 signal request_released
 
 const DEFAULT_TIMEOUT_SECONDS := 8.0
-const DEFAULT_POOL_SIZE := 2
+# One foreground request stays available while the client permits one opening
+# preload and one ambient decision to wait on provider work.
+const DEFAULT_POOL_SIZE := 3
 
 var _base_url := "http://127.0.0.1:8787"
 var _configuration_error := ""

@@ -1,53 +1,551 @@
 import type { z } from "zod";
 import {
-  agentStepProposalJsonSchema,
-  agentStepProposalSchema,
-  conversationJudgmentJsonSchema,
-  conversationJudgmentSchema,
-  conversationProposalJsonSchema,
-  conversationProposalSchema,
+  ambientReplyJudgmentJsonSchemaForTarget,
+  ambientReplyJudgmentSchemaForRequest,
+  agentStepProposalJsonSchemaForTools,
+  agentStepProposalSchemaForRequest,
+  conversationJudgmentJsonSchemaForLocale,
+  conversationJudgmentSchemaForLocale,
+  conversationProposalJsonSchemaForRequest,
+  conversationProposalSchemaForRequest,
+  hearingJudgmentJsonSchemaForRequest,
+  hearingJudgmentSchemaForRequest,
+  mergedConversationTurnJsonSchemaForRequest,
+  mergedConversationTurnSchemaForRequest,
+  TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
+  type AgentStepRecordContracts,
 } from "./envelope.js";
+import {
+  providerLanguageName,
+  requireSupportedGameplayLocale,
+  supportedLocaleEntry,
+} from "../localization/supported-locales.js";
+import type { ToolName } from "../agentloop/tools.js";
+import type { ObservePacket } from "../agentloop/context.js";
+import { ProviderBudgetReservedError, ProviderFailureError } from "./ports.js";
 import type {
+  AmbientReplyJudgment,
+  AmbientReplyRequest,
   AgentStepProposal,
   AgentStepRequest,
   ConversationJudgment,
   ConversationJudgmentRequest,
   ConversationProposal,
   ConversationTurnRequest,
+  HearingJudgment,
+  HearingJudgmentRequest,
+  MergedConversationTurn,
+  MergedConversationTurnRequest,
   NpcProposalPort,
   ProposalMeta,
+  ProviderAuditSnapshot,
+  ProviderCallAudit,
   ProviderFailureReason,
+  ProviderResolutionAudit,
+  ProviderResolutionPurpose,
   ProviderUsage,
   ResolvedProposal,
   TextGenPort,
   TextGenRequest,
+  TextGenResult,
 } from "./ports.js";
 
-const TOOL_GUIDE = `
-Tool argument guide:
-- move_to: {targetId}
-- look: {targetId}
-- talk_to: {actorId}, with optional utterance at envelope level
-- wait: {reason}
-- use_object: {objectId,toState,ledgerKind,whyLine,economyDelta?}
-- write_record: {objectId?,toState?,ledgerKind,record,citedLedgerEventId?,whyLine,economyDelta?}
-- read_record: {recordId}
-- request: {targetActorId,action,whyLine?}
-Only use actors, objects, records, and tool names present in the observe packet.`;
+const TOOL_ARGUMENT_GUIDES: Record<Exclude<ToolName, "write_record" | "read_record">, readonly string[]> = {
+  move_to: [
+    '- move_to: {targetId}; when playerContact.available is true, targetId="player" means choosing one NPC-initiated approach',
+  ],
+  look: ["- look: {targetId}"],
+  talk_to: ["- talk_to: {actorId}, with optional utterance at envelope level"],
+  wait: ["- wait: {reason}"],
+  use_object: ["- use_object: {objectId,toState,ledgerKind,whyLine}"],
+  request: ["- request: {targetActorId,action,whyLine}"],
+};
+
+const RECORD_TOOL_ARGUMENT_GUIDES = {
+  write_record: {
+    legacy: [
+      "- write_record (legacy world path): {objectId|null,toState|null,ledgerKind,record,citedLedgerEventId|null,whyLine}",
+    ],
+    m3r: [
+      "- write_record (M3R administrativeAuthority): {recordKind,sourceMemoryId,stateBody,whyLine,institutionalPressureDelta,textSurfaceId,recordId?,openQuestion}",
+      "- M3R write_record openQuestion is required and either null or {status,text,whyLine}. Author it only when the action creates a concrete in-world question for the visitor; never fill it mechanically.",
+    ],
+  },
+  read_record: {
+    legacy: ["- read_record (legacy world path): {recordId}"],
+    m3r: [
+      "- read_record (M3R administrativeAuthority): {recordId,whyLine,institutionalPressureDelta,openQuestion}; source memory is runtime-derived",
+      "- M3R read_record openQuestion is required and either null or {status,text,whyLine}. Author it only when the action creates or resolves a concrete in-world question for the visitor; never fill it mechanically.",
+    ],
+  },
+} as const;
+
+const M3R_INSTITUTIONAL_PRESSURE_GUIDE =
+  "- M3R institutionalPressureDelta must be an integer from -25 through 25: negative lowers institutional pressure, zero leaves it unchanged, and positive raises it. Judge both direction and magnitude from the supplied evidence; no direction is preferred. One independent non-record source may create positive pressure only once across its read/write lineage, so relaying the same evidence does not mint new positive pressure.";
+
+const REACHABLE_SUSPICION_DELTA_GUIDE =
+  "The schema's suspicionDelta minimum and maximum are hard inclusive bounds that override calibration. At score 0, reassurance uses delta 0, not a negative; at 125, worsening uses 0, not a positive. Make whyLine match the reachable movement.";
+
+function suspicionDeltaBounds(suspicionBefore: number): {
+  minimum: number;
+  maximum: number;
+} {
+  return {
+    minimum: suspicionBefore === 0 ? 0 : -suspicionBefore,
+    maximum: 125 - suspicionBefore,
+  };
+}
+
+function withSuspicionDeltaBounds(
+  schema: Record<string, unknown>,
+  suspicionBefore: number,
+): Record<string, unknown> {
+  const boundedSchema = structuredClone(schema);
+  const properties = boundedSchema.properties as Record<string, unknown>;
+  const suspicionDelta = properties.suspicionDelta as Record<string, unknown>;
+  const bounds = suspicionDeltaBounds(suspicionBefore);
+  properties.suspicionDelta = {
+    ...suspicionDelta,
+    minimum: bounds.minimum,
+    maximum: bounds.maximum,
+  };
+  return boundedSchema;
+}
+
+function requireReachableSuspicionDelta(
+  value: { suspicionDelta: number },
+  context: z.RefinementCtx,
+  suspicionBefore: number,
+): void {
+  const bounds = suspicionDeltaBounds(suspicionBefore);
+  const suspicionAfter = suspicionBefore + value.suspicionDelta;
+  if (suspicionAfter >= 0 && suspicionAfter <= 125) return;
+  context.addIssue({
+    code: "custom",
+    path: ["suspicionDelta"],
+    message:
+      `suspicionDelta must be within ${bounds.minimum}..${bounds.maximum} from current score ${suspicionBefore}`,
+  });
+}
+
+function recordContractsForRequest(
+  request: AgentStepRequest,
+  tools: readonly ToolName[],
+): AgentStepRecordContracts {
+  const packet = request.observePacket;
+  const contracts: AgentStepRecordContracts = {};
+  if (tools.includes("write_record")) {
+    const hasRunWriteAuthority =
+      packet.administrativeSources.length > 0 &&
+      packet.administrativeAuthority.allowedRecordKinds.length > 0 &&
+      packet.administrativeAuthority.writableTextSurfaceIds.length > 0;
+    contracts.write_record = hasRunWriteAuthority ? "m3r" : "legacy";
+  }
+  if (tools.includes("read_record")) {
+    const hasRunRecordRevision = packet.visibleRecords.some(record =>
+      Number.isInteger(record.recordRevision) &&
+      typeof record.authorActorId === "string" &&
+      record.authorActorId.length > 0 &&
+      typeof record.textSurfaceId === "string" &&
+      record.textSurfaceId.length > 0
+    );
+    contracts.read_record =
+      packet.administrativeAuthority.allowedRecordKinds.length > 0 && hasRunRecordRevision
+        ? "m3r"
+        : "legacy";
+  }
+  return contracts;
+}
+
+function toolGuideForTools(
+  tools: readonly ToolName[],
+  recordContracts: AgentStepRecordContracts,
+): string {
+  const offered = [...new Set(tools)];
+  const usesM3rPressure = offered.some(tool =>
+    (tool === "write_record" || tool === "read_record") && recordContracts[tool] === "m3r"
+  );
+  return [
+    "Tool argument guide for the currently offered branches:",
+    ...offered.flatMap(tool => {
+      if (tool === "write_record" || tool === "read_record") {
+        const contract = recordContracts[tool];
+        if (!contract) throw new Error(`agent-step guide requires a ${tool} contract`);
+        return RECORD_TOOL_ARGUMENT_GUIDES[tool][contract];
+      }
+      return TOOL_ARGUMENT_GUIDES[tool];
+    }),
+    ...(usesM3rPressure ? [M3R_INSTITUTIONAL_PRESSURE_GUIDE] : []),
+    "Only use actors, objects, records, and tool names present in the observe packet.",
+  ].join("\n");
+}
+
+interface SanitizedValidationIssue {
+  path: string;
+  code: string;
+  message: string;
+}
+
+interface ProviderRepairValidationIssue {
+  path: string;
+  message: string;
+  offendingLatinTokens?: string[];
+}
+
+function sanitizeDiagnosticText(value: string): string {
+  return value
+    .replace(/[\u0000-\u001f\u007f-\u009f]/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+}
+
+function outputStringFragments(text: string): string[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return [];
+  }
+  const fragments = new Set<string>();
+  const visit = (value: unknown): void => {
+    if (typeof value === "string") {
+      const fragment = sanitizeDiagnosticText(value);
+      if (fragment.length > 0) fragments.add(fragment);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (value && typeof value === "object") {
+      Object.entries(value as Record<string, unknown>).forEach(([key, entry]) => {
+        const fragment = sanitizeDiagnosticText(key);
+        if (fragment.length > 0) fragments.add(fragment);
+        visit(entry);
+      });
+    }
+  };
+  visit(parsed);
+  return [...fragments].sort((left, right) => right.length - left.length);
+}
+
+function sanitizedValidationIssues(
+  error: z.ZodError,
+  sensitiveFragments: readonly string[],
+): SanitizedValidationIssue[] {
+  return error.issues.map(issue => {
+    let message = sanitizeDiagnosticText(issue.message);
+    for (const fragment of sensitiveFragments) {
+      message = message.split(fragment).join("[redacted]");
+    }
+    return {
+      path: issue.path.join("."),
+      code: issue.code,
+      message: [...message].slice(0, 240).join(""),
+    };
+  });
+}
+
+function providerRepairValidationIssue(issue: z.ZodIssue): ProviderRepairValidationIssue {
+  const base = {
+    path: issue.path.join("."),
+    message: issue.message,
+  };
+  if (issue.code !== "custom") return base;
+  const tokens = issue.params?.offendingLatinTokens;
+  if (
+    !Array.isArray(tokens) ||
+    !tokens.every(token => typeof token === "string" && token.length > 0)
+  ) {
+    return base;
+  }
+  return { ...base, offendingLatinTokens: [...tokens] };
+}
+
+const PRIVATE_ACTOR_CONTEXT_GUIDE =
+  "actorContext and selfContext describe only this resident's authored identity, voice, private motivation, and holder-local relationship knowledge. They may shape tone, priorities, and questions, but they are not observations or evidence about the player. Treat only supplied memories, heard speech, visible records, and visible facts as evidence, and never reveal a private pressure unless this resident deliberately chooses to speak about it in-fiction.";
+const CONVERSATION_PARTICIPANT_GUIDE =
+  "conversationFrame is authoritative about participation and location. The residentSpeaker is the only NPC speaking now, and the playerInterlocutor is always the person being addressed; every other actor named in residentContext, attributedHeardSpeech, or memoryEvidence is a third party, never the player. residentSpeaker.locationId belongs only to the resident. The player's location is known only when playerInterlocutor.locationId is non-null; never copy or infer the resident's location as the player's location. For an opening, write one fresh line addressed to the player. Prior resident speech and attributed NPC-to-NPC speech are evidence only: never replay either as if it were the resident's new opening line.";
+const CONVERSATION_VISIBLE_FACT_GUIDE =
+  "The groundingContract is a hard validity boundary for NPC speech, judgment reasons, questions, and every concrete claim about the player or world; it is not a style suggestion. Missing context means unknown, never absent. The resident's public role may ground generic job topics and ordinary capabilities when phrased without a concrete claim: a receptionist may conditionally ask whether the visit concerns a schedule or paperwork and may offer general reception guidance. It does not establish that this visitor has an appointment, that a particular document or record exists, or that anything was checked, missing, required, approved, owned, received, or completed. objective, goals, policy, and private motivation explain priorities but are not evidence of those concrete facts. A question can still make an invalid presupposition: 'Who arranged this appointment?' and localized equivalents assert that the interlocutor has an appointment, so they are invalid until the player or visible evidence establishes one. Ask the purpose first; only after the player establishes a concrete schedule, booking, document, or procedure may the resident narrow its source or details. The NPC may ask a neutral or conditional question about an unknown, but must not claim a specific record or item exists, was checked, is missing, is required, or belongs to anyone. Suggested player replies are different: they are uncommitted possible utterances, not observations, world facts, or statements the player has already made. safe/local is the least exposing plausible answer and may use a modest cover claim; uncertain/repair may hedge, qualify, or expose uncertainty; risky/weird may offer a bolder unsupported cover claim or lie so the player can choose that social risk. Never use any candidate suggestion as evidence in the NPC utterance, whyLine, openQuestion, or another suggestion, and never imply that it was selected. Each suggestion must be a self-contained in-character utterance that can be spoken verbatim: never narrate what the player says or label the speaker, and explicitly preserve the person, object, source, or claim being answered whenever omission could make a role, name, or noun phrase sound like the player's own identity or possession. Never emit a bare name, role, object, yes/no fragment, or copular noun phrase whose referent exists only in the NPC question.";
+const CONVERSATION_REPLY_BINDING_GUIDE =
+  "Interpret playerLine as a direct answer to answerBinding.answeredNpcLine, not as an isolated sentence. Preserve the semantic slot and referent established by that NPC question. Ellipsis in a displayed or typed answer fills the requested slot; it does not become a claim about the player's identity, job, possession, or biography unless the player explicitly says so. Judge the contextual proposition that the two lines express together.";
+const CONVERSATION_GROUNDING_SELF_CHECK =
+  "Before final JSON, silently perform this grounding check: (1) in NPC speech, why-lines, open questions, and every concrete world claim, identify each person-specific appointment, booking, required step, document, record, reference number, possession, past action, and claimed access to a specific institutional resource; (2) locate the exact supplied scene fact, player statement, visible fact, record, heard line, or memory that supports it; (3) if no support exists, make the NPC wording generic or conditional without claiming the fact applies to this visitor; (4) inspect suggestions separately as uncommitted literal candidate speech, make their relative social risk legible, and ensure no other field treats any suggestion as selected or true. A statement that the visitor wants to confirm steps before a hearing establishes that purpose and the hearing, but not a concrete appointment, reference number, notice, dossier, paperwork, visitor record, or a completed check.";
+
+function latestNpcLine(
+  history: readonly { speakerId: string; line: string }[],
+): string | null {
+  return [...history].reverse().find(entry => entry.speakerId !== "player")?.line ?? null;
+}
+
+function conversationGroundingContract(
+  request:
+    | ConversationTurnRequest
+    | ConversationJudgmentRequest
+    | MergedConversationTurnRequest,
+  newestPlayerLine?: string,
+) {
+  const playerStatements = request.conversationHistory
+    .filter(line => line.speakerId === "player")
+    .map(line => line.line);
+  if (newestPlayerLine !== undefined) playerStatements.push(newestPlayerLine);
+  const heardSpeech = [...request.observePacket.heardSpeech];
+  if (newestPlayerLine !== undefined) {
+    const duplicateIndex = heardSpeech.lastIndexOf(newestPlayerLine);
+    if (duplicateIndex >= 0) heardSpeech.splice(duplicateIndex, 1);
+  }
+  return {
+    knowledgeMode: "closed_world",
+    suppliedSceneContext: "sceneFacts" in request ? request.sceneFacts : [],
+    suppliedPlayerStatements: playerStatements,
+    visibleObjectFacts: request.observePacket.visibleObjects.map(object => ({
+      label: object.label,
+      state: object.state,
+    })),
+    visibleRecordFacts: request.observePacket.visibleRecords.map(record => ({
+      recordId: record.recordId,
+      kind: record.kind,
+      stateBody: record.stateBody,
+      recordRevision: record.recordRevision,
+    })),
+    attributedHeardSpeech: heardSpeech.map(line => {
+      const attributedNpcSpeech = /^(NPC_[A-Za-z0-9_]+):\s+([\s\S]+)$/.exec(line);
+      if (attributedNpcSpeech) {
+        return {
+          sourceType: "third_party_npc" as const,
+          speakerActorId: attributedNpcSpeech[1],
+          line: attributedNpcSpeech[2],
+        };
+      }
+      return {
+        sourceType: "player" as const,
+        speakerActorId: "player" as const,
+        line,
+      };
+    }),
+    validityRules: [
+      "Treat every unlisted person, identity, role, item, document, record, approval, appointment, possession, and past event as unknown.",
+      "Do not convert unknown into absent, missing, checked, expected, owned, received, or completed.",
+      "A public role may support generic job topics and ordinary capabilities, but objectives, goals, and private context do not establish that a concrete procedure, register entry, required document, appointment, approval, or next step exists for this visitor.",
+      "A question must not presuppose an unknown fact: asking who arranged 'this appointment' is invalid until the player or visible evidence establishes that an appointment exists and concerns the player.",
+      "Generic role guidance may be offered conditionally, but do not state that the resident checked or can access a specific unsupplied record, document, system, or institutional resource.",
+      "Suggested replies are uncommitted candidate speech, not evidence: safe/local is least exposing, uncertain/repair may hedge, and risky/weird may offer a bolder cover claim or lie. Only the one the player selects or types becomes a supplied player statement.",
+      "Attributed heard speech is prior evidence, not a line in the current player conversation; preserve its named speaker and never present it as the resident's new utterance.",
+    ],
+  };
+}
+
+function residentProviderContext(packet: ObservePacket) {
+  return {
+    actorId: packet.actorId,
+    role: packet.role,
+    landmarkId: packet.landmarkId,
+    goals: packet.goals,
+    actorPolicy: packet.actorPolicy,
+    actorContext: packet.actorContext,
+    selfContext: packet.selfContext,
+    memoryNotes: packet.actorMemory.ownActionNotes,
+  };
+}
+
+function conversationMemoryEvidence(packet: ObservePacket) {
+  return packet.actorMemory.ownActionNotes.map(note => {
+    const heard = /^\[heard_from=([^\]]+)\]\s*([\s\S]*)$/.exec(note);
+    if (heard) {
+      return {
+        evidenceType: "heard_third_party_npc" as const,
+        speakerActorId: heard[1],
+        note: heard[2],
+      };
+    }
+    const selfUtterance = /^\[self_utterance\]\s*([\s\S]*)$/.exec(note);
+    if (selfUtterance) {
+      return {
+        evidenceType: "resident_prior_utterance" as const,
+        speakerActorId: packet.actorId,
+        note: selfUtterance[1],
+      };
+    }
+    if (note.startsWith("[player_utterance]")) {
+      const exchange = /^\[player_utterance\]\s*([\s\S]*?)\s*\/\s*\[self_reply\]\s*([\s\S]*?)\s*\/\s*\[judgment_reason\]\s*([\s\S]*)$/.exec(note);
+      if (exchange) {
+        return {
+          evidenceType: "player_conversation_exchange" as const,
+          playerSpeakerActorId: "player" as const,
+          residentSpeakerActorId: packet.actorId,
+          playerLine: exchange[1],
+          residentReply: exchange[2],
+          judgmentReason: exchange[3],
+        };
+      }
+      return {
+        evidenceType: "player_conversation_exchange" as const,
+        playerSpeakerActorId: "player" as const,
+        residentSpeakerActorId: packet.actorId,
+        note,
+      };
+    }
+    return {
+      evidenceType: "resident_memory" as const,
+      holderActorId: packet.actorId,
+      note,
+    };
+  });
+}
+
+function conversationResidentContext(packet: ObservePacket) {
+  const { landmarkId: _landmarkId, memoryNotes: _memoryNotes, ...resident } =
+    residentProviderContext(packet);
+  return {
+    ...resident,
+    memoryEvidence: conversationMemoryEvidence(packet),
+    presentActorIds: packet.visibleActors,
+    audibleActorIds: packet.audibleActorIds,
+  };
+}
+
+function conversationFrame(
+  packet: ObservePacket,
+  phase: "opening" | "player_reply",
+) {
+  const playerLocationId = packet.playerContact?.available
+    ? packet.playerContact.playerLocationId
+    : null;
+  return {
+    phase,
+    residentSpeaker: {
+      actorId: packet.actorId,
+      role: packet.role,
+      locationId: packet.landmarkId,
+    },
+    playerInterlocutor: {
+      actorId: "player" as const,
+      role: "player" as const,
+      locationId: playerLocationId,
+      locationBasis: playerLocationId !== null
+        ? "engine_grounded_player_contact"
+        : phase === "player_reply"
+          ? "active_face_to_face_location_not_supplied"
+          : "not_supplied_for_opening",
+    },
+    thirdPartyActorIds: [...new Set([
+      ...packet.visibleActors,
+      ...packet.audibleActorIds,
+    ].filter(actorId => actorId !== packet.actorId && actorId !== "player"))],
+  };
+}
+
+function agentObserveContext(packet: ObservePacket, tools: readonly ToolName[]) {
+  const toolSet = new Set(tools);
+  const needsActors =
+    toolSet.has("move_to") ||
+    toolSet.has("look") ||
+    toolSet.has("talk_to") ||
+    toolSet.has("request");
+  const needsObjects = toolSet.has("look") || toolSet.has("use_object");
+  const needsRecords =
+    toolSet.has("look") || toolSet.has("read_record") || toolSet.has("write_record");
+  const needsAdministration = toolSet.has("read_record") || toolSet.has("write_record");
+  return {
+    resident: residentProviderContext(packet),
+    heardSpeech: packet.heardSpeech,
+    ...(needsActors
+      ? {
+          visibleActorIds: packet.visibleActors,
+          audibleActorIds: packet.audibleActorIds,
+        }
+      : {}),
+    ...(toolSet.has("move_to")
+      ? {
+          reachableAnchorRefs: packet.reachableAnchorRefs,
+          playerContact: packet.playerContact,
+        }
+      : {}),
+    ...(needsObjects ? { visibleObjects: packet.visibleObjects } : {}),
+    ...(needsRecords ? { visibleRecords: packet.visibleRecords } : {}),
+    ...(toolSet.has("use_object") || needsAdministration
+      ? { visibleLedgerEvents: packet.visibleLedgerEvents }
+      : {}),
+    ...(needsAdministration
+      ? {
+          administrativeSources: packet.administrativeSources,
+          administrativeAuthority: packet.administrativeAuthority,
+        }
+      : {}),
+  };
+}
+
+function ambientListenerContext(request: AmbientReplyRequest) {
+  const heardSpeech = [...request.observePacket.heardSpeech];
+  const exactSource = `${request.sourceSpeakerActorId}: ${request.sourceUtterance}`;
+  const duplicateIndex = heardSpeech.lastIndexOf(exactSource);
+  if (duplicateIndex >= 0) heardSpeech.splice(duplicateIndex, 1);
+  return {
+    ...residentProviderContext(request.observePacket),
+    presentActorIds: request.observePacket.visibleActors,
+    audibleActorIds: request.observePacket.audibleActorIds,
+    otherHeardSpeech: heardSpeech,
+  };
+}
+
+function localeOutputInstructions(locale: string, fields: string): string[] {
+  const supportedLocale = requireSupportedGameplayLocale(locale);
+  const instructions = [
+    `The immutable run locale is ${supportedLocale}. Write ${fields} in ${providerLanguageName(supportedLocale)}.`,
+    "Stay entirely inside the fiction. Never call anyone a player, user, or NPC, and never mention a game, AI, language model, prompt, system message, provider, or model response in player-visible prose.",
+    "Keep stable ids, intent labels, tool names, and tool argument keys unchanged in machine-readable fields; never copy stable ids into player-visible text.",
+  ];
+  if (supportedLocaleEntry(supportedLocale).presentationId === "ko") {
+    instructions.push(
+      "Write natural Korean prose in every player-visible text field, and include at least one Hangul code point in each nonempty field.",
+      "Latin-script names, established in-fiction acronyms such as QR or ID, numerals, and occasional Hanja are allowed when natural, but they cannot replace Korean prose. Never mix Japanese hiragana or katakana, Simplified Chinese forms, or Chinese function words and clauses into Korean player-visible text.",
+      "Do not copy lowercase Latin place, role, or name tokens from machine-readable context into player-visible prose. Render public labels in Korean—for example Studio as 스튜디오, Office as 사무실, Station as 스테이션, and Park as 공원—and transliterate non-acronym names when needed.",
+    );
+  }
+  return instructions;
+}
+
+function playerVisibleOutputContract(locale: string) {
+  const supportedLocale = requireSupportedGameplayLocale(locale);
+  return {
+    immutableRunLocale: supportedLocale,
+    requiredLanguage: providerLanguageName(supportedLocale),
+    sourceContextHandling:
+      "Actor and scenario context may be authored in another language. Preserve its meaning and voice, but translate or naturally re-express it; never copy source-language prose into a player-visible field unless it already matches requiredLanguage.",
+    finalCheck:
+      "Before returning JSON, reread every player-visible field and rewrite any field that is not wholly natural in requiredLanguage.",
+  };
+}
 
 interface SessionBudget {
   calls: number;
   inputTokens: number;
   outputTokens: number;
+  reservedTokens: number;
 }
+
+interface ProviderAuditState {
+  nextCallSeq: number;
+  nextResolutionSeq: number;
+  inFlight: Map<number, number>;
+  calls: ProviderCallAudit[];
+  resolutions: ProviderResolutionAudit[];
+  droppedCount: number;
+}
+
+type ProviderBudgetAdmission = "admitted" | "hard_exhausted" | "caller_reserved";
+
+const MAX_AUDIT_RESOLUTIONS = 256;
+const HEARING_PROVIDER_TIMEOUT_MS = 120_000;
 
 export interface ProviderServiceOptions {
   profileId: string;
   textGen: TextGenPort;
-  fallback: NpcProposalPort;
   timeoutMs?: number;
   maxCallsPerSession?: number;
   maxTokensPerSession?: number;
+  maxOutputTokensPerCall?: number;
 }
 
 export class ProviderService implements NpcProposalPort {
@@ -55,204 +553,718 @@ export class ProviderService implements NpcProposalPort {
   private readonly timeoutMs: number;
   private readonly maxCalls: number;
   private readonly maxTokens: number;
+  private readonly maxOutputTokensPerCall: number;
   private readonly budgets = new Map<string, SessionBudget>();
+  private readonly audits = new Map<string, ProviderAuditState>();
 
   constructor(private readonly options: ProviderServiceOptions) {
     this.profileId = options.profileId;
     this.timeoutMs = options.timeoutMs ?? 2500;
     this.maxCalls = options.maxCallsPerSession ?? 50;
     this.maxTokens = options.maxTokensPerSession ?? 50_000;
+    this.maxOutputTokensPerCall = options.maxOutputTokensPerCall ?? 1_000;
   }
 
   preflight(): Promise<{ available: boolean; reason?: ProviderFailureReason }> {
     return this.options.textGen.preflight();
   }
 
+  releaseScope(scopeId: string): void {
+    const inFlight = this.audits.get(scopeId)?.inFlight.size ?? 0;
+    if (inFlight > 0) {
+      throw new Error(`cannot release provider scope with ${inFlight} transport call(s) in flight`);
+    }
+    this.budgets.delete(scopeId);
+    this.audits.delete(scopeId);
+  }
+
+  accountingSnapshot(scopeId: string): { callsUsed: number; tokensUsed: number } {
+    const budget = this.budgetFor(scopeId);
+    return {
+      callsUsed: budget.calls,
+      tokensUsed: budget.inputTokens + budget.outputTokens + budget.reservedTokens,
+    };
+  }
+
+  auditSnapshot(scopeId: string): ProviderAuditSnapshot {
+    const budget = this.budgetFor(scopeId);
+    const audit = this.auditFor(scopeId);
+    const inFlightTokens = [...audit.inFlight.values()].reduce(
+      (total, reservedTokens) => total + reservedTokens,
+      0,
+    );
+    const inFlightCalls = audit.inFlight.size;
+    const resolvedCallSeqs = new Set(
+      audit.resolutions.flatMap(resolution => resolution.callSeqs),
+    );
+    return {
+      callsUsed: budget.calls,
+      tokensUsed: budget.inputTokens + budget.outputTokens + budget.reservedTokens,
+      inFlightCalls,
+      inFlightTokens,
+      complete:
+        audit.droppedCount === 0 &&
+        inFlightCalls === 0 &&
+        audit.calls.every(call => resolvedCallSeqs.has(call.seq)),
+      truncated: audit.droppedCount > 0,
+      droppedCount: audit.droppedCount,
+      calls: structuredClone(audit.calls).sort((first, second) => first.seq - second.seq),
+      resolutions: structuredClone(audit.resolutions).sort(
+        (first, second) => first.seq - second.seq,
+      ),
+    };
+  }
+
   async proposeConversationTurn(
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>> {
+    const visibleRecordIds = request.observePacket.visibleRecords.map(record => record.recordId);
+    const proposalSchema = conversationProposalSchemaForRequest(
+      request.locale,
+      visibleRecordIds,
+    );
+    const proposalJsonSchema = conversationProposalJsonSchemaForRequest(
+      request.locale,
+      visibleRecordIds,
+    );
     const instructions = [
-      "You are an NPC inside Dream of One, a Korean social-suspicion game.",
-      "Write in Korean. Stay in role and use only visible context.",
-      "Use natural modern Korean only in player-visible text; do not mix English, Chinese characters, or other scripts.",
-      "Return one NPC utterance and exactly three short player reply suggestions.",
-      "The reply intent labels shape variety only; they never decide suspicion or game truth.",
+      "You are the resident described in requestContext. Speak and reason only from inside that resident's world.",
+      "Stay in role and use only visible context.",
+      CONVERSATION_PARTICIPANT_GUIDE,
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
+      CONVERSATION_VISIBLE_FACT_GUIDE,
+      ...localeOutputInstructions(
+        request.locale,
+        "the resident utterance and all three visitor reply suggestions",
+      ),
+      "Return one resident utterance and exactly three short visitor reply suggestions.",
+      "citedRecordIds must contain every currently visible record whose content the resident utterance meaningfully conveys, and no other id. Use [] when the utterance cites no record. The reply suggestions must not introduce resident-only record content absent from the resident utterance or prior visitor speech.",
+      "Use the intent labels only as a relative social-risk gradient: safe/local is the least exposing plausible answer, uncertain/repair hedges or clarifies, and risky/weird may offer a bolder cover claim or lie. They are hidden candidate metadata and never decide suspicion or world truth.",
       "Do not claim a verdict, hidden fact, or world mutation.",
+      CONVERSATION_GROUNDING_SELF_CHECK,
+      "Before returning JSON, remove every unsupported concrete world claim from resident-authored speech and questions. Do not erase a candidate cover claim; keep it clearly confined to that unselected suggestion.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
-    const input = JSON.stringify({
+    const requestContext = {
       objective: request.objective,
-      sceneFacts: request.sceneFacts,
-      actor: request.observePacket,
+      conversationFrame: conversationFrame(request.observePacket, "opening"),
+      residentContext: conversationResidentContext(request.observePacket),
       conversationHistory: request.conversationHistory.slice(-6),
-      beatId: request.beatId,
-      locale: request.locale,
-    });
-    const resolved = await this.generateValidated({
+      groundingContract: conversationGroundingContract(request),
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
+    };
+    const input = JSON.stringify(requestContext);
+    return this.resolveValidated<ConversationProposal>({
       sessionId: request.sessionId,
       request: {
         purpose: "conversation",
         instructions,
         input,
         schemaName: "npc_conversation_turn",
-        jsonSchema: conversationProposalJsonSchema,
+        jsonSchema: proposalJsonSchema,
       },
-      schema: conversationProposalSchema,
+      schema: proposalSchema,
+      repairContext: requestContext,
     });
-    if (resolved.ok) {
-      return { proposal: resolved.value, meta: resolved.meta };
-    }
-    return this.withFallbackReason(
-      await this.options.fallback.proposeConversationTurn(request),
-      resolved.reason,
-    );
   }
 
   async judgeConversationTurn(
     request: ConversationJudgmentRequest,
   ): Promise<ResolvedProposal<ConversationJudgment>> {
+    const proposalSchema = conversationJudgmentSchemaForLocale(request.locale).superRefine(
+      (value, context) => requireReachableSuspicionDelta(
+        value,
+        context,
+        request.suspicionBefore,
+      ),
+    );
+    const proposalJsonSchema = withSuspicionDeltaBounds(
+      conversationJudgmentJsonSchemaForLocale(request.locale),
+      request.suspicionBefore,
+    );
     const instructions = [
-      "You are the judging mind of one NPC inside Dream of One, a Korean social-suspicion game.",
-      "Read the player's newest line and decide how it moves this NPC's suspicion and report pressure.",
+      "You are the judging mind of the resident described in requestContext. Reason only from inside that resident's world.",
+      "Read the visitor's newest line and decide how it moves this resident's suspicion and report pressure.",
       "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
-      "Both scores use a 0..125 game scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
+      CONVERSATION_PARTICIPANT_GUIDE,
+      CONVERSATION_REPLY_BINDING_GUIDE,
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
+      CONVERSATION_VISIBLE_FACT_GUIDE,
+      "Both scores use an internal 0..125 scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
+      REACHABLE_SUSPICION_DELTA_GUIDE,
       "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
       "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
       "List the signal labels that genuinely apply; an ordinary answer has none.",
-      "whyLine is one in-world Korean sentence the player will read as the reason suspicion moved.",
-      "Use natural modern Korean only in whyLine; do not mix English, Chinese characters, or other scripts.",
+      "whyLine is one in-world sentence stating the resident's reason for the suspicion movement. Refer to the interlocutor as the visitor or by an in-world role, never as a player or user.",
+      ...localeOutputInstructions(request.locale, "whyLine"),
       "Do not decide any verdict or session outcome.",
+      CONVERSATION_GROUNDING_SELF_CHECK,
       "Return only JSON matching the supplied schema.",
     ].join(" ");
-    const input = JSON.stringify({
+    const requestContext = {
       playerLine: request.playerLine,
       conversationHistory: request.conversationHistory.slice(-10),
-      actor: request.observePacket,
+      answerBinding: {
+        answeredNpcLine: latestNpcLine(request.conversationHistory),
+      },
+      conversationFrame: conversationFrame(request.observePacket, "player_reply"),
+      residentContext: conversationResidentContext(request.observePacket),
       suspicionBefore: request.suspicionBefore,
       reportPressureBefore: request.reportPressureBefore,
-      beatId: request.beatId,
-      locale: request.locale,
-    });
-    const resolved = await this.generateValidated({
+      groundingContract: conversationGroundingContract(request, request.playerLine),
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
+    };
+    const input = JSON.stringify(requestContext);
+    return this.resolveValidated<ConversationJudgment>({
       sessionId: request.sessionId,
       request: {
         purpose: "conversation",
         instructions,
         input,
         schemaName: "npc_conversation_judgment",
-        jsonSchema: conversationJudgmentJsonSchema,
+        jsonSchema: proposalJsonSchema,
       },
-      schema: conversationJudgmentSchema,
+      schema: proposalSchema,
+      repairContext: requestContext,
     });
-    if (resolved.ok) {
-      return { proposal: resolved.value, meta: resolved.meta };
-    }
-    return this.withFallbackReason(
-      await this.options.fallback.judgeConversationTurn(request),
-      resolved.reason,
+  }
+
+  async judgeAndProposeConversationTurn(
+    request: MergedConversationTurnRequest,
+  ): Promise<ResolvedProposal<MergedConversationTurn>> {
+    const visibleRecordIds = request.observePacket.visibleRecords.map(record => record.recordId);
+    const continuationAllowed = request.continuationAllowed !== false;
+    const proposalSchema = mergedConversationTurnSchemaForRequest(
+      request.locale,
+      visibleRecordIds,
+    )
+      .superRefine(
+        (value, context) => requireReachableSuspicionDelta(
+          value,
+          context,
+          request.suspicionBefore,
+        ),
+      )
+      .superRefine((value, context) => {
+        if (request.currentOpenQuestion != null && value.openQuestion == null) {
+          context.addIssue({
+            code: "custom",
+            path: ["openQuestion"],
+            message:
+              "a tracked currentOpenQuestion requires one complete open or resolved question object",
+          });
+        }
+        if (!continuationAllowed && value.continueConversation) {
+          context.addIssue({
+            code: "custom",
+            path: ["continueConversation"],
+            message: "continueConversation must be false when continuationAllowed is false",
+          });
+        }
+        if (
+          continuationAllowed &&
+          value.stance !== "vouch" &&
+          value.openQuestion?.status === "open" &&
+          !value.continueConversation
+        ) {
+          context.addIssue({
+            code: "custom",
+            path: ["continueConversation"],
+            message:
+              "an uncertain or opposing open question must continue immediately while capacity remains",
+          });
+        }
+      });
+    const proposalJsonSchema = withSuspicionDeltaBounds(
+      mergedConversationTurnJsonSchemaForRequest(request.locale, visibleRecordIds),
+      request.suspicionBefore,
     );
+    const instructions = [
+      "You are the resident described in requestContext. Speak and reason only from inside that resident's world.",
+      "In one response, judge the visitor's newest line AND write your next spoken reply with exactly three short visitor reply suggestions.",
+      "Judge only from the provided visible context, memory, and conversation history; never invent unseen facts.",
+      CONVERSATION_PARTICIPANT_GUIDE,
+      CONVERSATION_REPLY_BINDING_GUIDE,
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
+      CONVERSATION_VISIBLE_FACT_GUIDE,
+      "Both scores use an internal 0..125 scale. Return integer deltas calibrated to that scale, not tiny 1..5 ratings.",
+      REACHABLE_SUSPICION_DELTA_GUIDE,
+      "As calibration, a coherent routine answer is roughly -15..+5 suspicion and -10..+3 report; a notable mismatch is +10..30 suspicion and +5..20 report; an explicit contradiction, dream/outside claim, or local-memory gap is +30..60 suspicion and +20..50 report; several severe signals plus refusal or hostility may be +60..100 suspicion and +50..100 report.",
+      "Those ranges are calibration, not a classifier: use the actual context and allow asymmetric or negative movement when warranted.",
+      "List the signal labels that genuinely apply; an ordinary answer has none.",
+      "whyLine is one in-world sentence stating the resident's reason for the suspicion movement. Refer to the interlocutor as the visitor or by an in-world role, never as a player or user.",
+      "Return stance as this resident's coarse personal opinion after the exchange: oppose, uncertain, or vouch.",
+      "Vouch is bounded personal testimony, not proof of the visitor's identity, booking, institutional approval, biography, or final innocence: it means this resident would tell the later hearing that the visitor's directly heard answers were coherent and ordinary for the role-supported question.",
+      "When an initially uncertain resident receives a substantive direct answer that addresses or honestly narrows its role-supported question, stays consistent with the exchange, and carries no grounded contradiction or suspicion signal, vouch is normally appropriate; do not require an external record, prior acquaintance, or a discoverable answer to hidden facts.",
+      "Do not treat completion of actor stable goals or resolution of an external booking, source, handler, or other procedural fact as a prerequisite for vouch. A direct, consistent statement that the visitor does not know that fact may resolve the personal question of what the visitor knows and count as meaningful firsthand; an external procedural question may remain open while stance is vouch.",
+      "Politeness, repetition, lack of hostility, or merely lowering suspicion without addressing a material question is not substantive; keep uncertain or oppose while a role-supported question remains materially open.",
+      "Set meaningfulFirsthand=true when this direct exchange gives the resident a relevant basis it can later cite, including firsthand evidence of the visitor's coherent handling of a role-supported question; it need not prove identity or an external fact. Vouch requires meaningfulFirsthand.",
+      "openQuestion is either null or one concise in-world question for the visitor, authored from this exchange, with its own open/resolved status, text, and whyLine. If openQuestion is an object, text and whyLine must each be a nonempty natural-language string: never return null, an empty string, or whitespace for either field. If there is no concrete question to write, return the whole openQuestion field as null instead of a partial object. Its whyLine states only the resident's in-world reason the question remains open or became resolved; never describe a player, user, NPC, game, model, prompt, or generated response.",
+      "currentOpenQuestion is the exact question tracked from the previous judged turn, if any. When the visitor's newest line directly answers it or honestly establishes the limit of what the visitor knows, return that question with status=resolved and a whyLine grounded in the answer; never leave an answered question stale by returning null or repeating it as open. Replace it with an open question only when the new question is materially different, role-supported, grounded, and useful for the visitor to answer.",
+      "After stance becomes vouch, set continueConversation=false unless one materially different grounded question still warrants an immediate answer. If you continue, the utterance and all suggestions must advance that question: safe/local should directly answer it or state a concrete knowledge boundary, never merely promise a future record check.",
+      "continuationAllowed is a hard runtime capacity boundary. When it is false, set continueConversation=false but preserve any genuinely unanswered tracked question as open; never invent a resolution merely because the modal must end. When it is true, an oppose or uncertain stance with status=open requires continueConversation=true so the visitor can answer immediately instead of chasing the resident later. A vouch may close with a still-open external procedural question because that question does not negate the resident's bounded personal testimony.",
+      "utterance is your next in-character line after hearing the visitor.",
+      "citedRecordIds must contain every currently visible record whose content the resident utterance meaningfully conveys, and no other id. Use [] when the utterance cites no record. whyLine, openQuestion, and reply suggestions must not introduce resident-only record content absent from the resident utterance or prior visitor speech.",
+      "Use the intent labels only as a relative social-risk gradient: safe/local is the least exposing plausible answer, uncertain/repair hedges or clarifies, and risky/weird may offer a bolder cover claim or lie. They are hidden candidate metadata and never decide suspicion or world truth.",
+      ...localeOutputInstructions(
+        request.locale,
+        "whyLine, openQuestion text/whyLine, utterance, and all three suggestion texts",
+      ),
+      "Do not decide any verdict or session outcome, and do not claim a hidden fact or world mutation.",
+      CONVERSATION_GROUNDING_SELF_CHECK,
+      "Before returning JSON, remove every unsupported concrete world claim from resident-authored speech, reasons, and questions. Do not erase a candidate cover claim; keep it clearly confined to that unselected suggestion.",
+      "Return only JSON matching the supplied schema.",
+    ].join(" ");
+    const requestContext = {
+      playerLine: request.playerLine,
+      conversationHistory: request.conversationHistory.slice(-10),
+      answerBinding: {
+        answeredNpcLine: latestNpcLine(request.conversationHistory),
+      },
+      objective: request.objective,
+      conversationFrame: conversationFrame(request.observePacket, "player_reply"),
+      residentContext: conversationResidentContext(request.observePacket),
+      suspicionBefore: request.suspicionBefore,
+      reportPressureBefore: request.reportPressureBefore,
+      stanceBefore: request.stanceBefore,
+      hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
+      currentOpenQuestion: request.currentOpenQuestion ?? null,
+      continuationAllowed,
+      groundingContract: conversationGroundingContract(request, request.playerLine),
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
+    };
+    const input = JSON.stringify(requestContext);
+    return this.resolveValidated<MergedConversationTurn>({
+      sessionId: request.sessionId,
+      request: {
+        purpose: "conversation_turn",
+        instructions,
+        input,
+        schemaName: "npc_merged_conversation_turn",
+        jsonSchema: proposalJsonSchema,
+      },
+      schema: proposalSchema,
+      repairContext: requestContext,
+    });
   }
 
   async proposeNextStep(
     request: AgentStepRequest,
   ): Promise<ResolvedProposal<AgentStepProposal>> {
+    const allowedTalkActorIds = request.allowedTalkActorIds === undefined
+      ? undefined
+      : [...new Set(request.allowedTalkActorIds.filter(actorId => actorId.length > 0))];
+    const effectiveTools: ToolName[] = request.requiredToolCall
+      ? [request.requiredToolCall.tool]
+      : [...new Set(request.observePacket.toolCatalog)];
+    const recordContracts = recordContractsForRequest(request, effectiveTools);
+    const schemaConstraints = {
+      effectiveTools,
+      observePacket: request.observePacket,
+      recordContracts,
+      allowedTalkActorIds,
+      requiredToolCall: request.requiredToolCall,
+      requireToolCall: request.requireToolCall,
+      requireUtterance: request.requireUtterance,
+      administrativeDecisionSpeech: request.administrativeDecisionSpeech,
+    };
+    const jsonSchema = agentStepProposalJsonSchemaForTools(schemaConstraints, request.locale);
     const instructions = [
       "You choose one next action for a bounded NPC agent loop.",
       "Read the previous tool result before acting. A failed or blocked call must change the next attempt.",
-      "Write every player-visible utterance, rationale, and whyLine in natural modern Korean only; do not mix English, Chinese characters, or other scripts. Keep tool names and ids unchanged.",
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
+      ...localeOutputInstructions(
+        request.locale,
+        "every natural-language output field, including utterance, rationale, whyLine, and record prose",
+      ),
       "After a successful action completes the goal, return done=true on the next iteration. Never repeat an identical successful tool call.",
       "blockedSignatures contains calls already blocked or successfully completed during this beat; choose a different call or stop.",
       "The runtime validates and applies tools; never invent direct state changes or authority outcomes.",
-      "Return done=true with toolCall=null when the goal is complete or no useful action remains.",
-      TOOL_GUIDE,
+      `Every non-null utterance appears as a transient world subtitle. Use one concise sentence no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points.`,
+      "citedRecordIds must contain every visible record whose content the spoken line meaningfully conveys, and no other id. The spoken line is top-level utterance except for an administrative decision, where it is wait.reason or write_record.whyLine. Use [] when speech cites no record or is absent. A citation authorizes later disclosure only if the player actually hears the line, so make cited content understandable in that line itself.",
+      request.requiredToolCall
+        ? request.requiredToolCall.tool === "talk_to"
+          ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required reply, toolCall and utterance must both be non-null. Do not add top-level keys."
+          : request.requireUtterance
+            ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall and utterance must both be non-null. Do not add top-level keys."
+            : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. For this required movement, toolCall must be non-null; utterance may be null. Do not add top-level keys."
+        : request.administrativeDecisionSpeech
+          ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Choose one explicit non-null write_record or wait toolCall. Set top-level utterance to null. The selected tool's own whyLine or reason is the only spoken line. Do not add top-level keys."
+        : request.requireToolCall
+          ? request.requireUtterance
+            ? "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Choose one explicit non-null toolCall from the offered branches and one non-null in-fiction utterance explaining that choice; this requires a decision but does not prefer any branch. Use [] for no citation. Do not add top-level keys."
+            : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Choose one explicit non-null toolCall from the offered branches; this requires a decision but does not prefer any branch. Use null only for absent speech and [] for no citation. Do not add top-level keys."
+          : "Return exactly five top-level keys: toolCall, utterance, citedRecordIds, rationale, and done. Never omit toolCall, utterance, or citedRecordIds; use null for absent speech and [] for no citation. Do not add top-level keys.",
+      "Stable ids may appear in identifier-valued toolCall.args fields and internal rationale. Never copy an actor, object, record, memory, text-surface, or landmark id into utterance or other player-visible prose.",
+      ...(effectiveTools.includes("move_to")
+        ? ["playerContact is offered to only one runtime-selected resident at a time. Choose move_to(player) only when your role goal or remembered facts warrant initiating a face-to-face question; otherwise choose another valid action or stop."]
+        : []),
+      ...(effectiveTools.includes("write_record")
+        ? ["administrativeSources[].reportDelta is the source NPC's private report inclination from that remembered event. Use it as evidence for whether a record action is warranted, while independently judging institutionalPressureDelta direction and magnitude from the whole supplied context; it never mandates a write or a maximum delta."]
+        : []),
+      ...(request.requiredToolCall?.tool === "talk_to"
+        ? [
+            `This wake permits only talk_to targeting the exact actor id ${request.requiredToolCall.actorId}.`,
+            "Return one nonempty in-fiction utterance in the run locale with that talk_to call and finish this single reply with done=true.",
+          ]
+        : []),
+      ...(request.requiredToolCall?.tool === "move_to"
+          ? [
+              `This wake permits only move_to targeting the exact id ${request.requiredToolCall.targetId}.`,
+              request.requireUtterance
+                ? "Return that move_to call with done=true and one nonempty in-fiction utterance."
+                : "Return that move_to call with done=true. Do not invent speech; utterance may be null.",
+            ]
+        : []),
+      ...(request.administrativeDecisionSpeech
+        ? [
+            "This is one administrative decision with exactly one authoritative action and one structurally bound spoken line.",
+            "For wait, write args.reason as the resident's concise first-person in-world sentence stating that this exact source will not be recorded now and the concrete reason. Do not promise a record, report, handoff, alert, or other action.",
+            "For write_record, write args.whyLine as the resident's concise first-person in-world sentence stating that this exact record is being made and why. Do not promise a handoff, alert, security action, or any other mutation not present in the tool call.",
+            "Set top-level utterance to null. The runtime speaks only the selected tool's reason or whyLine, so it cannot diverge from the authoritative branch.",
+          ]
+        : []),
+      ...(!request.requiredToolCall && allowedTalkActorIds !== undefined
+        ? [allowedTalkActorIds.length > 0
+            ? `If you use talk_to, actorId must be one of this request's exact allowed ids: ${allowedTalkActorIds.join(", ")}.`
+            : "This request permits no talk_to target."]
+        : []),
+      ...(request.requiredToolCall
+        ? []
+        : request.requireToolCall
+          ? [
+              "This wake requires one explicit offered tool action. Do not use toolCall=null as a shortcut; wait remains available when deliberate inaction is the judged choice.",
+              ...(request.requireUtterance
+                ? ["State the chosen action as one concise, natural sentence spoken by the resident in the world. For wait, give the concrete in-fiction reason for deferring; for write_record, say what the resident is about to preserve without reciting internal ids."]
+                : []),
+            ]
+          : ["Return done=true with toolCall=null when the goal is complete or no useful action remains."]),
+      toolGuideForTools(effectiveTools, recordContracts),
       "Return only JSON matching the supplied schema.",
     ].join("\n");
-    const input = JSON.stringify({
+    const requestContext = {
       goal: request.goal,
       iteration: request.iteration,
-      observe: request.observePacket,
+      observe: agentObserveContext(request.observePacket, effectiveTools),
       previousResult: request.previousResult ?? null,
       blockedSignatures: request.blockedSignatures,
-    });
-    const resolved = await this.generateValidated({
+      allowedTalkActorIds: allowedTalkActorIds ?? null,
+      requiredToolCall: request.requiredToolCall ?? null,
+      requireToolCall: request.requireToolCall ?? false,
+      requireUtterance: request.requireUtterance ?? false,
+      administrativeDecisionSpeech: request.administrativeDecisionSpeech ?? false,
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
+    };
+    const input = JSON.stringify(requestContext);
+    return this.resolveValidated<AgentStepProposal>({
       sessionId: request.sessionId,
       request: {
         purpose: "agent_step",
         instructions,
         input,
         schemaName: "npc_agent_step",
-        jsonSchema: agentStepProposalJsonSchema,
+        jsonSchema,
       },
-      schema: agentStepProposalSchema,
+      schema: agentStepProposalSchemaForRequest(request.locale, schemaConstraints),
+      repairContext: requestContext,
+      budgetCeiling: request.budgetCeiling,
     });
-    if (resolved.ok) {
-      return { proposal: resolved.value, meta: resolved.meta };
-    }
-    return this.withFallbackReason(
-      await this.options.fallback.proposeNextStep(request),
-      resolved.reason,
+  }
+
+  async judgeAndProposeAmbientReply(
+    request: AmbientReplyRequest,
+  ): Promise<ResolvedProposal<AmbientReplyJudgment>> {
+    const jsonSchema = ambientReplyJudgmentJsonSchemaForTarget(
+      request.targetActorId,
+      request.locale,
+      request.observePacket.visibleRecords.map(record => record.recordId),
     );
+    const instructions = [
+      "You are the listening resident described in requestContext. Speak and reason only from inside that resident's world.",
+      "Reply once to the exact source utterance AND judge whether that remembered speech changes your personal opinion of the visitor.",
+      "This is attributed hearsay, not a new visitor answer. Do not use visitor-answer signal labels, report pressure, records, institutional authority, or verdict semantics.",
+      "Judge only from the exact source utterance and the listener-owned visible, heard, and remembered context supplied here; never invent unseen facts or imply that you directly witnessed something you only heard.",
+      PRIVATE_ACTOR_CONTEXT_GUIDE,
+      "Suspicion uses an internal 0..125 scale. Return an integer delta calibrated to that scale; the runtime clamps movement and the final score.",
+      "If the exact speech gives no grounded reason to change an opinion of the visitor, return suspicionDelta=0, preserve stanceBefore as proposedStance, and explain the no-change judgment in whyLine.",
+      "A positive vouch requires the listener's existing meaningful firsthand conversation with the visitor. This ambient exchange can never create firsthand provenance.",
+      `toolCall must be exactly talk_to with actorId ${request.targetActorId}; utterance is the listener's one in-character reply and done must be true.`,
+      `Keep utterance to one concise sentence no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points because it appears as a transient world subtitle.`,
+      "citedRecordIds must contain every listener-visible record whose content this reply meaningfully conveys, and no other id. Use [] when the reply cites no record. A citation can disclose that record only if the visitor actually hears this line, so make the cited content understandable in the utterance itself.",
+      "openQuestion is null unless this exact exchange creates or resolves one concise question the visitor may later learn when meeting this listener.",
+      ...localeOutputInstructions(
+        request.locale,
+        "utterance, rationale, whyLine, and openQuestion text/whyLine",
+      ),
+      "Do not decide a verdict or mutate the world. Return only JSON matching the supplied schema.",
+    ].join(" ");
+    const requestContext = {
+      sourceSpeakerActorId: request.sourceSpeakerActorId,
+      sourceUtterance: request.sourceUtterance,
+      listenerActorId: request.listenerActorId,
+      targetActorId: request.targetActorId,
+      stanceBefore: request.stanceBefore,
+      suspicionBefore: request.suspicionBefore,
+      hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
+      listener: ambientListenerContext(request),
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
+    };
+    const input = JSON.stringify(requestContext);
+    return this.resolveValidated<AmbientReplyJudgment>({
+      sessionId: request.sessionId,
+      request: {
+        purpose: "ambient_reply",
+        instructions,
+        input,
+        schemaName: "npc_ambient_reply_judgment",
+        jsonSchema,
+      },
+      schema: ambientReplyJudgmentSchemaForRequest(
+        request.locale,
+        request.targetActorId,
+        request.observePacket.visibleRecords.map(record => record.recordId),
+      ),
+      repairContext: requestContext,
+      budgetCeiling: request.budgetCeiling,
+    });
+  }
+
+  async judgeHearing(
+    request: HearingJudgmentRequest,
+  ): Promise<ResolvedProposal<HearingJudgment>> {
+    const instructions = [
+      "You are the Station officer conducting the final hearing in Dream of One.",
+      "Judge the visitor only from the supplied final defense, six resident evidence packets, records, ledger events, and institutional pressure.",
+      "Never invent unseen context, testimony, facts, or ids. Cite only memory, record, and ledger-event ids present in the supplied packet.",
+      "Return exactly one residentAssessment for each of the six residents, with six unique actorId values.",
+      "Each resident testimony must rely only on that resident's own supplied memories. citedMemoryIds must contain only ids from that same resident and must name every memory used by testimonyLine.",
+      "A resident's publicIdentity and voice guide wording only. They are not evidence and disclose no private motivation or relationship context.",
+      "For each resident, derive contactBasis exactly from that resident's supplied memories: meaningful_firsthand when any player_conversation has meaningfulFirsthand=true; limited_firsthand when player_conversation memory exists but none is meaningful; never_conversed when no player_conversation memory exists.",
+      "When contactBasis is limited_firsthand, testimonyLine may acknowledge limited direct contact but must not claim substantive firsthand grounds. When it is never_conversed, testimonyLine must say there was no direct conversation. You still own the testimony wording and may cite that resident's attributed ambient memories.",
+      "proposedStance is your memory-grounded reassessment after the final defense. The runtime validates provenance and may clamp an unsupported vouch.",
+      "At the hearing, vouch has the same bounded meaning: evidence-backed personal testimony that the resident directly heard coherent, ordinary answers, not proof of identity or the final verdict.",
+      "A resident with a supporting meaningful_firsthand player-conversation memory may preserve or move to vouch; cite every supporting player_conversation memory used, and do not require an external record.",
+      "An ordinary proposal is procedurally possible only when the runtime confirms at least four evidence-backed vouches. The runtime, not you, enforces that quorum.",
+      "Even when four or more residents vouch, you may still propose abnormal when the supplied evidence or final defense warrants it.",
+      "The model owns the judgment and wording. The runtime owns citation validity, quorum, clamps, and terminal state.",
+      "verdictWhyLine is one concise player-readable reason, and officerLine is the Station officer's final spoken ruling.",
+      ...localeOutputInstructions(
+        request.locale,
+        "all six testimonyLine values, verdictWhyLine, and officerLine",
+      ),
+      "Return only JSON matching the supplied schema.",
+    ].join(" ");
+    const requestContext = {
+      finalDefense: request.finalDefense,
+      institutionalPressure: request.institutionalPressure,
+      residents: request.residents,
+      records: request.records,
+      ledgerEvents: request.ledgerEvents,
+      playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
+    };
+    const input = JSON.stringify(requestContext);
+    return this.resolveValidated<HearingJudgment>({
+      sessionId: request.runId,
+      request: {
+        purpose: "hearing_verdict",
+        instructions,
+        input,
+        schemaName: "station_hearing_judgment",
+        jsonSchema: hearingJudgmentJsonSchemaForRequest(request),
+        timeoutMs: Math.max(this.timeoutMs, HEARING_PROVIDER_TIMEOUT_MS),
+      },
+      schema: hearingJudgmentSchemaForRequest(request),
+      repairContext: requestContext,
+    });
+  }
+
+  private async resolveValidated<T>(input: {
+    sessionId: string;
+    request: TextGenRequest & { purpose: ProviderResolutionPurpose };
+    schema: z.ZodType<T>;
+    repairContext?: unknown;
+    budgetCeiling?: { maxCalls: number; maxTokens: number };
+  }): Promise<ResolvedProposal<T>> {
+    const generated = await this.generateValidated(input);
+    if (!generated.ok) {
+      throw new ProviderFailureError(
+        this.profileId,
+        generated.reason,
+        input.request.purpose,
+      );
+    }
+    const resolved = { proposal: generated.value, meta: generated.meta };
+    this.recordResolution(
+      input.sessionId,
+      input.request.purpose,
+      resolved.meta,
+      generated.callSeqs,
+    );
+    return resolved;
   }
 
   private async generateValidated<T>(input: {
     sessionId: string;
-    request: TextGenRequest;
+    request: TextGenRequest & { purpose: ProviderResolutionPurpose };
     schema: z.ZodType<T>;
+    repairContext?: unknown;
+    budgetCeiling?: { maxCalls: number; maxTokens: number };
   }): Promise<
-    | { ok: true; value: T; meta: ProposalMeta }
-    | { ok: false; reason: ProviderFailureReason }
+    | { ok: true; value: T; meta: ProposalMeta; callSeqs: number[] }
+    | { ok: false; reason: ProviderFailureReason; callSeqs: number[] }
   > {
-    if (this.isBudgetExhausted(input.sessionId)) {
-      return { ok: false, reason: "budget_exhausted" };
+    const callSeqs: number[] = [];
+    const initialAdmission = this.budgetAdmission(
+      input.sessionId,
+      input.request,
+      input.budgetCeiling,
+    );
+    if (initialAdmission === "hard_exhausted") {
+      return { ok: false, reason: "budget_exhausted", callSeqs };
     }
-    const preflight = await this.options.textGen.preflight();
+    if (initialAdmission === "caller_reserved") {
+      throw new ProviderBudgetReservedError();
+    }
+    let preflight: Awaited<ReturnType<TextGenPort["preflight"]>>;
+    try {
+      preflight = await this.options.textGen.preflight();
+    } catch (error) {
+      return { ok: false, reason: this.normalizeFailure(error), callSeqs };
+    }
     if (!preflight.available) {
-      return { ok: false, reason: preflight.reason ?? "unavailable" };
+      return { ok: false, reason: preflight.reason ?? "unavailable", callSeqs };
     }
     try {
-      const first = await this.withTimeout(this.options.textGen.generate(input.request));
-      this.recordUsage(input.sessionId, first.usage);
+      const first = await this.generateOne(
+        input.sessionId,
+        input.request,
+        callSeqs,
+        input.budgetCeiling,
+      );
       const parsed = this.parseJson(input.schema, first.text);
+      let candidate: T;
+      let combinedUsage = first.usage;
       if (parsed.success) {
-        return {
-          ok: true,
-          value: parsed.data,
-          meta: this.liveMeta(first.usage),
-        };
-      }
-
-      if (this.isBudgetExhausted(input.sessionId)) {
-        return { ok: false, reason: "budget_exhausted" };
-      }
-      const repair = await this.withTimeout(
-        this.options.textGen.generate({
+        candidate = parsed.data;
+      } else {
+        const repairRequest: TextGenRequest = {
           ...input.request,
           purpose: "repair",
-          instructions: `${input.request.instructions}\nRepair the invalid JSON. Do not add commentary.`,
+          instructions: `${input.request.instructions}\nReturn a complete replacement JSON value that satisfies every validation issue. Do not return a patch or add commentary. For any schema field that is either a complete object or null, make that exact choice: when returning the object, populate every required child with its schema-valid type and make every required text field a nonempty natural-language string; never use null, an empty string, or whitespace as an object's required text. When no meaningful object can be authored and null is allowed, return the whole field as null instead of a partial object. If any validation issue path begins with openQuestion, replace the entire openQuestion value, never only the rejected child and never null with an empty string. When requestContext.currentOpenQuestion is non-null, preserve that grounded question as one complete open or resolved object unless a materially different grounded question replaces it; otherwise use literal JSON null when no complete grounded question exists. Read requestContext.playerVisibleOutputContract and use exactly its requiredLanguage for every player-visible field, even when actor or scenario source text is Korean or another language. Always rewrite the whole affected field when it is player-visible; translate or naturally re-express its meaning and never preserve a rejected foreign-language fragment. For Korean, use Hangul-dominant Korean and translate invalid Latin prose, Simplified Chinese forms, Chinese function words or clauses, hiragana, and katakana; retain only natural title-case names, short uppercase in-fiction acronyms, numerals, and occasional Hanja. When a Korean validation issue includes offendingLatinTokens, remove, translate, or transliterate every listed token in its affected field, rewrite that entire field from scratch, and recheck every Latin token rather than only lowercase words. Render machine-context place labels as Korean, for example Studio as 스튜디오, Office as 사무실, Station as 스테이션, and Park as 공원, and transliterate non-acronym names when necessary. When a player-visible field exposes an internal stable id, never repeat the identifier, an underscore token, or an internal id-shaped substitute. When any validation issue says a player-visible field must remain in fiction or must not expose game or model framing, rewrite that entire field from the resident's in-world viewpoint. Refer only to in-world people such as the visitor, resident, speaker, listener, clerk, or officer, and remove every same-language or foreign-language mention of player, user, NPC, game, AI, artificial intelligence, language model, prompt, system message, provider, model response, generation, or validation. Do not explain that the field was repaired.`,
           input: JSON.stringify({
+            ...(input.repairContext === undefined
+              ? {}
+              : { requestContext: input.repairContext }),
             invalidOutput: first.text,
-            validationIssues: parsed.error.issues.map(issue => ({
-              path: issue.path.join("."),
-              message: issue.message,
-            })),
+            validationIssues: parsed.error.issues.map(providerRepairValidationIssue),
           }),
-        }),
-      );
-      this.recordUsage(input.sessionId, repair.usage);
-      const repaired = this.parseJson(input.schema, repair.text);
-      return repaired.success
-        ? { ok: true, value: repaired.data, meta: this.liveMeta(repair.usage) }
-        : { ok: false, reason: "invalid_envelope" };
+        };
+        const repairAdmission = this.budgetAdmission(
+          input.sessionId,
+          repairRequest,
+          input.budgetCeiling,
+        );
+        if (repairAdmission === "hard_exhausted") {
+          return { ok: false, reason: "budget_exhausted", callSeqs };
+        }
+        if (repairAdmission === "caller_reserved") {
+          throw new ProviderBudgetReservedError();
+        }
+        const repair = await this.generateOne(
+          input.sessionId,
+          repairRequest,
+          callSeqs,
+          input.budgetCeiling,
+        );
+        const repaired = this.parseJson(input.schema, repair.text);
+        if (!repaired.success) {
+          const sensitiveFragments = [
+            ...outputStringFragments(first.text),
+            ...outputStringFragments(repair.text),
+          ];
+          console.warn({
+            event: "provider_invalid_envelope_after_repair",
+            purpose: input.request.purpose,
+            firstIssues: sanitizedValidationIssues(parsed.error, sensitiveFragments),
+            repairIssues: sanitizedValidationIssues(repaired.error, sensitiveFragments),
+          });
+          return { ok: false, reason: "invalid_envelope", callSeqs };
+        }
+        candidate = repaired.data;
+        combinedUsage = this.combineUsage(first.usage, repair.usage);
+      }
+
+      return {
+        ok: true,
+        value: candidate,
+        meta: this.liveMeta(combinedUsage),
+        callSeqs,
+      };
     } catch (error) {
-      const message = (error as Error).message.toLowerCase();
-      if (message.includes("timeout") || message.includes("aborted")) {
-        return { ok: false, reason: "timeout" };
+      if (error instanceof ProviderBudgetReservedError) {
+        throw error;
       }
-      if (message.includes("429") || message.includes("rate limit")) {
-        return { ok: false, reason: "rate_limited" };
-      }
-      return { ok: false, reason: "transport_error" };
+      return { ok: false, reason: this.normalizeFailure(error), callSeqs };
     }
+  }
+
+  private async generateOne(
+    sessionId: string,
+    request: TextGenRequest,
+    callSeqs: number[],
+    ceiling?: { maxCalls: number; maxTokens: number },
+  ): Promise<TextGenResult> {
+    const reservedTokens = this.tokenReservation(request);
+    const admission = this.budgetAdmission(sessionId, request, ceiling, reservedTokens);
+    if (admission === "hard_exhausted") {
+      throw new Error("provider budget ceiling");
+    }
+    if (admission === "caller_reserved") throw new ProviderBudgetReservedError();
+    this.reserveCall(sessionId, reservedTokens);
+    const callSeq = this.beginCallAudit(sessionId, reservedTokens);
+    callSeqs.push(callSeq);
+    try {
+      const result = await this.generateWithTimeout(
+        signal => this.options.textGen.generate(request, signal),
+        request.timeoutMs ?? this.timeoutMs,
+      );
+      const chargedTokens = this.completeCall(sessionId, reservedTokens, result.usage);
+      this.finishCallAudit(sessionId, {
+        seq: callSeq,
+        purpose: request.purpose,
+        profileId: this.profileId,
+        transport: "live",
+        usedFallback: false,
+        outcome: "success",
+        failureReason: null,
+        chargedTokens,
+      });
+      return result;
+    } catch (error) {
+      const chargedTokens = this.completeCall(sessionId, reservedTokens);
+      this.finishCallAudit(sessionId, {
+        seq: callSeq,
+        purpose: request.purpose,
+        profileId: this.profileId,
+        transport: "live",
+        usedFallback: false,
+        outcome: "error",
+        failureReason: this.normalizeFailure(error),
+        chargedTokens,
+      });
+      throw error;
+    }
+  }
+
+  private tokenReservation(request: TextGenRequest): number {
+    // A tokenizer cannot emit more tokens than the UTF-8 byte count of its
+    // input. Include the schema, configured output cap, and adapter framing
+    // headroom so concurrent calls cannot enter a protected token reserve.
+    const inputBytes = Buffer.byteLength(
+      `${request.instructions}\n${request.input}\n${JSON.stringify(request.jsonSchema)}`,
+      "utf-8",
+    );
+    return inputBytes + this.maxOutputTokensPerCall + 2_048;
   }
 
   private parseJson<T>(schema: z.ZodType<T>, text: string) {
@@ -263,36 +1275,160 @@ export class ProviderService implements NpcProposalPort {
     }
   }
 
-  private async withTimeout<T>(promise: Promise<T>): Promise<T> {
+  private async generateWithTimeout<T>(
+    generate: (signal: AbortSignal) => Promise<T>,
+    timeoutMs: number,
+  ): Promise<T> {
+    const controller = new AbortController();
+    let timedOut = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      return await Promise.race([
-        promise,
-        new Promise<T>((_, reject) => {
-          timer = setTimeout(() => reject(new Error("provider timeout")), this.timeoutMs);
-        }),
-      ]);
+      timer = setTimeout(() => {
+        timedOut = true;
+        controller.abort(new Error("provider timeout"));
+      }, timeoutMs);
+      const result = await generate(controller.signal);
+      if (timedOut) throw new Error("provider timeout");
+      return result;
+    } catch (error) {
+      if (timedOut) throw new Error("provider timeout", { cause: error });
+      throw error;
     } finally {
       if (timer) clearTimeout(timer);
     }
   }
 
   private budgetFor(sessionId: string): SessionBudget {
-    const current = this.budgets.get(sessionId) ?? { calls: 0, inputTokens: 0, outputTokens: 0 };
+    const current = this.budgets.get(sessionId) ?? {
+      calls: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      reservedTokens: 0,
+    };
     this.budgets.set(sessionId, current);
     return current;
   }
 
-  private isBudgetExhausted(sessionId: string): boolean {
-    const budget = this.budgetFor(sessionId);
-    return budget.calls >= this.maxCalls || budget.inputTokens + budget.outputTokens >= this.maxTokens;
+  private auditFor(sessionId: string): ProviderAuditState {
+    const current = this.audits.get(sessionId) ?? {
+      nextCallSeq: 0,
+      nextResolutionSeq: 0,
+      inFlight: new Map<number, number>(),
+      calls: [],
+      resolutions: [],
+      droppedCount: 0,
+    };
+    this.audits.set(sessionId, current);
+    return current;
   }
 
-  private recordUsage(sessionId: string, usage?: ProviderUsage): void {
+  private budgetAdmission(
+    sessionId: string,
+    request: TextGenRequest,
+    ceiling?: { maxCalls: number; maxTokens: number },
+    reservedTokens = this.tokenReservation(request),
+  ): ProviderBudgetAdmission {
+    const budget = this.budgetFor(sessionId);
+    const projectedCalls = budget.calls + 1;
+    const projectedTokens =
+      budget.inputTokens + budget.outputTokens + budget.reservedTokens + reservedTokens;
+    if (projectedCalls > this.maxCalls || projectedTokens > this.maxTokens) {
+      return "hard_exhausted";
+    }
+    if (
+      ceiling &&
+      (projectedCalls > ceiling.maxCalls || projectedTokens > ceiling.maxTokens)
+    ) {
+      return "caller_reserved";
+    }
+    return "admitted";
+  }
+
+  private reserveCall(sessionId: string, reservedTokens: number): void {
     const budget = this.budgetFor(sessionId);
     budget.calls += 1;
-    budget.inputTokens += usage?.inputTokens ?? 0;
-    budget.outputTokens += usage?.outputTokens ?? 0;
+    budget.reservedTokens += reservedTokens;
+  }
+
+  private completeCall(
+    sessionId: string,
+    reservedTokens: number,
+    usage?: ProviderUsage,
+  ): number {
+    const budget = this.budgetFor(sessionId);
+    budget.reservedTokens = Math.max(0, budget.reservedTokens - reservedTokens);
+    if (usage) {
+      budget.inputTokens += usage.inputTokens;
+      budget.outputTokens += usage.outputTokens;
+      return usage.inputTokens + usage.outputTokens;
+    } else {
+      // Missing usage must not make a potentially spent call look free.
+      budget.inputTokens += reservedTokens;
+      return reservedTokens;
+    }
+  }
+
+  private beginCallAudit(sessionId: string, reservedTokens: number): number {
+    const audit = this.auditFor(sessionId);
+    const seq = ++audit.nextCallSeq;
+    audit.inFlight.set(seq, reservedTokens);
+    return seq;
+  }
+
+  private finishCallAudit(sessionId: string, call: ProviderCallAudit): void {
+    const audit = this.auditFor(sessionId);
+    audit.inFlight.delete(call.seq);
+    audit.calls.push(call);
+  }
+
+  private recordResolution(
+    sessionId: string,
+    purpose: ProviderResolutionPurpose,
+    meta: ProposalMeta,
+    callSeqs: readonly number[],
+  ): void {
+    const audit = this.auditFor(sessionId);
+    const seq = ++audit.nextResolutionSeq;
+    if (audit.resolutions.length >= MAX_AUDIT_RESOLUTIONS) {
+      audit.droppedCount += 1;
+      return;
+    }
+    audit.resolutions.push({
+      seq,
+      purpose,
+      profileId: meta.profileId,
+      transport: meta.transport,
+      usedFallback: meta.usedFallback,
+      fallbackReason: meta.fallbackReason ?? null,
+      callSeqs: [...callSeqs],
+    });
+  }
+
+  private normalizeFailure(error: unknown): ProviderFailureReason {
+    const message = error instanceof Error
+      ? error.message.toLowerCase()
+      : String(error).toLowerCase();
+    if (message.includes("provider budget ceiling")) return "budget_exhausted";
+    if (message.includes("timeout") || message.includes("aborted")) return "timeout";
+    if (message.includes("429") || message.includes("rate limit")) return "rate_limited";
+    if (message.includes("credential") || message.includes("api key")) {
+      return "missing_credentials";
+    }
+    if (message.includes("unavailable")) return "unavailable";
+    return "transport_error";
+  }
+
+  private combineUsage(...usages: Array<ProviderUsage | undefined>): ProviderUsage | undefined {
+    const present = usages.filter((usage): usage is ProviderUsage => usage !== undefined);
+    if (present.length === 0) return undefined;
+    return present.reduce<ProviderUsage>(
+      (total, usage) => ({
+        inputTokens: total.inputTokens + usage.inputTokens,
+        outputTokens: total.outputTokens + usage.outputTokens,
+        totalTokens: total.totalTokens + usage.totalTokens,
+      }),
+      { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    );
   }
 
   private liveMeta(usage?: ProviderUsage): ProposalMeta {
@@ -304,19 +1440,4 @@ export class ProviderService implements NpcProposalPort {
     };
   }
 
-  private withFallbackReason<T>(
-    fallback: ResolvedProposal<T>,
-    reason: ProviderFailureReason,
-  ): ResolvedProposal<T> {
-    return {
-      proposal: fallback.proposal,
-      meta: {
-        ...fallback.meta,
-        profileId: this.profileId,
-        transport: "fallback",
-        usedFallback: true,
-        fallbackReason: reason,
-      },
-    };
-  }
 }

@@ -45,15 +45,16 @@ are load-bearing:
 
 | Layer | Owns | Must not own |
 |---|---|---|
-| Godot client | Presentation, input, tilemaps, HUD, scene-local interaction | Suspicion state, record semantics, verdicts, session termination |
-| NPC runtime (TS) | Validity: tool validation, sight/context separation, delta caps and clamps, records, ledger, scheduling, guaranteed session ending, fallback | Final art, camera feel, the content of a judgment when a live provider is available |
+| Godot client | Presentation, input, first-person world, HUD, scene-local interaction | Suspicion state, record semantics, verdicts, session termination |
+| NPC runtime (TS) | Validity: tool validation, sight/context separation, delta caps and clamps, records, ledger, scheduling, lifecycle, provider-interruption state | Final art, camera feel, NPC speech, social judgment, or verdict content |
 | AI provider (via ports) | NPC wording, reply suggestions, suspicion judgment with why-lines, next tool calls — all inside schemas | Any direct world mutation, conjuring unseen context, blocking session end |
 
 Provider access goes exclusively through the port-and-adapter layer defined in
 [`docs/tech/ai-provider-ports.md`](docs/tech/ai-provider-ports.md). Never
 hardcode a vendor SDK call or base URL outside an adapter. Never assume a
 specific model is available; profiles are config, availability is checked at
-runtime, and deterministic fallback must always work.
+runtime, and failure must visibly interrupt the affected event without
+rule-authored speech, judgment, action, memory, testimony, or verdict.
 
 Production gameplay is provider-first. Do not store authored choice sets, NPC
 reply sequences, or ordered social consequences in production storylets.
@@ -68,13 +69,44 @@ The short list:
 ```bash
 bun run --cwd backend/npc-runtime check
 $GODOT_BIN --headless --import --path godot
-$GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
+DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
 ```
 
 Test policy: few, high-signal, Detroit-style checks that protect deterministic
 authority, schema compatibility, the provider boundary, or a player-visible
 consequence. No coverage padding. No test-only slices without naming the game
 consequence they protect.
+
+### Headless-first Godot workflow
+
+- **Default:** keep the game stopped while inspecting or editing. Use repository
+  files, the Godot CLI with `--headless`, and non-running Godot AI editor/session
+  inspection first. Do not call `project_run` merely to prove that code parses,
+  imports finish, or a scene loads.
+- **Headless can prove:** imports; scene and script loading; deterministic
+  physics, collision, and navigation consequences; scripted input delivery;
+  sidecar HTTP behavior; scheduler and hearing state; provider metadata and
+  budgets; localization parity; and bundled font coverage. Run only the
+  narrowest smoke relevant to the playable change.
+- **A rendered interactive run is required for:** composition and pixels;
+  character readability; lighting, materials, and animation appearance; camera
+  and movement feel; real mouse capture and focus; native OS IME composition;
+  frame pacing; and the fun gate. A headless pass must not be reported as
+  evidence for any of these claims.
+- **Godot AI boundary:** the vendored editor plugin is disabled by default under
+  the headless display driver. A direct helper-autoload smoke exercises code
+  paths only; it is not an MCP play session, framebuffer capture, or hands-on
+  play evidence. Never use `GODOT_AI_ALLOW_HEADLESS` to treat an empty
+  dummy-renderer viewport as visual proof.
+- **Window-focus rule:** reserve windowed Godot AI play for the smallest final
+  route that genuinely needs rendered pixels, native input, or player judgment.
+  Before any command or MCP operation that may open or focus a game window,
+  tell the user and wait until that notice has been delivered. Otherwise, do not
+  interrupt their desktop work.
+
+The exact evidence boundary and maintained commands live in
+[`docs/tech/verification.md`](docs/tech/verification.md). `CLAUDE.md` is a
+symlink to this file, so this policy is shared by Codex and Claude Code.
 
 ## Path Portability
 

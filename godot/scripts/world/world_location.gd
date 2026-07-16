@@ -56,18 +56,30 @@ func _setup_camera(tile_block: Dictionary) -> void:
 	var t := int(tile_block.get("tile_size", 16))
 	# Magnification lives entirely in the window's integer scale (main.gd);
 	# the camera renders 1:1 world pixels and clamps to the dressed apron so
-	# wide views never show void.
+	# wide views never show void. Smoothing is off: fractional Camera2D
+	# interpolation fights snap_2d_* + integer upscale and jitters tiles.
 	var bounds: Rect2i = builder.dressed_bounds
 	_camera = Camera2D.new()
 	_camera.zoom = Vector2(1, 1)
-	_camera.position_smoothing_enabled = true
-	_camera.position_smoothing_speed = 8.0
+	_camera.position_smoothing_enabled = false
 	_camera.limit_left = bounds.position.x * t
 	_camera.limit_top = bounds.position.y * t
 	_camera.limit_right = bounds.end.x * t
 	_camera.limit_bottom = bounds.end.y * t
 	builder.player.add_child(_camera)
 	_camera.make_current()
+	_snap_camera_to_world_pixels()
+
+func _process(_delta: float) -> void:
+	_snap_camera_to_world_pixels()
+
+## Keep the follow camera on whole world pixels so continuous player motion
+## cannot produce sub-pixel camera globals under transform/vertex snap.
+func _snap_camera_to_world_pixels() -> void:
+	if _camera == null or builder == null or builder.player == null:
+		return
+	var player_global: Vector2 = builder.player.global_position
+	_camera.position = player_global.round() - player_global
 
 func get_player() -> Node:
 	return builder.player if builder != null else null

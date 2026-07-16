@@ -2,13 +2,37 @@
 
 ## Logline
 
-You wake near a civic Station where ordinary procedure has already started recording you. To leave, you must complete a normal public loop through Store, Studio, Park, and Station while NPC society audits whether your words belong there.
+You wake as an outsider in the central park with a scheduled Station hearing
+already waiting. Six residents live, meet, and compare what they actually
+know about you; to leave, you must persuade enough of them that you are an
+ordinary person before the hearing decides what you are.
+
+## Player Situation
+
+The player wakes in the park and remembers nothing from before that moment.
+The only lead is a clue that a Studio review schedule might include them. It
+does not prove that they are the expected reviewer or that the booking belongs
+to them. Neither fact has a hidden canonical answer that the player must
+discover.
+
+The Studio reception is a plausible first conversation, not a required quest
+route. The run's purpose is to pass the scheduled hearing through
+conversation. The player may admit uncertainty, adopt the review premise,
+challenge it, or offer another account; no authored answer is privileged as
+the truth.
 
 ## AI Gameplay Thesis
 
-The released game should use an API proposal provider for bounded wording when a configured provider passes runtime preflight.
+The released game uses a configured provider as the residents' judgment when
+that provider passes runtime preflight. It proposes NPC wording and next
+actions, judges suspicion and stance from the speaker's scoped context, and
+judges the final hearing account.
 
-The provider may propose NPC pressure wording, witness phrasing, soft inquest questions, localized variants, and fallback text variants. The backend decides whether the proposal is valid, which Evidence is created, how Exposure changes, and whether Station intake, Inquest, verdict, or session termination opens.
+The runtime validates every proposed world action, enforces sight and context
+separation, clamps allowed state changes, maintains records and the civic
+ledger, and guarantees that conversations and the hearing terminate. It does
+not replace a live provider's social or hearing judgment with authored
+outcomes.
 
 Pitch-facing production details live in `docs/archive/scenario/pitch/`.
 
@@ -18,11 +42,11 @@ The player is not a detective, spy, or hero. The player is a person trying to re
 
 The fantasy is tense competence:
 
-- read the public rule;
-- speak only within the expected procedure;
-- accept small corrections before they become formal records;
-- notice which words are too true to say aloud;
-- reach the Station with a record that still looks normal.
+- learn what each resident has actually seen, heard, or read;
+- choose what account of yourself to give them;
+- repair contradictions before they become institutional pressure;
+- earn enough grounded support to enter the hearing with a credible account;
+- argue for an ordinary classification and leave.
 
 ## Design Pillars
 
@@ -37,11 +61,13 @@ The fantasy is tense competence:
 
 ## Core Dramatic Question
 
-Can the player pass through a normal civic day without giving the Station enough procedural evidence to classify them as lucid-abnormal?
+Can the player make six independently informed residents' accounts of them
+sound ordinary before the Station hearing?
 
 ## What The Game Is Not
 
 - Not a detective game where the player gathers clues to solve a case.
+- Not a booking mystery or a memory-recovery quest.
 - Not combat stealth or chase stealth.
 - Not a dream-symbol tour where weirdness replaces rules.
 - Not a lore codex with gameplay attached.
@@ -53,19 +79,19 @@ Can the player pass through a normal civic day without giving the Station enough
 | System | Owns |
 |---|---|
 | Godot | 3D presentation, movement, collisions, text surfaces, NPC placement, prompts, HUD, observed local results. |
-| Backend/product rules | Schema validation, Exposure thresholds, Station intake, Inquest, verdict, session termination, fallback selection, Evidence validity. |
-| Scenario docs | Intended beats, voice, text, artifacts, environmental story, playtest quality bar. |
+| NPC runtime | Schema and tool validation, scoped context, delta caps, records, civic ledger, scheduling, exact retry/abort lifecycle, and visible provider-interruption state. |
+| AI provider | NPC wording, suspicion and stance judgment, valid next-tool proposals, and the final hearing judgment. |
+| Scenario docs | Setting, resident identities, goals, private pressures, voice, scene facts, and outcome presentation; never fixed production replies or reaction order. |
 
-## First Scenario Choice
+## Opening Situation
 
-The first conversation-first scenario is `Same Order`, a compact Store conversation that can escalate into Station intake:
+The run begins in the park. The Studio clue gives the player somewhere
+plausible to start, while every resident remains a valid first conversation.
+Residents ask and act from their own goals and scoped memories; the content
+does not prescribe who reveals a fact, who reports it, or how any stance must
+change.
 
-1. Store Clerk assumes the player knows the usual order.
-2. The player chooses from three diegetic answers.
-3. A risky/weird answer creates a deterministic suspicion signal.
-4. Optional recorded statement can add stronger Evidence.
-5. NPC unease becomes a social report.
-6. Station intake or inquest opens from backend-owned thresholds.
-7. A why-line explains the exact record used against the player.
-
-`Station Soft Inquest` remains useful historical Station material, but it is not the current player-facing first loop.
+`Same Order` remains an M1 Store regression scenario, not the M3R opening or
+production route. Its fixed beats and lines may be used only by scripted test
+adapters. `Station Soft Inquest` likewise remains source
+material rather than the current player-facing first loop.

@@ -33,8 +33,8 @@ player-facing UI should expose dialogue choices and optional recorded free input
 | `proposalIntent` | enum | Backend | Bounded provider purpose: ask, warn, report, clarify, idle. |
 | `surfaceLineKo` | string | Provider proposes, backend validates | Korean line candidate shown only after validation. |
 | `evidenceClaim` | string | Provider proposes, backend validates | Claimed observation text that must not become Evidence without deterministic validation. |
-| `validationResult` | enum | Backend | accepted, rejected, fallback. |
-| `fallbackReason` | string | Backend | Why invalid provider output was replaced. |
+| `validationResult` | enum | Backend | accepted or rejected. |
+| `providerFailure` | object? | Backend | Why the exact model operation was interrupted without applying an event. |
 
 ## Speech Acts
 

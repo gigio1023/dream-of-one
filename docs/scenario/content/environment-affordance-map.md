@@ -158,10 +158,10 @@ Implemented now:
 - current playable slice evidence field
   `playability.providerSchedulingPlan`, generated from
   `backend/npc-runtime/src/runtime/same-order-provider-scheduling.ts`, turning
-  the provider-shaped route comparison into 27 bounded role-agent jobs with
-  available action context, deterministic fallback wording, allowed provider
-  fields, forbidden authority fields, and accepted locked actions. This is not
-  live Godot dispatch evidence.
+  the provider-shaped route comparison into 27 bounded historical fixture jobs
+  with available action context, fixed test wording, allowed provider fields,
+  forbidden authority fields, and accepted locked actions. This artifact is
+  not a production outage policy or live Godot dispatch evidence.
 - current playable slice evidence field
   `playability.providerDispatchContract`, generated from
   `backend/npc-runtime/src/runtime/same-order-provider-dispatch-contract.ts`,

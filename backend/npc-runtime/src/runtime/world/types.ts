@@ -1,4 +1,4 @@
-// Deterministic world-state authority shared by live, fallback, and scripted proposals.
+// Deterministic world-state authority shared by live and scripted proposals.
 //
 // Absorbs the generic core of the retired `runtime/agentic-environment.ts`
 // proof file: records, an append-only civic ledger, the civic economy, and
@@ -14,7 +14,12 @@ export const WORLD_ROLES = [
   "store_clerk",
   "store_manager",
   "waiting_customer",
+  "studio_receptionist",
+  "studio_manager",
+  "office_worker",
+  "park_caretaker",
   "station_officer",
+  "roaming_liaison",
 ] as const;
 
 export type WorldRole = (typeof WORLD_ROLES)[number];
@@ -45,6 +50,7 @@ export const CIVIC_ECONOMY_KEYS: readonly (keyof CivicEconomy)[] = [
 
 /** Record kinds — the social medium (docs/game/glossary.md, world-social-sim.md). */
 export const RECORD_KINDS = [
+  "note",
   "receipt",
   "clerk_statement",
   "correction",

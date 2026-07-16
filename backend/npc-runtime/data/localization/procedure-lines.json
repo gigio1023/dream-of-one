@@ -1,0 +1,26 @@
+{
+  "ko-KR": {
+    "hesitationMarker": "(응답 지연)",
+    "hearingOpening": "청문회를 시작합니다. 여섯 주민의 증언을 검토하기 전에 최종 진술을 말씀해 주십시오."
+  },
+  "en-US": {
+    "hesitationMarker": "(response delayed)",
+    "hearingOpening": "The hearing is now in session. Before I review the six residents' testimony, give your final statement."
+  },
+  "it-IT": {
+    "hesitationMarker": "(risposta in ritardo)",
+    "hearingOpening": "L'udienza ha inizio. Prima di esaminare le testimonianze dei sei residenti, presenti la sua dichiarazione finale."
+  },
+  "zh-CN": {
+    "hesitationMarker": "（回答延迟）",
+    "hearingOpening": "听证现在开始。在审查六名居民的证词之前，请作最终陈述。"
+  },
+  "fr-FR": {
+    "hesitationMarker": "(réponse tardive)",
+    "hearingOpening": "L'audience commence. Avant d'examiner les témoignages des six résidents, présentez votre déclaration finale."
+  },
+  "ja-JP": {
+    "hesitationMarker": "（返答の遅れ）",
+    "hearingOpening": "聴聞を開始します。六名の住民の証言を審査する前に、最終陳述を述べてください。"
+  }
+}

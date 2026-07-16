@@ -97,16 +97,20 @@ func build(root: Node2D, location_id: String, snapshot: Dictionary, tile_block: 
 	_build_collision(root, solids, loc)
 	_build_doorways(root, loc)
 
-	# Record props.
+	# Record props. Player-facing record surfaces stay in layout/runtime data
+	# for inspect + NPC visibility, but spawnInWorld:false keeps them out of
+	# the dressed room (M3: records live in inspect, not as floor props).
 	var prop_state := _prop_state_map(snapshot)
 	var prop_meta := _prop_meta_map(snapshot)
 	for prop_id in loc.get("props", {}).keys():
+		var content: Dictionary = prop_content.get(prop_id, {})
+		if content.has("spawnInWorld") and not bool(content.get("spawnInWorld")):
+			continue
 		var cell: Array = loc["props"][prop_id]
 		var node := PROP_SCENE.instantiate()
 		actors_node.add_child(node)
 		node.position = _cell_center(cell)
 		var meta: Dictionary = prop_meta.get(prop_id, {})
-		var content: Dictionary = prop_content.get(prop_id, {})
 		var label := str(meta.get("label", ""))
 		if label.is_empty():
 			label = _t(str(content.get("labelKey", "")))

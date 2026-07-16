@@ -15,7 +15,7 @@ signal restart_requested
 signal resolution_requested(preset_id: String)
 signal ui_scale_requested(scale: float)
 
-const HESITATION_SECONDS := 6.0
+const MIN_INTERROGATION_HESITATION_MS := 40000
 const INPUT_MAX_LENGTH := 120
 const HUD_REFERENCE_HEIGHT := 720.0
 const INK := Color("#ece8dc")
@@ -81,6 +81,11 @@ var _status_revision := 0
 var _ui_scale := 1.0
 var _user_scale := 1.0
 var _provider_fallback := false
+var _committed_prompt := ""
+var _typewriter_tween: Tween = null
+var _thinking_tween: Tween = null
+var _hesitation_seconds := 0.0
+const TYPEWRITER_CHARS_PER_SECOND := 36.0
 
 func _ready() -> void:
 	layer = 20
@@ -90,10 +95,10 @@ func _ready() -> void:
 	set_process(true)
 
 func _process(_delta: float) -> void:
-	if not _conversation_panel.visible or _hesitation_timer.is_stopped():
+	if not _conversation_panel.visible or _hesitation_seconds <= 0.0 or _hesitation_timer.is_stopped():
 		return
 	var remaining := maxf(_hesitation_timer.time_left, 0.0)
-	_timer_bar.value = HESITATION_SECONDS - remaining
+	_timer_bar.value = _hesitation_seconds - remaining
 	_timer_label.text = _t("hud.timer.seconds", {"seconds": "%0.1f" % remaining})
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -168,7 +173,7 @@ func _build_pressure_panel() -> void:
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 8)
 	rows.add_child(header)
-	_location_label = _label(_t("world.location.store"), 12, INK)
+	_location_label = _label(_t("world.location.store"), 14, INK)
 	header.add_child(_location_label)
 	_fallback_badge = _label(_t("hud.mode.fixture"), 10, Color("#91b7a0"))
 	_fallback_badge.visible = false
@@ -189,7 +194,7 @@ func _build_pressure_panel() -> void:
 	_report_bar = _meter(COLD)
 	meters.add_child(_report_bar)
 
-	_ledger_label = _label(_t("hud.ledger.open_hint"), 10, MUTED)
+	_ledger_label = _label(_t("hud.ledger.open_hint"), 12, MUTED)
 	_ledger_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	rows.add_child(_ledger_label)
 
@@ -208,7 +213,7 @@ func _build_hint_panel() -> void:
 	anchor.add_child(_hint_panel)
 	var margin := _margin(12, 4, 12, 4)
 	_hint_panel.add_child(margin)
-	_hint_label = _label(_t("hud.prompt.approach"), 11, INK)
+	_hint_label = _label(_t("hud.prompt.approach"), 13, INK)
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	margin.add_child(_hint_label)
@@ -232,16 +237,17 @@ func _build_conversation_panel() -> void:
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 6)
 	column.add_child(header)
-	_speaker_label = _label("", 12, WARM)
+	_speaker_label = _label("", 14, WARM)
 	_speaker_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_speaker_label)
 	_stamp = _label(_t("hud.conversation.recorded_stamp"), 11, Color("#e8b46c"))
 	_stamp.visible = false
 	_stamp.rotation = -0.08
 	header.add_child(_stamp)
-	_timer_label = _label(_t("hud.timer.seconds", {"seconds": "6.0"}), 10, MUTED)
-	_set_scaled_minimum(_timer_label, Vector2(42, 0))
+	_timer_label = _label(_t("hud.timer.seconds", {"seconds": "40.0"}), 10, MUTED)
+	_set_scaled_minimum(_timer_label, Vector2(48, 0))
 	_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_timer_label.visible = false
 	header.add_child(_timer_label)
 
 	_prompt_scroll = ScrollContainer.new()
@@ -251,25 +257,26 @@ func _build_conversation_panel() -> void:
 	_prompt_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_set_scaled_minimum(_prompt_scroll, Vector2(0, 30))
 	column.add_child(_prompt_scroll)
-	_prompt_label = _label("", 13, INK)
+	_prompt_label = _label("", 15, INK)
 	_prompt_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_prompt_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_prompt_scroll.add_child(_prompt_label)
 
 	_timer_bar = _meter(COLD)
-	_timer_bar.max_value = HESITATION_SECONDS
+	_timer_bar.max_value = 40.0
 	_timer_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_set_scaled_minimum(_timer_bar, Vector2(70, 3))
+	_timer_bar.visible = false
 	column.add_child(_timer_bar)
 
 	for index in range(3):
 		var button := Button.new()
 		button.name = "Choice%d" % (index + 1)
-		_set_scaled_minimum(button, Vector2(0, 22))
+		_set_scaled_minimum(button, Vector2(0, 26))
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.focus_mode = Control.FOCUS_ALL
-		_set_scaled_font(button, 12)
+		_set_scaled_font(button, 14)
 		_apply_button_styles(button, PAPER_SOFT, WARM)
 		# Submit on activation start so both mouse-down and keyboard accept remain
 		# reliable while the resizable window remaps the release point.
@@ -285,7 +292,7 @@ func _build_conversation_panel() -> void:
 	_input.max_length = INPUT_MAX_LENGTH
 	_input.placeholder_text = _t("hud.conversation.input_placeholder")
 	_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_set_scaled_font(_input, 12)
+	_set_scaled_font(_input, 14)
 	_input.add_theme_color_override("font_color", INK)
 	_input.add_theme_color_override("font_placeholder_color", Color(MUTED, 0.7))
 	_input.add_theme_stylebox_override("normal", _input_style(false))
@@ -294,15 +301,15 @@ func _build_conversation_panel() -> void:
 	input_row.add_child(_input)
 	_submit_button = Button.new()
 	_submit_button.text = _t("hud.conversation.submit")
-	_set_scaled_minimum(_submit_button, Vector2(46, 22))
-	_set_scaled_font(_submit_button, 11)
+	_set_scaled_minimum(_submit_button, Vector2(52, 24))
+	_set_scaled_font(_submit_button, 13)
 	_apply_button_styles(_submit_button, Color("#263143"), COLD)
 	_submit_button.pressed.connect(func() -> void: _submit_text(_input.text))
 	input_row.add_child(_submit_button)
 
 	_hesitation_timer = Timer.new()
 	_hesitation_timer.one_shot = true
-	_hesitation_timer.wait_time = HESITATION_SECONDS
+	_hesitation_timer.wait_time = 40.0
 	_hesitation_timer.timeout.connect(_on_hesitation_timeout)
 	add_child(_hesitation_timer)
 
@@ -447,8 +454,8 @@ func show_turn(turn: Dictionary) -> void:
 	_conversation_panel.visible = true
 	var actor_id := str(turn.get("speakerId", turn.get("actorId", "")))
 	_speaker_label.text = _actor_name(actor_id)
-	_prompt_label.text = str(turn.get("prompt", ""))
 	_prompt_scroll.scroll_vertical = 0
+	_start_typewriter(str(turn.get("prompt", "")))
 	set_provider(_dictionary_or_empty(turn.get("proposalMeta")))
 	var choices: Array = turn.get("choices", [])
 	for index in range(_choice_buttons.size()):
@@ -466,13 +473,15 @@ func show_turn(turn: Dictionary) -> void:
 	_input.clear()
 	_stamp.visible = false
 	_stamp.modulate.a = 0.0
-	_timer_bar.value = 0
-	_hesitation_timer.start(HESITATION_SECONDS)
+	_configure_hesitation_timer(turn)
 	if not _choice_buttons.is_empty():
 		_choice_buttons[0].call_deferred("grab_focus")
 
 func hide_conversation() -> void:
 	_hesitation_timer.stop()
+	_hesitation_seconds = 0.0
+	_stop_thinking_animation()
+	_kill_typewriter()
 	_conversation_panel.visible = false
 	_busy = false
 	if not _outcome_layer.visible:
@@ -486,14 +495,84 @@ func set_busy(value: bool) -> void:
 	_submit_button.disabled = value
 	if value:
 		_hesitation_timer.stop()
+		_show_thinking()
+	else:
+		_stop_thinking_animation()
 
 func show_conversation_error(message: String) -> void:
 	set_busy(false)
+	_prompt_label.modulate = Color(1, 1, 1, 1)
+	_prompt_label.text = _committed_prompt
 	_status_revision += 1
 	_ledger_label.text = message
 	_ledger_label.modulate = DANGER
-	if _conversation_panel.visible:
-		_hesitation_timer.start(HESITATION_SECONDS)
+	if _conversation_panel.visible and _hesitation_seconds > 0.0:
+		_hesitation_timer.start(_hesitation_seconds)
+
+func _configure_hesitation_timer(turn: Dictionary) -> void:
+	var hesitation_ms := int(turn.get("hesitationMs", 0))
+	if hesitation_ms >= MIN_INTERROGATION_HESITATION_MS:
+		_hesitation_seconds = float(hesitation_ms) / 1000.0
+		_timer_label.visible = true
+		_timer_bar.visible = true
+		_timer_bar.max_value = _hesitation_seconds
+		_timer_bar.value = 0.0
+		_timer_label.text = _t("hud.timer.seconds", {"seconds": "%0.1f" % _hesitation_seconds})
+		_hesitation_timer.start(_hesitation_seconds)
+	else:
+		_hesitation_seconds = 0.0
+		_timer_label.visible = false
+		_timer_bar.visible = false
+		_timer_bar.value = 0.0
+		_hesitation_timer.stop()
+
+func _show_thinking() -> void:
+	_kill_typewriter()
+	_stop_thinking_animation()
+	var speaker := _speaker_label.text
+	if speaker.is_empty():
+		speaker = _t("hud.conversation.thinking_speaker_fallback")
+	_prompt_label.text = _t("hud.conversation.thinking", {"speaker": speaker})
+	_prompt_label.modulate = Color(1, 1, 1, 1)
+	_thinking_tween = create_tween()
+	_thinking_tween.set_loops()
+	_thinking_tween.tween_property(_prompt_label, "modulate:a", 0.55, 0.55)
+	_thinking_tween.tween_property(_prompt_label, "modulate:a", 1.0, 0.55)
+
+func _stop_thinking_animation() -> void:
+	if _thinking_tween != null and is_instance_valid(_thinking_tween):
+		_thinking_tween.kill()
+	_thinking_tween = null
+	if is_instance_valid(_prompt_label):
+		_prompt_label.modulate = Color(1, 1, 1, 1)
+
+func _start_typewriter(full_text: String) -> void:
+	_stop_thinking_animation()
+	_kill_typewriter()
+	_committed_prompt = full_text
+	_prompt_label.modulate = Color(1, 1, 1, 1)
+	# Long generated lines fill immediately so the prompt scroll region can
+	# size itself; ordinary reply length still typewrites.
+	if full_text.length() > 64:
+		_prompt_label.text = full_text
+		return
+	_prompt_label.text = ""
+	if full_text.is_empty():
+		return
+	var duration := clampf(float(full_text.length()) / TYPEWRITER_CHARS_PER_SECOND, 0.08, 0.85)
+	_typewriter_tween = create_tween()
+	_typewriter_tween.tween_method(_reveal_typewriter_chars, 0.0, float(full_text.length()), duration)
+
+func _reveal_typewriter_chars(visible_count: float) -> void:
+	_prompt_label.text = _committed_prompt.substr(
+		0,
+		clampi(int(round(visible_count)), 0, _committed_prompt.length())
+	)
+
+func _kill_typewriter() -> void:
+	if _typewriter_tween != null and is_instance_valid(_typewriter_tween):
+		_typewriter_tween.kill()
+	_typewriter_tween = null
 
 func set_pressure(suspicion: int, report_pressure: int, why_lines: Array = []) -> void:
 	_suspicion_bar.value = suspicion
@@ -839,7 +918,7 @@ func _label(text: String, size: int, color: Color) -> Label:
 	return label
 
 func _metric_label(label_text: String) -> Label:
-	var label := _label("%s 000" % label_text, 10, INK)
+	var label := _label("%s 000" % label_text, 12, INK)
 	_set_scaled_minimum(label, Vector2(50, 0))
 	return label
 
@@ -913,8 +992,8 @@ func _margin(left: int, top: int, right: int, bottom: int) -> MarginContainer:
 	return margin
 
 ## Base typography: logical px at 720p ≈ physical px. Body text lands at
-## ~19px on 1080p and ~39px on 4K at 100% — regular PC density, not the old
-## doubled large-text default. The user scale multiplies on top (Esc settings).
+## ~22px on 1080p and ~45px on 4K at 100% after the M3 readability bump.
+## The user scale multiplies on top (Esc settings, 80–150%).
 func _calculate_ui_scale() -> float:
 	var height := get_viewport().get_visible_rect().size.y
 	return clampf(height / HUD_REFERENCE_HEIGHT, 1.0, 3.0) * _user_scale

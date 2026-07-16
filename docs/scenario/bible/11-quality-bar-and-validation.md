@@ -30,10 +30,14 @@ The game is not live-provider-backed until these pass:
 - API proposal is generated from current ObservationFrame, conversation state, and NPC role context.
 - Runtime preflight proves configured provider and model availability.
 - Backend schema validates or rejects the proposal.
-- Rejected provider output produces deterministic fallback and Evidence reason.
-- Accepted provider line changes wording only.
+- Rejected provider output produces a visible provider interruption, applies
+  no event, and retains the exact request for retry.
+- Accepted provider output owns wording and social judgment inside runtime
+  validity constraints.
 - Exposure, intake, Inquest, verdict, and termination remain backend-owned.
-- Two runs can show varied NPC phrasing with the same deterministic outcome under the same state.
+- Two runs may show different valid phrasing and judgment from the same state;
+  the runtime keeps authority over provenance, bounds, and mutations rather
+  than forcing the same social outcome.
 
 ## Indie Quality Bar
 

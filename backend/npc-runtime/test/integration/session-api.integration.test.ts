@@ -4,6 +4,7 @@ import { startSessionServer, type RunningSessionServer } from "../../src/api/htt
 import { SessionService } from "../../src/runtime/session/service.js";
 import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
+import { ProviderFailureError } from "../../src/providers/ports.js";
 
 type Answer = { type: "choice" | "free_input" | "hesitation"; choiceId?: string; text?: string };
 
@@ -49,6 +50,53 @@ async function driveRoute(base: string, answers: Answer[]): Promise<any> {
   assert.equal(end.status, 200, JSON.stringify(end.json));
   return end.json;
 }
+
+test("legacy session provider failure leaves no partial start or answer mutation", async () => {
+  const failedOpeningAdapter = createSameOrderScriptedAdapter();
+  failedOpeningAdapter.proposeConversationTurn = async () => {
+    throw new ProviderFailureError(
+      failedOpeningAdapter.profileId,
+      "unavailable",
+      "conversation",
+    );
+  };
+  const failedOpeningService = new SessionService({ proposalPort: failedOpeningAdapter });
+  await assert.rejects(
+    failedOpeningService.start("same-order", "ko-KR"),
+    (error: unknown) =>
+      error instanceof ProviderFailureError && error.reason === "unavailable",
+  );
+  assert.equal(
+    (Reflect.get(failedOpeningService, "sessions") as Map<unknown, unknown>).size,
+    0,
+  );
+
+  const adapter = createSameOrderScriptedAdapter();
+  const originalAnswer = adapter.judgeAndProposeConversationTurn.bind(adapter);
+  let failAnswer = true;
+  adapter.judgeAndProposeConversationTurn = async request => {
+    if (failAnswer) {
+      throw new ProviderFailureError(adapter.profileId, "timeout", "conversation_turn");
+    }
+    return originalAnswer(request);
+  };
+  const service = new SessionService({ proposalPort: adapter });
+  const started = await service.start("same-order", "ko-KR");
+  const before = service.snapshot(started.sessionId);
+  const answer = {
+    type: "choice" as const,
+    choiceId: started.nextTurn.choices[0]?.choiceId,
+  };
+  await assert.rejects(
+    service.answer(started.sessionId, started.nextTurn.turnId, answer),
+    (error: unknown) => error instanceof ProviderFailureError && error.reason === "timeout",
+  );
+  assert.deepEqual(service.snapshot(started.sessionId), before);
+
+  failAnswer = false;
+  const answered = await service.answer(started.sessionId, started.nextTurn.turnId, answer);
+  assert.ok(answered.whyLines[0]);
+});
 
 test("all four routes are drivable purely through the Session API", async () => {
   await withServer(async base => {
@@ -100,7 +148,7 @@ test("session/start returns a validated world snapshot with five economy values"
   });
 });
 
-test("answer surfaces Korean why-lines, a suspicion delta, and ledger deltas", async () => {
+test("answer surfaces the provider-authored why-line and a suspicion delta", async () => {
   await withServer(async base => {
     const start = await post(base, "/v1/session/start", { storyletId: "same-order", locale: "ko-KR" });
     const sessionId = start.json.sessionId;
@@ -112,7 +160,10 @@ test("answer surfaces Korean why-lines, a suspicion delta, and ledger deltas", a
     assert.equal(res.status, 200);
     assert.deepEqual(res.json.signals, ["local_routine_mismatch"]);
     assert.ok(res.json.whyLines[0].length > 0);
-    assert.match(res.json.whyLines[0], /[가-힣]/);
+    assert.equal(
+      res.json.whyLines[0],
+      "The line contradicted the local routine the NPC assumed.",
+    );
     assert.ok(res.json.suspicionDelta > 0);
   });
 });
@@ -158,9 +209,10 @@ test("Session API exposes a blocked tool result followed by a provider re-plan",
       return { rationale: "Re-plan complete.", done: true };
     },
   });
+  const service = new SessionService({ proposalPort: adapter });
   const running = await startSessionServer({
     logListen: false,
-    service: new SessionService({ proposalPort: adapter }),
+    service,
   });
   const base = `http://${running.host}:${running.port}`;
   try {
@@ -171,10 +223,101 @@ test("Session API exposes a blocked tool result followed by a provider re-plan",
       answer: { type: "choice", choiceId: "routine.generated.1" },
     });
     assert.equal(answer.status, 200, JSON.stringify(answer.json));
-    assert.equal(answer.json.transcriptDeltas[0].validation.reason, "not_visible");
-    assert.equal(answer.json.transcriptDeltas[1].validation.ok, true);
+    // Agent-loop beats no longer delay the answer; drain the aftermath queue.
+    await service.awaitIdle(start.json.sessionId);
+    const aftermath = service.takeLastAftermath(start.json.sessionId);
+    assert.ok(aftermath);
+    assert.equal(aftermath.transcriptDeltas[0].validation.reason, "not_visible");
+    assert.equal(aftermath.transcriptDeltas[1].validation.ok, true);
     assert.deepEqual(previousResults.slice(0, 2), [undefined, false]);
   } finally {
+    await running.close();
+  }
+});
+
+test("legacy session/end waits for delayed answer aftermath before freezing the result", async () => {
+  let markAftermathStarted!: () => void;
+  const aftermathStarted = new Promise<void>(resolve => {
+    markAftermathStarted = resolve;
+  });
+  let releaseAftermath!: () => void;
+  const aftermathReleased = new Promise<void>(resolve => {
+    releaseAftermath = resolve;
+  });
+
+  const adapter = new ScriptedNpcAdapter({
+    conversation: () => ({
+      utterance: "평소 주문으로 마칠까요?",
+      suggestedReplies: [
+        { text: "네, 같은 걸로 부탁해요.", intent: "safe/local" },
+        { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair" },
+        { text: "오늘 처음 왔는데요.", intent: "risky/weird" },
+      ],
+      continueConversation: false,
+    }),
+    nextStep: async request => {
+      if (request.iteration === 0) {
+        markAftermathStarted();
+        await aftermathReleased;
+        return {
+          toolCall: {
+            tool: "use_object",
+            args: {
+              objectId: "usual_order_cue",
+              toState: "cited",
+              ledgerKind: "usual_order_cited",
+              whyLine: "점원이 보이는 평소 주문 표식을 확인했습니다.",
+            },
+          },
+          rationale: "Confirm the visible routine before closing service.",
+          done: false,
+        };
+      }
+      return { rationale: "The routine is confirmed.", done: true };
+    },
+  });
+
+  let markEndCalled!: () => void;
+  const endCalled = new Promise<void>(resolve => {
+    markEndCalled = resolve;
+  });
+  class EndObservedSessionService extends SessionService {
+    override end(sessionId: string) {
+      markEndCalled();
+      return super.end(sessionId);
+    }
+  }
+
+  const service = new EndObservedSessionService({ proposalPort: adapter });
+  const running = await startSessionServer({ logListen: false, service });
+  const base = `http://${running.host}:${running.port}`;
+  try {
+    const start = await post(base, "/v1/session/start", { storyletId: "same-order", locale: "ko-KR" });
+    const answer = await post(base, "/v1/session/answer", {
+      sessionId: start.json.sessionId,
+      turnId: start.json.nextTurn.turnId,
+      answer: { type: "choice", choiceId: "routine.generated.1" },
+    });
+    assert.equal(answer.status, 200, JSON.stringify(answer.json));
+    await aftermathStarted;
+
+    const endPromise = post(base, "/v1/session/end", { sessionId: start.json.sessionId });
+    await endCalled;
+    releaseAftermath();
+
+    const ended = await endPromise;
+    assert.equal(ended.status, 200, JSON.stringify(ended.json));
+    assert.equal(ended.json.route, "clean_cover");
+    assert.equal(ended.json.outcomePanel.body, "평소 순서대로 응대가 끝났습니다.");
+    assert.equal(ended.json.outcomePanel.citedLedgerIds.length, 1);
+    assert.equal(ended.json.telemetrySummary.ledgerEventCount, 1);
+    assert.equal(ended.json.telemetrySummary.providerProfile, "scripted/test");
+    assert.equal(ended.json.telemetrySummary.fallbackCount, 0);
+
+    const retry = await post(base, "/v1/session/end", { sessionId: start.json.sessionId });
+    assert.deepEqual(retry, ended);
+  } finally {
+    releaseAftermath();
     await running.close();
   }
 });

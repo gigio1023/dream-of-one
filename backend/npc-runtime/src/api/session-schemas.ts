@@ -41,7 +41,23 @@ const proposalMetaSchema = z
       .strict()
       .optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((meta, context) => {
+    if (meta.usedFallback !== (meta.transport === "fallback")) {
+      context.addIssue({
+        code: "custom",
+        path: ["usedFallback"],
+        message: "only fallback transport may set usedFallback",
+      });
+    }
+    if (meta.transport !== "fallback" && meta.fallbackReason !== undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["fallbackReason"],
+        message: "live and scripted proposal metadata cannot carry a fallback reason",
+      });
+    }
+  });
 
 export const civicEconomySchema = z
   .object({
@@ -129,6 +145,8 @@ const nextTurnSchema = z
       z.object({ choiceId: nonEmpty, intent: intentEnum, line: nonEmpty }).strict(),
     ),
     proposalMeta: proposalMetaSchema,
+    /** Station interrogation only; omit on ordinary conversation turns. */
+    hesitationMs: z.number().int().positive().optional(),
   })
   .strict();
 
@@ -202,7 +220,9 @@ const npcActionSchema = z
 // -------------------------------------------------------------------------
 
 export const startRequestSchema = z
-  .object({ storyletId: nonEmpty, locale: nonEmpty })
+  // The retained Same Order regression storylet is Korean-only. Six-locale
+  // production support belongs to the run-bound M3R request schemas.
+  .object({ storyletId: nonEmpty, locale: z.literal("ko-KR") })
   .strict();
 
 export const answerRequestSchema = z

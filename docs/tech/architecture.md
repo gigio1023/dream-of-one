@@ -4,16 +4,16 @@
 
 ```mermaid
 flowchart LR
-    subgraph Client["Godot 4.x 2D client (godot/)"]
-        Scenes["Scenes: world tilemaps,\nactors, record props"]
-        HUD["HUD: conversation panel,\nsuspicion, ledger line"]
+    subgraph Client["Godot 4.x first-person 3D client (godot/)"]
+        Scenes["Scenes: seamless 3D town,\nactors, doors/props"]
+        HUD["HUD: conversation surface,\nsubtitles, suspicion, ledger line"]
         Bridge["RuntimeBridge\n(HTTP or embedded)"]
     end
 
     subgraph Runtime["NPC runtime (backend/npc-runtime/, TypeScript)"]
-        Decision["DecisionService\n(deterministic authority)"]
-        Suspicion["Suspicion classifier\n+ reason taxonomy"]
-        World["World state: records,\ncivic ledger, economy"]
+        Decision["RunService + conversation sessions\n(deterministic authority)"]
+        Suspicion["Judgment validation + clamps\n+ provider interruption state"]
+        World["World state: memories, stances,\nrecords, civic ledger, clock"]
         Agent["Agent-loop engine:\ncontext assembly, tool validation"]
         Ports["Provider ports\n(NpcProposalPort)"]
     end
@@ -21,7 +21,6 @@ flowchart LR
     subgraph Providers["Adapters (config-selected profiles)"]
         CC["ChatCompletionsAdapter\nOpenAI SDK + custom baseURL\n(ModelScope, OpenRouter, local, ...)"]
         RESP["ResponsesAdapter\nOpenAI Responses API\n(gpt-5.x family)"]
-        FALLBACK["RuleFallbackNpcAdapter\n(resilience only)"]
         SCRIPTED["ScriptedNpcAdapter\n(test injection only)"]
     end
 
@@ -34,7 +33,6 @@ flowchart LR
     Agent --> Ports
     Ports --> CC
     Ports --> RESP
-    Ports --> FALLBACK
     Agent -. test injection .-> SCRIPTED
 ```
 
@@ -67,7 +65,9 @@ to the clean-machine packaging gate below.
 | Frame-rate isolation | Brain latency is process-isolated from rendering | Requires disciplined threaded/async scheduling inside the engine |
 
 So: **brains (agent loop, context assembly, provider ports, memory, all
-deterministic authority) live in `backend/npc-runtime/`. Godot is the body
+deterministic authority) live in `backend/npc-runtime/`. M3R first lifts
+those systems under a run-scoped service; the current code is still
+conversation-session scoped. Godot is the body
 and the stage** — senses in (observations, player input), actions out
 (validated mutations to render). This also means the whole social sim can run
 headless (fixture NPCs conversing without a renderer), which is how agent-loop
@@ -115,9 +115,12 @@ small Godot C# in-process probe before committing to the M5 runtime path.
 ## Client ↔ runtime transport
 
 - **HTTP sidecar.** The runtime runs as a local Bun process
-  (`bun run --cwd backend/npc-runtime serve`) exposing the v1-proven endpoint
-  shape (`/v1/npc/decision`, plus v2 session endpoints). Godot talks JSON over
-  localhost. Fast iteration, engine-independent testing.
+  (`bun run --cwd backend/npc-runtime serve`). The current implementation is
+  session-scoped and exposes `/v1/npc/decision` plus the v2 session endpoints.
+  M3R keeps this transport but adds `/v1/run/*` lifecycle endpoints, binds
+  conversation sessions beneath a `runId`, and extends the validated packets
+  with run identity. Godot talks JSON over localhost. Fast iteration,
+  engine-independent testing.
 - **Packaging (must be proven before M5):** the shipped build targets a
   Bun-compiled sidecar executable with a launcher that starts and stops it.
   If clean-machine packaging or lifecycle recovery fails, compare the
@@ -131,9 +134,10 @@ small Godot C# in-process probe before committing to the M5 runtime path.
   (session events, decision packets, proposal envelopes, ledger events).
   Zod-validated on both ingress and egress. Godot-side parsing stays dumb.
 - **Semantic world layout.** `godot/data/world_layout.json` remains the
-  source for landmarks/zones/anchors/actors, extended with a `tile` block
-  (grid coords) for 2D. The client renders it; the runtime reasons over it.
-  One file, two consumers, no duplicated world truth.
+  source for landmarks/zones/anchors/actors, re-expressed in 3D coordinates
+  with sight/audibility volumes for the converted client (M3R). The client
+  renders it; the runtime reasons over it. One file, two consumers, no
+  duplicated world truth.
 - **Content as constraints.** Storylets compile scene facts, actor goals,
   classification patterns, authority thresholds, and outcome presentation
   from `docs/scenario/` canon. Authored choice lists, NPC reply lists, and
@@ -142,7 +146,7 @@ small Godot C# in-process probe before committing to the M5 runtime path.
 ## Repo layout target
 
 ```
-godot/                     # 2D client (rebuilt in M1)
+godot/                     # client (M1–M3: 2D; converting to first-person 3D in M3R)
   scenes/ scripts/ assets/ data/ tools/
 backend/npc-runtime/
   src/

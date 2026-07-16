@@ -1,11 +1,14 @@
 extends SceneTree
 
-## Checks only the committed M1 asset floor. Missing optional/local packs are
-## reported as information because the playable build must not depend on them.
+## Checks the committed asset floor. Missing optional/local packs are reported
+## as information because the playable build must not depend on them.
 
 const KENNEY_ATLAS := "res://assets/kenney2d/rpg-urban-pack/Tilemap/tilemap_packed.png"
 const KENNEY_LICENSE := "res://assets/kenney2d/rpg-urban-pack/License.txt"
 const MANIFEST := "res://assets/third_party/manifest.json"
+const COMMERCIAL_TRIM_DIR := "res://assets/kenney3d/city_commercial"
+const KAYKIT_CITY_DIR := "res://assets/kaykit/city_builder_bits"
+const KAYKIT_PROTOTYPE_DIR := "res://assets/kaykit/prototype_bits"
 const GREYBOX_ASSETS := [
 	"res://assets/greybox/queue_marker.png",
 	"res://assets/greybox/store_counter.png",
@@ -26,11 +29,13 @@ func _run() -> void:
 	_check_file(KENNEY_LICENSE, "Kenney CC0 license")
 	for path in GREYBOX_ASSETS:
 		_check_file(path, "greybox asset")
-	_check_license_text()
 	_check_manifest()
+	_check_no_closed_commercial_buildings()
+	_check_no_kaykit_city_architecture()
+	_check_no_kaykit_prototype_forbidden_content()
 
 	if _failures.is_empty():
-		print("PASS check_assets: Kenney atlas/license, %d greybox assets, and manifest are valid" % GREYBOX_ASSETS.size())
+		print("PASS check_assets: committed 2D/3D packs, licenses, curated files, greybox assets, and manifest are valid")
 		quit(0)
 		return
 	for failure in _failures:
@@ -43,14 +48,17 @@ func _check_file(path: String, label: String) -> void:
 		return
 	print("PASS check_assets: %s" % path)
 
-func _check_license_text() -> void:
-	if not FileAccess.file_exists(KENNEY_LICENSE):
+func _check_license_text(path: String, pack_name: String, license_name: String) -> void:
+	if not FileAccess.file_exists(path):
 		return
-	var text := FileAccess.get_file_as_string(KENNEY_LICENSE)
+	var text := FileAccess.get_file_as_string(path)
 	if text.strip_edges().is_empty():
-		_failures.append("Kenney license file is empty")
+		_failures.append("license file is empty for %s" % pack_name)
+	elif license_name.findn("Open Font") >= 0 or license_name.findn("OFL") >= 0:
+		if text.findn("SIL OPEN FONT LICENSE") < 0:
+			_failures.append("license does not identify SIL OFL for %s" % pack_name)
 	elif text.findn("CC0") < 0 and text.findn("Creative Commons Zero") < 0:
-		_failures.append("Kenney license does not identify CC0")
+		_failures.append("license does not identify CC0 for %s" % pack_name)
 
 func _check_manifest() -> void:
 	if not FileAccess.file_exists(MANIFEST):
@@ -88,7 +96,8 @@ func _check_manifest() -> void:
 		if name.is_empty() or tier.is_empty() or install_path.is_empty():
 			_failures.append("manifest pack row is missing name/tier/installPath")
 			continue
-		if str(pack.get("source", "")).is_empty() or str(pack.get("license", "")).is_empty():
+		var license_name := str(pack.get("license", ""))
+		if str(pack.get("source", "")).is_empty() or license_name.is_empty():
 			_failures.append("manifest pack %s is missing source/license" % name)
 
 		var installed := _directory_exists(install_path)
@@ -100,11 +109,81 @@ func _check_manifest() -> void:
 			var license_path := str(pack.get("licensePath", ""))
 			if license_path.is_empty() or not FileAccess.file_exists(license_path):
 				_failures.append("committed pack license is missing: %s" % name)
+			else:
+				_check_license_text(license_path, name, license_name)
+				_check_sha256(
+					license_path,
+					str(pack.get("licenseSha256", "")),
+					"license for %s" % name
+				)
+			_check_manifest_selection(pack, name, install_path)
 		else:
 			local_rows += 1
 			print("INFO check_assets: local pack %s installed=%s (absence is allowed)" % [name, installed])
 	if local_rows == 0:
 		print("INFO check_assets: no optional local-pack rows declared; committed tier is self-sufficient")
+
+func _check_manifest_selection(pack: Dictionary, pack_name: String, install_path: String) -> void:
+	var selected_assets: Variant = pack.get("selectedAssets", [])
+	if selected_assets is Array:
+		for relative_path_value in selected_assets:
+			var relative_path := str(relative_path_value)
+			_check_file(install_path.path_join(relative_path), "selected file for %s" % pack_name)
+	var selected_hashes: Variant = pack.get("selectedFileSha256", {})
+	if selected_hashes is Dictionary:
+		for relative_path_value in (selected_hashes as Dictionary).keys():
+			var relative_path := str(relative_path_value)
+			var path := install_path.path_join(relative_path)
+			_check_file(path, "selected file for %s" % pack_name)
+			_check_sha256(
+				path,
+				str((selected_hashes as Dictionary).get(relative_path_value, "")),
+				"selected file for %s" % pack_name
+			)
+
+func _check_sha256(path: String, expected: String, label: String) -> void:
+	if expected.is_empty() or not FileAccess.file_exists(path):
+		return
+	var actual := FileAccess.get_sha256(path)
+	if actual.to_lower() != expected.to_lower():
+		_failures.append("SHA-256 mismatch for %s: expected %s, got %s" % [label, expected, actual])
+
+func _check_no_closed_commercial_buildings() -> void:
+	if not _directory_exists(COMMERCIAL_TRIM_DIR):
+		return
+	for file_name in DirAccess.get_files_at(COMMERCIAL_TRIM_DIR):
+		var normalized := file_name.to_lower().replace("-", "_")
+		if normalized.begins_with("building_") or normalized.begins_with("low_detail_building_"):
+			_failures.append("closed City Kit building mesh is forbidden in the enterable town: %s" % file_name)
+
+func _check_no_kaykit_city_architecture() -> void:
+	if not _directory_exists(KAYKIT_CITY_DIR):
+		return
+	for file_name in DirAccess.get_files_at(KAYKIT_CITY_DIR):
+		var normalized := file_name.to_lower().replace("-", "_")
+		if (
+			normalized.begins_with("building_")
+			or normalized.begins_with("road_")
+			or normalized.begins_with("base_")
+			or normalized.begins_with("base.")
+		):
+			_failures.append("KayKit City architecture is forbidden in the enterable town: %s" % file_name)
+
+func _check_no_kaykit_prototype_forbidden_content() -> void:
+	if not _directory_exists(KAYKIT_PROTOTYPE_DIR):
+		return
+	for file_name in DirAccess.get_files_at(KAYKIT_PROTOTYPE_DIR):
+		var normalized := file_name.to_lower().replace("-", "_")
+		if (
+			normalized.begins_with("door_")
+			or normalized.begins_with("dummy_")
+			or normalized.begins_with("floor")
+			or normalized.begins_with("pillar_")
+			or normalized.begins_with("primitive_")
+			or normalized.begins_with("target")
+			or normalized.begins_with("wall")
+		):
+			_failures.append("KayKit Prototype architecture, target, or dummy asset is forbidden: %s" % file_name)
 
 func _directory_exists(path: String) -> bool:
 	return DirAccess.dir_exists_absolute(ProjectSettings.globalize_path(path))

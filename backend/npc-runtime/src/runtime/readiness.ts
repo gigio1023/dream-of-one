@@ -26,7 +26,7 @@ export async function evaluateRuntimeReadiness(service: SessionService, storylet
         ok: provider.available,
         profileId: service.providerProfile(),
         reason: provider.reason,
-        fallbackAvailable: true,
+        failureMode: "interrupt" as const,
       },
     },
   };

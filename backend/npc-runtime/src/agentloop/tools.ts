@@ -60,7 +60,7 @@ export type ToolBlockReason =
   | "invalid_args";
 
 /** Which ledger-event kinds a role is allowed to author. */
-const ROLE_LEDGER_AUTHORITY: Record<WorldRole, ReadonlySet<string>> = {
+export const ROLE_LEDGER_AUTHORITY: Record<WorldRole, ReadonlySet<string>> = {
   player: new Set<string>(),
   store_clerk: new Set([
     "usual_order_cited",
@@ -86,17 +86,51 @@ const ROLE_LEDGER_AUTHORITY: Record<WorldRole, ReadonlySet<string>> = {
     "queue_wary_noted",
     "queue_delay_noted",
   ]),
-  station_officer: new Set(["station_record_cited", "station_correction_recorded"]),
+  studio_receptionist: new Set(["record_written", "record_updated", "record_read"]),
+  studio_manager: new Set(["record_written", "record_updated", "record_read"]),
+  office_worker: new Set(["record_written", "record_updated", "record_read"]),
+  park_caretaker: new Set(["record_written", "record_updated", "record_read"]),
+  station_officer: new Set([
+    "record_written",
+    "record_updated",
+    "record_read",
+    "station_record_cited",
+    "station_correction_recorded",
+  ]),
+  roaming_liaison: new Set(["record_written", "record_updated", "record_read"]),
+};
+
+/** Object affordances are separate from administrative ledger authority. */
+const ROLE_OBJECT_AUTHORITY: Record<WorldRole, boolean> = {
+  player: false,
+  store_clerk: true,
+  store_manager: true,
+  waiting_customer: true,
+  studio_receptionist: false,
+  studio_manager: false,
+  office_worker: false,
+  park_caretaker: false,
+  station_officer: false,
+  roaming_liaison: false,
 };
 
 /** Which record kinds a role may author. */
-const ROLE_RECORD_AUTHORITY: Record<WorldRole, ReadonlySet<RecordKind>> = {
+export const ROLE_RECORD_AUTHORITY: Record<WorldRole, ReadonlySet<RecordKind>> = {
   player: new Set<RecordKind>(),
   store_clerk: new Set<RecordKind>(["receipt", "clerk_statement", "correction"]),
   store_manager: new Set<RecordKind>(["clerk_statement", "report"]),
   waiting_customer: new Set<RecordKind>(["posting"]),
-  station_officer: new Set<RecordKind>(["dossier", "citation"]),
+  studio_receptionist: new Set<RecordKind>(["note", "correction"]),
+  studio_manager: new Set<RecordKind>(["note", "correction", "report"]),
+  office_worker: new Set<RecordKind>(["note", "correction"]),
+  park_caretaker: new Set<RecordKind>(["note", "posting", "report"]),
+  station_officer: new Set<RecordKind>(["note", "correction", "report", "dossier", "citation"]),
+  roaming_liaison: new Set<RecordKind>(["note"]),
 };
+
+export function recordKindsForRole(role: WorldRole): RecordKind[] {
+  return [...ROLE_RECORD_AUTHORITY[role]];
+}
 
 function asString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim().length > 0 ? value : undefined;
@@ -105,7 +139,7 @@ function asString(value: unknown): string | undefined {
 /** The set of tool names offered to a role, derived from role authority. */
 export function toolCatalogForRole(role: WorldRole): ToolName[] {
   const base: ToolName[] = ["move_to", "look", "talk_to", "wait", "read_record"];
-  if (ROLE_LEDGER_AUTHORITY[role].size > 0) {
+  if (ROLE_OBJECT_AUTHORITY[role]) {
     base.push("use_object");
   }
   if (ROLE_RECORD_AUTHORITY[role].size > 0) {

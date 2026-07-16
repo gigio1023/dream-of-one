@@ -1,0 +1,748 @@
+[gd_scene format=3 uid="uid://bfis2d2g38chy"]
+
+[ext_resource type="Script" uid="uid://dxk1la341eo3j" path="res://scripts/ui/hud_3d.gd" id="1_xeuvv"]
+[ext_resource type="Theme" uid="uid://cveoqev2gg0t3" path="res://assets/greybox/town_hud_theme.tres" id="2_w7ihb"]
+
+[node name="HUD3D" type="CanvasLayer" unique_id=1675612338]
+process_mode = 3
+script = ExtResource("1_xeuvv")
+
+[node name="Overlay" type="Control" parent="." unique_id=1541512440]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_w7ihb")
+
+[node name="StartHint" type="Label" parent="Overlay" unique_id=2062677157]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(680, 56)
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -340.0
+offset_top = 28.0
+offset_right = 340.0
+offset_bottom = 84.0
+theme_override_font_sizes/font_size = 20
+text = "hud.m3r.start_hint"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="ContactCuePanel" type="PanelContainer" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+z_index = 15
+custom_minimum_size = Vector2(560, 54)
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -280.0
+offset_top = 88.0
+offset_right = 280.0
+offset_bottom = 142.0
+mouse_filter = 2
+
+[node name="ContactCueMargin" type="MarginContainer" parent="Overlay/ContactCuePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 8
+
+[node name="ContactCueLabel" type="Label" parent="Overlay/ContactCuePanel/ContactCueMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="Reticle" type="Label" parent="Overlay" unique_id=1701409843]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+theme_override_font_sizes/font_size = 28
+text = "·"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PromptPanel" type="PanelContainer" parent="Overlay" unique_id=442350069]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(560, 72)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -280.0
+offset_top = -104.0
+offset_right = 280.0
+offset_bottom = -32.0
+mouse_filter = 2
+
+[node name="PromptMargin" type="MarginContainer" parent="Overlay/PromptPanel" unique_id=914019426]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 10
+
+[node name="PromptLabel" type="Label" parent="Overlay/PromptPanel/PromptMargin" unique_id=1072619297]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="AmbientSubtitlePanel" type="PanelContainer" parent="Overlay" unique_id=1128530992]
+unique_name_in_owner = true
+visible = false
+z_index = 20
+custom_minimum_size = Vector2(760, 96)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -380.0
+offset_top = -220.0
+offset_right = 380.0
+offset_bottom = -124.0
+mouse_filter = 2
+
+[node name="AmbientSubtitleMargin" type="MarginContainer" parent="Overlay/AmbientSubtitlePanel" unique_id=1822553197]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 14
+
+[node name="AmbientSubtitleLabel" type="Label" parent="Overlay/AmbientSubtitlePanel/AmbientSubtitleMargin" unique_id=1644927685]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="SettingsShade" type="ColorRect" parent="Overlay" unique_id=562713826]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.04, 0.05, 0.06, 0.82)
+
+[node name="SettingsPanel" type="PanelContainer" parent="Overlay/SettingsShade" unique_id=1538192761]
+custom_minimum_size = Vector2(520, 680)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -340.0
+offset_right = 260.0
+offset_bottom = 340.0
+
+[node name="SettingsMargin" type="MarginContainer" parent="Overlay/SettingsShade/SettingsPanel" unique_id=483374769]
+layout_mode = 2
+theme_override_constants/margin_left = 34
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 34
+theme_override_constants/margin_bottom = 28
+
+[node name="SettingsColumns" type="VBoxContainer" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin" unique_id=2111670642]
+layout_mode = 2
+theme_override_constants/separation = 11
+
+[node name="SettingsTitle" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1749963203]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "hud.settings.title"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="TitleSeparator" type="HSeparator" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=493455203]
+layout_mode = 2
+
+[node name="SensitivityLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=152357322]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "hud.settings.look_sensitivity"
+autowrap_mode = 3
+
+[node name="SensitivitySlider" type="HSlider" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1907032286]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.01
+max_value = 1.0
+step = 0.01
+value = 0.12
+
+[node name="InvertYCheck" type="CheckButton" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1454467187]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "hud.settings.invert_y"
+autowrap_mode = 3
+
+[node name="FovLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=145728742]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "hud.settings.fov"
+autowrap_mode = 3
+
+[node name="FovSlider" type="HSlider" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=70903646]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 60.0
+value = 75.0
+
+[node name="UiScaleLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1811602415]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "hud.settings.ui_scale"
+autowrap_mode = 3
+
+[node name="UiScaleOption" type="OptionButton" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1664846954]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 36)
+layout_mode = 2
+
+[node name="MasterVolumeLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=2132074860]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "hud.settings.master_volume"
+autowrap_mode = 3
+
+[node name="MasterVolumeSlider" type="HSlider" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1938455988]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 24)
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.8
+
+[node name="SfxVolumeLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=418253914]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "hud.settings.sfx_volume"
+autowrap_mode = 3
+
+[node name="SfxVolumeSlider" type="HSlider" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=2051936076]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 24)
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.8
+
+[node name="LanguageLabel" type="Label" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=2129814183]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "hud.settings.language"
+autowrap_mode = 3
+
+[node name="LanguageOption" type="OptionButton" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=299281038]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 36)
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=1179849014]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+
+[node name="CloseSettingsButton" type="Button" parent="Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns" unique_id=772478979]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 48)
+layout_mode = 2
+text = "hud.settings.return"
+autowrap_mode = 3
+
+[node name="ConversationShade" type="ColorRect" parent="Overlay" unique_id=1769277182]
+visible = false
+z_index = 50
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.025, 0.035, 0.05, 0.72)
+
+[node name="ConversationPanel" type="PanelContainer" parent="Overlay/ConversationShade" unique_id=575960445]
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -560.0
+offset_top = 24.0
+offset_right = 560.0
+offset_bottom = -24.0
+
+[node name="ConversationMargin" type="MarginContainer" parent="Overlay/ConversationShade/ConversationPanel" unique_id=1943691211]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="ConversationColumns" type="VBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin" unique_id=48711294]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="ConversationHeader" type="VBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=565651476]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ConversationSpeakerLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=1532702043]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+autowrap_mode = 3
+
+[node name="ConversationStanceLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=1574555424]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+autowrap_mode = 3
+
+[node name="ConversationProviderLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=493881863]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 3
+
+[node name="PromptScroll" type="ScrollContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1003693884]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ConversationPromptLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/PromptScroll" unique_id=855216337]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/font_size = 22
+autowrap_mode = 3
+
+[node name="ConversationThinkingLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1298750503]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+
+[node name="ConversationTimerLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.72, 0.4, 1)
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="ConversationWhyLineLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=337130830]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ConversationChoices" type="VBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=643675631]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ConversationChoice1" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=413619225]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ConversationChoice2" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=444677498]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ConversationChoice3" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=1928375374]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 64)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ConversationInputRow" type="HBoxContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=291500317]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ConversationFreeInput" type="LineEdit" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow" unique_id=540008870]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+max_length = 120
+
+[node name="ConversationSubmitButton" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow" unique_id=834202607]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ConversationStatusLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1099542982]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+autowrap_mode = 3
+
+[node name="EndConversationButton" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1154947243]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ProviderFailurePanel" type="PanelContainer" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+z_index = 90
+layout_mode = 0
+anchor_left = 0.08
+anchor_right = 0.92
+offset_top = 18.0
+offset_bottom = 518.0
+
+[node name="ProviderFailureMargin" type="MarginContainer" parent="Overlay/ProviderFailurePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 18
+
+[node name="ProviderFailureColumns" type="VBoxContainer" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ProviderFailureTitle" type="Label" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.72, 0.46, 1)
+theme_override_font_sizes/font_size = 27
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ProviderFailureBody" type="Label" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ProviderFailureReason" type="Label" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.96, 0.65, 0.52, 1)
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ProviderFailureRetryButton" type="Button" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ProviderFailureRestartButton" type="Button" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ProviderFailureStatus" type="Label" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.55, 0.45, 1)
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="EncounteredStancePanel" type="PanelContainer" parent="Overlay" unique_id=1963527026]
+visible = false
+z_index = 15
+custom_minimum_size = Vector2(440, 230)
+layout_mode = 0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -470.0
+offset_top = 90.0
+offset_right = -30.0
+offset_bottom = 320.0
+
+[node name="EncounteredStanceMargin" type="MarginContainer" parent="Overlay/EncounteredStancePanel" unique_id=1866431278]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="EncounteredStanceLabel" type="Label" parent="Overlay/EncounteredStancePanel/EncounteredStanceMargin" unique_id=27522384]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="LogShade" type="ColorRect" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+z_index = 45
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.025, 0.035, 0.05, 0.82)
+
+[node name="LogPanel" type="PanelContainer" parent="Overlay/LogShade"]
+layout_mode = 0
+anchor_left = 0.05
+anchor_top = 0.05
+anchor_right = 0.95
+anchor_bottom = 0.95
+
+[node name="LogMargin" type="MarginContainer" parent="Overlay/LogShade/LogPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="LogColumns" type="VBoxContainer" parent="Overlay/LogShade/LogPanel/LogMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="LogTitle" type="Label" parent="Overlay/LogShade/LogPanel/LogMargin/LogColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="LogSeparator" type="HSeparator" parent="Overlay/LogShade/LogPanel/LogMargin/LogColumns"]
+layout_mode = 2
+
+[node name="LogScroll" type="ScrollContainer" parent="Overlay/LogShade/LogPanel/LogMargin/LogColumns"]
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LogBody" type="RichTextLabel" parent="Overlay/LogShade/LogPanel/LogMargin/LogColumns/LogScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 19
+fit_content = true
+scroll_active = false
+
+[node name="LogErrorLabel" type="Label" parent="Overlay/LogShade/LogPanel/LogMargin/LogColumns"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.55, 0.48, 1)
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="LogBusyLabel" type="Label" parent="Overlay/LogShade/LogPanel/LogMargin/LogColumns"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CloseLogButton" type="Button" parent="Overlay/LogShade/LogPanel/LogMargin/LogColumns"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="OutcomeShade" type="ColorRect" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+z_index = 65
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.02, 0.028, 0.04, 0.94)
+
+[node name="OutcomePanel" type="PanelContainer" parent="Overlay/OutcomeShade"]
+layout_mode = 0
+anchor_left = 0.08
+anchor_top = 0.05
+anchor_right = 0.92
+anchor_bottom = 0.95
+
+[node name="OutcomeMargin" type="MarginContainer" parent="Overlay/OutcomeShade/OutcomePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 34
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 34
+theme_override_constants/margin_bottom = 28
+
+[node name="OutcomeColumns" type="VBoxContainer" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="OutcomeTitle" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 34
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="OutcomeVerdictLabel" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="OutcomeVouchLabel" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="OutcomeSeparator" type="HSeparator" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+layout_mode = 2
+
+[node name="OutcomeScroll" type="ScrollContainer" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+custom_minimum_size = Vector2(0, 380)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="OutcomeBody" type="RichTextLabel" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns/OutcomeScroll"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(1200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/normal_font_size = 19
+fit_content = true
+scroll_active = false
+
+[node name="OutcomeStatusLabel" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.55, 0.48, 1)
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="RestartButton" type="Button" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "hud.m3r.outcome.restart"
+autowrap_mode = 3
+
+[node name="HearingFade" type="ColorRect" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+z_index = 80
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.015, 0.02, 0.03, 0)
+
+[node name="DebugPanel" type="PanelContainer" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+z_index = 100
+layout_mode = 0
+anchor_left = 0.02
+anchor_top = 0.58
+anchor_right = 0.62
+anchor_bottom = 0.98
+mouse_filter = 2
+
+[node name="DebugMargin" type="MarginContainer" parent="Overlay/DebugPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="DebugText" type="RichTextLabel" parent="Overlay/DebugPanel/DebugMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_font_sizes/normal_font_size = 13
+scroll_active = true

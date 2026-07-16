@@ -11,6 +11,91 @@ description — **"Would I play this again for five minutes?"** with one
 sentence of why. That's it. External playtests are welcome input and never a
 gate.
 
+For the M3R conversion, intermediate 3D spatial/UI slices use model-free
+engineering evidence: CLI smokes plus Godot AI session/readiness, saved scene
+hierarchy/properties, current diagnostics, and non-input captures. A final
+bounded live run supplies the play/fun answer and itemized acceptance.
+
+### M3R live-play routing (owner-set, updated 2026-07-13)
+
+M3R separates the model driving the test from the model living inside the
+game:
+
+- GPT-5.6 Sol ultra is the current default for planning, implementation,
+  diagnosis, repair, self-review, and actual play through Godot AI.
+- High-volume Godot tool use or a hands-on play run stays in one native child
+  with exclusive run ownership; the lead session remains available to inspect
+  the result and make repairs. No custom worker role is required.
+- Do not use `lower-capability-executor-prompt` unless the owner explicitly
+  requests it.
+- Every real NPC/model call in those play runs pins
+  `modelscope/qwen3.7-plus`. A live result counts only when the returned
+  metadata says that profile, `transport=live`, and no provider interruption. Missing Qwen
+  credentials block live acceptance; OpenAI, a local model, scripted output,
+  or rule-authored output may not substitute.
+- Bun checks, fixture smokes, scripted Session API parity, headless Godot
+  smokes, and explicit fail-closed interruption checks make no product LLM call.
+  Sol may run them, but they are engineering evidence only and never prove the
+  LLM game experience.
+
+The existing spend-bearing live-provider smoke has now passed all six locales
+at commit `7ad18d9d` (2026-07-15). The latest `ko-KR` round used two calls and
+7,769 charged tokens; the sequential `en-US`, `it-IT`, `zh-CN`, `fr-FR`, and
+`ja-JP` rounds used ten calls and 35,454 charged tokens in total. Every call
+used `modelscope/qwen3.7-plus`, returned `transport=live`, and had no repair,
+fallback, failure, dropped result, truncation, or in-flight remainder. This is
+provider/language evidence only: the final Godot AI route still supplies the
+rendered layout, IME, and play evidence, without adding a locale-specific
+smoke harness or weakening the Qwen/zero-fallback requirements.
+
+A bounded rendered first-contact run at commit `de5a46fa` (2026-07-15) then
+completed the real park flow from an `E` prompt through one Korean answer and
+the next generated turn. It used nine calls and 21,267 charged tokens, all on
+`modelscope/qwen3.7-plus` with `transport=live`; repair, fallback, failure,
+dropped result, truncation, and in-flight remainder were all zero. The world
+paused during the modal exchange, social revision advanced, and the former
+empty preparation modal did not recur. Its bounded fun answer was
+*conditionally yes*: the remembered answer, why-line, and follow-up made the
+social loop worth continuing despite rough visuals. This proves first contact,
+not the still-pending full interrogation, recovery, hearing, or IME routes.
+
+A broader rendered town-life run at commit `f9a06083` (2026-07-16) used 39
+physical calls and 144,089 charged tokens. Its 35 resolutions matched 35
+runtime-trace entries; four repair calls completed successfully, and fallback,
+failed calls, dropped evidence, truncation, and in-flight remainder were all
+zero. The run proved jump and camera control, the open Park-to-Studio portal,
+multiple residents moving, latency-safe grounded contact, a generated Korean
+conversation with visible stance/why-line consequences, a complete
+Manager/Caretaker exchange in authoritative runtime history, and the later
+listener-facing no-change diagnostic. Its fun answer was **yes, narrowly**:
+the moving residents and generated social consequences supported another five
+minutes, but mandatory three-answer conversations and easy-to-miss ambient
+speech reduced the pull. The worker did not capture both ambient subtitles and
+speech blips while they were visibly on-screen, so the first-playable visual
+claim, full hearing routes, provider-interruption presentation, and IME remain open.
+
+### Headless evidence boundary
+
+Headless is the default implementation-time route so automated work does not
+open or focus a game window. It can prove imports and scene loads, scripted
+input delivery, deterministic physics/collision/navigation consequences,
+sidecar HTTP parity, scheduler and hearing state transitions, provider
+metadata and budgets, localization key/placeholder parity, and bundled font
+coverage. A live Qwen provider smoke remains real provider evidence when its
+returned metadata passes the requirements below, even though it is not play
+evidence.
+
+Headless does **not** prove rendered composition, character readability,
+lighting/materials, camera or movement feel, real mouse capture and focus
+behavior, OS IME composition, frame pacing, or the fun gate. The vendored
+Godot AI editor plugin is disabled by default when Godot uses the headless
+display driver; direct helper-autoload smokes may exercise its normal input
+code path, but they do not create an MCP play session, a framebuffer capture,
+or hands-on evidence. `GODOT_AI_ALLOW_HEADLESS` must not be used to relabel an
+empty dummy-renderer viewport as visual proof. Keep the game stopped during
+ordinary implementation and reserve a rendered Godot AI run for the smallest
+final acceptance route that needs pixels, native input, or player judgment.
+
 ## Commands (engineering)
 
 ```bash
@@ -22,16 +107,75 @@ $GODOT_BIN --version # Expected: 4.7.x stable
 $GODOT_BIN --headless --import --path godot
 DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/scene_load_smoke.gd
 DREAM_SESSION_MODE=fixture $GODOT_BIN --headless --path godot --script res://tools/route_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/npc_movement_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/physical_prop_smoke.gd
+$GODOT_BIN --headless --path godot --script res://tools/godot_ai_input_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/localization_smoke.gd
 $GODOT_BIN --headless --path godot --script res://tools/check_assets.gd
+$GODOT_BIN --headless --path godot --script res://tools/asset_validation_smoke.gd
 
-# Localhost Session API parity (starts and stops a scripted test adapter)
+# Localhost API parity (starts and stops scripted test adapters; no live model)
 GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
+GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/run-api-http-parity.sh
 
-# Opt-in real provider smoke; requires the selected profile's credentials
-bun run --cwd backend/npc-runtime provider:smoke -- --profile openai/gpt-5.4-mini
-bun run --cwd backend/npc-runtime provider:smoke -- --profile modelscope/qwen3.7-plus
+# M3R opt-in live provider smoke (manual/spend-bearing; Qwen only)
+: "${MODELSCOPE_API_KEY:?MODELSCOPE_API_KEY is required for live Qwen verification}"
+set -o pipefail
+env -u OPENAI_API_KEY -u LOCAL_LLM_BASE_URL \
+  NPC_PROVIDER_PROFILE=modelscope/qwen3.7-plus \
+  MODELSCOPE_BASE_URL=https://api-inference.modelscope.ai/v1 \
+  bun --no-env-file backend/npc-runtime/src/tools/provider-smoke.ts \
+  --profile modelscope/qwen3.7-plus --locale ko-KR | \
+  jq -e '
+    .profileId == "modelscope/qwen3.7-plus" and
+    .locale == "ko-KR" and
+    .acceptancePassed == true
+  '
 ```
+
+The same existing smoke accepts `--locale en-US|it-IT|zh-CN|fr-FR|ja-JP`
+for the other supported languages. It uses the M3R Studio receptionist
+opening and merged judgment/reply path; it is a provider calibration check,
+not a substitute for the final Godot AI play route.
+
+For a live game run, start the sidecar with the same guard and no dotenv
+autoload, then point Godot at it:
+
+```bash
+env -u OPENAI_API_KEY -u LOCAL_LLM_BASE_URL \
+  NPC_PROVIDER_PROFILE=modelscope/qwen3.7-plus \
+  MODELSCOPE_BASE_URL=https://api-inference.modelscope.ai/v1 \
+  PORT=18787 \
+  bun --no-env-file backend/npc-runtime/src/index.ts
+
+DREAM_SESSION_MODE=http \
+DREAM_SESSION_URL=http://127.0.0.1:18787 \
+"$GODOT_BIN" --path godot
+```
+
+`/health/ready` proves only the sidecar is serving. The live run must inspect
+`providerAudit` on the terminal hearing response before the client reloads,
+require `complete=true`, `truncated=false`, `droppedCount=0`,
+`inFlightCalls=0`, and a `callsUsed` count greater than zero. Every recorded
+call must report `profileId=modelscope/qwen3.7-plus`, `transport=live`,
+`usedFallback=false`, and `outcome=success`; every recorded resolution must
+use the same profile with `transport=live`, `usedFallback=false`, and no
+fallback reason. `callsUsed` must equal completed calls plus in-flight calls,
+and `tokensUsed` must equal the sum of `calls[].chargedTokens` plus
+`inFlightTokens`. The adjacent `providerRuntimeTrace` must also be complete,
+untruncated, non-empty, and contain only that same Qwen/live/no-fallback
+metadata; the adjacent run-level `providerFailure` must be null, proving that
+a structurally valid live envelope was not later rejected semantically. For complete evidence with any
+recorded resolution or trace entry, the resolution count must equal the runtime
+trace entry count and both dropped counts must be zero. The Godot AI
+`providerAuditSummary.allExpectedProfileLiveNoFallback` field combines these
+checks and must be `true`. It also requires the client-known provider-request
+in-flight count to be zero, covering the interval after a preload, NPC
+decision, or player/hearing answer starts but before a response can carry a
+new server audit. Sampling one response packet or checking only
+`lastProposalMeta` is insufficient. The
+OpenAI-compatible npm client used by the ModelScope adapter is transport code;
+the pinned base URL and returned profile identify the model route.
 
 CI runs the Bun check on backend changes (existing workflow). Godot smokes
 run locally per slice; add them to CI only if a real regression escapes
@@ -42,9 +186,14 @@ twice.
 - A slice ships with the narrowest check that would catch its regression —
   usually one existing smoke, occasionally one new fixture.
 - Tests protect: deterministic authority, schema compatibility, the provider
-  boundary (validation/fallback/budget), player-visible route outcomes. Tests
+  boundary (validation/failure/budget), player-visible route outcomes. Tests
   do not protect: helper scripts, formatting, internal helper structure.
 - No verification ledgers, evidence packs, proof audits, or standing status
   files. State lives in code, tests, and the PR that shipped it.
-- Screenshots in PRs for visual changes: one before/after pair, taken from
-  the running game. No contact-sheet apparatus.
+- Visual-change PRs include the smallest Godot AI capture that proves the
+  claim: one affected editor/game frame, with a before/after pair only when the
+  comparison matters. Exercised-state captures belong to the bounded live
+  play. No contact-sheet apparatus.
+- A failed or unavailable Qwen live run is an honest blocked result, not
+  permission to relax the route or count a deterministic smoke as the fun
+  gate.

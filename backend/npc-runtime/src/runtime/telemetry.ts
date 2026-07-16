@@ -2,8 +2,26 @@ import { createHash, randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { basename, isAbsolute, relative, resolve } from "node:path";
 import type { ActionType, DecisionEnvelope } from "../contracts/types.js";
-import type { DecisionMailboxMetrics } from "./decision-service.js";
 import type { SchedulerSnapshot } from "./multi-bot-scheduler.js";
+
+export interface DecisionMailboxMetrics {
+  queued: number;
+  inflight: number;
+  coalesced: number;
+  dropped: number;
+  skippedBeforeBroker: number;
+  cancelled: number;
+  deadlineExceeded: number;
+  globalCap: number;
+  globalInFlight: number;
+  globalQueued: number;
+  backpressureRejected: number;
+  actorQueueSaturated: number;
+  globalQueueSaturated: number;
+  perBotPendingLimit: number;
+  globalPendingLimit: number;
+  currentGlobalPending: number;
+}
 
 export type TelemetryRecordType = "godot_observation" | "decision_cycle" | "scheduler_snapshot";
 

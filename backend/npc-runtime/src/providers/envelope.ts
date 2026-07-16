@@ -292,7 +292,7 @@ export const conversationProposalSchema = z
   });
 
 // Deltas are validated as integers only; the runtime clamps them to the
-// per-turn validity caps so an over-eager model never dumps to fallback.
+// per-turn validity caps so an over-eager model cannot escape runtime validity.
 export const conversationJudgmentSchema = z
   .object({
     suspicionDelta: z.number().int(),
@@ -572,7 +572,7 @@ export function hearingJudgmentSchemaForLocale(locale: string) {
  * RunService remains the final authority and repeats this validation at
  * commit time; doing it here gives the provider's one repair attempt a chance
  * to fix request-semantic mistakes instead of turning a successful transport
- * call directly into runtime fallback.
+ * call into a fail-closed runtime path.
  */
 export function hearingJudgmentSchemaForRequest(request: HearingJudgmentRequest) {
   return hearingJudgmentSchemaForLocale(request.locale).superRefine((value, context) => {
@@ -1737,7 +1737,7 @@ export function agentStepProposalJsonSchemaForTools(
         ) {
           // A required meeting reply should already be grounded by the runtime.
           // Keep an exact transport branch so local Zod can reject inconsistent
-          // packets and deterministically invoke fallback instead of throwing.
+          // packets and surface the inconsistency through fail-closed validation.
           actorIds.push(constraints.requiredToolCall.actorId);
         }
         return constrainStringField(argsProperties, "actorId", actorIds);

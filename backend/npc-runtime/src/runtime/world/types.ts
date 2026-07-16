@@ -1,4 +1,4 @@
-// Deterministic world-state authority shared by live, fallback, and scripted proposals.
+// Deterministic world-state authority shared by live and scripted proposals.
 //
 // Absorbs the generic core of the retired `runtime/agentic-environment.ts`
 // proof file: records, an append-only civic ledger, the civic economy, and

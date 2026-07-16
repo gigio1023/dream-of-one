@@ -239,9 +239,9 @@ export interface RuleJudgmentInput {
 }
 
 /**
- * Deterministic fallback judgment: the signal-pattern classifier that was the
- * M1 product default. It is used only when no live provider judgment is
- * available (and by the scripted regression adapter).
+ * Signal-pattern classifier retained for the scripted M1 regression adapter.
+ * Production provider failures must never call this function as a substitute
+ * social judgment.
  */
 export function ruleJudgeConversationTurn(input: RuleJudgmentInput): {
   suspicionDelta: number;

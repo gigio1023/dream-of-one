@@ -22,7 +22,7 @@ import {
 } from "../localization/supported-locales.js";
 import type { ToolName } from "../agentloop/tools.js";
 import type { ObservePacket } from "../agentloop/context.js";
-import { ProviderBudgetReservedError } from "./ports.js";
+import { ProviderBudgetReservedError, ProviderFailureError } from "./ports.js";
 import type {
   AmbientReplyJudgment,
   AmbientReplyRequest,
@@ -542,7 +542,6 @@ const HEARING_PROVIDER_TIMEOUT_MS = 120_000;
 export interface ProviderServiceOptions {
   profileId: string;
   textGen: TextGenPort;
-  fallback: NpcProposalPort;
   timeoutMs?: number;
   maxCallsPerSession?: number;
   maxTokensPerSession?: number;
@@ -568,6 +567,15 @@ export class ProviderService implements NpcProposalPort {
 
   preflight(): Promise<{ available: boolean; reason?: ProviderFailureReason }> {
     return this.options.textGen.preflight();
+  }
+
+  releaseScope(scopeId: string): void {
+    const inFlight = this.audits.get(scopeId)?.inFlight.size ?? 0;
+    if (inFlight > 0) {
+      throw new Error(`cannot release provider scope with ${inFlight} transport call(s) in flight`);
+    }
+    this.budgets.delete(scopeId);
+    this.audits.delete(scopeId);
   }
 
   accountingSnapshot(scopeId: string): { callsUsed: number; tokensUsed: number } {
@@ -657,7 +665,6 @@ export class ProviderService implements NpcProposalPort {
       },
       schema: proposalSchema,
       repairContext: requestContext,
-      fallback: () => this.options.fallback.proposeConversationTurn(request),
     });
   }
 
@@ -719,7 +726,6 @@ export class ProviderService implements NpcProposalPort {
       },
       schema: proposalSchema,
       repairContext: requestContext,
-      fallback: () => this.options.fallback.judgeConversationTurn(request),
     });
   }
 
@@ -839,7 +845,6 @@ export class ProviderService implements NpcProposalPort {
       },
       schema: proposalSchema,
       repairContext: requestContext,
-      fallback: () => this.options.fallback.judgeAndProposeConversationTurn(request),
     });
   }
 
@@ -963,7 +968,6 @@ export class ProviderService implements NpcProposalPort {
       schema: agentStepProposalSchemaForRequest(request.locale, schemaConstraints),
       repairContext: requestContext,
       budgetCeiling: request.budgetCeiling,
-      fallback: () => this.options.fallback.proposeNextStep(request),
     });
   }
 
@@ -1022,7 +1026,6 @@ export class ProviderService implements NpcProposalPort {
       ),
       repairContext: requestContext,
       budgetCeiling: request.budgetCeiling,
-      fallback: () => this.options.fallback.judgeAndProposeAmbientReply(request),
     });
   }
 
@@ -1072,7 +1075,6 @@ export class ProviderService implements NpcProposalPort {
       },
       schema: hearingJudgmentSchemaForRequest(request),
       repairContext: requestContext,
-      fallback: () => this.options.fallback.judgeHearing(request),
     });
   }
 
@@ -1082,12 +1084,16 @@ export class ProviderService implements NpcProposalPort {
     schema: z.ZodType<T>;
     repairContext?: unknown;
     budgetCeiling?: { maxCalls: number; maxTokens: number };
-    fallback: () => Promise<ResolvedProposal<T>>;
   }): Promise<ResolvedProposal<T>> {
     const generated = await this.generateValidated(input);
-    const resolved = generated.ok
-      ? { proposal: generated.value, meta: generated.meta }
-      : this.withFallbackReason(await input.fallback(), generated.reason);
+    if (!generated.ok) {
+      throw new ProviderFailureError(
+        this.profileId,
+        generated.reason,
+        input.request.purpose,
+      );
+    }
+    const resolved = { proposal: generated.value, meta: generated.meta };
     this.recordResolution(
       input.sessionId,
       input.request.purpose,
@@ -1158,11 +1164,11 @@ export class ProviderService implements NpcProposalPort {
           repairRequest,
           input.budgetCeiling,
         );
-        if (repairAdmission !== "admitted") {
-          // A live first call must remain linked to one resolution. If only the
-          // repair no longer fits the caller reserve, retain the existing
-          // deterministic fallback resolution rather than orphaning that call.
+        if (repairAdmission === "hard_exhausted") {
           return { ok: false, reason: "budget_exhausted", callSeqs };
+        }
+        if (repairAdmission === "caller_reserved") {
+          throw new ProviderBudgetReservedError();
         }
         const repair = await this.generateOne(
           input.sessionId,
@@ -1196,8 +1202,7 @@ export class ProviderService implements NpcProposalPort {
       };
     } catch (error) {
       if (error instanceof ProviderBudgetReservedError) {
-        if (callSeqs.length === 0) throw error;
-        return { ok: false, reason: "budget_exhausted", callSeqs };
+        throw error;
       }
       return { ok: false, reason: this.normalizeFailure(error), callSeqs };
     }
@@ -1219,8 +1224,8 @@ export class ProviderService implements NpcProposalPort {
     const callSeq = this.beginCallAudit(sessionId, reservedTokens);
     callSeqs.push(callSeq);
     try {
-      const result = await this.withTimeout(
-        this.options.textGen.generate(request),
+      const result = await this.generateWithTimeout(
+        signal => this.options.textGen.generate(request, signal),
         request.timeoutMs ?? this.timeoutMs,
       );
       const chargedTokens = this.completeCall(sessionId, reservedTokens, result.usage);
@@ -1270,15 +1275,24 @@ export class ProviderService implements NpcProposalPort {
     }
   }
 
-  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  private async generateWithTimeout<T>(
+    generate: (signal: AbortSignal) => Promise<T>,
+    timeoutMs: number,
+  ): Promise<T> {
+    const controller = new AbortController();
+    let timedOut = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      return await Promise.race([
-        promise,
-        new Promise<T>((_, reject) => {
-          timer = setTimeout(() => reject(new Error("provider timeout")), timeoutMs);
-        }),
-      ]);
+      timer = setTimeout(() => {
+        timedOut = true;
+        controller.abort(new Error("provider timeout"));
+      }, timeoutMs);
+      const result = await generate(controller.signal);
+      if (timedOut) throw new Error("provider timeout");
+      return result;
+    } catch (error) {
+      if (timedOut) throw new Error("provider timeout", { cause: error });
+      throw error;
     } finally {
       if (timer) clearTimeout(timer);
     }
@@ -1426,19 +1440,4 @@ export class ProviderService implements NpcProposalPort {
     };
   }
 
-  private withFallbackReason<T>(
-    fallback: ResolvedProposal<T>,
-    reason: ProviderFailureReason,
-  ): ResolvedProposal<T> {
-    return {
-      proposal: fallback.proposal,
-      meta: {
-        ...fallback.meta,
-        profileId: this.profileId,
-        transport: "fallback",
-        usedFallback: true,
-        fallbackReason: reason,
-      },
-    };
-  }
 }

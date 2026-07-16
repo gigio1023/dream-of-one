@@ -3,9 +3,14 @@ import { DEFAULT_ROLE_POLICIES, assembleObservePacket, type ActorMemory } from "
 import { runBeat, type NpcAction } from "../../agentloop/engine.js";
 import type { ActorContextLite } from "../../agentloop/tools.js";
 import { TranscriptStore, type TranscriptEntry } from "../../agentloop/transcript.js";
-import type { NpcProposalPort, ProposalMeta, SuggestedReply } from "../../providers/ports.js";
+import {
+  ProviderFailureError,
+  type NpcProposalPort,
+  type ProposalMeta,
+  type SuggestedReply,
+} from "../../providers/ports.js";
 import { createProviderFromEnvironment } from "../../providers/registry.js";
-import { fallbackContent } from "../../localization/fallback-content.js";
+import { procedureContent } from "../../localization/procedure-content.js";
 import {
   requireSupportedGameplayLocale,
   type GameplayLocale,
@@ -281,7 +286,7 @@ export class SessionService {
     const sessionId = `sess-${randomUUID()}`;
     const initialMeta: ProposalMeta = {
       profileId: this.proposalPort.profileId,
-      transport: "fallback",
+      transport: "live",
       usedFallback: false,
     };
     const session: SessionState = {
@@ -305,7 +310,12 @@ export class SessionService {
       turnCount: 0,
     };
     this.sessions.set(sessionId, session);
-    session.activeTurn = await this.buildNextTurn(session);
+    try {
+      session.activeTurn = await this.buildNextTurn(session);
+    } catch (error) {
+      this.sessions.delete(sessionId);
+      throw error;
+    }
     return {
       sessionId,
       worldSnapshot: this.buildWorldSnapshot(session),
@@ -332,13 +342,12 @@ export class SessionService {
     // Append the speaker agent beat onto the same serialize chain so later
     // mutations (and session/end) wait for it, while the answer HTTP response
     // can return as soon as the merged call finishes.
-    const chain = this.sessionChains.get(sessionId) ?? Promise.resolve();
     this.sessionChains.set(
       sessionId,
-      chain
+      resultPromise
         .then(
           () => this.runAnswerAftermath(sessionId),
-          () => this.runAnswerAftermath(sessionId),
+          () => undefined,
         )
         .then(
           () => undefined,
@@ -376,10 +385,7 @@ export class SessionService {
     const beat = session.storylet.beats[session.beatIndex];
     const priorContinue = session.activeTurn.continueConversation;
     const classified = this.classifyAnswer(session, answer);
-    session.processedTurnIds.add(turnId);
-    session.turnCount += 1;
     const judgmentHistory = session.dialogue.slice(-10);
-    session.dialogue.push({ speakerId: "player", line: classified.line });
 
     const actor = this.actorContext(session, beat.speakerId);
     const memory = this.memoryFor(session, beat.speakerId);
@@ -413,7 +419,11 @@ export class SessionService {
       objective: proposeBeat.objective,
       sceneFacts: [session.storylet.scenePremise, ...proposeBeat.sceneFacts],
     });
+    this.rejectFallbackProposalMeta(merged.meta, "conversation_turn");
     this.trackProposalMeta(session, [merged.meta]);
+    session.processedTurnIds.add(turnId);
+    session.turnCount += 1;
+    session.dialogue.push({ speakerId: "player", line: classified.line });
 
     const suspicionBefore = session.suspicion;
     const reportPressureBefore = session.reportPressure;
@@ -475,10 +485,7 @@ export class SessionService {
 
     return {
       signals: merged.proposal.signals,
-      whyLines:
-        merged.meta.transport === "live"
-          ? [merged.proposal.whyLine]
-          : this.resolveWhyLines(session.storylet, merged.proposal.signals),
+      whyLines: [merged.proposal.whyLine],
       suspicionDelta: session.suspicion - suspicionBefore,
       reportPressure: session.reportPressure,
       npcReactions: reactions,
@@ -626,7 +633,11 @@ export class SessionService {
     };
   }
 
-  end(sessionId: string): SessionEndResult {
+  end(sessionId: string): Promise<SessionEndResult> {
+    return this.serialize(sessionId, () => this.resolveEnd(sessionId));
+  }
+
+  private async resolveEnd(sessionId: string): Promise<SessionEndResult> {
     const session = this.require(sessionId);
     const route = session.finalRoute ?? this.projectRoute(session);
     session.finalRoute = route;
@@ -683,6 +694,7 @@ export class SessionService {
       observePacket,
       conversationHistory: session.dialogue.slice(-10),
     });
+    this.rejectFallbackProposalMeta(resolved.meta, "conversation");
     this.trackProposalMeta(session, [resolved.meta]);
     session.dialogue.push({ speakerId: beat.speakerId, line: resolved.proposal.utterance });
     const choiceSetId = `${beat.promptId}.generated`;
@@ -722,7 +734,7 @@ export class SessionService {
       if (!text) throw new SessionError("free_input requires non-empty text", "invalid_answer");
       return { line: text, freeInputHash: hashText(text) };
     }
-    return { line: fallbackContent(session.locale).hesitationMarker };
+    return { line: procedureContent(session.locale).hesitationMarker };
   }
 
   private projectRoute(session: SessionState): RouteId {
@@ -731,12 +743,6 @@ export class SessionService {
     if (session.reportPressure >= softReport) return "soft_report";
     if (session.signalsSeen.size > 0 || session.suspicion > 0) return "repair_recovery";
     return "clean_cover";
-  }
-
-  private resolveWhyLines(storylet: Storylet, signals: ConversationSuspicionSignal[]): string[] {
-    return signals.length === 0
-      ? [storylet.whyLines.none]
-      : signals.map(signal => storylet.whyLines[signal] ?? storylet.whyLines.none);
   }
 
   private routeState(
@@ -802,6 +808,18 @@ export class SessionService {
       session.lastProposalMeta = meta;
       if (meta.usedFallback) session.fallbackCount += 1;
     }
+  }
+
+  private rejectFallbackProposalMeta(
+    meta: ProposalMeta,
+    purpose: ConstructorParameters<typeof ProviderFailureError>[2],
+  ): void {
+    if (meta.transport !== "fallback" && !meta.usedFallback) return;
+    throw new ProviderFailureError(
+      meta.profileId,
+      meta.fallbackReason ?? "invalid_envelope",
+      purpose,
+    );
   }
 
   private buildWorldSnapshot(session: SessionState): WorldSnapshot {

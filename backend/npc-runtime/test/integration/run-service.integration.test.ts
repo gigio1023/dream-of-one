@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
-import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
+import { ProviderFailureError } from "../../src/providers/ports.js";
 import { loadProviderConfig } from "../../src/providers/registry.js";
-import { loadRunLayout } from "../../src/runtime/run-layout.js";
+import { conversationZoneFor, loadRunLayout } from "../../src/runtime/run-layout.js";
 import {
   issueActorGoalMovement,
   type RunSchedulerRuntime,
@@ -86,6 +86,171 @@ test("run/start hydrates the shared town layout into six persistent uncertain ac
   assert.equal(snapshot.scheduler.actors.length, 6);
   assert.ok(snapshot.scheduler.actors.every(actor => actor.currentBlock !== null));
   assert.ok(snapshot.scheduler.actors.every(actor => actor.pendingMovement === null));
+});
+
+test("player provider failures preserve exact state and clear only after the same operation succeeds", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
+  const originalAnswer = adapter.judgeAndProposeConversationTurn.bind(adapter);
+  let failOpening = true;
+  let failAnswer = true;
+  adapter.proposeConversationTurn = async request => {
+    if (request.actorId === STUDIO_RECEPTIONIST_ID && failOpening) {
+      throw new ProviderFailureError(adapter.profileId, "unavailable", "conversation");
+    }
+    return originalOpening(request);
+  };
+  adapter.judgeAndProposeConversationTurn = async request => {
+    if (request.actorId === STUDIO_RECEPTIONIST_ID && failAnswer) {
+      throw new ProviderFailureError(adapter.profileId, "timeout", "conversation_turn");
+    }
+    return originalAnswer(request);
+  };
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
+  const started = service.start("player-provider-exact-retry", "ko-KR");
+  const beforeOpening = service.snapshot(started.runId);
+
+  await assert.rejects(
+    preloadReceptionist(service, started.runId),
+    (error: unknown) =>
+      error instanceof ProviderFailureError && error.reason === "unavailable",
+  );
+  const openingFailed = service.snapshot(started.runId);
+  assert.equal(openingFailed.worldRevision, beforeOpening.worldRevision);
+  assert.equal(
+    openingFailed.actors.find(actor => actor.actorId === STUDIO_RECEPTIONIST_ID)?.memories.length,
+    0,
+  );
+  assert.equal(openingFailed.providerFailure?.purpose, "conversation");
+  const openingOperationKey = openingFailed.providerFailure?.operationKey;
+  assert.ok(openingOperationKey);
+
+  const layout = loadRunLayout();
+  const other = openingFailed.actors.find(actor => actor.actorId === "NPC_Office_Worker");
+  assert.ok(other);
+  const otherZone = conversationZoneFor(layout, other.actorId, other.locationId);
+  assert.ok(otherZone);
+  await service.preloadConversation(
+    started.runId,
+    other.actorId,
+    otherZone.zoneId,
+    "ko-KR",
+  );
+  assert.equal(
+    service.snapshot(started.runId).providerFailure?.operationKey,
+    openingOperationKey,
+    "a different successful provider operation must not erase the failure",
+  );
+
+  failOpening = false;
+  await preloadReceptionist(service, started.runId);
+  assert.equal(service.snapshot(started.runId).providerFailure, null);
+  await groundOrdinaryConversation(
+    service,
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "player-provider-exact-retry:ground",
+  );
+  const conversation = await service.startConversation(
+    started.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+  const safe = conversation.nextTurn.choices.find(choice => choice.intent === "safe/local");
+  assert.ok(safe);
+  const beforeAnswer = service.snapshot(started.runId);
+  const answer = { type: "choice" as const, choiceId: safe.choiceId };
+
+  await assert.rejects(
+    service.answer(started.runId, conversation.sessionId, conversation.nextTurn.turnId, answer),
+    (error: unknown) =>
+      error instanceof ProviderFailureError && error.reason === "timeout",
+  );
+  const answerFailed = service.snapshot(started.runId);
+  assert.equal(answerFailed.worldRevision, beforeAnswer.worldRevision);
+  assert.deepEqual(answerFailed.actors, beforeAnswer.actors);
+  assert.equal(answerFailed.providerFailure?.purpose, "conversation_turn");
+
+  failAnswer = false;
+  const answered = await service.answer(
+    started.runId,
+    conversation.sessionId,
+    conversation.nextTurn.turnId,
+    answer,
+  );
+  assert.equal(answered.actor.memories.length, 2);
+  assert.equal(service.snapshot(started.runId).providerFailure, null);
+});
+
+test("an interrupted run can be abandoned idempotently without a fabricated terminal result", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.proposeConversationTurn = async () => {
+    throw new ProviderFailureError(adapter.profileId, "unavailable", "conversation");
+  };
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
+  const startId = "provider-interrupted-abandon";
+  const started = service.start(startId, "ko-KR");
+  await assert.rejects(
+    preloadReceptionist(service, started.runId),
+    (error: unknown) =>
+      error instanceof ProviderFailureError && error.reason === "unavailable",
+  );
+  const interrupted = service.snapshot(started.runId);
+  assert.equal(interrupted.terminalResult, null);
+  assert.equal(interrupted.providerFailure?.purpose, "conversation");
+
+  const request = { runId: started.runId, abandonId: "abandon-provider-interrupted" };
+  const abandoned = await service.abandonRun(request);
+  assert.equal(abandoned.runStatus, "closed");
+  assert.equal(abandoned.reason, "provider_failed");
+  assert.deepEqual(abandoned.providerFailure, interrupted.providerFailure);
+  assert.ok(!("terminalResult" in abandoned));
+  await assert.rejects(
+    Promise.resolve().then(() => service.snapshot(started.runId)),
+    (error: unknown) => error instanceof RunError && error.code === "run_not_found",
+  );
+  assert.deepEqual(await service.abandonRun(request), abandoned);
+  await assert.rejects(
+    service.abandonRun({ ...request, abandonId: "different-abandon-id" }),
+    (error: unknown) => error instanceof RunError && error.code === "abandon_id_conflict",
+  );
+
+  const cleanRestart = service.start(startId, "ko-KR");
+  assert.notEqual(cleanRestart.runId, started.runId);
+  assert.equal(cleanRestart.providerFailure, null);
+});
+
+test("abandon rejects healthy runs and evicted interruption tombstones do not resurrect state", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.proposeConversationTurn = async () => {
+    throw new ProviderFailureError(adapter.profileId, "timeout", "conversation");
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds(),
+    closedRunRetentionLimit: 1,
+  });
+  const healthy = service.start("healthy-abandon-rejected", "ko-KR");
+  await assert.rejects(
+    service.abandonRun({ runId: healthy.runId, abandonId: "abandon-healthy" }),
+    (error: unknown) => error instanceof RunError && error.code === "run_not_interrupted",
+  );
+
+  const first = service.start("first-interrupted-abandon", "ko-KR");
+  await assert.rejects(preloadReceptionist(service, first.runId));
+  const firstRequest = { runId: first.runId, abandonId: "abandon-first" };
+  await service.abandonRun(firstRequest);
+
+  const second = service.start("second-interrupted-abandon", "ko-KR");
+  await assert.rejects(preloadReceptionist(service, second.runId));
+  await service.abandonRun({ runId: second.runId, abandonId: "abandon-second" });
+
+  await assert.rejects(
+    service.abandonRun(firstRequest),
+    (error: unknown) => error instanceof RunError && error.code === "run_not_found",
+  );
 });
 
 test("conversation zones cover every authored resident position plus interaction reach", () => {
@@ -1157,42 +1322,38 @@ test("ending a child conversation is idempotent and leaves its run state alive",
   assert.equal(changed.actor.playerConversationReady, true);
 });
 
-test("rule fallback stays in-fiction and reaches a bounded clean end", async () => {
+test("an injected fallback proposal is rejected before it can become simulation state", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalOpening = adapter.proposeConversationTurn.bind(adapter);
+  adapter.proposeConversationTurn = async request => {
+    const resolved = await originalOpening(request);
+    return {
+      ...resolved,
+      meta: {
+        profileId: "test/forbidden-fallback",
+        transport: "fallback" as const,
+        usedFallback: true,
+        fallbackReason: "transport_error" as const,
+      },
+    };
+  };
   const service = new RunService({
-    proposalPort: new RuleFallbackNpcAdapter(),
+    proposalPort: adapter,
     idFactory: deterministicIds(),
   });
-  const run = service.start("run-test-start", "ko-KR");
-  await preloadReceptionist(service, run.runId);
-  await groundOrdinaryConversation(
-    service,
-    run.runId,
-    STUDIO_RECEPTIONIST_ID,
-    STUDIO_ZONE_ID,
-    "ground-rule-fallback",
+  const run = service.start("forbidden-injected-fallback", "ko-KR");
+  await assert.rejects(
+    preloadReceptionist(service, run.runId),
+    (error: unknown) =>
+      error instanceof ProviderFailureError &&
+      error.reason === "transport_error" &&
+      error.purpose === "conversation",
   );
-  const started = await service.startConversation(
-    run.runId,
-    STUDIO_RECEPTIONIST_ID,
-    STUDIO_ZONE_ID,
-    "ko-KR",
-  );
-  assert.equal(started.nextTurn.proposalMeta.transport, "fallback");
-  assert.doesNotMatch(started.nextTurn.prompt, /주문|상점/);
-
-  let next = started.nextTurn;
-  let lastAnswer;
-  for (let index = 0; index < 3; index += 1) {
-    lastAnswer = await service.answer(run.runId, started.sessionId, next.turnId, {
-      type: "choice",
-      choiceId: next.choices[0].choiceId,
-    });
-    assert.equal(lastAnswer.proposalMeta.transport, "fallback");
-    assert.match(lastAnswer.judgment.whyLine, /[가-힣]/);
-    if (lastAnswer.nextTurn) next = lastAnswer.nextTurn;
-  }
-  assert.ok(lastAnswer);
-  assert.equal(lastAnswer.nextTurn, null, "the deterministic turn cap guarantees an ending");
+  const snapshot = service.snapshot(run.runId);
+  assert.equal(snapshot.worldRevision, 0);
+  assert.equal(snapshot.actors[0]?.playerConversationReady, false);
+  assert.equal(snapshot.actors[0]?.memories.length, 0);
+  assert.equal(snapshot.providerFailure?.reason, "transport_error");
 });
 
 test("runtime proposal trace truncates explicitly instead of hiding later metadata", async () => {

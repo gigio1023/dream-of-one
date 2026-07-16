@@ -73,6 +73,14 @@ const providerResolutionPurposeSchema = z.enum([
   "ambient_reply",
   "hearing_verdict",
 ]);
+export const runProviderFailureSchema = z
+  .object({
+    profileId: nonEmpty,
+    reason: providerFailureReasonSchema,
+    purpose: providerResolutionPurposeSchema,
+    operationKey: nonEmpty,
+  })
+  .strict();
 const providerCallAuditSchema = z
   .object({
     seq: z.number().int().positive(),
@@ -498,6 +506,7 @@ export const runPropHandlingObservationMemorySchema = z
     action: runPropHandlingActionSchema,
     playerPosition: position3Schema,
     objectPosition: position3Schema,
+    observedWorldRevision: z.number().int().nonnegative(),
     worldSeconds: z.number().nonnegative(),
     worldRevision: z.number().int().positive(),
   })
@@ -840,6 +849,7 @@ export const runSnapshotSchema = z
     providerAudit: providerAuditSnapshotSchema,
     providerRuntimeTrace: providerRuntimeTraceSchema,
     lastProposalMeta: proposalMetaSchema.nullable(),
+    providerFailure: runProviderFailureSchema.nullable(),
     activeConversationId: nonEmpty.nullable(),
     actors: z.array(runActorSchema).length(6),
     scheduler: runSchedulerSnapshotSchema,
@@ -1209,6 +1219,7 @@ export const runNpcDecisionResponseSchema = z
     providerMetas: z.array(proposalMetaSchema).max(3),
     providerAudit: providerAuditSnapshotSchema,
     providerRuntimeTrace: providerRuntimeTraceSchema,
+    providerFailure: runProviderFailureSchema.nullable(),
     socialView: runSocialViewSchema,
     activeContact: runActiveContactSchema.nullable(),
   })
@@ -1333,6 +1344,31 @@ export const runEndResponseSchema = z
   })
   .strict();
 
+export const runAbandonRequestSchema = z
+  .object({ runId: nonEmpty, abandonId: nonEmpty.max(128) })
+  .strict();
+
+export const runAbandonResponseSchema = z
+  .object({
+    runId: nonEmpty,
+    abandonId: nonEmpty,
+    runStatus: z.literal("closed"),
+    reason: z.literal("provider_failed"),
+    providerFailure: runProviderFailureSchema,
+    providerBudget: z.object({
+      callLimit: z.number().int().positive(),
+      tokenLimit: z.number().int().positive(),
+      reservedCalls: z.number().int().nonnegative(),
+      reservedTokens: z.number().int().nonnegative(),
+      callsUsed: z.number().int().nonnegative(),
+      tokensUsed: z.number().int().nonnegative(),
+    }).strict(),
+    providerAudit: providerAuditSnapshotSchema,
+    providerRuntimeTrace: providerRuntimeTraceSchema,
+    lastProposalMeta: proposalMetaSchema.nullable(),
+  })
+  .strict();
+
 export const runSessionAnswerRequestSchema = z
   .object({
     runId: nonEmpty,
@@ -1440,6 +1476,7 @@ export const runSessionSnapshotResponseSchema = z
 export type RunSnapshot = z.infer<typeof runSnapshotSchema>;
 export type RunProviderAudit = z.infer<typeof providerAuditSnapshotSchema>;
 export type RunProviderRuntimeTrace = z.infer<typeof providerRuntimeTraceSchema>;
+export type RunProviderFailure = z.infer<typeof runProviderFailureSchema>;
 export type RunActor = z.infer<typeof runActorSchema>;
 export type RunMemory = z.infer<typeof runMemorySchema>;
 export type RunRecordReadMemory = z.infer<typeof runRecordReadMemorySchema>;
@@ -1472,6 +1509,8 @@ export type RunHearingRequest = z.infer<typeof runHearingRequestSchema>;
 export type RunHearingResponse = z.infer<typeof runHearingResponseSchema>;
 export type RunEndRequest = z.infer<typeof runEndRequestSchema>;
 export type RunEndResponse = z.infer<typeof runEndResponseSchema>;
+export type RunAbandonRequest = z.infer<typeof runAbandonRequestSchema>;
+export type RunAbandonResponse = z.infer<typeof runAbandonResponseSchema>;
 export type RunGeneratedNextTurn = z.infer<typeof runGeneratedNextTurnSchema>;
 export type RunHearingNextTurn = z.infer<typeof runHearingNextTurnSchema>;
 export type RunNextTurn = z.infer<typeof runNextTurnSchema>;

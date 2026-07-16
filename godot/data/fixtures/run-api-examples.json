@@ -255,7 +255,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     },
     "runAdvanceHearingDue": {
@@ -1195,6 +1196,7 @@
               0.85,
               4.1
             ],
+            "observedWorldRevision": 0,
             "worldSeconds": 0,
             "worldRevision": 1
           },
@@ -1216,6 +1218,7 @@
               0.85,
               4.1
             ],
+            "observedWorldRevision": 0,
             "worldSeconds": 0,
             "worldRevision": 1
           }
@@ -1434,6 +1437,7 @@
                   0.85,
                   4.1
                 ],
+                "observedWorldRevision": 0,
                 "worldSeconds": 0,
                 "worldRevision": 1
               }
@@ -1486,6 +1490,7 @@
                   0.85,
                   4.1
                 ],
+                "observedWorldRevision": 0,
                 "worldSeconds": 0,
                 "worldRevision": 1
               }
@@ -1648,7 +1653,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     },
     "runAdvanceArrival": {
@@ -2597,7 +2603,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     },
     "npcDecision": {
@@ -2912,7 +2919,8 @@
           "openQuestions": [],
           "encounteredRecords": []
         },
-        "activeContact": null
+        "activeContact": null,
+        "providerFailure": null
       }
     },
     "runAdvanceSpatialFacts": {
@@ -3798,7 +3806,8 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null
+          "activeContact": null,
+          "providerFailure": null
         }
       },
       {
@@ -3872,7 +3881,8 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null
+          "activeContact": null,
+          "providerFailure": null
         }
       },
       {
@@ -3954,7 +3964,8 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null
+          "activeContact": null,
+          "providerFailure": null
         }
       },
       {
@@ -4044,7 +4055,8 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null
+          "activeContact": null,
+          "providerFailure": null
         }
       },
       {
@@ -4142,7 +4154,8 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null
+          "activeContact": null,
+          "providerFailure": null
         }
       },
       {
@@ -4248,7 +4261,8 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null
+          "activeContact": null,
+          "providerFailure": null
         }
       },
       {
@@ -4362,7 +4376,8 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null
+          "activeContact": null,
+          "providerFailure": null
         }
       }
     ],
@@ -4839,7 +4854,8 @@
           "expiresAtSeconds": 120,
           "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다.",
           "procedure": "ordinary"
-        }
+        },
+        "providerFailure": null
       }
     },
     "sessionPreloadPlayerContact": {
@@ -6188,7 +6204,8 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     },
     "sessionPreloads": [
@@ -8162,7 +8179,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     },
     "sessionEnd": {
@@ -8784,7 +8802,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     },
     "administrationWriteDecision": {
@@ -9012,7 +9031,8 @@
           ],
           "encounteredRecords": []
         },
-        "activeContact": null
+        "activeContact": null,
+        "providerFailure": null
       }
     },
     "administrationReadDecision": {
@@ -9248,7 +9268,8 @@
           ],
           "encounteredRecords": []
         },
-        "activeContact": null
+        "activeContact": null,
+        "providerFailure": null
       }
     },
     "administrationRecordEncounter": {
@@ -9953,7 +9974,8 @@
               }
             }
           ]
-        }
+        },
+        "providerFailure": null
       }
     }
   },
@@ -13480,7 +13502,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -14089,7 +14112,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     },
     {
@@ -14960,7 +14984,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -15569,7 +15594,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     },
     {
@@ -16454,7 +16480,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -17067,7 +17094,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     },
     {
@@ -17938,7 +17966,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -18547,7 +18576,8 @@
             }
           ],
           "encounteredRecords": []
-        }
+        },
+        "providerFailure": null
       }
     }
   ]

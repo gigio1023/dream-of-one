@@ -43,7 +43,7 @@ export class ChatCompletionsAdapter implements TextGenPort {
     return { available: true };
   }
 
-  async generate(request: TextGenRequest): Promise<TextGenResult> {
+  async generate(request: TextGenRequest, signal: AbortSignal): Promise<TextGenResult> {
     if (!this.client) {
       throw new Error(`missing credentials for ${this.options.profileId}`);
     }
@@ -79,7 +79,7 @@ export class ChatCompletionsAdapter implements TextGenPort {
     };
     const completion = await this.client.chat.completions.create(
       body,
-      { timeout: request.timeoutMs ?? this.options.timeoutMs },
+      { timeout: request.timeoutMs ?? this.options.timeoutMs, signal },
     );
     const text = completion.choices?.[0]?.message.content;
     if (!text) {

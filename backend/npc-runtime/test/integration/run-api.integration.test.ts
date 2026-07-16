@@ -3,6 +3,7 @@ import { test } from "bun:test";
 import { startSessionServer, type RunningSessionServer } from "../../src/api/http-server.js";
 import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
 import { createStudioReceptionScriptedAdapter } from "../../src/providers/testing/studio-reception-script.js";
+import { ProviderFailureError } from "../../src/providers/ports.js";
 import { loadRunLayout } from "../../src/runtime/run-layout.js";
 import { RunService, STUDIO_RECEPTIONIST_ID } from "../../src/runtime/run-service.js";
 import { SessionService } from "../../src/runtime/session/service.js";
@@ -42,6 +43,67 @@ async function get(base: string, path: string): Promise<{ status: number; json: 
   const response = await fetch(`${base}${path}`);
   return { status: response.status, json: await response.json() };
 }
+
+test("the HTTP abandon route closes only a visibly interrupted run", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  adapter.proposeConversationTurn = async () => {
+    throw new ProviderFailureError(adapter.profileId, "unavailable", "conversation");
+  };
+  const running = await startSessionServer({
+    logListen: false,
+    service: new SessionService({ proposalPort: createSameOrderScriptedAdapter() }),
+    runService: new RunService({ proposalPort: adapter, idFactory: deterministicIds() }),
+  });
+  const base = `http://${running.host}:${running.port}`;
+  try {
+    const started = await post(base, "/v1/run/start", {
+      startId: "http-provider-interrupted",
+      locale: "ko-KR",
+    });
+    assert.equal(started.status, 200, JSON.stringify(started.json));
+    const healthyAbandon = await post(base, "/v1/run/abandon", {
+      runId: started.json.runId,
+      abandonId: "abandon-too-early",
+    });
+    assert.equal(healthyAbandon.status, 409);
+    assert.equal(healthyAbandon.json.error, "run_not_interrupted");
+
+    const failed = await post(base, "/v1/session/preload", {
+      runId: started.json.runId,
+      actorId: STUDIO_RECEPTIONIST_ID,
+      interactionZoneId: "StudioReceptionConversation",
+      locale: "ko-KR",
+    });
+    assert.equal(failed.status, 503, JSON.stringify(failed.json));
+    assert.deepEqual(failed.json, {
+      error: "provider_failed",
+      profileId: adapter.profileId,
+      reason: "unavailable",
+      purpose: "conversation",
+    });
+
+    const abandonRequest = {
+      runId: started.json.runId,
+      abandonId: "abandon-http-provider-interrupted",
+    };
+    const abandoned = await post(base, "/v1/run/abandon", abandonRequest);
+    assert.equal(abandoned.status, 200, JSON.stringify(abandoned.json));
+    assert.equal(abandoned.json.runStatus, "closed");
+    assert.equal(abandoned.json.reason, "provider_failed");
+    assert.equal(abandoned.json.providerFailure.reason, "unavailable");
+    assert.equal("terminalResult" in abandoned.json, false);
+    assert.deepEqual(await post(base, "/v1/run/abandon", abandonRequest), abandoned);
+
+    const snapshot = await get(
+      base,
+      `/v1/run/snapshot?runId=${encodeURIComponent(started.json.runId)}`,
+    );
+    assert.equal(snapshot.status, 404);
+    assert.equal(snapshot.json.error, "run_not_found");
+  } finally {
+    await running.close();
+  }
+});
 
 async function groundRunConversation(
   base: string,

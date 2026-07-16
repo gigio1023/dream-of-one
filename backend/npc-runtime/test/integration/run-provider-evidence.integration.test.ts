@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
-import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import type {
   ProviderFailureReason,
   TextGenPort,
@@ -114,15 +113,20 @@ class DeferredTextGen implements TextGenPort {
   }
 }
 
-class UnavailableTextGen implements TextGenPort {
+class RecoveringTextGen implements TextGenPort {
   readonly adapterId = "test/provider-evidence-unavailable";
+  available = false;
+  readonly requests: TextGenRequest[] = [];
 
   async preflight(): Promise<{ available: boolean; reason?: ProviderFailureReason }> {
-    return { available: false, reason: "missing_credentials" };
+    return this.available
+      ? { available: true }
+      : { available: false, reason: "missing_credentials" };
   }
 
-  async generate(_request: TextGenRequest): Promise<TextGenResult> {
-    throw new Error("an unavailable transport must not generate");
+  async generate(request: TextGenRequest): Promise<TextGenResult> {
+    this.requests.push(structuredClone(request));
+    return output(liveWait, 5, 5);
   }
 }
 
@@ -130,7 +134,6 @@ function liveProvider(textGen: TextGenPort): ProviderService {
   return new ProviderService({
     profileId: LIVE_PROFILE_ID,
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
     timeoutMs: 2_000,
     maxCallsPerSession: 120,
     maxTokensPerSession: 250_000,
@@ -409,9 +412,10 @@ test("a schedule transition still makes an in-flight preload stale and tracks it
   assert.equal(textGen.requests.length, 1);
 });
 
-test("an accepted provider fallback contributes exactly one runtime-trace entry", async () => {
+test("provider failure surfaces without a synthesized runtime-trace entry", async () => {
+  const textGen = new RecoveringTextGen();
   const service = new RunService({
-    proposalPort: liveProvider(new UnavailableTextGen()),
+    proposalPort: liveProvider(textGen),
     idFactory: deterministicIds("accepted-fallback-evidence"),
   });
   const started = service.start("provider-accepted-fallback-evidence", "ko-KR");
@@ -436,15 +440,33 @@ test("an accepted provider fallback contributes exactly one runtime-trace entry"
     observedWorldRevision: wake.observedWorldRevision,
   });
 
-  assert.equal(response.status, "completed");
-  assert.equal(response.providerMetas.length, 1);
-  assert.equal(response.providerMetas[0]?.transport, "fallback");
-  assert.equal(response.providerMetas[0]?.fallbackReason, "missing_credentials");
+  assert.equal(response.status, "failed");
+  assert.deepEqual(response.providerMetas, []);
+  assert.deepEqual(response.actionDeltas, []);
+  assert.deepEqual(response.movementDeltas, []);
+  assert.deepEqual(response.providerFailure, {
+    profileId: LIVE_PROFILE_ID,
+    reason: "missing_credentials",
+    purpose: "agent_step",
+    operationKey: `npc_decision:${wake.wakeId}`,
+  });
   assert.equal(response.providerAudit.calls.length, 0);
-  assert.equal(response.providerAudit.resolutions.length, 1);
-  assert.equal(response.providerRuntimeTrace.entries.length, 1);
-  assert.equal(
-    response.providerRuntimeTrace.entries[0]?.meta.fallbackReason,
-    "missing_credentials",
-  );
+  assert.equal(response.providerAudit.resolutions.length, 0);
+  assert.equal(response.providerRuntimeTrace.entries.length, 0);
+
+  const failedSnapshot = service.snapshot(started.runId);
+  assert.equal(failedSnapshot.worldRevision, response.worldRevision);
+  assert.equal(failedSnapshot.providerFailure?.operationKey, `npc_decision:${wake.wakeId}`);
+  textGen.available = true;
+  const recovered = await service.decision({
+    runId: started.runId,
+    wakeId: wake.wakeId,
+    observedWorldRevision: wake.observedWorldRevision,
+  });
+  assert.equal(recovered.status, "completed");
+  assert.deepEqual(recovered.actionDeltas, []);
+  assert.deepEqual(recovered.movementDeltas, []);
+  assert.equal(recovered.providerFailure, null);
+  assert.equal(service.snapshot(started.runId).providerFailure, null);
+  assert.equal(textGen.requests.length, 1);
 });

@@ -51,7 +51,7 @@ test("scripted adapter walkthroughs reach each deterministic route", async () =>
       const res = await svc.answer(start.sessionId, next.turnId, answer);
       next = res.nextTurn;
     }
-    const end = svc.end(start.sessionId);
+    const end = await svc.end(start.sessionId);
     assert.equal(end.route, walkthrough.route, `walkthrough ${walkthrough.route} produced ${end.route}`);
     assert.equal(end.route, walkthrough.expectedOutcome);
     assert.equal(end.outcomePanel.title, walkthrough.expectedTitle);

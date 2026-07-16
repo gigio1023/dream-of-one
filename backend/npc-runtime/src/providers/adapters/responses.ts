@@ -35,7 +35,7 @@ export class ResponsesAdapter implements TextGenPort {
       : { available: false, reason: "missing_credentials" };
   }
 
-  async generate(request: TextGenRequest): Promise<TextGenResult> {
+  async generate(request: TextGenRequest, signal: AbortSignal): Promise<TextGenResult> {
     if (!this.client) {
       throw new Error(`missing credentials for ${this.options.profileId}`);
     }
@@ -57,7 +57,7 @@ export class ResponsesAdapter implements TextGenPort {
           },
         },
       },
-      { timeout: request.timeoutMs ?? this.options.timeoutMs },
+      { timeout: request.timeoutMs ?? this.options.timeoutMs, signal },
     );
     if (!response.output_text) {
       throw new Error("Responses API returned no output_text");

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { mergedConversationTurnSchema } from "../../src/providers/envelope.js";
-import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
 import type { MergedConversationTurnRequest } from "../../src/providers/ports.js";
 import { createSameOrderWorld } from "../../src/runtime/world/index.js";
@@ -99,20 +98,6 @@ test("merged conversation requires either null or one complete nonblank open que
       whyLine: "방문 목적이 아직 분명하지 않습니다.",
     },
   }).success, true);
-});
-
-test("fallback merged turn composes rule judgment with canned reply suggestions", async () => {
-  const fallback = new RuleFallbackNpcAdapter();
-  const resolved = await fallback.judgeAndProposeConversationTurn(sampleRequest());
-  assert.equal(resolved.meta.usedFallback, true);
-  assert.ok(resolved.proposal.utterance.length > 0);
-  assert.match(resolved.proposal.utterance, /[가-힣]/);
-  assert.equal(resolved.proposal.suggestedReplies.length, 3);
-  assert.ok(resolved.proposal.whyLine.length > 0);
-  const reparsed = mergedConversationTurnSchema.safeParse({
-    ...resolved.proposal,
-  });
-  assert.equal(reparsed.success, true);
 });
 
 test("scripted merged turn keeps judgment clamps available to the session path", async () => {

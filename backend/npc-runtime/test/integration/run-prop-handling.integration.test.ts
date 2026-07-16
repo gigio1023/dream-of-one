@@ -419,6 +419,92 @@ test("same prop/action spam collapses to one latest fact in every provider surfa
   assert.deepEqual(compacted.socialView, started.socialView);
 });
 
+test("late first delivery cannot replace a newer observed prop fact", async () => {
+  const layout = loadRunLayout();
+  const service = new RunService({
+    proposalPort: createStudioReceptionScriptedAdapter(),
+    idFactory: deterministicIds(),
+    layout,
+  });
+  const started = service.start("start-late-prop-delivery", "ko-KR");
+  const observers = layout.actors.map(actor => ({ actorId: actor.actorId, visible: true }));
+  const clocked = await service.advance({
+    runId: started.runId,
+    advanceId: "advance-before-newer-prop",
+    observedWorldRevision: started.worldRevision,
+    elapsedSeconds: 1,
+    arrivals: [],
+  });
+  const newer = await service.advance({
+    runId: started.runId,
+    advanceId: "advance-newer-prop",
+    observedWorldRevision: clocked.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    propHandlingEvents: [{
+      eventId: "prop-event-newer-observation",
+      propId: "Prop_Studio_Keyboard",
+      action: "carry",
+      playerPosition: [2, 0, 0],
+      objectPosition: [2, 0.8, 0],
+      observedWorldRevision: clocked.worldRevision,
+      observers,
+    }],
+  });
+  const late = await service.advance({
+    runId: started.runId,
+    advanceId: "advance-late-older-prop",
+    observedWorldRevision: newer.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    propHandlingEvents: [{
+      eventId: "prop-event-late-older-observation",
+      propId: "Prop_Studio_Keyboard",
+      action: "carry",
+      playerPosition: [1, 0, 0],
+      objectPosition: [1, 0.8, 0],
+      observedWorldRevision: started.worldRevision,
+      observers,
+    }],
+  });
+
+  assert.deepEqual(late.acceptedPropEventIds, ["prop-event-late-older-observation"]);
+  assert.equal(late.worldRevision, newer.worldRevision);
+  assert.equal(late.propObservationMemories?.length, layout.actors.length);
+  const snapshot = service.snapshot(started.runId);
+  assert.ok(snapshot.actors.every(actor => {
+    const matching = actor.memories.filter(memory =>
+      memory.kind === "prop_handling_observation" &&
+      memory.propId === "Prop_Studio_Keyboard" &&
+      memory.action === "carry"
+    );
+    return (
+      matching.length === 1 &&
+      matching[0]?.eventId === "prop-event-newer-observation" &&
+      matching[0]?.observedWorldRevision === clocked.worldRevision
+    );
+  }));
+
+  const retry = await service.advance({
+    runId: started.runId,
+    advanceId: "advance-late-older-prop-retry",
+    observedWorldRevision: newer.worldRevision,
+    elapsedSeconds: 0,
+    arrivals: [],
+    propHandlingEvents: [{
+      eventId: "prop-event-late-older-observation",
+      propId: "Prop_Studio_Keyboard",
+      action: "carry",
+      playerPosition: [1, 0, 0],
+      objectPosition: [1, 0.8, 0],
+      observedWorldRevision: started.worldRevision,
+      observers,
+    }],
+  });
+  assert.deepEqual(retry.propObservationMemories, late.propObservationMemories);
+  assert.equal(service.snapshot(started.runId).worldRevision, newer.worldRevision);
+});
+
 test("visibility-only facts keep a preloaded opening and ground the later answer provider", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   const originalConversation = adapter.proposeConversationTurn.bind(adapter);

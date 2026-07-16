@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
-import { fallbackContent } from "../../src/localization/fallback-content.js";
-import { ProviderBudgetReservedError } from "../../src/providers/ports.js";
+import {
+  ProviderBudgetReservedError,
+  ProviderFailureError,
+} from "../../src/providers/ports.js";
 import type {
   AmbientReplyRequest,
   AgentStepRequest,
@@ -2156,7 +2158,7 @@ test("a modal queues resolved ambient speech and exact retry commits it without 
   assert.deepEqual(await service.decision(meeting.request), committed);
 });
 
-test("a neutral ambient reply still records one localized no-change judgment", async () => {
+test("a neutral ambient reply records the provider-authored no-change judgment", async () => {
   const service = new RunService({
     proposalPort: createStudioReceptionScriptedAdapter(),
     idFactory: deterministicIds("no-change"),
@@ -2176,7 +2178,7 @@ test("a neutral ambient reply still records one localized no-change judgment", a
   assert.equal(judgment.stanceBefore, "uncertain");
   assert.equal(judgment.proposedStance, "uncertain");
   assert.equal(judgment.appliedStance, "uncertain");
-  assert.equal(judgment.whyLine, fallbackContent("ko-KR").agent.ambientNoChangeWhy);
+  assert.equal(judgment.whyLine, "테스트 대화만으로는 판단을 바꾸지 않았습니다.");
   assert.deepEqual(snapshot.socialView.encounteredResidents, []);
 
   await service.preloadConversation(
@@ -2641,6 +2643,51 @@ test("the run reserve stops ambient dispatch before any provider spend", async (
   assert.equal(snapshot.ambientSpeech.cursor, 0);
   assert.equal(snapshot.ambientSpeech.activeConversation, null);
   assert.deepEqual(await service.decision(meeting.request), response);
+});
+
+test("ambient provider failure commits no partial turn and exact retry replays the whole exchange", async () => {
+  const adapter = createStudioReceptionScriptedAdapter();
+  const originalOpening = adapter.proposeNextStep.bind(adapter);
+  const originalReply = adapter.judgeAndProposeAmbientReply.bind(adapter);
+  let openingCalls = 0;
+  let replyCalls = 0;
+  let failReply = true;
+  adapter.proposeNextStep = async request => {
+    openingCalls += 1;
+    return originalOpening(request);
+  };
+  adapter.judgeAndProposeAmbientReply = async request => {
+    replyCalls += 1;
+    if (failReply) {
+      throw new ProviderFailureError(adapter.profileId, "timeout", "ambient_reply");
+    }
+    return originalReply(request);
+  };
+  const service = new RunService({
+    proposalPort: adapter,
+    idFactory: deterministicIds("ambient-provider-retry"),
+  });
+  const meeting = await readyFirstMeeting(service, "ambient-provider-retry");
+  const before = service.snapshot(meeting.started.runId);
+  const failed = await service.decision(meeting.request);
+  assert.equal(failed.status, "failed");
+  assert.deepEqual(failed.speechEvents, []);
+  assert.deepEqual(failed.actionDeltas, []);
+  assert.equal(failed.providerFailure?.reason, "timeout");
+  assert.equal(failed.providerFailure?.purpose, "ambient_reply");
+  const afterFailure = service.snapshot(meeting.started.runId);
+  assert.equal(afterFailure.worldRevision, before.worldRevision);
+  assert.equal(afterFailure.ambientSpeech.cursor, before.ambientSpeech.cursor);
+  assert.ok(afterFailure.actors.every(actor => actor.memories.length === 0));
+
+  failReply = false;
+  const recovered = await service.decision(meeting.request);
+  assert.equal(recovered.status, "completed");
+  assert.equal(recovered.speechEvents.length, 2);
+  assert.equal(recovered.providerFailure, null);
+  assert.equal(service.snapshot(meeting.started.runId).providerFailure, null);
+  assert.equal(openingCalls, 2, "retry cannot commit the first attempt's partial opening");
+  assert.equal(replyCalls, 2);
 });
 
 test("a caller-reserved first ambient call leaves no fallback or partial exchange", async () => {

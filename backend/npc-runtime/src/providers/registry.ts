@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { ChatCompletionsAdapter } from "./adapters/chat-completions.js";
 import { ResponsesAdapter } from "./adapters/responses.js";
-import { RuleFallbackNpcAdapter } from "./fallback.js";
 import type { NpcProposalPort, TextGenPort } from "./ports.js";
 import { ProviderService } from "./service.js";
 
@@ -112,7 +111,6 @@ export function createProviderFromConfig(
     proposalPort: new ProviderService({
       profileId,
       textGen,
-      fallback: new RuleFallbackNpcAdapter(),
       timeoutMs,
       maxCallsPerSession: config.runtime.maxCallsPerSession,
       maxTokensPerSession: config.runtime.maxTokensPerSession,

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
 import { assembleObservePacket, DEFAULT_ROLE_POLICIES } from "../../src/agentloop/context.js";
-import { fallbackContent } from "../../src/localization/fallback-content.js";
 import { createSameOrderWorld } from "../../src/runtime/world/index.js";
 import {
   ambientReplyJudgmentJsonSchema,
@@ -22,14 +21,16 @@ import {
   mergedConversationTurnSchemaForRequest,
   TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS,
 } from "../../src/providers/envelope.js";
-import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
 import {
   createProviderFromConfig,
   createProviderFromEnvironment,
   loadProviderConfig,
 } from "../../src/providers/registry.js";
 import { ProviderService } from "../../src/providers/service.js";
-import { ProviderBudgetReservedError } from "../../src/providers/ports.js";
+import {
+  ProviderBudgetReservedError,
+  ProviderFailureError,
+} from "../../src/providers/ports.js";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
 import { validateHearingJudgment } from "../../src/runtime/run-hearing.js";
 import {
@@ -67,6 +68,27 @@ class FakeTextGen implements TextGenPort {
     if (!next) throw new Error("no fake output");
     if (next instanceof Error) throw next;
     return next;
+  }
+}
+
+async function expectProviderFailure<T>(
+  promise: Promise<T>,
+  expected: {
+    profileId: string;
+    reason: ProviderFailureReason;
+    purpose: ProviderFailureError["purpose"];
+  },
+): Promise<ProviderFailureError> {
+  try {
+    await promise;
+    assert.fail("expected provider failure");
+  } catch (error) {
+    assert.ok(error instanceof ProviderFailureError);
+    assert.equal(error.code, "provider_failed");
+    assert.equal(error.profileId, expected.profileId);
+    assert.equal(error.reason, expected.reason);
+    assert.equal(error.purpose, expected.purpose);
+    return error;
   }
 }
 
@@ -372,7 +394,6 @@ test("required talk_to narrows transport and Zod contracts and repairs an invali
   const service = new ProviderService({
     profileId: "test/agent-step-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const packet = observePacket();
   packet.toolCatalog = ["talk_to", "wait"];
@@ -536,7 +557,6 @@ test("Korean agent-step repair rewrites a lowercase Latin utterance instead of f
   const service = new ProviderService({
     profileId: "test/agent-step-korean-utterance-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.proposeNextStep({
@@ -610,7 +630,6 @@ test("required move_to player narrows transport and Zod contracts without requir
   const service = new ProviderService({
     profileId: "test/required-player-approach",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const packet = requestScopedPacket();
   packet.toolCatalog = ["move_to", "talk_to", "wait"];
@@ -724,7 +743,6 @@ test("allowed talk actor scope narrows transport and Zod schemas while omission 
   const service = new ProviderService({
     profileId: "test/allowed-talk-target-live",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.proposeNextStep({
@@ -783,7 +801,7 @@ test("allowed talk actor scope narrows transport and Zod schemas while omission 
   }).success, true);
 });
 
-test("disallowed grounded talk target repairs once then uses deterministic invalid-envelope fallback", async () => {
+test("disallowed grounded talk target repairs once then fails closed", async () => {
   const allowedActorId = "NPC_Office_Worker";
   const disallowedActorId = "NPC_Store_Manager";
   const packet = requestScopedPacket();
@@ -801,10 +819,9 @@ test("disallowed grounded talk target repairs once then uses deterministic inval
   const service = new ProviderService({
     profileId: "test/allowed-talk-target-fallback",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
-  const result = await service.proposeNextStep({
+  await expectProviderFailure(service.proposeNextStep({
     sessionId: "run-allowed-talk-target-fallback",
     locale: "ko-KR",
     iteration: 0,
@@ -812,11 +829,11 @@ test("disallowed grounded talk target repairs once then uses deterministic inval
     observePacket: packet,
     blockedSignatures: [],
     allowedTalkActorIds: [allowedActorId],
+  }), {
+    profileId: "test/allowed-talk-target-fallback",
+    reason: "invalid_envelope",
+    purpose: "agent_step",
   });
-
-  assert.equal(result.meta.transport, "fallback");
-  assert.equal(result.meta.usedFallback, true);
-  assert.equal(result.meta.fallbackReason, "invalid_envelope");
   assert.deepEqual(textGen.requests.map(request => request.purpose), ["agent_step", "repair"]);
   const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
     validationIssues: Array<{ path: string; message: string }>;
@@ -825,8 +842,6 @@ test("disallowed grounded talk target repairs once then uses deterministic inval
     path: "toolCall.args.actorId",
     message: `talk_to target ${disallowedActorId} is outside this request's allowed talk scope`,
   }]);
-  assert.equal(result.proposal.toolCall?.tool, "talk_to");
-  assert.equal(result.proposal.toolCall?.args.actorId, allowedActorId);
   assert.deepEqual(
     agentStepToolArgsJsonSchema(textGen.requests[0]?.jsonSchema ?? {}, "talk_to")[0]
       ?.actorId?.enum,
@@ -834,7 +849,8 @@ test("disallowed grounded talk target repairs once then uses deterministic inval
   );
   const audit = service.auditSnapshot("run-allowed-talk-target-fallback");
   assert.equal(audit.callsUsed, 2);
-  assert.deepEqual(audit.resolutions[0]?.callSeqs, [1, 2]);
+  assert.deepEqual(audit.resolutions, []);
+  assert.equal(audit.complete, false);
 });
 
 test("an explicit offered-tool decision cannot escape through a null completion", async () => {
@@ -865,7 +881,6 @@ test("an explicit offered-tool decision cannot escape through a null completion"
   const service = new ProviderService({
     profileId: "test/required-offered-tool",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.proposeNextStep({
@@ -954,39 +969,6 @@ test("an explicit offered-tool decision cannot escape through a null completion"
   );
 });
 
-test("deterministic fallback makes an administrative deferral audible in the run locale", async () => {
-  const packet = m3rAdministrativePacket();
-  packet.toolCatalog = ["write_record", "wait"];
-  const fallback = new RuleFallbackNpcAdapter();
-  const result = await fallback.proposeNextStep({
-    sessionId: "run-fallback-administrative-utterance",
-    locale: "ko-KR",
-    iteration: 0,
-    goal: "기록하거나 명시적으로 보류한다.",
-    observePacket: packet,
-    blockedSignatures: [],
-    requireToolCall: true,
-    administrativeDecisionSpeech: true,
-  });
-
-  assert.equal(result.proposal.toolCall?.tool, "wait");
-  assert.equal(
-    result.proposal.toolCall?.args.reason,
-    fallbackContent("ko-KR").agent.administrativeWaitUtterance,
-  );
-  assert.equal(result.proposal.utterance, undefined);
-  assert.equal(
-    agentStepProposalSchemaForRequest("ko-KR", {
-      effectiveTools: ["write_record", "wait"],
-      observePacket: packet,
-      recordContracts: { write_record: "m3r" },
-      requireToolCall: true,
-      administrativeDecisionSpeech: true,
-    }).safeParse({ ...result.proposal, utterance: null }).success,
-    true,
-  );
-});
-
 test("agent-step record contracts select only M3R or legacy schemas and guides", async () => {
   const completedStep = JSON.stringify({
     toolCall: null,
@@ -998,7 +980,6 @@ test("agent-step record contracts select only M3R or legacy schemas and guides",
   const service = new ProviderService({
     profileId: "test/record-contracts",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const m3rPacket = observePacket();
@@ -1258,7 +1239,6 @@ test("request-scoped Zod repairs unoffered tools and wrong M3R record args", asy
   const service = new ProviderService({
     profileId: "test/request-schema-repairs",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const waitOnlyPacket = observePacket();
@@ -1323,7 +1303,7 @@ test("request-scoped Zod repairs unoffered tools and wrong M3R record args", asy
   }]);
 });
 
-test("request-scoped target validation repairs once then falls back for hidden authority", async () => {
+test("request-scoped target validation repairs once then fails closed for hidden authority", async () => {
   const step = (
     toolCall: { tool: string; args: Record<string, unknown> },
     utterance: string | null = null,
@@ -1459,22 +1439,21 @@ test("request-scoped target validation repairs once then falls back for hidden a
     const service = new ProviderService({
       profileId: `test/request-target-${candidate.name}`,
       textGen,
-      fallback: new RuleFallbackNpcAdapter(),
     });
     const packet = candidate.packet();
     const sessionId = `run-request-target-${candidate.name}`;
-    const result = await service.proposeNextStep({
+    await expectProviderFailure(service.proposeNextStep({
       sessionId,
       locale: "ko-KR",
       iteration: 0,
       goal: "현재 관측과 권한 안에서만 행동한다.",
       observePacket: packet,
       blockedSignatures: [],
+    }), {
+      profileId: `test/request-target-${candidate.name}`,
+      reason: "invalid_envelope",
+      purpose: "agent_step",
     });
-
-    assert.equal(result.meta.transport, "fallback", candidate.name);
-    assert.equal(result.meta.usedFallback, true, candidate.name);
-    assert.equal(result.meta.fallbackReason, "invalid_envelope", candidate.name);
     assert.deepEqual(
       textGen.requests.map(request => request.purpose),
       ["agent_step", "repair"],
@@ -1490,9 +1469,8 @@ test("request-scoped target validation repairs once then falls back for hidden a
     candidate.assertTransportSchema(textGen.requests[0]?.jsonSchema ?? {});
     const audit = service.auditSnapshot(sessionId);
     assert.equal(audit.callsUsed, 2, candidate.name);
-    assert.equal(audit.resolutions.length, 1, candidate.name);
-    assert.equal(audit.resolutions[0]?.callSeqs.length, 2, candidate.name);
-    assert.ok((audit.resolutions[0]?.callSeqs.length ?? 0) <= 2, candidate.name);
+    assert.deepEqual(audit.resolutions, [], candidate.name);
+    assert.equal(audit.complete, false, candidate.name);
   }
 });
 
@@ -1625,7 +1603,6 @@ test("request-scoped exact targets remain live and use one physical call", async
     const service = new ProviderService({
       profileId: `test/request-valid-${candidate.name}`,
       textGen,
-      fallback: new RuleFallbackNpcAdapter(),
     });
     const sessionId = `run-request-valid-${candidate.name}`;
     const result = await service.proposeNextStep({
@@ -1798,7 +1775,7 @@ test("free-world speech cites only records visible to its current speaker", () =
   assert.equal(ambientProperties.citedRecordIds.maxItems, MAX_SPEECH_RECORD_CITATIONS);
 });
 
-test("ambient reply repairs one wrong nonempty target then succeeds or falls back", async () => {
+test("ambient reply repairs one wrong nonempty target then succeeds or fails closed", async () => {
   const request = ambientReplyRequest();
   const valid = JSON.parse(validAmbientReply);
   const wrongTarget = {
@@ -1814,7 +1791,6 @@ test("ambient reply repairs one wrong nonempty target then succeeds or falls bac
   const repairedService = new ProviderService({
     profileId: "test/ambient-target-repair",
     textGen: repairedTextGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const repaired = await repairedService.judgeAndProposeAmbientReply(request);
 
@@ -1866,27 +1842,22 @@ test("ambient reply repairs one wrong nonempty target then succeeds or falls bac
   const fallbackService = new ProviderService({
     profileId: "test/ambient-target-fallback",
     textGen: invalidTextGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
-  const fallback = await fallbackService.judgeAndProposeAmbientReply(fallbackRequest);
-
-  assert.equal(fallback.meta.transport, "fallback");
-  assert.equal(fallback.meta.usedFallback, true);
-  assert.equal(fallback.meta.fallbackReason, "invalid_envelope");
-  assert.equal(fallback.proposal.toolCall.args.actorId, request.targetActorId);
+  await expectProviderFailure(
+    fallbackService.judgeAndProposeAmbientReply(fallbackRequest),
+    {
+      profileId: "test/ambient-target-fallback",
+      reason: "invalid_envelope",
+      purpose: "ambient_reply",
+    },
+  );
   assert.deepEqual(
     invalidTextGen.requests.map(providerRequest => providerRequest.purpose),
     ["ambient_reply", "repair"],
   );
-  assert.deepEqual(fallbackService.auditSnapshot(fallbackRequest.sessionId).resolutions, [{
-    seq: 1,
-    purpose: "ambient_reply",
-    profileId: "test/ambient-target-fallback",
-    transport: "fallback",
-    usedFallback: true,
-    fallbackReason: "invalid_envelope",
-    callSeqs: [1, 2],
-  }]);
+  const failedAudit = fallbackService.auditSnapshot(fallbackRequest.sessionId);
+  assert.deepEqual(failedAudit.resolutions, []);
+  assert.equal(failedAudit.complete, false);
 });
 
 test("hearing strict schema requires every property and exactly six unique residents", () => {
@@ -2209,33 +2180,6 @@ test("stable-id validation preserves ordinary English compounds", () => {
   }
 });
 
-test("deterministic fallback keeps a grounded player contact opportunity playable", async () => {
-  const packet = observePacket();
-  packet.playerContact = {
-    available: true,
-    targetActorId: "player",
-    interactionZoneId: "ParkConversation",
-    playerLocationId: "Park",
-    visible: true,
-    audible: true,
-    reachable: true,
-    safeDistanceM: 2.2,
-  };
-  const resolved = await new RuleFallbackNpcAdapter().proposeNextStep({
-    sessionId: "fallback-contact",
-    locale: "ko-KR",
-    iteration: 0,
-    goal: "방문자에게 직접 확인할지 판단한다.",
-    observePacket: packet,
-    blockedSignatures: [],
-  });
-  assert.deepEqual(resolved.proposal.toolCall, {
-    tool: "move_to",
-    args: { targetId: "player" },
-  });
-  assert.equal(resolved.meta.transport, "fallback");
-});
-
 test("provider service returns schema-validated live conversation proposals", async () => {
   const textGen = new FakeTextGen([
     { text: validConversation, usage: { inputTokens: 20, outputTokens: 30, totalTokens: 50 } },
@@ -2243,7 +2187,6 @@ test("provider service returns schema-validated live conversation proposals", as
   const service = new ProviderService({
     profileId: "test/live",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const result = await service.proposeConversationTurn(conversationRequest());
   assert.equal(result.meta.transport, "live");
@@ -2370,7 +2313,6 @@ test("player-facing conversation cites only records visible to the resident", as
   const service = new ProviderService({
     profileId: "test/conversation-record-citation",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const opening = await service.proposeConversationTurn(request);
@@ -2450,7 +2392,6 @@ test("conversation openings keep resident, player, third-party speech, and locat
   const service = new ProviderService({
     profileId: "test/conversation-role-separation",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   await service.proposeConversationTurn(request);
 
@@ -2510,7 +2451,7 @@ test("conversation openings keep resident, player, third-party speech, and locat
   assert.match(transport.instructions, /never replay either as if it were the resident's new opening line/);
 });
 
-test("ambient reply is one schema-validated call with its own audit purpose and neutral localized fallback", async () => {
+test("ambient reply is one schema-validated call and unavailable transport fails closed", async () => {
   const internalRationale =
     "NPC_Store_Clerk compared sourceMemoryId mem-ambient-1 with current context.";
   const textGen = new FakeTextGen([
@@ -2525,7 +2466,6 @@ test("ambient reply is one schema-validated call with its own audit purpose and 
   const service = new ProviderService({
     profileId: "test/ambient-reply",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const request = ambientReplyRequest();
   const result = await service.judgeAndProposeAmbientReply(request);
@@ -2563,17 +2503,13 @@ test("ambient reply is one schema-validated call with its own audit purpose and 
   const unavailable = new ProviderService({
     profileId: "test/ambient-unavailable",
     textGen: new FakeTextGen([], false),
-    fallback: new RuleFallbackNpcAdapter(),
   });
-  const fallback = await unavailable.judgeAndProposeAmbientReply(request);
-  assert.equal(fallback.meta.fallbackReason, "missing_credentials");
-  assert.equal(fallback.proposal.suspicionDelta, 0);
-  assert.equal(fallback.proposal.proposedStance, request.stanceBefore);
-  assert.equal(
-    fallback.proposal.whyLine,
-    fallbackContent("ko-KR").agent.ambientNoChangeWhy,
-  );
-  assert.doesNotMatch(fallback.proposal.whyLine, /답변/);
+  await expectProviderFailure(unavailable.judgeAndProposeAmbientReply(request), {
+    profileId: "test/ambient-unavailable",
+    reason: "missing_credentials",
+    purpose: "ambient_reply",
+  });
+  assert.deepEqual(unavailable.auditSnapshot(request.sessionId).resolutions, []);
 });
 
 test("an overlong transient ambient reply is repaired before it reaches the subtitle queue", async () => {
@@ -2589,7 +2525,6 @@ test("an overlong transient ambient reply is repaired before it reaches the subt
   const service = new ProviderService({
     profileId: "test/ambient-subtitle-length-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.judgeAndProposeAmbientReply(ambientReplyRequest());
@@ -2609,7 +2544,6 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   const service = new ProviderService({
     profileId: "test/hearing-live",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const request = hearingRequest();
   const result = await service.judgeHearing(request);
@@ -2637,7 +2571,7 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   assert.deepEqual(providerInput.ledgerEvents, request.ledgerEvents);
 });
 
-test("an invalid hearing envelope receives one repair before fallback", async () => {
+test("an invalid hearing envelope receives one repair before returning live", async () => {
   const invalid = validHearingJudgment();
   invalid.residentAssessments[5].actorId = invalid.residentAssessments[0].actorId;
   invalid.residentAssessments[0].testimonyLine = "Direct testimony was unavailable.";
@@ -2648,7 +2582,6 @@ test("an invalid hearing envelope receives one repair before fallback", async ()
   const service = new ProviderService({
     profileId: "test/hearing-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const result = await service.judgeHearing(hearingRequest());
 
@@ -2718,7 +2651,6 @@ test("request-scoped hearing semantic failures receive one repair and remain liv
     const service = new ProviderService({
       profileId: `test/hearing-semantic-repair-${candidate.name}`,
       textGen,
-      fallback: new RuleFallbackNpcAdapter(),
     });
     const result = await service.judgeHearing(request);
 
@@ -2751,7 +2683,7 @@ test("request-scoped hearing semantic failures receive one repair and remain liv
   }
 });
 
-test("hearing semantic repair failure remains explicit provider fallback", async () => {
+test("hearing semantic repair failure fails closed without a verdict", async () => {
   const request = hearingRequest();
   const invalid = validHearingJudgment();
   invalid.residentAssessments[0].contactBasis = "limited_firsthand";
@@ -2762,36 +2694,30 @@ test("hearing semantic repair failure remains explicit provider fallback", async
   const service = new ProviderService({
     profileId: "test/hearing-semantic-repair-failure",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const warnings: unknown[][] = [];
   const originalWarn = console.warn;
   console.warn = (...args: unknown[]) => warnings.push(args);
-  let result;
+  let failure: ProviderFailureError | undefined;
   try {
-    result = await service.judgeHearing(request);
+    failure = await expectProviderFailure(service.judgeHearing(request), {
+      profileId: "test/hearing-semantic-repair-failure",
+      reason: "invalid_envelope",
+      purpose: "hearing_verdict",
+    });
   } finally {
     console.warn = originalWarn;
   }
 
-  assert.equal(result?.meta.transport, "fallback");
-  assert.equal(result?.meta.usedFallback, true);
-  assert.equal(result?.meta.fallbackReason, "invalid_envelope");
+  assert.equal(failure?.reason, "invalid_envelope");
   assert.deepEqual(
     textGen.requests.map(providerRequest => providerRequest.purpose),
     ["hearing_verdict", "repair"],
   );
-  assert.equal(validateHearingJudgment(request, result!.proposal).ok, true);
   assert.equal(warnings.length, 1);
-  assert.deepEqual(service.auditSnapshot(request.runId).resolutions, [{
-    seq: 1,
-    purpose: "hearing_verdict",
-    profileId: "test/hearing-semantic-repair-failure",
-    transport: "fallback",
-    usedFallback: true,
-    fallbackReason: "invalid_envelope",
-    callSeqs: [1, 2],
-  }]);
+  const failedAudit = service.auditSnapshot(request.runId);
+  assert.deepEqual(failedAudit.resolutions, []);
+  assert.equal(failedAudit.complete, false);
 });
 
 test("zero-vouch ordinary hearing repairs once to live abnormal under a narrowed schema", async () => {
@@ -2821,7 +2747,6 @@ test("zero-vouch ordinary hearing repairs once to live abnormal under a narrowed
   const service = new ProviderService({
     profileId: "test/hearing-zero-vouch-schema",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.judgeHearing(request);
@@ -2852,48 +2777,18 @@ test("zero-vouch ordinary hearing repairs once to live abnormal under a narrowed
   );
 });
 
-test("hearing fallback is terminal, preserves stances, and needs four evidenced vouches", async () => {
-  const fallback = new RuleFallbackNpcAdapter();
+test("unavailable hearing fails closed without a terminal verdict", async () => {
   const fourRequest = hearingRequest(4);
-  const four = await fallback.judgeHearing(fourRequest);
-  assert.equal(four.proposal.proposedVerdict, "ordinary");
-  assert.equal(four.proposal.residentAssessments.length, 6);
-  assert.deepEqual(
-    four.proposal.residentAssessments.map(assessment => assessment.proposedStance),
-    fourRequest.residents.map(resident => resident.stanceBefore),
-  );
-  assert.equal(
-    four.proposal.residentAssessments[5].testimonyLine,
-    fallbackContent("ko-KR").hearing.neverMetTestimony,
-  );
-  assert.deepEqual(four.proposal.residentAssessments[5].citedMemoryIds, []);
-  assert.equal(four.proposal.residentAssessments[5].contactBasis, "never_conversed");
-  assert.equal(four.proposal.residentAssessments[4].contactBasis, "limited_firsthand");
-  assert.equal(four.proposal.residentAssessments[0].contactBasis, "meaningful_firsthand");
-  assert.doesNotMatch(
-    four.proposal.residentAssessments[0].testimonyLine,
-    /NPC_|mem-hearing/,
-    "fallback testimony must not expose raw ids in player prose",
-  );
-
-  const three = await fallback.judgeHearing(hearingRequest(3));
-  assert.equal(three.proposal.proposedVerdict, "abnormal");
-  const unsupportedFourth = hearingRequest(4);
-  unsupportedFourth.residents[3].memories = [];
-  const unsupported = await fallback.judgeHearing(unsupportedFourth);
-  assert.equal(unsupported.proposal.proposedVerdict, "abnormal");
-
   const unavailable = new ProviderService({
     profileId: "test/hearing-unavailable",
     textGen: new FakeTextGen([], false),
-    fallback,
   });
-  const terminal = await unavailable.judgeHearing(fourRequest);
-  assert.equal(terminal.meta.transport, "fallback");
-  assert.equal(terminal.meta.fallbackReason, "missing_credentials");
-  assert.equal(terminal.proposal.proposedVerdict, "ordinary");
-  assert.ok(terminal.proposal.officerLine.length > 0);
-  assert.ok(terminal.proposal.verdictWhyLine.length > 0);
+  await expectProviderFailure(unavailable.judgeHearing(fourRequest), {
+    profileId: "test/hearing-unavailable",
+    reason: "missing_credentials",
+    purpose: "hearing_verdict",
+  });
+  assert.deepEqual(unavailable.auditSnapshot(fourRequest.runId).resolutions, []);
 });
 
 test("scripted provider tests may configure an exact hearing verdict", async () => {
@@ -2909,12 +2804,11 @@ test("scripted provider tests may configure an exact hearing verdict", async () 
   assert.equal(result.proposal.proposedVerdict, "abnormal");
 });
 
-test("the model judges suspicion live; the rule classifier answers only as fallback", async () => {
+test("the model judges suspicion live and unavailability fails closed", async () => {
   const judgmentTextGen = new FakeTextGen([{ text: validJudgment }]);
   const live = new ProviderService({
     profileId: "test/judgment",
     textGen: judgmentTextGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const judged = await live.judgeConversationTurn(judgmentRequest());
   assert.equal(judged.meta.transport, "live");
@@ -2942,14 +2836,12 @@ test("the model judges suspicion live; the rule classifier answers only as fallb
   const down = new ProviderService({
     profileId: "test/judgment-down",
     textGen: new FakeTextGen([], false),
-    fallback: new RuleFallbackNpcAdapter(),
   });
-  const fallback = await down.judgeConversationTurn(judgmentRequest());
-  assert.equal(fallback.meta.transport, "fallback");
-  assert.equal(fallback.meta.fallbackReason, "missing_credentials");
-  // The dream-language line still registers through the deterministic classifier.
-  assert.ok(fallback.proposal.signals.includes("dream_language_leak"));
-  assert.ok(fallback.proposal.suspicionDelta > 0);
+  await expectProviderFailure(down.judgeConversationTurn(judgmentRequest()), {
+    profileId: "test/judgment-down",
+    reason: "missing_credentials",
+    purpose: "conversation",
+  });
 });
 
 test("standalone conversation judgments repair a delta above the suspicion ceiling", async () => {
@@ -2970,7 +2862,6 @@ test("standalone conversation judgments repair a delta above the suspicion ceili
   const service = new ProviderService({
     profileId: "test/reachable-standalone-suspicion-delta",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.judgeConversationTurn({
@@ -3008,7 +2899,6 @@ test("merged conversation judgments repair a delta below the suspicion floor", a
   const service = new ProviderService({
     profileId: "test/reachable-suspicion-delta",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.judgeAndProposeConversationTurn({
@@ -3072,7 +2962,6 @@ test("merged conversation repair rewrites meta-framed open-question reasons in f
   const service = new ProviderService({
     profileId: "test/in-fiction-open-question-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.judgeAndProposeConversationTurn({
@@ -3145,7 +3034,6 @@ test("merged conversation repair completes nullable open-question objects with n
   const service = new ProviderService({
     profileId: "test/complete-open-question-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.judgeAndProposeConversationTurn({
@@ -3235,7 +3123,6 @@ test("merged conversation repair cannot erase a tracked open question", async ()
   const service = new ProviderService({
     profileId: "test/preserve-tracked-open-question",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.judgeAndProposeConversationTurn({
@@ -3302,7 +3189,6 @@ test("merged conversation keeps open questions inside an allowed immediate conti
   const service = new ProviderService({
     profileId: "test/open-question-continuation",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const base = {
     ...judgmentRequest(),
@@ -3368,7 +3254,6 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
   const service = new ProviderService({
     profileId: "test/merged-stance",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const result = await service.judgeAndProposeConversationTurn({
     ...judgmentRequest(),
@@ -3501,7 +3386,6 @@ test("merged conversation normalizes only duplicate hidden intent labels without
   const service = new ProviderService({
     profileId: "test/merged-intent-normalization",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.judgeAndProposeConversationTurn({
@@ -3551,7 +3435,6 @@ test("merged intent normalization never bypasses visible-text repair", async () 
   const service = new ProviderService({
     profileId: "test/merged-intent-normalization-after-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
     maxTokensPerSession: 100_000,
   });
 
@@ -3598,7 +3481,6 @@ test("merged Korean conversation repair receives every rejected Latin token", as
   const service = new ProviderService({
     profileId: "test/merged-korean-latin-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
   const result = await service.judgeAndProposeConversationTurn({
@@ -3660,7 +3542,6 @@ test("typed multilingual player text keeps exact Unicode bytes in the provider r
   const service = new ProviderService({
     profileId: "test/multilingual-player-line",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const result = await service.judgeAndProposeConversationTurn({
     ...judgmentRequest(),
@@ -3724,7 +3605,6 @@ test("player-visible stable ids get one bounded repair even when the prose conta
   const service = new ProviderService({
     profileId: "test/stable-id-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const result = await service.judgeAndProposeConversationTurn({
     ...judgmentRequest(),
@@ -3765,7 +3645,7 @@ test("player-visible stable ids get one bounded repair even when the prose conta
   );
 });
 
-test("an invalid-envelope fallback never promotes an uncertain resident to vouch", async () => {
+test("an invalid merged envelope fails closed without creating social evidence", async () => {
   const leakedStableIdTurn = {
     ...JSON.parse(validMergedTurn),
     utterance: "NPC_Office_Worker의 답변을 확인했습니다.",
@@ -3777,22 +3657,23 @@ test("an invalid-envelope fallback never promotes an uncertain resident to vouch
   const service = new ProviderService({
     profileId: "test/stable-id-fallback-stance",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
     maxTokensPerSession: 100_000,
   });
-  const result = await service.judgeAndProposeConversationTurn({
+  await expectProviderFailure(service.judgeAndProposeConversationTurn({
     ...judgmentRequest(),
     playerLine: "안내를 받으러 왔습니다.",
     objective: "방문 이유를 확인한다.",
     sceneFacts: ["사무실에서 직접 대화하고 있다."],
     stanceBefore: "uncertain",
     hasMeaningfulFirsthandConversation: false,
+  }), {
+    profileId: "test/stable-id-fallback-stance",
+    reason: "invalid_envelope",
+    purpose: "conversation_turn",
   });
-
-  assert.equal(result.meta.transport, "fallback");
-  assert.equal(result.meta.fallbackReason, "invalid_envelope");
-  assert.equal(result.proposal.meaningfulFirsthand, true);
-  assert.equal(result.proposal.stance, "uncertain");
+  const audit = service.auditSnapshot(judgmentRequest().sessionId);
+  assert.deepEqual(audit.resolutions, []);
+  assert.equal(audit.complete, false);
 });
 
 test("agent-step prompts keep visible language Korean and stop successful repetition", async () => {
@@ -3809,7 +3690,6 @@ test("agent-step prompts keep visible language Korean and stop successful repeti
   const service = new ProviderService({
     profileId: "test/agent-language",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const result = await service.proposeNextStep({
     sessionId: "session-agent-language",
@@ -3830,37 +3710,6 @@ test("agent-step prompts keep visible language Korean and stop successful repeti
   assert.match(textGen.requests[0].instructions, /run locale is ko-KR/);
   assert.match(textGen.requests[0].instructions, /natural modern Korean/);
   assert.match(textGen.requests[0].instructions, /Never repeat an identical successful tool call/);
-
-  const ambientFallback = await new RuleFallbackNpcAdapter().proposeNextStep({
-    sessionId: "run-ambient-fallback",
-    locale: "ko-KR",
-    iteration: 0,
-    goal: "곁에 있는 주민과 직접 말한다.",
-    observePacket: observePacket(),
-    blockedSignatures: [],
-    requiredToolCall: { tool: "talk_to", actorId: "NPC_Store_Manager" },
-    requireUtterance: true,
-  });
-  assert.equal(ambientFallback.proposal.toolCall?.tool, "talk_to");
-  assert.equal(ambientFallback.proposal.toolCall?.args.actorId, "NPC_Store_Manager");
-  assert.match(ambientFallback.proposal.utterance ?? "", /[가-힣]/);
-  assert.doesNotMatch(
-    ambientFallback.proposal.utterance ?? "",
-    /NPC_|mem-|TS_/,
-  );
-  const mismatchedPacket = observePacket();
-  mismatchedPacket.audibleActorIds = ["player"];
-  const exactTargetFallback = await new RuleFallbackNpcAdapter().proposeNextStep({
-    sessionId: "run-ambient-exact-target",
-    locale: "ko-KR",
-    iteration: 0,
-    goal: "지정된 주민에게만 답한다.",
-    observePacket: mismatchedPacket,
-    blockedSignatures: [],
-    requiredToolCall: { tool: "talk_to", actorId: "NPC_Store_Manager" },
-    requireUtterance: true,
-  });
-  assert.notEqual(exactTargetFallback.proposal.toolCall?.tool, "talk_to");
 });
 
 test("non-Korean player text gets one repair before it reaches the game", async () => {
@@ -3874,7 +3723,6 @@ test("non-Korean player text gets one repair before it reaches the game", async 
   const service = new ProviderService({
     profileId: "test/korean-repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const result = await service.judgeConversationTurn(judgmentRequest());
   assert.equal(result.meta.transport, "live");
@@ -3897,7 +3745,6 @@ test("provider prompts and validation follow a non-Korean run locale without ano
   const service = new ProviderService({
     profileId: "test/english-locale",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const result = await service.judgeConversationTurn({
     ...judgmentRequest(),
@@ -3942,7 +3789,6 @@ test("invalid provider JSON gets one bounded repair attempt", async () => {
   const service = new ProviderService({
     profileId: "test/repair",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const result = await service.proposeConversationTurn(conversationRequest());
   assert.equal(result.meta.transport, "live");
@@ -3994,26 +3840,28 @@ test("invalid first and repair envelopes emit one sanitized structured warning",
   const service = new ProviderService({
     profileId: "test/sanitized-invalid-envelope-warning",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const warnings: unknown[][] = [];
   const originalWarn = console.warn;
   console.warn = (...args: unknown[]) => {
     warnings.push(args);
   };
-  let result;
+  let failure: ProviderFailureError | undefined;
   try {
-    result = await service.proposeConversationTurn({
+    failure = await expectProviderFailure(service.proposeConversationTurn({
       ...conversationRequest(),
       sessionId: "run-sanitized-invalid-envelope-warning",
       locale: "ko-KR",
+    }), {
+      profileId: "test/sanitized-invalid-envelope-warning",
+      reason: "invalid_envelope",
+      purpose: "conversation",
     });
   } finally {
     console.warn = originalWarn;
   }
 
-  assert.equal(result?.meta.transport, "fallback");
-  assert.equal(result?.meta.fallbackReason, "invalid_envelope");
+  assert.equal(failure?.reason, "invalid_envelope");
   assert.equal(warnings.length, 1);
   assert.equal(warnings[0]?.length, 1);
   const warning = warnings[0]?.[0] as {
@@ -4038,49 +3886,37 @@ test("invalid first and repair envelopes emit one sanitized structured warning",
   assert.deepEqual(textGen.requests.map(request => request.purpose), ["conversation", "repair"]);
 });
 
-test("missing credentials and exhausted budget use explicit fallback metadata", async () => {
+test("missing credentials and hard budget exhaustion fail closed", async () => {
   const unavailable = new ProviderService({
     profileId: "test/missing",
     textGen: new FakeTextGen([], false),
-    fallback: new RuleFallbackNpcAdapter(),
   });
-  const missing = await unavailable.proposeConversationTurn(conversationRequest());
-  assert.equal(missing.meta.transport, "fallback");
-  assert.equal(missing.meta.fallbackReason, "missing_credentials");
+  await expectProviderFailure(unavailable.proposeConversationTurn(conversationRequest()), {
+    profileId: "test/missing",
+    reason: "missing_credentials",
+    purpose: "conversation",
+  });
   assert.equal(unavailable.accountingSnapshot("session-provider-test").callsUsed, 0);
   assert.deepEqual(unavailable.auditSnapshot("session-provider-test").calls, []);
-  assert.deepEqual(unavailable.auditSnapshot("session-provider-test").resolutions, [{
-    seq: 1,
-    purpose: "conversation",
-    profileId: "test/missing",
-    transport: "fallback",
-    usedFallback: true,
-    fallbackReason: "missing_credentials",
-    callSeqs: [],
-  }]);
+  assert.deepEqual(unavailable.auditSnapshot("session-provider-test").resolutions, []);
 
   const budgeted = new ProviderService({
     profileId: "test/budget",
     textGen: new FakeTextGen([{ text: validConversation }]),
-    fallback: new RuleFallbackNpcAdapter(),
     maxCallsPerSession: 1,
   });
   const first = await budgeted.proposeConversationTurn(conversationRequest());
-  const second = await budgeted.proposeConversationTurn(conversationRequest());
+  await expectProviderFailure(budgeted.proposeConversationTurn(conversationRequest()), {
+    profileId: "test/budget",
+    reason: "budget_exhausted",
+    purpose: "conversation",
+  });
   assert.equal(first.meta.transport, "live");
-  assert.equal(second.meta.fallbackReason, "budget_exhausted");
   assert.equal(budgeted.accountingSnapshot("session-provider-test").callsUsed, 1);
   const hardBudgetAudit = budgeted.auditSnapshot("session-provider-test");
   assert.equal(hardBudgetAudit.complete, true);
-  assert.deepEqual(hardBudgetAudit.resolutions.at(-1), {
-    seq: 2,
-    purpose: "conversation",
-    profileId: "test/budget",
-    transport: "fallback",
-    usedFallback: true,
-    fallbackReason: "budget_exhausted",
-    callSeqs: [],
-  });
+  assert.equal(hardBudgetAudit.resolutions.length, 1);
+  assert.equal(hardBudgetAudit.resolutions[0]?.transport, "live");
 
   const repairCeilingTextGen = new FakeTextGen([
     { text: "not json", usage: { inputTokens: 5, outputTokens: 1, totalTokens: 6 } },
@@ -4096,9 +3932,8 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
   const repairCeiling = new ProviderService({
     profileId: "test/ambient-repair-ceiling",
     textGen: repairCeilingTextGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
-  const stoppedBeforeRepair = await repairCeiling.proposeNextStep({
+  await assert.rejects(repairCeiling.proposeNextStep({
     sessionId: "run-ambient-repair-ceiling",
     locale: "ko-KR",
     iteration: 0,
@@ -4108,32 +3943,21 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
     requiredToolCall: { tool: "talk_to", actorId: "NPC_Store_Manager" },
     requireUtterance: true,
     budgetCeiling: { maxCalls: 1, maxTokens: 50_000 },
-  });
-  assert.equal(stoppedBeforeRepair.meta.fallbackReason, "budget_exhausted");
+  }), (error: unknown) => error instanceof ProviderBudgetReservedError);
   assert.equal(repairCeilingTextGen.requests.length, 1, "repair cannot enter the reserved call slot");
   assert.equal(
     repairCeiling.accountingSnapshot("run-ambient-repair-ceiling").callsUsed,
     1,
   );
   const repairAudit = repairCeiling.auditSnapshot("run-ambient-repair-ceiling");
-  assert.equal(repairAudit.complete, true);
+  assert.equal(repairAudit.complete, false);
   assert.equal(repairAudit.calls.length, 1);
-  assert.equal(repairAudit.resolutions.length, 1);
-  assert.equal(repairAudit.resolutions[0]?.fallbackReason, "budget_exhausted");
-  assert.deepEqual(repairAudit.resolutions[0]?.callSeqs, [1]);
+  assert.deepEqual(repairAudit.resolutions, []);
 
   const tokenCeilingTextGen = new FakeTextGen([{ text: validConversation }]);
-  const tokenCeilingFallback = new RuleFallbackNpcAdapter();
-  const originalTokenFallback = tokenCeilingFallback.proposeNextStep.bind(tokenCeilingFallback);
-  let tokenFallbackCalls = 0;
-  tokenCeilingFallback.proposeNextStep = async request => {
-    tokenFallbackCalls += 1;
-    return originalTokenFallback(request);
-  };
   const tokenCeiling = new ProviderService({
     profileId: "test/ambient-token-ceiling",
     textGen: tokenCeilingTextGen,
-    fallback: tokenCeilingFallback,
   });
   await assert.rejects(
     tokenCeiling.proposeNextStep({
@@ -4152,7 +3976,6 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
       error.code === "provider_budget_reserved",
   );
   assert.equal(tokenCeilingTextGen.requests.length, 0);
-  assert.equal(tokenFallbackCalls, 0);
   assert.equal(tokenCeiling.accountingSnapshot("run-ambient-token-ceiling").callsUsed, 0);
   const tokenCeilingAudit = tokenCeiling.auditSnapshot("run-ambient-token-ceiling");
   assert.equal(tokenCeilingAudit.complete, true);
@@ -4160,34 +3983,92 @@ test("missing credentials and exhausted budget use explicit fallback metadata", 
   assert.deepEqual(tokenCeilingAudit.resolutions, []);
 });
 
-test("provider timeout falls back without blocking the session", async () => {
-  const never: TextGenPort = {
-    adapterId: "never",
+test("provider timeout stays in flight until a transport that ignores abort physically settles", async () => {
+  let resolveGeneration!: (result: TextGenResult) => void;
+  let receivedSignal: AbortSignal | undefined;
+  const ignoresAbort: TextGenPort = {
+    adapterId: "ignores-abort",
     preflight: async () => ({ available: true }),
-    generate: async () => await new Promise<TextGenResult>(() => {}),
+    generate: async (_request, signal) => {
+      receivedSignal = signal;
+      return await new Promise<TextGenResult>(resolve => {
+        resolveGeneration = resolve;
+      });
+    },
   };
   const service = new ProviderService({
-    profileId: "test/timeout",
-    textGen: never,
-    fallback: new RuleFallbackNpcAdapter(),
+    profileId: "test/timeout-ignores-abort",
+    textGen: ignoresAbort,
     timeoutMs: 5,
   });
-  const result = await service.proposeConversationTurn(conversationRequest());
-  assert.equal(result.meta.transport, "fallback");
-  assert.equal(result.meta.fallbackReason, "timeout");
+  let settled = false;
+  const pending = service.proposeConversationTurn(conversationRequest()).finally(() => {
+    settled = true;
+  });
+  await Bun.sleep(20);
+
+  assert.equal(receivedSignal?.aborted, true);
+  assert.equal(settled, false, "timeout cannot claim an abort-ignoring transport has settled");
+  const timedOutInFlight = service.auditSnapshot("session-provider-test");
+  assert.equal(timedOutInFlight.inFlightCalls, 1);
+  assert.equal(timedOutInFlight.complete, false);
+  assert.deepEqual(timedOutInFlight.calls, []);
+  assert.throws(
+    () => service.releaseScope("session-provider-test"),
+    /cannot release provider scope.*in flight/,
+  );
+
+  resolveGeneration({ text: validConversation });
+  await expectProviderFailure(pending, {
+    profileId: "test/timeout-ignores-abort",
+    reason: "timeout",
+    purpose: "conversation",
+  });
   assert.equal(service.accountingSnapshot("session-provider-test").callsUsed, 1);
   const audit = service.auditSnapshot("session-provider-test");
   assert.equal(audit.calls[0]?.outcome, "error");
   assert.equal(audit.calls[0]?.failureReason, "timeout");
-  assert.deepEqual(audit.resolutions[0]?.callSeqs, [1]);
-  assert.equal(audit.resolutions[0]?.fallbackReason, "timeout");
+  assert.deepEqual(audit.resolutions, []);
+  assert.equal(audit.complete, false);
 });
 
-test("provider audit retains an early fallback followed by a live resolution", async () => {
+test("provider timeout aborts and promptly settles a cancellation-aware transport", async () => {
+  let receivedSignal: AbortSignal | undefined;
+  const honorsAbort: TextGenPort = {
+    adapterId: "honors-abort",
+    preflight: async () => ({ available: true }),
+    generate: async (_request, signal) => {
+      receivedSignal = signal;
+      return await new Promise<TextGenResult>((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+      });
+    },
+  };
+  const service = new ProviderService({
+    profileId: "test/timeout-honors-abort",
+    textGen: honorsAbort,
+    timeoutMs: 5,
+  });
+
+  await expectProviderFailure(service.proposeConversationTurn(conversationRequest()), {
+    profileId: "test/timeout-honors-abort",
+    reason: "timeout",
+    purpose: "conversation",
+  });
+  assert.equal(receivedSignal?.aborted, true);
+  const audit = service.auditSnapshot("session-provider-test");
+  assert.equal(audit.inFlightCalls, 0);
+  assert.equal(audit.complete, false);
+  assert.equal(audit.calls[0]?.outcome, "error");
+  assert.equal(audit.calls[0]?.failureReason, "timeout");
+  assert.deepEqual(audit.resolutions, []);
+});
+
+test("a preflight failure creates no proposal and a later live attempt still succeeds", async () => {
   let available = false;
   const requests: TextGenRequest[] = [];
   const textGen: TextGenPort = {
-    adapterId: "fallback-then-live",
+    adapterId: "failure-then-live",
     preflight: async () => available
       ? { available: true }
       : { available: false, reason: "missing_credentials" },
@@ -4200,29 +4081,26 @@ test("provider audit retains an early fallback followed by a live resolution", a
     },
   };
   const service = new ProviderService({
-    profileId: "test/fallback-then-live",
+    profileId: "test/failure-then-live",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
 
-  const fallback = await service.proposeConversationTurn(conversationRequest());
+  await expectProviderFailure(service.proposeConversationTurn(conversationRequest()), {
+    profileId: "test/failure-then-live",
+    reason: "missing_credentials",
+    purpose: "conversation",
+  });
   available = true;
   const live = await service.proposeConversationTurn(conversationRequest());
 
-  assert.equal(fallback.meta.transport, "fallback");
   assert.equal(live.meta.transport, "live");
   assert.equal(requests.length, 1);
   const audit = service.auditSnapshot("session-provider-test");
   assert.equal(audit.callsUsed, 1);
   assert.equal(audit.tokensUsed, 18);
-  assert.deepEqual(audit.resolutions.map(resolution => ({
-    transport: resolution.transport,
-    fallbackReason: resolution.fallbackReason,
-    callSeqs: resolution.callSeqs,
-  })), [
-    { transport: "fallback", fallbackReason: "missing_credentials", callSeqs: [] },
-    { transport: "live", fallbackReason: null, callSeqs: [1] },
-  ]);
+  assert.equal(audit.resolutions.length, 1);
+  assert.equal(audit.resolutions[0]?.transport, "live");
+  assert.deepEqual(audit.resolutions[0]?.callSeqs, [1]);
 });
 
 test("provider audit isolates run scopes and starts a new scope empty", async () => {
@@ -4231,7 +4109,6 @@ test("provider audit isolates run scopes and starts a new scope empty", async ()
     textGen: new FakeTextGen([
       { text: validConversation, usage: { inputTokens: 3, outputTokens: 2, totalTokens: 5 } },
     ]),
-    fallback: new RuleFallbackNpcAdapter(),
   });
   await service.proposeConversationTurn({
     ...conversationRequest(),
@@ -4250,24 +4127,38 @@ test("provider audit isolates run scopes and starts a new scope empty", async ()
     calls: [],
     resolutions: [],
   });
+
+  service.releaseScope("run-scope-a");
+  assert.deepEqual(service.auditSnapshot("run-scope-a"), {
+    callsUsed: 0,
+    tokensUsed: 0,
+    inFlightCalls: 0,
+    inFlightTokens: 0,
+    complete: true,
+    truncated: false,
+    droppedCount: 0,
+    calls: [],
+    resolutions: [],
+  });
 });
 
-test("provider audit retains a live transport error before deterministic fallback", async () => {
+test("provider audit retains a live transport error without fabricating a resolution", async () => {
   const service = new ProviderService({
     profileId: "test/transport-error",
     textGen: new FakeTextGen([new Error("connection reset")]),
-    fallback: new RuleFallbackNpcAdapter(),
   });
-  const result = await service.proposeConversationTurn(conversationRequest());
-
-  assert.equal(result.meta.fallbackReason, "transport_error");
+  await expectProviderFailure(service.proposeConversationTurn(conversationRequest()), {
+    profileId: "test/transport-error",
+    reason: "transport_error",
+    purpose: "conversation",
+  });
   const audit = service.auditSnapshot("session-provider-test");
   assert.equal(audit.calls.length, 1);
   assert.equal(audit.calls[0]?.outcome, "error");
   assert.equal(audit.calls[0]?.failureReason, "transport_error");
   assert.equal(audit.calls[0]?.chargedTokens, audit.tokensUsed);
-  assert.deepEqual(audit.resolutions[0]?.callSeqs, [1]);
-  assert.equal(audit.resolutions[0]?.fallbackReason, "transport_error");
+  assert.deepEqual(audit.resolutions, []);
+  assert.equal(audit.complete, false);
 });
 
 test("provider audit wire schema rejects accounting and completeness drift", () => {
@@ -4390,7 +4281,6 @@ test("provider audit exposes in-flight accounting without pretending to be compl
   const service = new ProviderService({
     profileId: "test/audit-in-flight",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const pending = service.proposeConversationTurn(conversationRequest());
   await entered;
@@ -4441,7 +4331,6 @@ test("concurrent provider operations keep invocation-local call sequences", asyn
   const service = new ProviderService({
     profileId: "test/audit-concurrent",
     textGen,
-    fallback: new RuleFallbackNpcAdapter(),
   });
   const conversation = service.proposeConversationTurn({
     ...conversationRequest(),
@@ -4486,25 +4375,6 @@ test("concurrent provider operations keep invocation-local call sequences", asyn
   ]));
   assert.deepEqual(byPurpose.get("conversation"), [1]);
   assert.deepEqual(byPurpose.get("agent_step"), [2]);
-});
-
-test("provider audit marks resolution truncation explicitly", async () => {
-  const service = new ProviderService({
-    profileId: "test/audit-truncation",
-    textGen: new FakeTextGen([], false),
-    fallback: new RuleFallbackNpcAdapter(),
-  });
-  const request = { ...conversationRequest(), sessionId: "run-truncated-audit" };
-  for (let index = 0; index < 257; index += 1) {
-    await service.proposeConversationTurn(request);
-  }
-  const audit = service.auditSnapshot(request.sessionId);
-  assert.equal(audit.callsUsed, 0);
-  assert.equal(audit.resolutions.length, 256);
-  assert.equal(audit.droppedCount, 1);
-  assert.equal(audit.truncated, true);
-  assert.equal(audit.complete, false);
-  providerAuditSnapshotSchema.parse(audit);
 });
 
 test("production registry contains no scripted profile", () => {

@@ -44,6 +44,23 @@ export class ProviderBudgetReservedError extends Error {
   }
 }
 
+/**
+ * A live provider could not produce a validated proposal. The error carries
+ * metadata only: prompts and generated output must never cross this boundary.
+ */
+export class ProviderFailureError extends Error {
+  readonly code = "provider_failed";
+
+  constructor(
+    readonly profileId: string,
+    readonly reason: ProviderFailureReason,
+    readonly purpose: ProviderResolutionPurpose,
+  ) {
+    super(`provider ${profileId} failed for ${purpose}: ${reason}`);
+    this.name = "ProviderFailureError";
+  }
+}
+
 export interface ProviderUsage {
   inputTokens: number;
   outputTokens: number;
@@ -293,6 +310,12 @@ export interface AmbientReplyRequest {
 export interface NpcProposalPort {
   readonly profileId: string;
   preflight(): Promise<{ available: boolean; reason?: ProviderFailureReason }>;
+  /**
+   * Release all accounting retained for a completed run/session scope.
+   * Callers may invoke this only after every physical transport has settled.
+   * Stateless proposal ports do not need to implement it.
+   */
+  releaseScope?(scopeId: string): void;
   /** Exact transport budget use for one run/session key, when this port owns a budget. */
   accountingSnapshot?(scopeId: string): { callsUsed: number; tokensUsed: number };
   /** Run-wide metadata-only transport and resolution provenance for acceptance auditing. */
@@ -334,5 +357,6 @@ export interface TextGenResult {
 export interface TextGenPort {
   readonly adapterId: string;
   preflight(): Promise<{ available: boolean; reason?: ProviderFailureReason }>;
-  generate(request: TextGenRequest): Promise<TextGenResult>;
+  /** Settle only after generation finishes or the supplied cancellation is acknowledged. */
+  generate(request: TextGenRequest, signal: AbortSignal): Promise<TextGenResult>;
 }

@@ -10,6 +10,7 @@ import { z } from "zod";
 import { SessionError, SessionService } from "../runtime/session/service.js";
 import { RunError, RunService } from "../runtime/run-service.js";
 import { evaluateRuntimeReadiness } from "../runtime/readiness.js";
+import { ProviderFailureError } from "../providers/ports.js";
 import {
   answerRequestSchema,
   answerResponseSchema,
@@ -23,6 +24,8 @@ import {
   startResponseSchema,
 } from "./session-schemas.js";
 import {
+  runAbandonRequestSchema,
+  runAbandonResponseSchema,
   runAdvanceRequestSchema,
   runAdvanceResponseSchema,
   runEncounterRequestSchema,
@@ -109,6 +112,9 @@ function statusForRunError(error: RunError): number {
     case "hearing_id_conflict":
     case "end_id_conflict":
     case "run_not_terminal":
+    case "abandon_id_conflict":
+    case "run_not_interrupted":
+    case "run_abandon_in_flight":
     case "encounter_id_conflict":
       return 409;
     default:
@@ -227,6 +233,14 @@ export function createSessionServer(service: SessionService, runService = new Ru
         return;
       }
 
+      if (method === "POST" && path === "/v1/run/abandon") {
+        const parsed = runAbandonRequestSchema.safeParse(await readJsonBody(req));
+        if (!parsed.success) return badRequest(res, parsed.error);
+        const result = await runService.abandonRun(parsed.data);
+        respond(res, runAbandonResponseSchema, result);
+        return;
+      }
+
       if (method === "POST" && path === "/v1/session/start") {
         const body = await readJsonBody(req);
         if (hasRunId(body)) {
@@ -329,7 +343,7 @@ export function createSessionServer(service: SessionService, runService = new Ru
         }
         const parsed = endRequestSchema.safeParse(body);
         if (!parsed.success) return badRequest(res, parsed.error);
-        const result = service.end(parsed.data.sessionId);
+        const result = await service.end(parsed.data.sessionId);
         respond(res, endResponseSchema, result);
         return;
       }
@@ -345,6 +359,15 @@ export function createSessionServer(service: SessionService, runService = new Ru
       }
       if (error instanceof RunError) {
         writeJson(res, statusForRunError(error), { error: error.code, message: error.message });
+        return;
+      }
+      if (error instanceof ProviderFailureError) {
+        writeJson(res, 503, {
+          error: error.code,
+          profileId: error.profileId,
+          reason: error.reason,
+          purpose: error.purpose,
+        });
         return;
       }
       if (error instanceof SyntaxError) {

@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import {
   DEFAULT_ROLE_POLICIES,
-  summarizeObservePacket,
   type ObservePacket,
 } from "../agentloop/context.js";
 import {
@@ -16,7 +15,7 @@ import {
   gameplayLocaleSchema,
   type GameplayLocale,
 } from "../localization/supported-locales.js";
-import { fallbackContent } from "../localization/fallback-content.js";
+import { procedureContent } from "../localization/procedure-content.js";
 import {
   agentStepProposalSchema,
   ambientReplyJudgmentSchema,
@@ -29,6 +28,7 @@ import type {
   ConversationProposal,
   ConversationTurnRequest,
   HearingJudgment,
+  MergedConversationTurn,
   NpcProposalPort,
   ProposalMeta,
   ResolvedProposal,
@@ -36,6 +36,7 @@ import type {
 import {
   emptyProviderAuditSnapshot,
   ProviderBudgetReservedError,
+  ProviderFailureError,
 } from "../providers/ports.js";
 import { createProviderFromEnvironment } from "../providers/registry.js";
 import {
@@ -59,7 +60,6 @@ import {
 } from "./run-cast.js";
 import {
   buildHearingJudgmentRequest,
-  hearingContactBasisForMemories,
   validateHearingJudgment,
   type HearingJudgmentRequest,
   type ValidatedHearingJudgment,
@@ -83,6 +83,8 @@ import {
 import { RECORD_KINDS, type RecordKind } from "./world/types.js";
 import type {
   RunAdministrationDelta,
+  RunAbandonRequest,
+  RunAbandonResponse,
   RunActiveContact,
   RunActorReadinessDelta,
   RunActorSpatialFacts,
@@ -113,6 +115,7 @@ import type {
   RunOpenQuestion,
   RunPlayerConversationMemory,
   RunPlayerContactOutcomeMemory,
+  RunProviderFailure,
   RunPlayerSpatialFacts,
   RunPropHandlingEvent,
   RunPropHandlingObservationMemory,
@@ -148,6 +151,7 @@ export const RUN_PROVIDER_BUDGET = {
  * receipts remain run-long for exact retry/conflict semantics.
  */
 export const MAX_PROP_OBSERVATION_MEMORIES_PER_ACTOR = 12;
+export const MAX_CLOSED_RUN_TOMBSTONES = 256;
 export const MAX_PROVIDER_RUNTIME_TRACE_ENTRIES = 512;
 export const MAX_SOCIAL_SOURCE_EXCERPT_CODE_POINTS = 160;
 
@@ -441,9 +445,24 @@ interface HearingRuntimeState {
   answerInFlight?: Promise<HearingAnswerResponse>;
 }
 
-interface CachedRunEnd {
+interface ClosedRunTombstone {
   endId: string;
   response: RunEndResponse;
+}
+
+interface ClosingRun {
+  endId: string;
+  promise: Promise<RunEndResponse>;
+}
+
+interface AbandonedRunTombstone {
+  abandonId: string;
+  response: RunAbandonResponse;
+}
+
+interface AbandoningRun {
+  abandonId: string;
+  promise: Promise<RunAbandonResponse>;
 }
 
 type HearingAnswerClaim =
@@ -480,7 +499,6 @@ interface RunState {
   hearingProcedure: RunHearingProcedure | null;
   terminalResult: RunTerminalResult | null;
   hearingRuntime: HearingRuntimeState | null;
-  runEnd: CachedRunEnd | null;
   locale: GameplayLocale;
   elapsedSeconds: number;
   graceEndsAtSeconds: number;
@@ -491,6 +509,7 @@ interface RunState {
   providerRuntimeTrace: RunSnapshot["providerRuntimeTrace"];
   providerRuntimeTraceNextSeq: number;
   lastProposalMeta: ProposalMeta | null;
+  providerFailure: RunProviderFailure | null;
   activeConversationId: string | null;
   actors: Map<string, RunActorState>;
   scheduler: RunSchedulerRuntime;
@@ -534,6 +553,8 @@ export interface RunServiceOptions {
   idFactory?: (prefix: IdPrefix) => string;
   layout?: RunLayout;
   cast?: RunCast;
+  /** Test seam for the bounded idempotent end-response cache. */
+  closedRunRetentionLimit?: number;
 }
 
 export type RunErrorCode =
@@ -564,6 +585,9 @@ export type RunErrorCode =
   | "hearing_id_conflict"
   | "end_id_conflict"
   | "run_not_terminal"
+  | "abandon_id_conflict"
+  | "run_not_interrupted"
+  | "run_abandon_in_flight"
   | "invalid_arrival"
   | "invalid_spatial_facts"
   | "encounter_id_conflict"
@@ -792,16 +816,29 @@ export class RunService {
   private readonly runChains = new Map<string, Promise<unknown>>();
   private readonly backgroundProviderGates = new Map<string, BackgroundProviderGate>();
   private readonly closedBackgroundProviderRuns = new Set<string>();
+  private readonly closedRunTombstones = new Map<string, ClosedRunTombstone>();
+  private readonly closingRuns = new Map<string, ClosingRun>();
+  private readonly abandonedRunTombstones = new Map<string, AbandonedRunTombstone>();
+  private readonly abandoningRuns = new Map<string, AbandoningRun>();
   private readonly proposalPort: NpcProposalPort;
   private readonly idFactory: (prefix: IdPrefix) => string;
   private readonly layout: RunLayout;
   private readonly cast: RunCast;
+  private readonly closedRunRetentionLimit: number;
 
   constructor(options: RunServiceOptions = {}) {
     this.proposalPort = options.proposalPort ?? createProviderFromEnvironment().proposalPort;
     this.idFactory = options.idFactory ?? (prefix => `${prefix}-${randomUUID()}`);
     this.layout = options.layout ?? loadRunLayout();
     this.cast = options.cast ?? loadRunCast(this.layout);
+    this.closedRunRetentionLimit =
+      options.closedRunRetentionLimit ?? MAX_CLOSED_RUN_TOMBSTONES;
+    if (
+      !Number.isInteger(this.closedRunRetentionLimit) ||
+      this.closedRunRetentionLimit < 1
+    ) {
+      throw new Error("closedRunRetentionLimit must be a positive integer");
+    }
     assertRunCastMatchesLayout(this.cast, this.layout);
   }
 
@@ -854,7 +891,6 @@ export class RunService {
       hearingProcedure: null,
       terminalResult: null,
       hearingRuntime: null,
-      runEnd: null,
       locale: runLocale,
       elapsedSeconds: 0,
       graceEndsAtSeconds: this.layout.graceEndsAtSeconds,
@@ -874,6 +910,7 @@ export class RunService {
       },
       providerRuntimeTraceNextSeq: 0,
       lastProposalMeta: null,
+      providerFailure: null,
       activeConversationId: null,
       actors,
       scheduler,
@@ -952,6 +989,7 @@ export class RunService {
       providerAudit: clone(run.providerAudit),
       providerRuntimeTrace: clone(run.providerRuntimeTrace),
       lastProposalMeta: clone(run.lastProposalMeta),
+      providerFailure: clone(run.providerFailure),
       activeConversationId: run.activeConversationId,
       actors: [...run.actors.values()].map(actor => this.publicActor(actor)),
       scheduler: snapshotRunScheduler(this.layout, run.scheduler, run.elapsedSeconds),
@@ -974,19 +1012,159 @@ export class RunService {
   }
 
   endRun(request: RunEndRequest): Promise<RunEndResponse> {
+    const tombstone = this.closedRunTombstones.get(request.runId);
+    if (tombstone) {
+      if (tombstone.endId !== request.endId) {
+        return Promise.reject(
+          new RunError(
+            "a closed run cannot be retried with a different endId",
+            "end_id_conflict",
+          ),
+        );
+      }
+      return Promise.resolve(clone(tombstone.response));
+    }
+    const closing = this.closingRuns.get(request.runId);
+    if (closing) {
+      if (closing.endId !== request.endId) {
+        return Promise.reject(
+          new RunError(
+            "a closing run cannot be retried with a different endId",
+            "end_id_conflict",
+          ),
+        );
+      }
+      return closing.promise.then(response => clone(response));
+    }
+
+    const promise = this.closeRun(request);
+    const entry: ClosingRun = { endId: request.endId, promise };
+    this.closingRuns.set(request.runId, entry);
+    void promise.finally(() => {
+      if (this.closingRuns.get(request.runId) === entry) {
+        this.closingRuns.delete(request.runId);
+      }
+    }).catch(() => undefined);
+    return promise.then(response => clone(response));
+  }
+
+  abandonRun(request: RunAbandonRequest): Promise<RunAbandonResponse> {
+    const tombstone = this.abandonedRunTombstones.get(request.runId);
+    if (tombstone) {
+      if (tombstone.abandonId !== request.abandonId) {
+        return Promise.reject(
+          new RunError(
+            "an abandoned run cannot be retried with a different abandonId",
+            "abandon_id_conflict",
+          ),
+        );
+      }
+      return Promise.resolve(clone(tombstone.response));
+    }
+    const abandoning = this.abandoningRuns.get(request.runId);
+    if (abandoning) {
+      if (abandoning.abandonId !== request.abandonId) {
+        return Promise.reject(
+          new RunError(
+            "an abandoning run cannot be retried with a different abandonId",
+            "abandon_id_conflict",
+          ),
+        );
+      }
+      return abandoning.promise.then(response => clone(response));
+    }
+
+    const promise = this.closeInterruptedRun(request);
+    const entry: AbandoningRun = { abandonId: request.abandonId, promise };
+    this.abandoningRuns.set(request.runId, entry);
+    void promise.finally(() => {
+      if (this.abandoningRuns.get(request.runId) === entry) {
+        this.abandoningRuns.delete(request.runId);
+      }
+    }).catch(() => undefined);
+    return promise.then(response => clone(response));
+  }
+
+  private async closeInterruptedRun(
+    request: RunAbandonRequest,
+  ): Promise<RunAbandonResponse> {
+    await this.serialize(request.runId, async () => {
+      const run = this.requireRun(request.runId);
+      if (run.runStatus === "terminal" || run.runStatus === "closed" || !run.providerFailure) {
+        throw new RunError(
+          "only a non-terminal run with an unresolved provider failure can be abandoned",
+          "run_not_interrupted",
+        );
+      }
+      this.closeBackgroundProviderLane(run.runId);
+    });
+    await this.awaitBackgroundWorkSettled(request.runId);
     return this.serialize(request.runId, async () => {
       const run = this.requireRun(request.runId);
-      if (run.runEnd) {
-        if (run.runEnd.endId !== request.endId) {
-          throw new RunError("a closed run cannot be retried with a different endId", "end_id_conflict");
-        }
-        return clone(run.runEnd.response);
+      if (run.runStatus === "terminal" || run.runStatus === "closed" || !run.providerFailure) {
+        this.closedBackgroundProviderRuns.delete(run.runId);
+        throw new RunError(
+          "the provider interruption resolved before the run was abandoned",
+          "run_not_interrupted",
+        );
       }
+      this.refreshProviderState(run);
+      if (run.providerAudit.inFlightCalls !== 0) {
+        this.closedBackgroundProviderRuns.delete(run.runId);
+        throw new RunError(
+          "cannot abandon a run while provider transport remains in flight",
+          "run_abandon_in_flight",
+        );
+      }
+      const response: RunAbandonResponse = {
+        runId: run.runId,
+        abandonId: request.abandonId,
+        runStatus: "closed",
+        reason: "provider_failed",
+        providerFailure: clone(run.providerFailure),
+        providerBudget: clone(run.providerBudget),
+        providerAudit: clone(run.providerAudit),
+        providerRuntimeTrace: clone(run.providerRuntimeTrace),
+        lastProposalMeta: clone(run.lastProposalMeta),
+      };
+
+      this.proposalPort.releaseScope?.(run.runId);
+      this.runs.delete(run.runId);
+      this.backgroundProviderGates.delete(run.runId);
+      this.closedBackgroundProviderRuns.delete(run.runId);
+      for (const [startId, cached] of this.startCache) {
+        if (cached.response.runId === run.runId) this.startCache.delete(startId);
+      }
+      this.abandonedRunTombstones.set(run.runId, {
+        abandonId: request.abandonId,
+        response: clone(response),
+      });
+      while (this.abandonedRunTombstones.size > this.closedRunRetentionLimit) {
+        const oldest = this.abandonedRunTombstones.keys().next().value as string | undefined;
+        if (!oldest) break;
+        this.abandonedRunTombstones.delete(oldest);
+      }
+      return response;
+    });
+  }
+
+  private async closeRun(request: RunEndRequest): Promise<RunEndResponse> {
+    await this.serialize(request.runId, async () => {
+      const run = this.requireRun(request.runId);
+      if (run.runStatus !== "terminal" || !run.terminalResult) {
+        throw new RunError(`run is not terminal: ${run.runStatus}`, "run_not_terminal");
+      }
+    });
+    await this.awaitBackgroundWorkSettled(request.runId);
+    return this.serialize(request.runId, async () => {
+      const run = this.requireRun(request.runId);
       if (run.runStatus !== "terminal" || !run.terminalResult) {
         throw new RunError(`run is not terminal: ${run.runStatus}`, "run_not_terminal");
       }
       this.refreshProviderState(run);
-      run.runStatus = "closed";
+      if (run.providerAudit.inFlightCalls !== 0) {
+        throw new Error("cannot close a run while provider transport remains in flight");
+      }
       const response: RunEndResponse = {
         runId: run.runId,
         endId: request.endId,
@@ -997,7 +1175,20 @@ export class RunService {
         providerRuntimeTrace: clone(run.providerRuntimeTrace),
         lastProposalMeta: clone(run.lastProposalMeta),
       };
-      run.runEnd = { endId: request.endId, response: clone(response) };
+
+      this.proposalPort.releaseScope?.(run.runId);
+      this.runs.delete(run.runId);
+      this.backgroundProviderGates.delete(run.runId);
+      this.closedBackgroundProviderRuns.delete(run.runId);
+      this.closedRunTombstones.set(run.runId, {
+        endId: request.endId,
+        response: clone(response),
+      });
+      while (this.closedRunTombstones.size > this.closedRunRetentionLimit) {
+        const oldest = this.closedRunTombstones.keys().next().value as string | undefined;
+        if (!oldest) break;
+        this.closedRunTombstones.delete(oldest);
+      }
       return response;
     });
   }
@@ -1136,36 +1327,39 @@ export class RunService {
     request: HearingJudgmentRequest,
   ): Promise<HearingAnswerResponse> {
     await this.awaitBackgroundWorkSettled(runId);
-    let judgment: HearingJudgment;
-    let meta: ProposalMeta;
+    const operationKey = `hearing_verdict:${runtime.hearingId}:${runtime.answerSignature ?? "missing"}`;
+    let resolved: ResolvedProposal<HearingJudgment>;
     try {
-      const resolved = await this.proposalPort.judgeHearing(clone(request));
-      const validated = validateHearingJudgment(request, resolved.proposal);
-      if (validated.ok) {
-        judgment = resolved.proposal;
-        meta = resolved.meta;
-      } else {
-        this.warnLiveHearingSemanticReplacement(resolved.meta, validated.reason);
-        judgment = this.fallbackHearingJudgment(request);
-        meta = this.goalFallbackMeta("invalid_envelope");
+      resolved = await this.proposalPort.judgeHearing(clone(request));
+      this.rejectFallbackProposalMeta(resolved.meta, "hearing_verdict");
+    } catch (error) {
+      if (error instanceof ProviderFailureError) {
+        await this.serialize(runId, async () => {
+          this.recordProviderFailure(this.requireRun(runId), error, operationKey);
+        });
       }
-    } catch {
-      judgment = this.fallbackHearingJudgment(request);
-      meta = this.goalFallbackMeta("transport_error");
+      throw error;
     }
-    const checked = validateHearingJudgment(request, judgment);
-    if (!checked.ok) throw new Error(`deterministic hearing fallback is invalid: ${checked.reason}`);
+    const checked = validateHearingJudgment(request, resolved.proposal);
+    if (!checked.ok) {
+      this.warnLiveHearingSemanticReplacement(resolved.meta, checked.reason);
+      const error = this.invalidProviderEnvelope("hearing_verdict");
+      await this.serialize(runId, async () => {
+        this.recordProviderFailure(this.requireRun(runId), error, operationKey);
+      });
+      throw error;
+    }
     const validated = this.normalizeValidatedHearing(request, checked.value);
     if (validated.evidencedVouchCount < 4 && validated.proposedVerdict === "ordinary") {
-      // The model supplied a structurally valid judgment, but the runtime must
-      // replace its ordinary ruling and wording to enforce the evidenced-vouch
-      // floor. Mark that semantic replacement as fallback so terminal live
-      // acceptance cannot look clean merely because transport succeeded.
       this.warnLiveHearingSemanticReplacement(
-        meta,
+        resolved.meta,
         "ordinary verdict had fewer than four evidenced vouches",
       );
-      meta = this.goalFallbackMeta("invalid_envelope");
+      const error = this.invalidProviderEnvelope("hearing_verdict");
+      await this.serialize(runId, async () => {
+        this.recordProviderFailure(this.requireRun(runId), error, operationKey);
+      });
+      throw error;
     }
 
     return this.serialize(runId, async () => {
@@ -1178,7 +1372,8 @@ export class RunService {
       ) {
         throw new RunError("hearing judgment became stale", "run_not_active");
       }
-      this.trackProposal(run, meta);
+      this.clearProviderFailure(run, operationKey);
+      this.trackProposal(run, resolved.meta);
       const nextRevision = run.worldRevision + 1;
       const terminalResult = this.commitHearingResult(
         run,
@@ -1186,7 +1381,7 @@ export class RunService {
         runtime.finalDefense,
         request,
         validated,
-        meta,
+        resolved.meta,
         nextRevision,
       );
       run.worldRevision = nextRevision;
@@ -1206,7 +1401,7 @@ export class RunService {
         hearingProcedure: clone(run.hearingProcedure),
         nextTurn: null,
         terminalResult: clone(terminalResult),
-        proposalMeta: clone(meta),
+        proposalMeta: clone(resolved.meta),
         providerAudit: clone(run.providerAudit),
         providerRuntimeTrace: clone(run.providerRuntimeTrace),
         socialView: this.publicSocialView(run),
@@ -1807,20 +2002,22 @@ export class RunService {
             action: event.action,
             playerPosition: clone(event.playerPosition),
             objectPosition: clone(event.objectPosition),
+            observedWorldRevision: event.observedWorldRevision,
             worldSeconds: toSeconds,
             worldRevision: candidateWorldRevision,
           }));
+        let appliedMemory = false;
         for (const memory of memories) {
-          this.appendPropObservationMemory(
+          appliedMemory = this.appendPropObservationMemory(
             this.requireActor(run, memory.listenerActorId),
             memory,
-          );
+          ) || appliedMemory;
         }
         run.propHandlingReceipts.set(event.eventId, {
           signature: propHandlingSignature(event),
           memories: clone(memories),
         });
-        if (memories.length > 0) propMemoryMutation = true;
+        if (appliedMemory) propMemoryMutation = true;
         propObservationMemories.push(...clone(memories));
       }
 
@@ -2334,6 +2531,7 @@ export class RunService {
       }
 
       const playerLine = this.resolvePlayerLine(conversation.activeTurn, answer, run.locale);
+      const operationKey = `conversation_turn:${sessionId}:${turnId}:${signature}`;
       const actor = this.requireActor(run, conversation.actorId);
       const stanceBefore = actor.stance;
       const suspicionBefore = actor.suspicion;
@@ -2351,28 +2549,37 @@ export class RunService {
         [playerLine],
         run.spatialFacts?.actors.get(actor.actorId),
       );
-      const resolved = await this.proposalPort.judgeAndProposeConversationTurn({
-        sessionId: run.runId,
-        locale: run.locale,
-        beatId: conversation.activeTurn.beatId,
-        promptId: conversation.activeTurn.promptId,
-        actorId: actor.actorId,
-        playerLine,
-        conversationHistory: clone(conversation.dialogue.slice(-10)),
-        observePacket,
-        suspicionBefore,
-        reportPressureBefore: reportBefore,
-        objective: this.conversationObjective(actor, conversation.procedure),
-        sceneFacts: this.conversationSceneFacts(actor, conversation.procedure),
-        stanceBefore,
-        hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
-        currentOpenQuestion: clone(
-          conversation.lastMemory?.kind === "player_conversation"
-            ? conversation.lastMemory.openQuestion
-            : null,
-        ),
-        continuationAllowed,
-      });
+      let resolved: ResolvedProposal<MergedConversationTurn>;
+      try {
+        resolved = await this.proposalPort.judgeAndProposeConversationTurn({
+          sessionId: run.runId,
+          locale: run.locale,
+          beatId: conversation.activeTurn.beatId,
+          promptId: conversation.activeTurn.promptId,
+          actorId: actor.actorId,
+          playerLine,
+          conversationHistory: clone(conversation.dialogue.slice(-10)),
+          observePacket,
+          suspicionBefore,
+          reportPressureBefore: reportBefore,
+          objective: this.conversationObjective(actor, conversation.procedure),
+          sceneFacts: this.conversationSceneFacts(actor, conversation.procedure),
+          stanceBefore,
+          hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
+          currentOpenQuestion: clone(
+            conversation.lastMemory?.kind === "player_conversation"
+              ? conversation.lastMemory.openQuestion
+              : null,
+          ),
+          continuationAllowed,
+        });
+        this.rejectFallbackProposalMeta(resolved.meta, "conversation_turn");
+      } catch (error) {
+        if (error instanceof ProviderFailureError) {
+          this.recordProviderFailure(run, error, operationKey);
+        }
+        throw error;
+      }
       this.trackProposal(run, resolved.meta);
       const observedCitations = this.observedRecordCitations(
         observePacket,
@@ -2382,11 +2589,11 @@ export class RunService {
         ? this.commitObservedRecordCitations(run, actor.actorId, observedCitations)
         : null;
       if (!citedRecords) {
-        throw new RunError(
-          "the conversation reply cited a record revision outside the current observation",
-          "invalid_answer",
-        );
+        const error = this.invalidProviderEnvelope("conversation_turn");
+        this.recordProviderFailure(run, error, operationKey);
+        throw error;
       }
+      this.clearProviderFailure(run, operationKey);
 
       const suspicionAfter = clampConversationScore(
         suspicionBefore +
@@ -2525,6 +2732,9 @@ export class RunService {
       if (conversation.status === "active") {
         throw new RunError("conversation still has an answerable turn", "session_still_active");
       }
+      if (conversation.procedure === "interrogation" && !conversation.lastJudgment) {
+        throw new Error("a completed interrogation must retain its provider-authored judgment");
+      }
       const actor = this.requireActor(run, conversation.actorId);
       conversation.status = "ended";
       conversation.activeTurn = null;
@@ -2539,8 +2749,7 @@ export class RunService {
           listenerActorId: actor.actorId,
           sessionId,
           ledgerSeq: conversation.interrogationLedgerSeq,
-          whyLine:
-            conversation.lastJudgment?.whyLine ?? fallbackContent(run.locale).whyLines.none,
+          whyLine: conversation.lastJudgment?.whyLine as string,
           worldSeconds: run.elapsedSeconds,
           worldRevision: nextRevision,
         };
@@ -2633,6 +2842,7 @@ export class RunService {
     runId: string,
     attempt: GoalDecisionAttempt,
   ): Promise<RunNpcDecisionResponse> {
+    const operationKey = `npc_decision:${attempt.request.wakeId}`;
     if (attempt.state === "unclaimed") {
       const early = await this.serialize(runId, async () =>
         this.claimGoalDecision(this.requireRun(runId), attempt),
@@ -2659,7 +2869,6 @@ export class RunService {
     const budgetStop = new Error("goal_background_budget_reserved");
     let meetingOwnedBeforeTransport = false;
     const meetingOwnershipStop = new Error("goal_meeting_owned_before_transport");
-    let synthesizedRuntimeFallback = false;
     try {
       const initialRun = this.requireRun(runId);
       const loop = await runBoundedProposalLoop<{
@@ -2709,15 +2918,12 @@ export class RunService {
           });
         },
         onMeta: async meta => {
+          this.rejectFallbackProposalMeta(meta, "agent_step");
           await this.serialize(runId, async () => {
             this.trackProposal(this.requireRun(runId), meta);
           });
           attempt.providerMetas.push(clone(meta));
           while (attempt.providerMetas.length > 3) attempt.providerMetas.shift();
-          if (meta.fallbackReason === "budget_exhausted") {
-            budgetReserved = true;
-            throw budgetStop;
-          }
         },
         evaluate: proposal => {
           const validated = this.validateGoalProposal(
@@ -2785,24 +2991,22 @@ export class RunService {
             observation.procedure === "interrogation" &&
             observation.observePacket.playerContact?.available
           ) {
-            const priorMeta = attempt.providerMetas.at(-1);
-            if (priorMeta?.fallbackReason !== "budget_exhausted") {
-              return this.commitBudgetReservedInterrogationPolicy(run, attempt);
-            }
-            attempt.resolvedAction = {
-              tool: "move_to_player",
-              contactReason: fallbackContent(run.locale).whyLines.none,
-            };
-            attempt.actionMeta = clone(priorMeta);
-            attempt.policyAction = null;
-            return this.commitGoalDecision(run, attempt);
+            return this.commitBudgetReservedInterrogationPolicy(run, attempt);
           }
           this.deferGoalForBudget(run, attempt);
           return this.finishGoalAttempt(run, attempt, "budget_reserved");
         });
       }
-      // The deterministic policy action below keeps the wake terminal and
-      // honest without granting any world mutation after provider failure.
+      const failure = error instanceof ProviderFailureError
+        ? error
+        : new ProviderFailureError(
+            this.proposalPort.profileId,
+            "transport_error",
+            "agent_step",
+          );
+      return this.serialize(runId, async () =>
+        this.retryGoalAfterProviderFailure(this.requireRun(runId), attempt, failure),
+      );
     }
 
     if (attempt.resolvedAction?.tool === "talk_to" && attempt.actionMeta) {
@@ -2811,62 +3015,14 @@ export class RunService {
     }
 
     if (!attempt.resolvedAction) {
-      const administrativeFallbackLine =
-        observation.administrativeDecisionSourceMemoryId !== null
-          ? fallbackContent(this.requireRun(runId).locale).agent.administrativeWaitUtterance
-          : null;
-      attempt.resolvedAction =
-        observation.procedure === "interrogation" &&
-        observation.observePacket.playerContact?.available
-          ? {
-              tool: "move_to_player",
-              contactReason: fallbackContent(this.requireRun(runId).locale).whyLines.none,
-            }
-          : {
-              tool: "wait",
-              reason: administrativeFallbackLine ?? "bounded goal fallback",
-            };
-      if (administrativeFallbackLine) {
-        attempt.resolvedUtterance = administrativeFallbackLine;
-        attempt.resolvedUtteranceCitations = [];
-      }
-      const fallbackMeta = this.goalFallbackMeta("invalid_envelope");
-      attempt.actionMeta = fallbackMeta;
-      attempt.policyAction = null;
-      synthesizedRuntimeFallback = true;
-      attempt.providerMetas = [
-        ...attempt.providerMetas.slice(-(GOAL_MAX_ATTEMPTS - 1)),
-        clone(fallbackMeta),
-      ];
+      const error = this.invalidProviderEnvelope("agent_step");
+      return this.serialize(runId, async () =>
+        this.retryGoalAfterProviderFailure(this.requireRun(runId), attempt, error),
+      );
     }
     return this.serialize(runId, async () => {
       const run = this.requireRun(runId);
-      if (attempt.actionMeta?.usedFallback) {
-        if (synthesizedRuntimeFallback) this.trackProposal(run, attempt.actionMeta);
-        const isInterrogationContact = attempt.resolvedAction?.tool === "move_to_player";
-        run.agentTranscript.append({
-          actorId: attempt.actorId,
-          step: run.agentTranscript.nextStep(attempt.actorId),
-          observedSummary: summarizeObservePacket(observation.observePacket),
-          tool: isInterrogationContact ? "move_to" : "wait",
-          args: isInterrogationContact
-            ? { targetId: "player" }
-            : { reason: "bounded goal fallback" },
-          rationale: isInterrogationContact
-            ? "provider attempts exhausted; deterministic policy preserves the required grounded interrogation"
-            : "provider attempts exhausted; deterministic policy yields this beat",
-          proposalMeta: clone(attempt.actionMeta),
-          validation: {
-            ok: true,
-            note: isInterrogationContact
-              ? "deterministic grounded interrogation contact"
-              : "deterministic fallback wait",
-          },
-          nextStepChange: isInterrogationContact
-            ? "Station contact will be revalidated at commit"
-            : "goal yields without a world mutation",
-        });
-      }
+      this.clearProviderFailure(run, operationKey);
       return this.commitGoalDecision(run, attempt);
     });
   }
@@ -3529,15 +3685,12 @@ export class RunService {
           });
         },
         onMeta: async meta => {
+          this.rejectFallbackProposalMeta(meta, "ambient_reply");
           await this.serialize(runId, async () => {
             this.trackProposal(this.requireRun(runId), meta);
           });
           attempt.providerMetas.push(clone(meta));
           while (attempt.providerMetas.length > 3) attempt.providerMetas.shift();
-          if (meta.fallbackReason === "budget_exhausted") {
-            budgetReserved = true;
-            throw budgetStop;
-          }
         },
         evaluate: (proposal, meta) => {
           const reply = this.validatedAmbientReply(
@@ -3603,25 +3756,21 @@ export class RunService {
           return this.finishGoalAttempt(run, attempt, "budget_reserved");
         });
       }
+      const failure = error instanceof ProviderFailureError
+        ? error
+        : new ProviderFailureError(
+            this.proposalPort.profileId,
+            "transport_error",
+            "ambient_reply",
+          );
+      return this.serialize(runId, async () =>
+        this.retryGoalAfterProviderFailure(this.requireRun(runId), attempt, failure),
+      );
     }
-
-    await this.serialize(runId, async () => {
-      const current = this.requireRun(runId);
-      if (current.activeAmbientConversation?.wakeId === attempt.request.wakeId) {
-        current.activeAmbientConversation = null;
-      }
-      attempt.resolvedAction = null;
-      attempt.resolvedUtterance = null;
-      attempt.resolvedUtteranceCitations = [];
-      attempt.actionMeta = null;
-      attempt.policyAction = null;
-      attempt.conversationId = null;
-      attempt.conversationActorIds = null;
-      attempt.conversationFactSignatures = {};
-      attempt.conversationEvidenceKeys = {};
-      attempt.resolvedTurns = [];
-    });
-    return null;
+    const failure = this.invalidProviderEnvelope("ambient_reply");
+    return this.serialize(runId, async () =>
+      this.retryGoalAfterProviderFailure(this.requireRun(runId), attempt, failure),
+    );
   }
 
   private claimGoalConversationReply(
@@ -4349,6 +4498,7 @@ export class RunService {
       providerMetas: clone(attempt.providerMetas),
       providerAudit: clone(run.providerAudit),
       providerRuntimeTrace: clone(run.providerRuntimeTrace),
+      providerFailure: clone(run.providerFailure),
       socialView: this.publicSocialView(run),
       activeContact: clone(run.activeContact),
     };
@@ -4446,15 +4596,6 @@ export class RunService {
     );
   }
 
-  private goalFallbackMeta(reason: ProposalMeta["fallbackReason"]): ProposalMeta {
-    return {
-      profileId: this.proposalPort.profileId,
-      transport: "fallback",
-      usedFallback: true,
-      ...(reason ? { fallbackReason: reason } : {}),
-    };
-  }
-
   /** Preserve the required grounded Station approach without fake provider evidence. */
   private commitBudgetReservedInterrogationPolicy(
     run: RunState,
@@ -4470,7 +4611,7 @@ export class RunService {
     }
     attempt.resolvedAction = {
       tool: "move_to_player",
-      contactReason: fallbackContent(run.locale).whyLines.none,
+      contactReason: "station_interrogation_procedure",
     };
     attempt.actionMeta = null;
     attempt.policyAction = "budget_reserved_interrogation";
@@ -4555,6 +4696,7 @@ export class RunService {
     runId: string,
     attempt: AmbientDecisionAttempt,
   ): Promise<RunNpcDecisionResponse> {
+    const operationKey = `npc_decision:${attempt.request.wakeId}`;
     if (attempt.state === "unclaimed") {
       const early = await this.serialize(runId, async () =>
         this.claimAmbientDecision(this.requireRun(runId), attempt),
@@ -4678,6 +4820,10 @@ export class RunService {
               observePacket,
             });
           }
+          this.rejectFallbackProposalMeta(
+            resolvedMeta,
+            turnIndex === 0 ? "agent_step" : "ambient_reply",
+          );
           await this.serialize(runId, async () => {
             const run = this.requireRun(runId);
             this.trackProposal(run, resolvedMeta);
@@ -4687,14 +4833,17 @@ export class RunService {
             }
           });
           attempt.providerMetas.push(clone(resolvedMeta));
-          if (resolvedMeta.fallbackReason === "budget_exhausted") {
-            return this.serialize(runId, async () =>
-              this.finishAmbientAttempt(this.requireRun(runId), attempt, "budget_reserved"),
-            );
-          }
+          while (attempt.providerMetas.length > 3) attempt.providerMetas.shift();
           if (!resolvedTurn) {
+            const failure = this.invalidProviderEnvelope(
+              turnIndex === 0 ? "agent_step" : "ambient_reply",
+            );
             return this.serialize(runId, async () =>
-              this.finishAmbientAttempt(this.requireRun(runId), attempt, "failed"),
+              this.retryAmbientAfterProviderFailure(
+                this.requireRun(runId),
+                attempt,
+                failure,
+              ),
             );
           }
           attempt.resolvedTurns.push(resolvedTurn);
@@ -4703,22 +4852,29 @@ export class RunService {
         return this.serialize(runId, async () => {
           const run = this.requireRun(runId);
           this.refreshProviderState(run);
-          return this.finishAmbientAttempt(
-            run,
-            attempt,
-            error instanceof BackgroundProviderLaneClosedError
-              ? "stale"
-              : error instanceof ProviderBudgetReservedError
-                ? "budget_reserved"
-                : "failed",
-          );
+          if (error instanceof BackgroundProviderLaneClosedError) {
+            return this.finishAmbientAttempt(run, attempt, "stale");
+          }
+          if (error instanceof ProviderBudgetReservedError) {
+            return this.finishAmbientAttempt(run, attempt, "budget_reserved");
+          }
+          const failure = error instanceof ProviderFailureError
+            ? error
+            : new ProviderFailureError(
+                this.proposalPort.profileId,
+                "transport_error",
+                attempt.resolvedTurns.length === 0 ? "agent_step" : "ambient_reply",
+              );
+          return this.retryAmbientAfterProviderFailure(run, attempt, failure);
         });
       }
     }
 
-    return this.serialize(runId, async () =>
-      this.commitAmbientDecision(this.requireRun(runId), attempt),
-    );
+    return this.serialize(runId, async () => {
+      const run = this.requireRun(runId);
+      this.clearProviderFailure(run, operationKey);
+      return this.commitAmbientDecision(run, attempt);
+    });
   }
 
   private claimAmbientDecision(
@@ -5092,6 +5248,82 @@ export class RunService {
     return true;
   }
 
+  private recordProviderFailure(
+    run: RunState,
+    error: ProviderFailureError,
+    operationKey: string,
+  ): void {
+    this.refreshProviderState(run);
+    run.providerFailure = {
+      profileId: error.profileId,
+      reason: error.reason,
+      purpose: error.purpose,
+      operationKey,
+    };
+  }
+
+  private clearProviderFailure(run: RunState, operationKey: string): void {
+    if (run.providerFailure?.operationKey === operationKey) {
+      run.providerFailure = null;
+    }
+  }
+
+  private invalidProviderEnvelope(
+    purpose: ConstructorParameters<typeof ProviderFailureError>[2],
+  ): ProviderFailureError {
+    return new ProviderFailureError(
+      this.proposalPort.profileId,
+      "invalid_envelope",
+      purpose,
+    );
+  }
+
+  private retryGoalAfterProviderFailure(
+    run: RunState,
+    attempt: GoalDecisionAttempt,
+    error: ProviderFailureError,
+  ): RunNpcDecisionResponse {
+    const operationKey = `npc_decision:${attempt.request.wakeId}`;
+    this.recordProviderFailure(run, error, operationKey);
+    if (run.activeAmbientConversation?.wakeId === attempt.request.wakeId) {
+      run.activeAmbientConversation = null;
+    }
+    attempt.state = "resolving";
+    attempt.resolvedAction = null;
+    attempt.resolvedUtterance = null;
+    attempt.resolvedUtteranceCitations = [];
+    attempt.actionMeta = null;
+    attempt.policyAction = null;
+    attempt.providerMetas = [];
+    attempt.conversationId = null;
+    attempt.conversationActorIds = null;
+    attempt.conversationFactSignatures = {};
+    attempt.conversationEvidenceKeys = {};
+    attempt.resolvedTurns = [];
+    const response = this.goalDecisionResponse(run, attempt, "failed", [], []);
+    attempt.response = clone(response);
+    return response;
+  }
+
+  private retryAmbientAfterProviderFailure(
+    run: RunState,
+    attempt: AmbientDecisionAttempt,
+    error: ProviderFailureError,
+  ): RunNpcDecisionResponse {
+    const operationKey = `npc_decision:${attempt.request.wakeId}`;
+    this.recordProviderFailure(run, error, operationKey);
+    if (run.activeAmbientConversation?.conversationId === attempt.conversationId) {
+      run.activeAmbientConversation = null;
+    }
+    attempt.state = "resolving";
+    attempt.resolvedTurns = [];
+    attempt.providerMetas = [];
+    attempt.actorReadinessDeltas = [];
+    const response = this.ambientDecisionResponse(run, attempt, "failed", []);
+    attempt.response = clone(response);
+    return response;
+  }
+
   private finishAmbientAttempt(
     run: RunState,
     attempt: AmbientDecisionAttempt,
@@ -5139,6 +5371,7 @@ export class RunService {
       providerMetas: clone(attempt.providerMetas),
       providerAudit: clone(run.providerAudit),
       providerRuntimeTrace: clone(run.providerRuntimeTrace),
+      providerFailure: clone(run.providerFailure),
       socialView: this.publicSocialView(run),
       activeContact: clone(run.activeContact),
     };
@@ -5147,13 +5380,14 @@ export class RunService {
   private serialize<T>(runId: string, task: () => Promise<T>): Promise<T> {
     const previous = this.runChains.get(runId) ?? Promise.resolve();
     const next = previous.then(task, task);
-    this.runChains.set(
-      runId,
-      next.then(
-        () => undefined,
-        () => undefined,
-      ),
+    const settled = next.then(
+      () => undefined,
+      () => undefined,
     );
+    this.runChains.set(runId, settled);
+    void settled.then(() => {
+      if (this.runChains.get(runId) === settled) this.runChains.delete(runId);
+    });
     return next;
   }
 
@@ -5186,9 +5420,23 @@ export class RunService {
   private appendPropObservationMemory(
     actor: RunActorState,
     memory: RunPropHandlingObservationMemory,
-  ): void {
-    // Replace, rather than accumulate, repeated low-value facts. Removing all
-    // prior matches also compacts snapshots loaded from an older build.
+  ): boolean {
+    const matching = actor.memories.filter(
+      (candidate): candidate is RunPropHandlingObservationMemory =>
+        candidate.kind === "prop_handling_observation" &&
+        candidate.propId === memory.propId &&
+        candidate.action === memory.action,
+    );
+    const newestObservedRevision = matching.reduce(
+      (latest, candidate) => Math.max(latest, candidate.observedWorldRevision),
+      -1,
+    );
+    if (memory.observedWorldRevision < newestObservedRevision) return false;
+
+    // Replace, rather than accumulate, repeated low-value facts. Source
+    // revision wins over delivery order, so a late first delivery cannot
+    // overwrite a newer observed fact. Equal-revision retries remain safe at
+    // the receipt layer and equal-revision distinct events retain input order.
     for (let index = 0; index < actor.memories.length;) {
       const candidate = actor.memories[index];
       if (
@@ -5202,6 +5450,7 @@ export class RunService {
       }
     }
     actor.memories.push(memory);
+    return true;
   }
 
   private publicActor(actor: RunActorState): RunActor {
@@ -5650,15 +5899,20 @@ export class RunService {
     runId: string,
     attempt: ConversationOpeningAttempt,
   ): Promise<RunSessionPreloadResponse> {
+    const operationKey = `conversation:${attempt.actorId}:${attempt.interactionZoneId}:${attempt.evidenceKey}`;
     let acquired = false;
     let resolved: ResolvedProposal<ConversationProposal>;
     try {
       await this.acquireBackgroundProviderSlot(runId);
       acquired = true;
       resolved = await this.proposalPort.proposeConversationTurn(clone(attempt.request));
+      this.rejectFallbackProposalMeta(resolved.meta, "conversation");
     } catch (error) {
       await this.serialize(runId, async () => {
         const run = this.requireRun(runId);
+        if (error instanceof ProviderFailureError) {
+          this.recordProviderFailure(run, error, operationKey);
+        }
         if (run.conversationOpenings.get(attempt.actorId) === attempt) {
           run.conversationOpenings.delete(attempt.actorId);
           run.preloadRequiredEvidence.delete(attempt.actorId);
@@ -5711,14 +5965,14 @@ export class RunService {
         ? this.commitObservedRecordCitations(run, actor.actorId, observedCitations)
         : null;
       if (!citedRecords) {
+        const error = this.invalidProviderEnvelope("conversation");
+        this.recordProviderFailure(run, error, operationKey);
         run.conversationOpenings.delete(actor.actorId);
         run.preloadRequiredEvidence.delete(actor.actorId);
         actor.playerConversationReady = false;
-        throw new RunError(
-          "conversation opening cited a record revision outside its observation",
-          "conversation_not_ready",
-        );
+        throw error;
       }
+      this.clearProviderFailure(run, operationKey);
       attempt.resolved = clone(resolved);
       attempt.citedRecords = citedRecords;
       // Provider latency must not make a nearby resident walk away between
@@ -5908,59 +6162,6 @@ export class RunService {
     };
   }
 
-  private fallbackHearingJudgment(request: HearingJudgmentRequest): HearingJudgment {
-    const content = fallbackContent(request.locale);
-    const assessments = request.residents.map(resident => {
-      const contactBasis = hearingContactBasisForMemories(resident.memories);
-      const firsthand = [...resident.memories]
-        .reverse()
-        .find(memory =>
-          memory.kind === "player_conversation" &&
-          memory.sourceActorId === "player" &&
-          memory.meaningfulFirsthand
-        );
-      if (firsthand) {
-        return {
-          actorId: resident.actorId,
-          contactBasis,
-          proposedStance: resident.stanceBefore,
-          testimonyLine: content.hearing.memoryGroundedTestimony.replace(
-            "{memory}",
-            firsthand.whyLine ?? firsthand.text,
-          ),
-          citedMemoryIds: [firsthand.memoryId],
-        };
-      }
-      const hasAnyPlayerConversation = resident.memories.some(
-        memory => memory.kind === "player_conversation" && memory.sourceActorId === "player",
-      );
-      return {
-        actorId: resident.actorId,
-        contactBasis,
-        proposedStance:
-          resident.stanceBefore === "vouch" ? "uncertain" as const : resident.stanceBefore,
-        testimonyLine: hasAnyPlayerConversation
-          ? content.hearing.missingEvidenceTestimony
-          : content.hearing.neverMetTestimony,
-        citedMemoryIds: [],
-      };
-    }) as HearingJudgment["residentAssessments"];
-    const vouchCount = assessments.filter(assessment => assessment.proposedStance === "vouch").length;
-    const ordinary = vouchCount >= 4;
-    return {
-      residentAssessments: assessments,
-      proposedVerdict: ordinary ? "ordinary" : "abnormal",
-      verdictWhyLine: ordinary
-        ? content.hearing.ordinaryVerdictWhy
-        : content.hearing.abnormalVerdictWhy,
-      officerLine: ordinary
-        ? content.hearing.ordinaryOfficerLine
-        : content.hearing.abnormalOfficerLine,
-      citedRecordIds: [],
-      citedLedgerEventIds: [],
-    };
-  }
-
   private warnLiveHearingSemanticReplacement(meta: ProposalMeta, reason: string): void {
     if (meta.transport !== "live" || meta.usedFallback) return;
     console.warn({
@@ -6009,16 +6210,9 @@ export class RunService {
     meta: ProposalMeta,
     worldRevision: number,
   ): RunTerminalResult {
-    const content = fallbackContent(run.locale);
-    const verdict =
-      judgment.evidencedVouchCount < 4 ? "abnormal" : judgment.proposedVerdict;
-    const quorumForced = judgment.evidencedVouchCount < 4 && judgment.proposedVerdict === "ordinary";
-    const verdictWhyLine = quorumForced
-      ? content.hearing.abnormalVerdictWhy
-      : judgment.verdictWhyLine;
-    const officerLine = quorumForced
-      ? content.hearing.abnormalOfficerLine
-      : judgment.officerLine;
+    const verdict = judgment.proposedVerdict;
+    const verdictWhyLine = judgment.verdictWhyLine;
+    const officerLine = judgment.officerLine;
 
     for (const assessment of judgment.residentAssessments) {
       this.requireActor(run, assessment.actorId).stance = assessment.appliedStance;
@@ -6986,7 +7180,7 @@ export class RunService {
       promptId: "station_hearing_final_defense",
       choiceSetId: "station_hearing_final_defense.free_input",
       speakerId: STATION_OFFICER_ID,
-      prompt: fallbackContent(locale).hearing.opening,
+      prompt: procedureContent(locale).hearingOpening,
       acceptsFreeInput: true,
       continueConversation: false,
       procedure: "hearing",
@@ -7010,7 +7204,7 @@ export class RunService {
       if (turn.procedure !== "interrogation") {
         throw new RunError("hesitation is available only during interrogation", "invalid_answer");
       }
-      return fallbackContent(locale).hesitationMarker;
+      return procedureContent(locale).hesitationMarker;
     }
     const text = answer.text.trim();
     if (text.length === 0 || text.length > 120) {
@@ -7035,5 +7229,17 @@ export class RunService {
       meta,
     );
     run.lastProposalMeta = clone(meta);
+  }
+
+  private rejectFallbackProposalMeta(
+    meta: ProposalMeta,
+    purpose: ConstructorParameters<typeof ProviderFailureError>[2],
+  ): void {
+    if (meta.transport !== "fallback" && !meta.usedFallback) return;
+    throw new ProviderFailureError(
+      meta.profileId,
+      meta.fallbackReason ?? "invalid_envelope",
+      purpose,
+    );
   }
 }

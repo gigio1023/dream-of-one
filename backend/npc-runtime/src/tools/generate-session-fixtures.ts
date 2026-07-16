@@ -87,7 +87,7 @@ async function buildEndpointExamples() {
       choiceId: "probe.generated.3",
     });
   }
-  const end = svc.end(sessionId);
+  const end = await svc.end(sessionId);
   return {
     start: {
       endpoint: "POST /v1/session/start",
@@ -125,7 +125,7 @@ async function buildRouteWalkthroughs() {
   const walkthroughs = [];
   for (const [route, answers] of Object.entries(ROUTE_SCRIPTS)) {
     const run = await drive(answers);
-    const end = run.svc.end(run.start.sessionId);
+    const end = await run.svc.end(run.start.sessionId);
     if (end.route !== route) throw new Error(`route ${route} produced ${end.route}`);
     walkthroughs.push({
       route,
@@ -142,7 +142,7 @@ async function buildRouteReplays() {
   for (const [route, answers] of Object.entries(ROUTE_SCRIPTS)) {
     const run = await drive(answers);
     const sessionId = run.start.sessionId;
-    const end = run.svc.end(sessionId);
+    const end = await run.svc.end(sessionId);
     if (end.route !== route) throw new Error(`route replay ${route} produced ${end.route}`);
     const fresh = service();
     const freshStart = await fresh.start("same-order", "ko-KR");
@@ -221,7 +221,7 @@ async function buildReplayGraph() {
       variants: Array<Record<string, unknown>>;
     } = {
       nextTurn: normalize(current.nextTurn, current.sessionId),
-      endResponse: normalize(current.service.end(current.sessionId), current.sessionId),
+      endResponse: normalize(await current.service.end(current.sessionId), current.sessionId),
       variants: [],
     };
     nodes[nodeId] = node;
@@ -241,7 +241,7 @@ async function buildReplayGraph() {
         node.variants.push(variant);
         await expand([...history, candidate.answer], nextNodeId);
       } else {
-        variant.endResponse = normalize(branch.service.end(branch.sessionId), branch.sessionId);
+        variant.endResponse = normalize(await branch.service.end(branch.sessionId), branch.sessionId);
         node.variants.push(variant);
       }
     }

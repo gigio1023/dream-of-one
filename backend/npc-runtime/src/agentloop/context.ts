@@ -1,6 +1,6 @@
 // Observe-packet assembly — a pure function of world state (invariant #5).
 //
-// The same packet shape feeds live providers, fallback, scripted tests, and
+// The same packet shape feeds live providers, scripted tests, and
 // the debug transcript. No data an NPC could not know ever
 // enters its packet: everything here is visibility-checked.
 

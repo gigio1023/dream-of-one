@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "bun:test";
-import { fallbackContent } from "../../src/localization/fallback-content.js";
+import { procedureContent } from "../../src/localization/procedure-content.js";
 import { SUPPORTED_GAMEPLAY_LOCALES } from "../../src/localization/supported-locales.js";
 import { startSessionServer } from "../../src/api/http-server.js";
-import { RuleFallbackNpcAdapter } from "../../src/providers/fallback.js";
-import { ProviderBudgetReservedError } from "../../src/providers/ports.js";
+import {
+  ProviderBudgetReservedError,
+  ProviderFailureError,
+} from "../../src/providers/ports.js";
 import { ProviderService } from "../../src/providers/service.js";
 import type {
   HearingJudgment,
@@ -72,6 +74,24 @@ function proposalFor(
     citedRecordIds: [],
     citedLedgerEventIds: [],
   };
+}
+
+function validNeverConversedHearingText(inputJson: string): string {
+  const input = JSON.parse(inputJson) as { residents: Array<{ actorId: string }> };
+  return JSON.stringify({
+    residentAssessments: input.residents.map(resident => ({
+      actorId: resident.actorId,
+      contactBasis: "never_conversed",
+      proposedStance: "uncertain",
+      testimonyLine: "직접 대화한 근거가 없어 보증할 수 없습니다.",
+      citedMemoryIds: [],
+    })),
+    proposedVerdict: "abnormal",
+    verdictWhyLine: "직접 대화에 근거한 보증이 부족합니다.",
+    officerLine: "현재 증언으로는 평범하다고 판정할 수 없습니다.",
+    citedRecordIds: [],
+    citedLedgerEventIds: [],
+  });
 }
 
 function createService(
@@ -249,7 +269,7 @@ test("hearing open is an immediate localized free-input procedure in all six loc
       hearingId: `localized-hearing-${locale}`,
     });
     assert.equal(providerOpeningCalls, 0);
-    assert.equal(opened.nextTurn.prompt, fallbackContent(locale).hearing.opening);
+    assert.equal(opened.nextTurn.prompt, procedureContent(locale).hearingOpening);
     assert.equal(opened.nextTurn.acceptsFreeInput, true);
     assert.deepEqual(opened.nextTurn.choices, []);
     assert.equal(opened.nextTurn.proposalMeta, null);
@@ -403,7 +423,6 @@ test("immediate hearing open reports held live background transport accurately",
     proposalPort: new ProviderService({
       profileId: "test/held-hearing-audit",
       textGen,
-      fallback: new RuleFallbackNpcAdapter(),
     }),
     idFactory: deterministicIds("held-hearing-audit"),
     layout,
@@ -441,20 +460,35 @@ test("immediate hearing open reports held live background transport accurately",
   await pendingPreload;
 });
 
-test("hearing quorum uses evidenced vouches and preserves provider abnormal authority", async () => {
+test("hearing quorum rejects unsupported ordinary verdicts and preserves supported provider authority", async () => {
+  const unsupported = createService("three-ordinary", request => proposalFor(request, "ordinary"));
+  const unsupportedRun = unsupported.start("start-three-ordinary", "ko-KR");
+  await earnVouches(unsupported, unsupportedRun.runId, 3);
+  await makeDue(unsupported, unsupportedRun.runId, "due-three-ordinary");
+  await assert.rejects(
+    resolveHearing(unsupported, unsupportedRun.runId, "hearing-three-ordinary"),
+    (error: unknown) =>
+      error instanceof ProviderFailureError &&
+      error.reason === "invalid_envelope" &&
+      error.purpose === "hearing_verdict",
+  );
+  const interrupted = unsupported.snapshot(unsupportedRun.runId);
+  assert.equal(interrupted.runStatus, "hearing_active");
+  assert.equal(interrupted.terminalResult, null);
+  assert.equal(interrupted.providerFailure?.reason, "invalid_envelope");
+
   for (const scenario of [
-    { scope: "three-ordinary", vouches: 3, proposed: "ordinary" as const, expected: "abnormal" },
-    { scope: "four-ordinary", vouches: 4, proposed: "ordinary" as const, expected: "ordinary" },
-    { scope: "four-abnormal", vouches: 4, proposed: "abnormal" as const, expected: "abnormal" },
+    { scope: "four-ordinary", proposed: "ordinary" as const, expected: "ordinary" as const },
+    { scope: "four-abnormal", proposed: "abnormal" as const, expected: "abnormal" as const },
   ]) {
     const service = createService(scenario.scope, request => proposalFor(request, scenario.proposed));
     const started = service.start(`start-${scenario.scope}`, "ko-KR");
-    await earnVouches(service, started.runId, scenario.vouches);
+    await earnVouches(service, started.runId, 4);
     await makeDue(service, started.runId, `due-${scenario.scope}`);
     const result = await resolveHearing(service, started.runId, `hearing-${scenario.scope}`);
     assert.equal(result.action, "answer");
     assert.equal(result.runStatus, "terminal");
-    assert.equal(result.terminalResult.evidencedVouchCount, scenario.vouches);
+    assert.equal(result.terminalResult.evidencedVouchCount, 4);
     assert.equal(result.terminalResult.verdict, scenario.expected);
     assert.equal(service.snapshot(started.runId).runStatus, "terminal");
   }
@@ -462,7 +496,7 @@ test("hearing quorum uses evidenced vouches and preserves provider abnormal auth
 
 test("hearing excludes prior vouches when their assessments cite no firsthand memory", async () => {
   const service = createService("uncited-prior-vouches", request => ({
-    ...proposalFor(request, "ordinary"),
+    ...proposalFor(request, "abnormal"),
     residentAssessments: request.residents.map(resident => ({
       actorId: resident.actorId,
       contactBasis: hearingContactBasisForMemories(resident.memories),
@@ -615,14 +649,22 @@ test("hearing and run end are retry-stable, conflict-safe, and freeze ordinary m
   );
 
   const endRequest = { runId: started.runId, endId: "end-lifecycle" };
-  const ended = await service.endRun(endRequest);
+  const firstEnd = service.endRun(endRequest);
+  const concurrentRetry = service.endRun(endRequest);
+  const concurrentConflict = service.endRun({ runId: started.runId, endId: "end-conflict" });
+  const [ended, retriedWhileClosing] = await Promise.all([firstEnd, concurrentRetry]);
   assert.equal(ended.runStatus, "closed");
+  assert.deepEqual(retriedWhileClosing, ended);
   assert.deepEqual(await service.endRun(endRequest), ended);
   await assert.rejects(
-    service.endRun({ runId: started.runId, endId: "end-conflict" }),
+    concurrentConflict,
     (error: unknown) => error instanceof RunError && error.code === "end_id_conflict",
   );
-  assert.equal(service.snapshot(started.runId).runStatus, "closed");
+  assert.throws(
+    () => service.snapshot(started.runId),
+    (error: unknown) => error instanceof RunError && error.code === "run_not_found",
+    "a closed run keeps only its bounded end tombstone, not the full mutable run",
+  );
 
   const reset = service.start("start-reset", "ko-KR");
   assert.equal(reset.runStatus, "active");
@@ -630,18 +672,21 @@ test("hearing and run end are retry-stable, conflict-safe, and freeze ordinary m
   assert.equal(reset.terminalResult, null);
 });
 
-test("run-wide provider audit survives terminal hearing, end, and a fresh run reset", async () => {
-  const unavailableTextGen: TextGenPort = {
-    adapterId: "audit-unavailable",
-    preflight: async () => ({ available: false, reason: "missing_credentials" }),
-    generate: async () => {
-      throw new Error("unavailable transport must not be called");
-    },
+test("failed hearing is retryable in place and its live audit survives end and reset", async () => {
+  let available = false;
+  const recoveringTextGen: TextGenPort = {
+    adapterId: "audit-recovering",
+    preflight: async () => available
+      ? ({ available: true })
+      : ({ available: false, reason: "missing_credentials" }),
+    generate: async request => ({
+      text: validNeverConversedHearingText(request.input),
+      usage: { inputTokens: 5, outputTokens: 5, totalTokens: 10 },
+    }),
   };
   const proposalPort = new ProviderService({
     profileId: "test/run-audit",
-    textGen: unavailableTextGen,
-    fallback: new RuleFallbackNpcAdapter(),
+    textGen: recoveringTextGen,
   });
   const service = new RunService({
     proposalPort,
@@ -663,16 +708,32 @@ test("run-wide provider audit survives terminal hearing, end, and a fresh run re
   assert.deepEqual(opened.providerRuntimeTrace.entries, []);
   assert.deepEqual(opened.providerAudit.resolutions, []);
 
-  const answered = await service.hearing({
+  const answerRequest = {
     action: "answer",
     runId: started.runId,
     hearingId: "hearing-run-audit",
     turnId: opened.nextTurn.turnId,
     answer: { type: "free_input", text: "최종 진술입니다." },
-  });
+  } as const;
+  await assert.rejects(
+    service.hearing(answerRequest),
+    (error: unknown) =>
+      error instanceof ProviderFailureError && error.reason === "missing_credentials",
+  );
+  const failed = service.snapshot(started.runId);
+  assert.equal(failed.runStatus, "hearing_active");
+  assert.equal(failed.terminalResult, null);
+  assert.equal(failed.providerFailure?.profileId, "test/run-audit");
+  assert.equal(failed.providerFailure?.reason, "missing_credentials");
+  assert.equal(failed.providerFailure?.purpose, "hearing_verdict");
+  assert.match(failed.providerFailure?.operationKey ?? "", /^hearing_verdict:hearing-run-audit:/);
+
+  available = true;
+  const answered = await service.hearing(answerRequest);
   assert.equal(answered.action, "answer");
   assert.equal(answered.runStatus, "terminal");
-  assert.equal(answered.providerAudit.callsUsed, 0);
+  assert.equal(service.snapshot(started.runId).providerFailure, null);
+  assert.equal(answered.providerAudit.callsUsed, 1);
   assert.equal(answered.providerAudit.complete, true);
   assert.equal(answered.providerAudit.truncated, false);
   assert.equal(answered.providerAudit.inFlightCalls, 0);
@@ -680,22 +741,27 @@ test("run-wide provider audit survives terminal hearing, end, and a fresh run re
     answered.providerAudit.resolutions.map(resolution => resolution.purpose),
     ["hearing_verdict"],
   );
-  assert.deepEqual(
-    answered.providerRuntimeTrace.entries.map(entry => entry.meta.transport),
-    ["fallback"],
-  );
+  assert.deepEqual(answered.providerRuntimeTrace.entries.map(entry => entry.meta.transport), ["live"]);
   assert.ok(answered.providerAudit.resolutions.every(
     resolution =>
       resolution.profileId === "test/run-audit" &&
-      resolution.transport === "fallback" &&
-      resolution.fallbackReason === "missing_credentials" &&
-      resolution.callSeqs.length === 0,
+      resolution.transport === "live" &&
+      resolution.fallbackReason === null &&
+      resolution.callSeqs.length === 1,
   ));
 
   const ended = await service.endRun({ runId: started.runId, endId: "end-run-audit" });
   assert.deepEqual(ended.providerAudit, answered.providerAudit);
   assert.deepEqual(ended.providerRuntimeTrace, answered.providerRuntimeTrace);
-  assert.deepEqual(service.snapshot(started.runId).providerAudit, answered.providerAudit);
+  assert.throws(
+    () => service.snapshot(started.runId),
+    (error: unknown) => error instanceof RunError && error.code === "run_not_found",
+  );
+  assert.deepEqual(
+    (await service.endRun({ runId: started.runId, endId: "end-run-audit" })).providerAudit,
+    answered.providerAudit,
+    "the end tombstone, not a retained RunState, owns the frozen audit retry",
+  );
 
   const reset = service.start("start-run-audit-reset", "ko-KR");
   assert.equal(reset.providerAudit.callsUsed, 0);
@@ -704,7 +770,75 @@ test("run-wide provider audit survives terminal hearing, end, and a fresh run re
   assert.deepEqual(reset.providerRuntimeTrace.entries, []);
 });
 
-test("RunService warns without prose when a live hearing still needs semantic replacement", async () => {
+test("repeated run endings release full runtime and provider scopes behind a bounded tombstone cache", async () => {
+  const liveTextGen: TextGenPort = {
+    adapterId: "retention-live",
+    preflight: async () => ({ available: true }),
+    generate: async request => ({
+      text: validNeverConversedHearingText(request.input),
+      usage: { inputTokens: 5, outputTokens: 5, totalTokens: 10 },
+    }),
+  };
+  const proposalPort = new ProviderService({
+    profileId: "test/run-retention",
+    textGen: liveTextGen,
+  });
+  const service = new RunService({
+    proposalPort,
+    idFactory: deterministicIds("run-retention"),
+    layout: { ...loadRunLayout(), hearingAtSeconds: 10 },
+    closedRunRetentionLimit: 2,
+  });
+  const endings: Array<{ runId: string; endId: string; response: Awaited<ReturnType<RunService["endRun"]>> }> = [];
+
+  for (let sequence = 1; sequence <= 4; sequence += 1) {
+    const started = service.start(`start-retention-${sequence}`, "ko-KR");
+    await makeDue(service, started.runId, `due-retention-${sequence}`);
+    await resolveHearing(service, started.runId, `hearing-retention-${sequence}`);
+    const endId = `end-retention-${sequence}`;
+    const response = await service.endRun({ runId: started.runId, endId });
+    endings.push({ runId: started.runId, endId, response });
+  }
+  await Promise.resolve();
+
+  const runtimeMaps = [
+    "runs",
+    "runChains",
+    "backgroundProviderGates",
+    "closedBackgroundProviderRuns",
+    "closingRuns",
+  ] as const;
+  for (const field of runtimeMaps) {
+    assert.equal((Reflect.get(service, field) as Map<unknown, unknown> | Set<unknown>).size, 0, field);
+  }
+  assert.equal(
+    (Reflect.get(service, "closedRunTombstones") as Map<unknown, unknown>).size,
+    2,
+  );
+  assert.equal((Reflect.get(proposalPort, "budgets") as Map<unknown, unknown>).size, 0);
+  assert.equal((Reflect.get(proposalPort, "audits") as Map<unknown, unknown>).size, 0);
+
+  for (const ending of endings.slice(-2)) {
+    assert.deepEqual(
+      await service.endRun({ runId: ending.runId, endId: ending.endId }),
+      ending.response,
+    );
+  }
+  const cachedLatestStart = service.start("start-retention-4", "ko-KR");
+  assert.equal(cachedLatestStart.runId, endings.at(-1)?.runId);
+  assert.throws(
+    () => service.snapshot(cachedLatestStart.runId),
+    (error: unknown) => error instanceof RunError && error.code === "run_not_found",
+    "an idempotent start retry returns its original packet without resurrecting the closed run",
+  );
+  await assert.rejects(
+    service.endRun({ runId: endings[0]!.runId, endId: endings[0]!.endId }),
+    (error: unknown) => error instanceof RunError && error.code === "run_not_found",
+    "evicting the oldest tombstone must not retain its full RunState",
+  );
+});
+
+test("RunService warns without prose and interrupts a semantic-invalid live hearing", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
   adapter.judgeHearing = async request => {
     const invalid = proposalFor(request, "abnormal");
@@ -733,34 +867,26 @@ test("RunService warns without prose when a live hearing still needs semantic re
   const warnings: unknown[][] = [];
   const originalWarn = console.warn;
   console.warn = (...args: unknown[]) => warnings.push(args);
-  let answered;
   try {
-    answered = await service.hearing({
-      action: "answer",
-      runId: started.runId,
-      hearingId: "hearing-semantic-invalid-live",
-      turnId: opened.nextTurn.turnId,
-      answer: { type: "free_input", text: "제 대화를 확인해 주십시오." },
-    });
+    await assert.rejects(
+      service.hearing({
+        action: "answer",
+        runId: started.runId,
+        hearingId: "hearing-semantic-invalid-live",
+        turnId: opened.nextTurn.turnId,
+        answer: { type: "free_input", text: "제 대화를 확인해 주십시오." },
+      }),
+      (error: unknown) =>
+        error instanceof ProviderFailureError && error.reason === "invalid_envelope",
+    );
   } finally {
     console.warn = originalWarn;
   }
-  assert.equal(answered.action, "answer");
-  assert.deepEqual(
-    answered.providerRuntimeTrace.entries.map(entry => ({
-      transport: entry.meta.transport,
-      usedFallback: entry.meta.usedFallback,
-      fallbackReason: entry.meta.fallbackReason ?? null,
-    })),
-    [
-      { transport: "fallback", usedFallback: true, fallbackReason: "invalid_envelope" },
-    ],
-  );
-  assert.equal(answered.proposalMeta.transport, "fallback");
-  assert.equal(answered.proposalMeta.fallbackReason, "invalid_envelope");
-  assert.ok(answered.terminalResult.residentAssessments.every(
-    assessment => assessment.contactBasis === "never_conversed",
-  ));
+  const snapshot = service.snapshot(started.runId);
+  assert.equal(snapshot.runStatus, "hearing_active");
+  assert.equal(snapshot.terminalResult, null);
+  assert.deepEqual(snapshot.providerRuntimeTrace.entries, []);
+  assert.equal(snapshot.providerFailure?.reason, "invalid_envelope");
   assert.equal(warnings.length, 1);
   assert.equal(warnings[0]?.length, 1);
   const warning = warnings[0]?.[0] as Record<string, unknown>;
@@ -802,7 +928,6 @@ test("valid never-conversed contact bases keep a live hearing fallback-free", as
     proposalPort: new ProviderService({
       profileId: "test/runtime-fallback-then-live",
       textGen,
-      fallback: new RuleFallbackNpcAdapter(),
     }),
     idFactory: deterministicIds("runtime-fallback-then-live"),
     layout: { ...loadRunLayout(), hearingAtSeconds: 10 },
@@ -835,50 +960,48 @@ test("valid never-conversed contact bases keep a live hearing fallback-free", as
   assert.equal(answered.providerRuntimeTrace.truncated, false);
 });
 
-test("never-conversed vouches clamp without replacing live testimony and semantic-invalid or failed providers still terminalize", async () => {
-  const neverMet = createService("never-met", request =>
-    proposalFor(request, "ordinary", { allVouch: true })
+test("semantic-invalid hearing applies no verdict and exact retry commits provider wording", async () => {
+  let valid = false;
+  const service = createService("semantic-retry", request =>
+    valid
+      ? proposalFor(request, "abnormal")
+      : proposalFor(request, "ordinary", { invalidCitation: true })
   );
-  const neverMetRun = neverMet.start("start-never-met", "ko-KR");
-  await makeDue(neverMet, neverMetRun.runId, "due-never-met");
-  const neverMetResult = await resolveHearing(neverMet, neverMetRun.runId, "hearing-never-met");
-  assert.equal(neverMetResult.terminalResult.evidencedVouchCount, 0);
-  assert.equal(neverMetResult.terminalResult.verdict, "abnormal");
-  assert.ok(neverMetResult.terminalResult.residentAssessments.every(
-    assessment =>
-      assessment.appliedStance === "uncertain" &&
-      assessment.citedMemoryIds.length === 0 &&
-      assessment.testimonyLine === `testimony:${assessment.actorId}`,
-  ));
-  assert.equal(neverMetResult.proposalMeta.transport, "fallback");
-  assert.equal(neverMetResult.proposalMeta.fallbackReason, "invalid_envelope");
-  assert.equal(neverMetResult.terminalResult.proposalMeta.transport, "fallback");
-  assert.equal(neverMetResult.providerRuntimeTrace.entries.at(-1)?.meta.transport, "fallback");
-
-  const invalid = createService("invalid", request =>
-    proposalFor(request, "ordinary", { invalidCitation: true })
-  );
-  const invalidRun = invalid.start("start-invalid", "ko-KR");
-  await makeDue(invalid, invalidRun.runId, "due-invalid");
-  const invalidResult = await resolveHearing(invalid, invalidRun.runId, "hearing-invalid");
-  assert.equal(invalidResult.runStatus, "terminal");
-  assert.equal(invalidResult.proposalMeta.transport, "fallback");
-  assert.equal(invalidResult.proposalMeta.usedFallback, true);
-  assert.equal(invalidResult.proposalMeta.fallbackReason, "invalid_envelope");
-
-  const failed = createService("failed", async () => {
-    throw new Error("provider unavailable");
+  const started = service.start("start-semantic-retry", "ko-KR");
+  await makeDue(service, started.runId, "due-semantic-retry");
+  const opened = await service.hearing({
+    action: "open",
+    runId: started.runId,
+    hearingId: "hearing-semantic-retry",
   });
-  const failedRun = failed.start("start-failed", "ko-KR");
-  await makeDue(failed, failedRun.runId, "due-failed");
-  const failedResult = await resolveHearing(failed, failedRun.runId, "hearing-failed");
-  assert.equal(failedResult.runStatus, "terminal");
-  assert.equal(failedResult.proposalMeta.transport, "fallback");
-  assert.equal(failedResult.proposalMeta.fallbackReason, "transport_error");
+  const answerRequest = {
+    action: "answer" as const,
+    runId: started.runId,
+    hearingId: "hearing-semantic-retry",
+    turnId: opened.nextTurn.turnId,
+    answer: { type: "free_input" as const, text: "최종 진술입니다." },
+  };
+  await assert.rejects(
+    service.hearing(answerRequest),
+    (error: unknown) =>
+      error instanceof ProviderFailureError && error.reason === "invalid_envelope",
+  );
+  const failed = service.snapshot(started.runId);
+  assert.equal(failed.runStatus, "hearing_active");
+  assert.equal(failed.terminalResult, null);
+  assert.ok(failed.actors.every(actor => actor.stance === "uncertain"));
+
+  valid = true;
+  const answered = await service.hearing(answerRequest);
+  assert.equal(answered.runStatus, "terminal");
+  assert.equal(answered.terminalResult.verdict, "abnormal");
+  assert.equal(answered.terminalResult.verdictWhyLine, "provider verdict:abnormal");
+  assert.equal(answered.terminalResult.officerLine, "provider officer:abnormal");
+  assert.equal(service.snapshot(started.runId).providerFailure, null);
 });
 
 test("HTTP hearing and run-end routes validate the full lifecycle envelope", async () => {
-  const runService = createService("http", request => proposalFor(request, "ordinary"));
+  const runService = createService("http", request => proposalFor(request, "abnormal"));
   const running = await startSessionServer({
     logListen: false,
     service: new SessionService({ proposalPort: createSameOrderScriptedAdapter() }),
@@ -1042,7 +1165,7 @@ test("high-pressure Station interrogation is grounded, recoverable, survivable, 
   let interrogationAnswerGoals: string[] | null = null;
   adapter.judgeAndProposeConversationTurn = async request => {
     const resolved = await ordinaryMergedTurn(request);
-    if (request.playerLine === fallbackContent(request.locale).hesitationMarker) {
+    if (request.playerLine === procedureContent(request.locale).hesitationMarker) {
       interrogationAnswerGoals = [...request.observePacket.goals];
       resolved.proposal.signals = [];
       resolved.proposal.meaningfulFirsthand = true;
@@ -1061,19 +1184,7 @@ test("high-pressure Station interrogation is grounded, recoverable, survivable, 
       firstInterrogationRequiredToolCall = request.requiredToolCall ?? null;
     }
     if (request.observePacket.playerContact?.available && forceBudgetFallback) {
-      return {
-        proposal: {
-          toolCall: { tool: "move_to", args: { targetId: "player" } },
-          rationale: "The provider budget races the pre-claim reserve check.",
-          done: true,
-        },
-        meta: {
-          profileId: adapter.profileId,
-          transport: "fallback",
-          usedFallback: true,
-          fallbackReason: "budget_exhausted",
-        },
-      };
+      throw new ProviderBudgetReservedError();
     }
     if (request.observePacket.playerContact?.available) return ordinaryNextStep(request);
     const source = request.observePacket.administrativeSources.find(memory => memory.reportDelta > 0);
@@ -1440,12 +1551,12 @@ test("high-pressure Station interrogation is grounded, recoverable, survivable, 
     observedWorldRevision: exhaustedWake.observedWorldRevision,
   });
   assert.equal(reserveContact.activeContact?.procedure, "interrogation");
-  assert.equal(reserveContact.providerMetas.at(-1)?.transport, "fallback");
-  assert.equal(reserveContact.providerMetas.at(-1)?.fallbackReason, "budget_exhausted");
+  assert.deepEqual(reserveContact.providerMetas, []);
+  assert.equal(reserveContact.providerFailure, null);
   assert.equal(
     reserveContact.providerRuntimeTrace.entries.length,
-    traceCountBeforeExhaustion + 1,
-    "one budget-exhausted provider packet contributes exactly one runtime-trace entry",
+    traceCountBeforeExhaustion,
+    "caller-reserved capacity is policy, not a provider proposal or failure",
   );
 
   const recoveryContact = reserveContact.activeContact;

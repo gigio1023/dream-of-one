@@ -161,6 +161,11 @@ func end_run(run_id: String, end_id: String) -> Dictionary:
 	return await _backend.end_run(run_id, end_id)
 
 
+func abandon_run(run_id: String, abandon_id: String) -> Dictionary:
+	await get_tree().process_frame
+	return await _backend.abandon_run(run_id, abandon_id)
+
+
 func _diagnostic_error_summary(error: Dictionary) -> Dictionary:
 	if error.is_empty():
 		return {}

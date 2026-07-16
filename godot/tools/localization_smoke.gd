@@ -245,7 +245,7 @@ func _run() -> void:
 	await _check_hud_registry(localization, locales, registry_order, default_locale)
 	if _failures.is_empty():
 		print(
-			"PASS localization_smoke: %d locales share %d exact M3R keys/placeholders; bundled KR/SC/JP glyph routes, source-excerpt logs, and long six-locale HUD at 100/150%% are valid"
+			"PASS localization_smoke: %d locales share %d exact M3R keys/placeholders; bundled KR/SC/JP glyph routes, source-excerpt logs, and long six-locale 1280x720 HUD at 100/150%% are valid"
 			% [locales.size(), reference_keys.size()]
 		)
 	_finish()
@@ -400,7 +400,9 @@ func _check_hud_registry(
 	registry_order: Array[String],
 	default_locale: String
 ) -> void:
-	root.size = Vector2i(1920, 1080)
+	# The project window is resizable. Protect the smallest supported desktop
+	# layout directly instead of allowing a 1080p-only smoke to hide clipping.
+	root.size = Vector2i(1280, 720)
 	var hud_scene := load("res://scenes/ui/hud_3d.tscn") as PackedScene
 	if hud_scene == null:
 		_failures.append("HUD3D scene could not load for locale registry smoke")
@@ -419,6 +421,8 @@ func _check_hud_registry(
 	root.add_child(dynamic_world_label)
 	await process_frame
 	await process_frame
+	if onboarding != null:
+		await _check_onboarding_dialogue_hint(hud, onboarding)
 	var snapshot: Dictionary = hud.call("presentation_snapshot")
 	if _ordered_string_array(snapshot.get("languageOptions", [])) != registry_order:
 		_failures.append("HUD language options do not come from the registry")
@@ -498,6 +502,54 @@ func _check_hud_registry(
 		onboarding.queue_free()
 	dynamic_world_label.queue_free()
 	await process_frame
+
+
+func _check_onboarding_dialogue_hint(hud: Node, onboarding: Node) -> void:
+	# Make the timing probe deterministic: a provider wait longer than the hint
+	# duration must not consume the one-time dialogue lesson before controls exist.
+	onboarding.set_process(false)
+	hud.call("begin_conversation", {"actorId": "NPC_Studio_Receptionist"})
+	onboarding.call("_poll_hud_surface")
+	onboarding.call("_process", 9.0)
+	var waiting_snapshot_value: Variant = onboarding.call("presentation_snapshot")
+	var waiting_snapshot := (
+		waiting_snapshot_value as Dictionary
+		if waiting_snapshot_value is Dictionary
+		else {}
+	)
+	if bool(waiting_snapshot.get("dialogueHintShown", false)):
+		_failures.append("dialogue onboarding hint was consumed during provider wait")
+	if bool(waiting_snapshot.get("conversationTurnActionable", true)):
+		_failures.append("busy conversation was exposed as an actionable turn")
+
+	var shown := bool(hud.call("show_turn", {
+		"prompt": "Onboarding timing probe",
+		"choices": [
+			{"choiceId": "probe_1", "line": "One"},
+			{"choiceId": "probe_2", "line": "Two"},
+			{"choiceId": "probe_3", "line": "Three"},
+		],
+		"acceptsFreeInput": true,
+	}))
+	if not shown:
+		_failures.append("dialogue onboarding timing probe could not show a turn")
+	onboarding.call("_poll_hud_surface")
+	onboarding.call("_process", 0.01)
+	var ready_snapshot_value: Variant = onboarding.call("presentation_snapshot")
+	var ready_snapshot := (
+		ready_snapshot_value as Dictionary
+		if ready_snapshot_value is Dictionary
+		else {}
+	)
+	if (
+		not bool(ready_snapshot.get("dialogueHintShown", false))
+		or not bool(ready_snapshot.get("conversationTurnActionable", false))
+		or str(ready_snapshot.get("key", "")) != "hud.m3r.onboarding.dialogue"
+		or not bool(ready_snapshot.get("visible", false))
+	):
+		_failures.append("dialogue onboarding hint did not start with actionable controls")
+	hud.call("close_conversation")
+	onboarding.call("_poll_hud_surface")
 
 
 func _check_provenance_log(
@@ -817,6 +869,45 @@ func _check_long_locale_hud(
 		"%s conversation at %d%%" % [presentation_id, roundi(scale * 100.0)]
 	)
 	hud.call("close_conversation")
+	await process_frame
+	hud.call("show_provider_failure", {
+		"profileId": "localization-smoke-profile",
+		"reason": "timeout",
+		"purpose": "conversation_turn",
+		"operationKey": "localization-smoke:%s:%s" % [presentation_id, scale],
+	}, true, true)
+	await process_frame
+	await process_frame
+	for control_name in [
+		"ProviderFailurePanel",
+		"ProviderFailureTitle",
+		"ProviderFailureBody",
+		"ProviderFailureReason",
+		"ProviderFailureRetryButton",
+		"ProviderFailureRestartButton",
+	]:
+		_check_visible_and_in_viewport(
+			hud.find_child(control_name, true, false) as Control,
+			"%s %s at %d%%" % [
+				presentation_id,
+				control_name,
+				roundi(scale * 100.0),
+			]
+		)
+	hud.call("show_provider_failure_restart_error")
+	await process_frame
+	_check_visible_and_in_viewport(
+		hud.find_child("ProviderFailureStatus", true, false) as Control,
+		"%s provider restart error at %d%%" % [
+			presentation_id,
+			roundi(scale * 100.0),
+		]
+	)
+	_check_no_visible_raw_keys(
+		hud,
+		"%s provider failure at %d%%" % [presentation_id, roundi(scale * 100.0)]
+	)
+	hud.call("clear_provider_failure")
 	await process_frame
 
 

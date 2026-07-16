@@ -183,6 +183,15 @@ func end_run(run_id: String, end_id: String) -> Dictionary:
 	)
 
 
+func abandon_run(run_id: String, abandon_id: String) -> Dictionary:
+	return await _post(
+		"/v1/run/abandon",
+		{"runId": run_id, "abandonId": abandon_id},
+		START_TIMEOUT_SECONDS,
+		"run_abandon_failed"
+	)
+
+
 func last_error() -> Dictionary:
 	return _last_error.duplicate(true)
 

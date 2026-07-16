@@ -63,6 +63,7 @@ var _resolving_answer := false
 var _ending_conversation := false
 var _required_retry_answer: Dictionary = {}
 var _conversation_start_retry_required := false
+var _conversation_start_in_flight := false
 var _conversation_preload_queue: Array[String] = []
 var _conversation_preload_queued: Dictionary = {}
 var _conversation_preload_queued_cycle_kinds: Dictionary = {}
@@ -151,6 +152,12 @@ var _player_focus_attention_target: Node = null
 var _player_preload_attention_target: Node = null
 var _conversation_return_look := Vector2.ZERO
 var _conversation_return_look_valid := false
+var _provider_failure: Dictionary = {}
+var _provider_failure_retry_kind := ""
+var _provider_failure_retry_context: Dictionary = {}
+var _provider_failure_retry_in_flight := false
+var _run_abandon_id := ""
+var _run_abandon_in_flight := false
 
 
 func _ready() -> void:
@@ -176,6 +183,10 @@ func _ready() -> void:
 	_hud.free_input_submitted.connect(_on_free_input_submitted)
 	_hud.hesitation_expired.connect(_on_hesitation_expired)
 	_hud.conversation_end_retry_requested.connect(_on_conversation_end_retry_requested)
+	_hud.provider_failure_retry_requested.connect(_on_provider_failure_retry_requested)
+	_hud.provider_failure_restart_requested.connect(
+		_on_provider_failure_restart_requested
+	)
 	_hud.restart_requested.connect(_on_restart_requested)
 	_hud.ambient_subtitle_started.connect(_on_ambient_subtitle_started)
 	for surface_value in get_tree().get_nodes_in_group(&"record_surfaces"):
@@ -214,6 +225,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _hud.debug_visible():
 		_hud.set_debug_snapshot(_debug_snapshot())
+	if _run_abandon_in_flight:
+		return
 	if get_tree().paused or _conversation_target != null:
 		return
 	if _run_id.is_empty() or _run_start_in_flight:
@@ -318,6 +331,7 @@ func presentation_snapshot() -> Dictionary:
 		"hearing": hud_snapshot.get("hearing", {}),
 		"institutionalPressure": hud_snapshot.get("institutionalPressure", {}),
 		"provider": _last_proposal_meta.duplicate(true),
+		"providerFailure": hud_snapshot.get("providerFailure", {}),
 		"providerBudget": _dictionary_or_empty(_run_snapshot.get("providerBudget")),
 		"providerAudit": _dictionary_or_empty(_run_snapshot.get("providerAudit")),
 		"providerRuntimeTrace": _dictionary_or_empty(
@@ -429,6 +443,8 @@ func _restore_player_control_if_unlocked() -> void:
 
 
 func _on_record_surface_requested(surface_id: String) -> void:
+	if _run_abandon_in_flight:
+		return
 	if (
 		_run_status != "active"
 		or _record_encounter_in_flight
@@ -987,6 +1003,10 @@ func _dispatch_hearing_open() -> void:
 		or hearing_id != _hearing_id
 	):
 		return
+	if _present_provider_failure(result, "hearing_open"):
+		_hud.show_hearing_opening(true)
+		_hearing_open_halted_reason = "provider_failed"
+		return
 	if _is_error(result):
 		_hud.show_hearing_opening(true)
 		_hearing_open_retry_remaining = minf(
@@ -1005,6 +1025,7 @@ func _dispatch_hearing_open() -> void:
 		_hud.show_hearing_opening(true)
 		push_error("RunService returned an invalid hearing-open response.")
 		return
+	_resolve_provider_failure("hearing_open")
 	_apply_social_view_from_response(result)
 	_hydrate_run_lifecycle(result)
 	_cache_provider_evidence(result)
@@ -1054,6 +1075,18 @@ func _stage_hearing(next_turn: Dictionary) -> void:
 func _enter_terminal_outcome() -> void:
 	if _terminal_result.is_empty():
 		push_error("Terminal run state has no terminalResult.")
+		return
+	if (
+		not _provider_failure.is_empty()
+		or _present_provider_failure(_terminal_result)
+	):
+		# A provider failure is not a verdict. Keep the authoritative terminal
+		# snapshot for diagnostics, but never render or label deterministic output
+		# as the model's judgment.
+		_player.set_control_enabled(false)
+		_player.release_mouse()
+		_set_run_clock_paused(true)
+		get_tree().paused = true
 		return
 	_discard_conversation_look()
 	_lifecycle_generation += 1
@@ -1115,17 +1148,22 @@ func _new_run_end_id() -> String:
 	return "godot-end-%d-%d" % [OS.get_process_id(), Time.get_ticks_usec()]
 
 
-func _reload_current_run_scene() -> void:
+func _reload_current_run_scene(provider_failure_restart := false) -> void:
 	_discard_conversation_look()
 	get_tree().paused = false
 	var error := get_tree().reload_current_scene()
 	if error != OK:
 		get_tree().paused = true
-		_hud.set_outcome_busy(false, &"hud.m3r.error.run_end")
+		if provider_failure_restart:
+			_hud.show_provider_failure_restart_error()
+		else:
+			_hud.set_outcome_busy(false, &"hud.m3r.error.run_end")
 		push_error("Could not reload the current 3D run scene: %s" % error_string(error))
 
 
 func _on_conversation_requested(actor_id: StringName, target: NPC3D) -> void:
+	if _run_abandon_in_flight:
+		return
 	var contact_id := ""
 	if (
 		str(_active_contact.get("actorId", "")) == str(actor_id)
@@ -1219,10 +1257,12 @@ func _begin_conversation(
 		return
 
 	_hud.begin_conversation(_actor_view(str(actor_id)))
+	_conversation_start_in_flight = true
 	var result: Dictionary = await _start_conversation_with_retry(
 		str(actor_id),
 		contact_id
 	)
+	_conversation_start_in_flight = false
 	await _handle_conversation_start_result(result, lifecycle_generation)
 
 
@@ -1231,6 +1271,10 @@ func _handle_conversation_start_result(
 	lifecycle_generation: int
 ) -> void:
 	if lifecycle_generation != _lifecycle_generation or _run_status != "active":
+		return
+	if _present_provider_failure(result, "conversation_start"):
+		_conversation_start_retry_required = true
+		_hud.show_conversation_start_retry()
 		return
 	if _is_error(result):
 		if str(result.get("error", "")) == "conversation_not_ready":
@@ -1268,6 +1312,7 @@ func _handle_conversation_start_result(
 		_finish_conversation_modal()
 		return
 
+	_resolve_provider_failure("conversation_start")
 	_active_session_id = str(result.get("sessionId", ""))
 	_active_turn = _dictionary_or_empty(result.get("nextTurn"))
 	_apply_social_view_from_response(result)
@@ -1349,7 +1394,8 @@ func _on_hesitation_expired() -> void:
 
 func _submit_answer(answer_payload: Dictionary) -> void:
 	if (
-		_resolving_answer
+		_run_abandon_in_flight
+		or _resolving_answer
 		or _ending_conversation
 		or _active_turn.is_empty()
 	):
@@ -1375,6 +1421,14 @@ func _submit_answer(answer_payload: Dictionary) -> void:
 	_resolving_answer = false
 	if lifecycle_generation != _lifecycle_generation or _run_status != "active":
 		return
+	if _present_provider_failure(
+		result,
+		"conversation_answer",
+		{"answer": answer_payload.duplicate(true)}
+	):
+		_required_retry_answer = answer_payload.duplicate(true)
+		_hud.show_conversation_error(&"hud.m3r.error.conversation_answer")
+		return
 	if _is_error(result):
 		if _run_session.mode() == "fixture" and str(result.get("error", "")) == "fixture_replay_miss":
 			_hud.show_conversation_error(&"hud.m3r.error.conversation_answer")
@@ -1390,6 +1444,7 @@ func _submit_answer(answer_payload: Dictionary) -> void:
 			_schedule_hesitation_retry()
 		return
 
+	_resolve_provider_failure("conversation_answer")
 	_required_retry_answer = {}
 	_hesitation_retry_scheduled = false
 	_apply_social_view_from_response(result)
@@ -1430,7 +1485,8 @@ func _schedule_hesitation_retry() -> void:
 
 func _submit_hearing_answer(answer_payload: Dictionary) -> void:
 	if (
-		_resolving_answer
+		_run_abandon_in_flight
+		or _resolving_answer
 		or _run_status != "hearing_active"
 		or _hearing_id.is_empty()
 		or _active_turn.is_empty()
@@ -1450,6 +1506,14 @@ func _submit_hearing_answer(answer_payload: Dictionary) -> void:
 	_resolving_answer = false
 	if _run_status != "hearing_active":
 		return
+	if _present_provider_failure(
+		result,
+		"hearing_answer",
+		{"answer": answer_payload.duplicate(true)}
+	):
+		_required_retry_answer = answer_payload.duplicate(true)
+		_hud.show_conversation_error(&"hud.m3r.error.hearing_answer")
+		return
 	if _is_error(result):
 		_required_retry_answer = answer_payload.duplicate(true)
 		_hud.show_conversation_error(&"hud.m3r.error.hearing_answer")
@@ -1462,6 +1526,7 @@ func _submit_hearing_answer(answer_payload: Dictionary) -> void:
 		_required_retry_answer = answer_payload.duplicate(true)
 		_hud.show_conversation_error(&"hud.m3r.error.invalid_response")
 		return
+	_resolve_provider_failure("hearing_answer")
 	_required_retry_answer = {}
 	_apply_social_view_from_response(result)
 	_hydrate_run_lifecycle(result)
@@ -1473,6 +1538,8 @@ func _submit_hearing_answer(answer_payload: Dictionary) -> void:
 
 
 func _on_conversation_end_retry_requested() -> void:
+	if _run_abandon_in_flight:
+		return
 	if _conversation_start_retry_required and _active_session_id.is_empty():
 		_conversation_start_retry_required = false
 		_hud.set_conversation_busy(true)
@@ -1480,10 +1547,12 @@ func _on_conversation_end_retry_requested() -> void:
 		if actor_id.is_empty():
 			_finish_conversation_modal()
 			return
+		_conversation_start_in_flight = true
 		var result: Dictionary = await _start_conversation_with_retry(
 			actor_id,
 			_conversation_contact_id
 		)
+		_conversation_start_in_flight = false
 		await _handle_conversation_start_result(result, _lifecycle_generation)
 		return
 	await _end_active_conversation()
@@ -1544,6 +1613,13 @@ func _ensure_run() -> bool:
 		)
 	var result: Dictionary = await _run_session.start_run(_run_start_locale, _run_start_id)
 	_run_start_in_flight = false
+	if (
+		str(result.get("error", "")) == "provider_failed"
+		and _present_provider_failure(result, "run_start")
+	):
+		_run_start_last_error = result.duplicate(true)
+		_run_start_halted_reason = "provider_failed"
+		return false
 	if _is_error(result):
 		_run_start_last_error = result.duplicate(true)
 		return false
@@ -1569,6 +1645,8 @@ func _ensure_run() -> bool:
 			"message": "RunService returned no runId.",
 		}
 		return false
+	_resolve_provider_failure("run_start")
+	_sync_provider_failure_marker(result)
 	_run_start_last_error = {}
 	_run_start_attempts = 0
 	_fixture_replay_complete = false
@@ -1767,7 +1845,12 @@ func _queue_conversation_preload(
 	transport_retry_count := 0,
 	cycle_kind := ""
 ) -> bool:
-	if _run_status != "active" or actor_id.is_empty() or _run_id.is_empty():
+	if (
+		_run_abandon_in_flight
+		or _run_status != "active"
+		or actor_id.is_empty()
+		or _run_id.is_empty()
+	):
 		return false
 	var actor := _actor_view(actor_id)
 	if (
@@ -1798,7 +1881,12 @@ func _queue_conversation_preload(
 
 
 func _pump_conversation_preloads() -> void:
-	if _run_status != "active" or get_tree().paused or _conversation_target != null:
+	if (
+		_run_abandon_in_flight
+		or _run_status != "active"
+		or get_tree().paused
+		or _conversation_target != null
+	):
 		return
 	if (
 		_run_session.mode() != "fixture"
@@ -1904,7 +1992,14 @@ func _dispatch_conversation_preload(actor_id: String) -> void:
 	if _run_status != "active":
 		return
 	var transport_retry_scheduled := false
-	if not _is_error(result):
+	if _present_provider_failure(
+		result,
+		"conversation_preload",
+		{"actorId": actor_id}
+	):
+		_mark_conversation_preload_recovery_required(actor_id, "provider_failed")
+	elif not _is_error(result):
+		_resolve_provider_failure("conversation_preload", {"actorId": actor_id})
 		_cache_provider_evidence(result, "preload")
 		_clear_conversation_preload_failure_state(actor_id)
 		_conversation_preload_refresh_required = true
@@ -2545,6 +2640,9 @@ func _dispatch_ambient_decision() -> void:
 		_ambient_decision_halted_reason = "in_flight_packet_changed"
 		push_error("Ambient NPC decision lane changed an immutable request.")
 		return
+	if _present_provider_failure(result, "ambient_background"):
+		_ambient_decision_halted_reason = "provider_failed"
+		return
 	if _is_error(result):
 		var error_code := str(result.get("error", "npc_decision_failed"))
 		if error_code == "npc_decision_failed":
@@ -2554,6 +2652,7 @@ func _dispatch_ambient_decision() -> void:
 		push_error("Ambient NPC decision lane halted: %s" % error_code)
 		return
 
+	_resolve_provider_failure("ambient_decision", {"request": request})
 	_cache_provider_evidence(result, "npc_decision")
 	_ambient_last_decision_status = str(result.get("status", "failed"))
 	_ambient_last_decision_kind = str(result.get("decisionKind", ""))
@@ -3600,6 +3699,7 @@ func _rebase_run_after_advance_conflict() -> void:
 		_advance_needs_rebase = true
 		_advance_retry_remaining = ADVANCE_RETRY_SECONDS
 		return
+	_sync_provider_failure_marker(result)
 	var previous_readiness := _conversation_readiness(_run_snapshot)
 	_replace_run_snapshot(result, true)
 	_apply_player_brief_from_snapshot(result)
@@ -3989,8 +4089,358 @@ func _debug_snapshot() -> Dictionary:
 		"providerAudit": _run_snapshot.get("providerAudit", {}),
 		"providerRuntimeTrace": _run_snapshot.get("providerRuntimeTrace", {}),
 		"lastProposalMeta": _last_proposal_meta,
+		"providerFailure": _provider_failure.duplicate(true),
 		"activeContact": _active_contact.duplicate(true),
 		"contactPresentation": _contact_presentation_snapshot(),
+	}
+
+
+func _on_provider_failure_retry_requested() -> void:
+	if _run_abandon_in_flight or _provider_failure_retry_in_flight:
+		return
+	var retry_kind := _provider_failure_retry_kind
+	if not _provider_failure_retry_supported(
+		retry_kind,
+		_provider_failure_retry_context
+	):
+		_hud.set_provider_failure_action_busy(false)
+		return
+	if retry_kind == "conversation_start" and not _conversation_start_retry_required:
+		_hud.set_provider_failure_action_busy(false)
+		return
+	if retry_kind in ["conversation_answer", "hearing_answer"]:
+		var required_answer := _dictionary_or_empty(
+			_provider_failure_retry_context.get("answer")
+		)
+		if required_answer.is_empty() or required_answer != _required_retry_answer:
+			_hud.set_provider_failure_action_busy(false)
+			return
+	_provider_failure_retry_in_flight = true
+	match retry_kind:
+		"run_start":
+			_run_start_halted_reason = ""
+			if not await _ensure_run():
+				if _run_start_halted_reason.is_empty():
+					call_deferred("_initialize_run_background")
+		"conversation_start":
+			await _on_conversation_end_retry_requested()
+		"conversation_answer", "hearing_answer":
+			var answer := _dictionary_or_empty(
+				_provider_failure_retry_context.get("answer")
+			)
+			await _submit_answer(answer.duplicate(true))
+		"hearing_open":
+			_hearing_open_halted_reason = ""
+			_hearing_open_retry_remaining = 0.0
+			await _dispatch_hearing_open()
+	_provider_failure_retry_in_flight = false
+	if not _provider_failure.is_empty() and not _run_abandon_in_flight:
+		_hud.set_provider_failure_action_busy(false)
+
+
+func _on_provider_failure_restart_requested() -> void:
+	if _run_abandon_in_flight:
+		return
+	if (
+		_provider_failure_retry_in_flight
+		or _provider_request_in_flight()
+		or not _provider_failure_restart_supported()
+	):
+		_hud.show_provider_failure_restart_error()
+		return
+	if _run_abandon_id.is_empty():
+		_run_abandon_id = (
+			"abandon-fixture-1"
+			if _run_session.mode() == "fixture"
+			else "godot-abandon-%d-%d" % [OS.get_process_id(), Time.get_ticks_usec()]
+		)
+	var run_id := _run_id
+	var abandon_id := _run_abandon_id
+	_run_abandon_in_flight = true
+	_player.set_control_enabled(false)
+	_player.release_mouse()
+	_hud.set_provider_failure_action_busy(true, &"restart")
+	var result: Dictionary = await _run_session.abandon_run(run_id, abandon_id)
+	_run_abandon_in_flight = false
+	if (
+		run_id != _run_id
+		or abandon_id != _run_abandon_id
+		or _is_error(result)
+		or not _valid_run_abandon_response(result, run_id, abandon_id)
+	):
+		_hud.show_provider_failure_restart_error()
+		_restore_player_control_if_unlocked()
+		return
+	_cache_provider_evidence(result, "run_abandon")
+	_reload_current_run_scene(true)
+
+
+func _present_provider_failure(
+	response: Dictionary,
+	retry_kind := "",
+	retry_context: Dictionary = {}
+) -> bool:
+	var failure := _provider_failure_payload(response)
+	if failure.is_empty():
+		return false
+	if retry_kind.is_empty():
+		var same_operation := (
+			not _provider_failure.is_empty()
+			and (
+				str(_provider_failure.get("operationKey", ""))
+				== str(failure.get("operationKey", ""))
+				or str(_provider_failure.get("operationKey", "")).begins_with(
+					"client:"
+				)
+			)
+		)
+		if not same_operation:
+			_provider_failure_retry_kind = ""
+			_provider_failure_retry_context = {}
+	else:
+		_provider_failure_retry_kind = retry_kind
+		_provider_failure_retry_context = retry_context.duplicate(true)
+	_provider_failure = failure.duplicate(true)
+	_hud.show_provider_failure(
+		_provider_failure,
+		_provider_failure_retry_supported(
+			_provider_failure_retry_kind,
+			_provider_failure_retry_context
+		),
+		_provider_failure_restart_supported()
+	)
+	return true
+
+
+func _resolve_provider_failure(
+	retry_kind: String,
+	_retry_context: Dictionary = {}
+) -> void:
+	if _provider_failure_retry_kind != retry_kind:
+		return
+	_provider_failure = {}
+	_provider_failure_retry_kind = ""
+	_provider_failure_retry_context = {}
+	_run_abandon_id = ""
+	_hud.clear_provider_failure()
+
+
+func _sync_provider_failure_marker(authoritative_response: Dictionary) -> void:
+	var marker := _provider_failure_marker(authoritative_response)
+	if not bool(marker.get("present", false)):
+		return
+	var value: Variant = marker.get("value")
+	if value is Dictionary:
+		# A snapshot can race a just-failed exact request at the same world
+		# revision. Keep the local immutable retry packet until that packet itself
+		# succeeds or fails again; a later marker will be observed after resolution.
+		if not _provider_failure_retry_kind.is_empty():
+			return
+		_present_provider_failure({"providerFailure": value})
+		return
+	if not _provider_failure_retry_kind.is_empty():
+		return
+	_provider_failure = {}
+	_provider_failure_retry_kind = ""
+	_provider_failure_retry_context = {}
+	_run_abandon_id = ""
+	_hud.clear_provider_failure()
+
+
+func _provider_failure_retry_supported(
+	retry_kind: String,
+	retry_context: Dictionary
+) -> bool:
+	match retry_kind:
+		"run_start":
+			return _run_id.is_empty()
+		"conversation_start":
+			return _conversation_target != null
+		"conversation_answer":
+			return (
+				_run_status == "active"
+				and not _active_session_id.is_empty()
+				and not _dictionary_or_empty(retry_context.get("answer")).is_empty()
+			)
+		"hearing_answer":
+			return (
+				_run_status == "hearing_active"
+				and not _hearing_id.is_empty()
+				and not _dictionary_or_empty(retry_context.get("answer")).is_empty()
+			)
+		"hearing_open":
+			return _run_status == "hearing_due" and not _hearing_id.is_empty()
+	return false
+
+
+func _provider_failure_restart_supported() -> bool:
+	return (
+		not _provider_failure.is_empty()
+		and not _run_id.is_empty()
+		and _run_status not in ["terminal", "closed"]
+	)
+
+
+func _provider_request_in_flight() -> bool:
+	return (
+		_run_start_in_flight
+		or _conversation_start_in_flight
+		or _resolving_answer
+		or _ending_conversation
+		or _record_encounter_in_flight
+		or _advance_in_flight
+		or _advance_rebase_in_flight
+		or _hearing_open_in_flight
+		or _ambient_decision_in_flight
+		or not _conversation_preload_in_flight.is_empty()
+	)
+
+
+func _valid_run_abandon_response(
+	result: Dictionary,
+	expected_run_id: String,
+	expected_abandon_id: String
+) -> bool:
+	var response_failure_value: Variant = result.get("providerFailure")
+	var last_meta_value: Variant = result.get("lastProposalMeta")
+	if (
+		str(result.get("runId", "")) != expected_run_id
+		or str(result.get("abandonId", "")) != expected_abandon_id
+		or str(result.get("runStatus", "")) != "closed"
+		or str(result.get("reason", "")) != "provider_failed"
+		or not response_failure_value is Dictionary
+		or not result.get("providerBudget", null) is Dictionary
+		or not result.get("providerAudit", null) is Dictionary
+		or not result.get("providerRuntimeTrace", null) is Dictionary
+		or (last_meta_value != null and not last_meta_value is Dictionary)
+		or result.has("terminalResult")
+		or result.has("verdict")
+	):
+		return false
+	var raw_failure := response_failure_value as Dictionary
+	if (
+		str(raw_failure.get("profileId", "")).is_empty()
+		or str(raw_failure.get("operationKey", "")).is_empty()
+		or str(raw_failure.get("reason", "")) not in [
+			"missing_credentials",
+			"unavailable",
+			"timeout",
+			"rate_limited",
+			"invalid_envelope",
+			"budget_exhausted",
+			"transport_error",
+		]
+		or str(raw_failure.get("purpose", "")) not in [
+			"conversation",
+			"conversation_turn",
+			"agent_step",
+			"ambient_reply",
+			"hearing_verdict",
+		]
+	):
+		return false
+	var response_failure := _normalize_provider_failure_payload(
+		raw_failure
+	)
+	if response_failure.is_empty() or _provider_failure.is_empty():
+		return false
+	for key in ["profileId", "reason", "purpose"]:
+		if str(response_failure.get(key, "")) != str(
+			_provider_failure.get(key, "")
+		):
+			return false
+	var expected_operation_key := str(_provider_failure.get("operationKey", ""))
+	return (
+		expected_operation_key.begins_with("client:")
+		or expected_operation_key == str(response_failure.get("operationKey", ""))
+	)
+
+
+func _provider_failure_payload(response: Dictionary) -> Dictionary:
+	if str(response.get("error", "")) == "provider_failed":
+		return _normalize_provider_failure_payload(response)
+	var marker := _provider_failure_marker(response)
+	var marker_value: Variant = marker.get("value")
+	if bool(marker.get("present", false)) and marker_value is Dictionary:
+		return _normalize_provider_failure_payload(marker_value as Dictionary)
+	for container in [
+		response,
+		_dictionary_or_empty(response.get("nextTurn")),
+		_dictionary_or_empty(response.get("terminalResult")),
+		_dictionary_or_empty(response.get("runSnapshot")),
+		_dictionary_or_empty(response.get("snapshot")),
+	]:
+		var candidate := container as Dictionary
+		for meta_key in ["proposalMeta", "lastProposalMeta"]:
+			var meta := _dictionary_or_empty(candidate.get(meta_key))
+			if str(meta.get("transport", "")) == "fallback" or bool(
+				meta.get("usedFallback", false)
+			):
+				return _normalize_provider_failure_payload(meta)
+	for meta_value in _array_or_empty(response.get("providerMetas")):
+		if not meta_value is Dictionary:
+			continue
+		var provider_meta := meta_value as Dictionary
+		if (
+			str(provider_meta.get("transport", "")) == "fallback"
+			or bool(provider_meta.get("usedFallback", false))
+		):
+			return _normalize_provider_failure_payload(provider_meta)
+	var audit := _dictionary_or_empty(response.get("providerAudit"))
+	for resolution_value in _array_or_empty(audit.get("resolutions")):
+		if not resolution_value is Dictionary:
+			continue
+		var resolution := resolution_value as Dictionary
+		if (
+			str(resolution.get("transport", "")) == "fallback"
+			or bool(resolution.get("usedFallback", false))
+		):
+			return _normalize_provider_failure_payload(resolution)
+	return {}
+
+
+func _provider_failure_marker(response: Dictionary) -> Dictionary:
+	for container in [
+		response,
+		_dictionary_or_empty(response.get("runSnapshot")),
+		_dictionary_or_empty(response.get("snapshot")),
+	]:
+		var candidate := container as Dictionary
+		if candidate.has("providerFailure"):
+			return {
+				"present": true,
+				"value": candidate.get("providerFailure"),
+			}
+	return {"present": false, "value": null}
+
+
+func _normalize_provider_failure_payload(failure: Dictionary) -> Dictionary:
+	var reason := str(failure.get(
+		"reason",
+		failure.get("fallbackReason", "transport_error")
+	))
+	if reason not in [
+		"missing_credentials",
+		"unavailable",
+		"timeout",
+		"rate_limited",
+		"invalid_envelope",
+		"budget_exhausted",
+		"transport_error",
+	]:
+		reason = "transport_error"
+	var purpose := str(failure.get("purpose", "conversation_turn"))
+	var operation_key := str(failure.get("operationKey", ""))
+	if operation_key.is_empty():
+		operation_key = "client:%s:%s" % [
+			purpose,
+			str(failure.get("profileId", "unknown")),
+		]
+	return {
+		"profileId": str(failure.get("profileId", "unknown")),
+		"reason": reason,
+		"purpose": purpose,
+		"operationKey": operation_key,
 	}
 
 

@@ -47,6 +47,7 @@ var _record_hint_shown := false
 var _prop_hint_shown := false
 var _prop_handled := false
 var _modal_surface := "none"
+var _conversation_turn_actionable := false
 var _hud_poll_remaining := 0.0
 var _prop_bind_remaining := 0.0
 var _current_hint_key: StringName = &""
@@ -95,14 +96,21 @@ func _process(delta: float) -> void:
 		_set_suppressed(true)
 		_update_player_brief_visibility()
 		return
-	_set_suppressed(false)
-	_update_player_brief_visibility()
 	if _modal_surface == "conversation":
+		# Opening the modal starts the provider-backed wait, not the player's
+		# response window. Keep the one-time input lesson hidden and untimed
+		# until HUD3D exposes a real enabled choice or free-text control.
+		_set_suppressed(not _conversation_turn_actionable)
+		_update_player_brief_visibility()
+		if not _conversation_turn_actionable:
+			return
 		if not _dialogue_hint_shown:
 			_dialogue_hint_shown = true
 			_show_hint(DIALOGUE_HINT, 8.0)
 		_update_hint_timer(delta)
 		return
+	_set_suppressed(false)
+	_update_player_brief_visibility()
 
 	_update_player_brief_timer(delta)
 	_update_hint_timer(delta)
@@ -125,6 +133,7 @@ func presentation_snapshot() -> Dictionary:
 		"propHintShown": _prop_hint_shown,
 		"propHandled": _prop_handled,
 		"modalSurface": _modal_surface,
+		"conversationTurnActionable": _conversation_turn_actionable,
 		"boundProps": _bound_props.size(),
 		"playerBrief": {
 			"configured": _player_brief_configured,
@@ -214,6 +223,9 @@ func _poll_hud_surface() -> void:
 	var snapshot := snapshot_value as Dictionary
 	var previous_modal_surface := _modal_surface
 	_modal_surface = str(snapshot.get("modalSurface", "none"))
+	_conversation_turn_actionable = bool(
+		snapshot.get("conversationTurnActionable", false)
+	)
 	var ui_scale := clampf(float(snapshot.get("uiScale", 1.0)), 0.8, 1.5)
 	_brief_panel.scale = Vector2.ONE * ui_scale
 	_brief_panel.pivot_offset = Vector2(0.0, _brief_panel.size.y)

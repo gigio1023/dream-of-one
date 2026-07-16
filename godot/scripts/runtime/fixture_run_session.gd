@@ -32,6 +32,8 @@ var _hearing_answer_request: Dictionary = {}
 var _hearing_answer_response: Dictionary = {}
 var _run_end_request: Dictionary = {}
 var _run_end_response: Dictionary = {}
+var _run_abandon_id := ""
+var _run_abandon_response: Dictionary = {}
 
 
 func _init() -> void:
@@ -474,6 +476,69 @@ func answer_hearing(
 	return response.duplicate(true)
 
 
+func abandon_run(run_id: String, abandon_id: String) -> Dictionary:
+	if not _run_abandon_response.is_empty():
+		if abandon_id == _run_abandon_id and run_id == str(
+			_run_abandon_response.get("runId", "")
+		):
+			_last_error = {}
+			return _run_abandon_response.duplicate(true)
+		return _stored_error(
+			"abandon_id_conflict",
+			"Fixture abandonId was reused for a different request."
+		)
+	if not _started:
+		return _stored_error("run_not_started", "Start the fixture run first.")
+	var expected_run_id := str(
+		_dictionary_or_empty(_endpoint("runStart").get("response")).get("runId", "")
+	)
+	if run_id != expected_run_id:
+		return _stored_error("run_not_found", "Fixture has no run: %s" % run_id)
+	var provider_failure := _dictionary_or_empty(
+		_current_run_snapshot.get("providerFailure")
+	)
+	var run_status := str(_current_run_snapshot.get("runStatus", "active"))
+	if (
+		abandon_id.is_empty()
+		or provider_failure.is_empty()
+		or run_status in ["terminal", "closed"]
+	):
+		return _stored_error(
+			"run_not_interrupted",
+			"Fixture run has no abandonable provider interruption."
+		)
+	var provider_budget := _dictionary_or_empty(
+		_current_run_snapshot.get("providerBudget")
+	)
+	var provider_audit := _dictionary_or_empty(
+		_current_run_snapshot.get("providerAudit")
+	)
+	var provider_trace := _dictionary_or_empty(
+		_current_run_snapshot.get("providerRuntimeTrace")
+	)
+	if provider_budget.is_empty() or provider_audit.is_empty() or provider_trace.is_empty():
+		return _stored_error(
+			"fixture_run_abandon_missing",
+			"Fixture interrupted snapshot has incomplete provider evidence."
+		)
+	_run_abandon_id = abandon_id
+	_run_abandon_response = {
+		"runId": run_id,
+		"abandonId": abandon_id,
+		"runStatus": "closed",
+		"reason": "provider_failed",
+		"providerFailure": provider_failure.duplicate(true),
+		"providerBudget": provider_budget.duplicate(true),
+		"providerAudit": provider_audit.duplicate(true),
+		"providerRuntimeTrace": provider_trace.duplicate(true),
+		"lastProposalMeta": _current_run_snapshot.get("lastProposalMeta"),
+	}
+	_run_closed = true
+	_current_run_snapshot["runStatus"] = "closed"
+	_last_error = {}
+	return _run_abandon_response.duplicate(true)
+
+
 func end_run(run_id: String, end_id: String) -> Dictionary:
 	if not _hearing_answered:
 		return _stored_error("run_not_terminal", "Resolve the fixture hearing before ending the run.")
@@ -527,6 +592,8 @@ func reset() -> void:
 	_hearing_answer_response = {}
 	_run_end_request = {}
 	_run_end_response = {}
+	_run_abandon_id = ""
+	_run_abandon_response = {}
 
 
 func last_error() -> Dictionary:

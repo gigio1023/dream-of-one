@@ -303,16 +303,14 @@ anchor_bottom = 1.0
 color = Color(0.025, 0.035, 0.05, 0.72)
 
 [node name="ConversationPanel" type="PanelContainer" parent="Overlay/ConversationShade" unique_id=575960445]
-custom_minimum_size = Vector2(900, 760)
 layout_mode = 0
 anchor_left = 0.5
-anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -450.0
-offset_top = -790.0
-offset_right = 450.0
-offset_bottom = -30.0
+offset_left = -560.0
+offset_top = 24.0
+offset_right = 560.0
+offset_bottom = -24.0
 
 [node name="ConversationMargin" type="MarginContainer" parent="Overlay/ConversationShade/ConversationPanel" unique_id=1943691211]
 layout_mode = 2
@@ -331,7 +329,6 @@ theme_override_constants/separation = 4
 
 [node name="ConversationSpeakerLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=1532702043]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 30
@@ -339,7 +336,6 @@ autowrap_mode = 3
 
 [node name="ConversationStanceLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=1574555424]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
@@ -348,20 +344,19 @@ autowrap_mode = 3
 [node name="ConversationProviderLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationHeader" unique_id=493881863]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(820, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 16
 autowrap_mode = 3
 
 [node name="PromptScroll" type="ScrollContainer" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1003693884]
-custom_minimum_size = Vector2(820, 120)
+custom_minimum_size = Vector2(0, 120)
 layout_mode = 2
 size_flags_vertical = 3
 
 [node name="ConversationPromptLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/PromptScroll" unique_id=855216337]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(800, 100)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -377,7 +372,7 @@ horizontal_alignment = 1
 [node name="ConversationTimerLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns"]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(820, 36)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.98, 0.72, 0.4, 1)
 theme_override_font_sizes/font_size = 21
@@ -387,7 +382,7 @@ autowrap_mode = 3
 
 [node name="ConversationWhyLineLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=337130830]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 54)
+custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
@@ -398,21 +393,21 @@ theme_override_constants/separation = 8
 
 [node name="ConversationChoice1" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=413619225]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 64)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
 
 [node name="ConversationChoice2" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=444677498]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 64)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
 
 [node name="ConversationChoice3" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices" unique_id=1928375374]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 64)
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
@@ -423,7 +418,7 @@ theme_override_constants/separation = 10
 
 [node name="ConversationFreeInput" type="LineEdit" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow" unique_id=540008870]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(600, 44)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
@@ -431,14 +426,14 @@ max_length = 120
 
 [node name="ConversationSubmitButton" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow" unique_id=834202607]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(210, 52)
+custom_minimum_size = Vector2(180, 52)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 autowrap_mode = 3
 
 [node name="ConversationStatusLabel" type="Label" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1099542982]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(820, 36)
+custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
 theme_override_font_sizes/font_size = 17
 autowrap_mode = 3
@@ -446,9 +441,85 @@ autowrap_mode = 3
 [node name="EndConversationButton" type="Button" parent="Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns" unique_id=1154947243]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(820, 48)
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ProviderFailurePanel" type="PanelContainer" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+z_index = 90
+layout_mode = 0
+anchor_left = 0.08
+anchor_right = 0.92
+offset_top = 18.0
+offset_bottom = 518.0
+
+[node name="ProviderFailureMargin" type="MarginContainer" parent="Overlay/ProviderFailurePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 18
+
+[node name="ProviderFailureColumns" type="VBoxContainer" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ProviderFailureTitle" type="Label" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.72, 0.46, 1)
+theme_override_font_sizes/font_size = 27
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ProviderFailureBody" type="Label" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 19
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ProviderFailureReason" type="Label" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.96, 0.65, 0.52, 1)
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="ProviderFailureRetryButton" type="Button" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ProviderFailureRestartButton" type="Button" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ProviderFailureStatus" type="Label" parent="Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.55, 0.45, 1)
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="EncounteredStancePanel" type="PanelContainer" parent="Overlay" unique_id=1963527026]
@@ -585,15 +656,6 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 34
-horizontal_alignment = 1
-autowrap_mode = 3
-
-[node name="OutcomeFallbackBadge" type="Label" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.68, 0.42, 1)
-theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 autowrap_mode = 3
 

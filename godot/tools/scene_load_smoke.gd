@@ -3,6 +3,10 @@ extends SceneTree
 ## Instances the retained M1 harness and active M3R client scenes in-tree.
 ## This is deliberately a scene/runtime smoke, not a structural unit test.
 
+const FixtureRunSessionSmoke := preload(
+	"res://scripts/runtime/fixture_run_session.gd"
+)
+
 const SCENES := [
 	{"label": "store", "path": "res://scenes/world/store.tscn", "frames": 1},
 	{"label": "station", "path": "res://scenes/world/station.tscn", "frames": 1},
@@ -53,6 +57,7 @@ func _initialize() -> void:
 func _run() -> void:
 	await process_frame
 	_check_engine_baseline()
+	_check_fixture_run_abandon_contract()
 	for spec in SCENES:
 		await _instance_scene(spec)
 
@@ -74,6 +79,54 @@ func _check_engine_baseline() -> void:
 	_check_jump_input_contract()
 	if renderer == "forward_plus" and physics_engine == "Jolt Physics":
 		print("PASS scene_load_smoke: Forward+ renderer and Jolt Physics baseline")
+
+
+func _check_fixture_run_abandon_contract() -> void:
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(
+		"res://data/fixtures/run-api-examples.json"
+	))
+	if not parsed is Dictionary:
+		_failures.append("fixture abandon smoke could not load run fixtures")
+		return
+	var endpoints := (parsed as Dictionary).get("endpoints", {}) as Dictionary
+	var start_packet := endpoints.get("runStart", {}) as Dictionary
+	var start_request := start_packet.get("request", {}) as Dictionary
+	var fixture := FixtureRunSessionSmoke.new()
+	var started: Dictionary = fixture.start_run(
+		str(start_request.get("locale", "")),
+		str(start_request.get("startId", ""))
+	)
+	if started.has("error"):
+		_failures.append("fixture abandon smoke could not start its isolated run")
+		return
+	var interrupted := started.duplicate(true)
+	interrupted["providerFailure"] = {
+		"profileId": "fixture-live-profile",
+		"reason": "timeout",
+		"purpose": "agent_step",
+		"operationKey": "npc_decision:fixture-abandon",
+	}
+	fixture.set("_current_run_snapshot", interrupted)
+	var run_id := str(started.get("runId", ""))
+	var abandon_id := "fixture-abandon-contract"
+	var first: Dictionary = fixture.abandon_run(run_id, abandon_id)
+	var repeated: Dictionary = fixture.abandon_run(run_id, abandon_id)
+	var conflict: Dictionary = fixture.abandon_run(run_id, "fixture-abandon-conflict")
+	if (
+		str(first.get("runId", "")) != run_id
+		or str(first.get("abandonId", "")) != abandon_id
+		or str(first.get("runStatus", "")) != "closed"
+		or str(first.get("reason", "")) != "provider_failed"
+		or not first.get("providerFailure", null) is Dictionary
+		or not first.get("providerBudget", null) is Dictionary
+		or not first.get("providerAudit", null) is Dictionary
+		or not first.get("providerRuntimeTrace", null) is Dictionary
+		or first.has("terminalResult")
+		or first.has("verdict")
+		or repeated != first
+		or str(conflict.get("error", "")) != "abandon_id_conflict"
+	):
+		_failures.append("fixture run abandon lost its strict idempotent contract")
 
 
 func _check_jump_input_contract() -> void:
@@ -3760,6 +3813,71 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 	var answer_packet := endpoints.get("runHearingAnswer", {}) as Dictionary
 	var answer_request := answer_packet.get("request", {}) as Dictionary
 	var final_answer := answer_request.get("answer", {}) as Dictionary
+	var exact_retry_visible := bool(instance.call(
+		"_present_provider_failure",
+		{
+			"error": "provider_failed",
+			"profileId": "fixture-live-profile",
+			"reason": "timeout",
+			"purpose": "hearing_verdict",
+		},
+		"hearing_answer",
+		{"answer": final_answer.duplicate(true)},
+	))
+	var exact_retry_snapshot := hud.provider_failure_snapshot()
+	if (
+		not exact_retry_visible
+		or not bool(exact_retry_snapshot.get("visible", false))
+		or not bool(exact_retry_snapshot.get("retryVisible", false))
+		or not bool(exact_retry_snapshot.get("restartVisible", false))
+	):
+		_failures.append(
+			"%s interrupted hearing lost retry or clean-run actions" % label
+		)
+	var valid_abandon_response := {
+		"runId": str(staged_snapshot.get("runId", "")),
+		"abandonId": "fixture-client-abandon",
+		"runStatus": "closed",
+		"reason": "provider_failed",
+		"providerFailure": {
+			"profileId": "fixture-live-profile",
+			"reason": "timeout",
+			"purpose": "hearing_verdict",
+			"operationKey": "hearing_verdict:fixture-client",
+		},
+		"providerBudget": staged_snapshot.get("providerBudget", {}),
+		"providerAudit": staged_snapshot.get("providerAudit", {}),
+		"providerRuntimeTrace": staged_snapshot.get("providerRuntimeTrace", {}),
+		"lastProposalMeta": staged_snapshot.get("provider", null),
+	}
+	if not bool(instance.call(
+		"_valid_run_abandon_response",
+		valid_abandon_response,
+		str(staged_snapshot.get("runId", "")),
+		"fixture-client-abandon",
+	)):
+		_failures.append("%s rejected a valid provider-failure abandon response" % label)
+	var fabricated_abandon := valid_abandon_response.duplicate(true)
+	fabricated_abandon["terminalResult"] = {"verdict": "ordinary"}
+	if bool(instance.call(
+		"_valid_run_abandon_response",
+		fabricated_abandon,
+		str(staged_snapshot.get("runId", "")),
+		"fixture-client-abandon",
+	)):
+		_failures.append("%s accepted a fabricated abandon verdict" % label)
+	await instance.call("_on_provider_failure_restart_requested")
+	var failed_abandon_snapshot := hud.provider_failure_snapshot()
+	if (
+		str(failed_abandon_snapshot.get("status", "")).is_empty()
+		or not bool(failed_abandon_snapshot.get("visible", false))
+		or bool(failed_abandon_snapshot.get("retryDisabled", true))
+		or bool(failed_abandon_snapshot.get("restartDisabled", true))
+		or str(instance.get("_run_abandon_id")) != "abandon-fixture-1"
+		or bool(instance.get("_run_abandon_in_flight"))
+	):
+		_failures.append("%s failed abandon did not preserve a recoverable warning" % label)
+	instance.call("_resolve_provider_failure", "hearing_answer")
 	instance.call("_submit_hearing_answer", final_answer)
 	var terminal := false
 	for _frame in range(360):
@@ -3833,12 +3951,86 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 	fallback_result["proposalMeta"] = fallback_meta
 	hud.show_outcome(fallback_result)
 	var fallback_outcome := hud.outcome_snapshot()
+	var fallback_failure := hud.provider_failure_snapshot()
 	if (
-		not bool(fallback_outcome.get("fallbackVisible", false))
-		or str(fallback_outcome.get("fallbackReason", "")) != "timeout"
-		or str(fallback_outcome.get("fallbackReasonText", "")).is_empty()
+		bool(fallback_outcome.get("visible", true))
+		or not str(fallback_outcome.get("route", "")).is_empty()
+		or not str(fallback_outcome.get("verdictDisplay", "")).is_empty()
+		or not bool(fallback_failure.get("visible", false))
+		or str(
+			(fallback_failure.get("failure", {}) as Dictionary).get("reason", "")
+		) != "timeout"
+		or hud.find_child("OutcomeFallbackBadge", true, false) != null
 	):
-		_failures.append("%s fallback hearing verdict was not visibly marked" % label)
+		_failures.append(
+			"%s provider failure rendered a fallback verdict or hid the failure" % label
+		)
+	var main_presented_failure := bool(instance.call(
+		"_present_provider_failure",
+		{
+			"error": "provider_failed",
+			"profileId": "fixture-live-profile",
+			"reason": "timeout",
+			"purpose": "hearing_verdict",
+		},
+	))
+	var main_failure_snapshot := (
+		instance.call("presentation_snapshot").get("providerFailure", {}) as Dictionary
+	)
+	if (
+		not main_presented_failure
+		or not bool(main_failure_snapshot.get("visible", false))
+		or str(
+			(main_failure_snapshot.get("failure", {}) as Dictionary).get(
+				"profileId",
+				""
+			)
+		) != "fixture-live-profile"
+		or bool(main_failure_snapshot.get("retryVisible", false))
+		or bool(main_failure_snapshot.get("restartVisible", false))
+		or bool(hud.outcome_snapshot().get("visible", true))
+	):
+		_failures.append("%s Main did not surface a structured provider failure" % label)
+	hud.show_provider_failure({
+		"profileId": "fixture-live-profile",
+		"reason": "timeout",
+		"purpose": "hearing_verdict",
+		"operationKey": "hearing_verdict:fixture",
+	}, true, true)
+	var retryable_failure := hud.provider_failure_snapshot()
+	if (
+		not bool(retryable_failure.get("visible", false))
+		or not bool(retryable_failure.get("retryVisible", false))
+		or not bool(retryable_failure.get("restartVisible", false))
+		or str(retryable_failure.get("title", "")).is_empty()
+		or str(retryable_failure.get("body", "")).is_empty()
+		or str(retryable_failure.get("reason", "")).is_empty()
+	):
+		_failures.append("%s provider failure surface lost its retry affordance" % label)
+	hud.set_provider_failure_action_busy(true, &"retry")
+	var locked_actions := hud.provider_failure_snapshot()
+	if (
+		not bool(locked_actions.get("retryDisabled", false))
+		or not bool(locked_actions.get("restartDisabled", false))
+		or str(locked_actions.get("busyAction", "")) != "retry"
+	):
+		_failures.append("%s provider failure actions could run concurrently" % label)
+	hud.show_provider_failure_restart_error()
+	var restart_error := hud.provider_failure_snapshot()
+	if (
+		str(restart_error.get("status", "")).is_empty()
+		or bool(restart_error.get("retryDisabled", true))
+		or bool(restart_error.get("restartDisabled", true))
+	):
+		_failures.append("%s provider restart failure was not recoverable" % label)
+	if not hud.provider_failure_retry_requested.is_connected(
+		Callable(instance, "_on_provider_failure_retry_requested")
+	):
+		_failures.append("%s provider failure retry signal is not connected to Main" % label)
+	if not hud.provider_failure_restart_requested.is_connected(
+		Callable(instance, "_on_provider_failure_restart_requested")
+	):
+		_failures.append("%s provider failure restart signal is not connected to Main" % label)
 	if not hud.restart_requested.is_connected(Callable(instance, "_on_restart_requested")):
 		_failures.append("%s restart button signal is not connected to Main" % label)
 	var end_packet := endpoints.get("runEnd", {}) as Dictionary

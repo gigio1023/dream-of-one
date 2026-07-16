@@ -14,6 +14,8 @@ signal log_visibility_changed(visible: bool)
 signal debug_visibility_changed(visible: bool)
 signal hesitation_expired
 signal restart_requested
+signal provider_failure_retry_requested
+signal provider_failure_restart_requested
 
 const UI_SCALE_OPTIONS: Array[float] = [0.8, 1.0, 1.25, 1.5]
 const TYPEWRITER_CHARACTERS_PER_SECOND := 42.0
@@ -54,6 +56,7 @@ const OUTCOME_ACTOR_IDS: PackedStringArray = [
 @onready var _language_option: OptionButton = %LanguageOption
 @onready var _close_settings_button: Button = %CloseSettingsButton
 @onready var _conversation_shade: ColorRect = $Overlay/ConversationShade
+@onready var _conversation_panel: PanelContainer = $Overlay/ConversationShade/ConversationPanel
 @onready var _conversation_speaker_label: Label = %ConversationSpeakerLabel
 @onready var _conversation_stance_label: Label = %ConversationStanceLabel
 @onready var _conversation_provider_label: Label = %ConversationProviderLabel
@@ -69,6 +72,13 @@ const OUTCOME_ACTOR_IDS: PackedStringArray = [
 @onready var _conversation_submit_button: Button = %ConversationSubmitButton
 @onready var _conversation_status_label: Label = %ConversationStatusLabel
 @onready var _end_conversation_button: Button = %EndConversationButton
+@onready var _provider_failure_panel: PanelContainer = %ProviderFailurePanel
+@onready var _provider_failure_title: Label = %ProviderFailureTitle
+@onready var _provider_failure_body: Label = %ProviderFailureBody
+@onready var _provider_failure_reason: Label = %ProviderFailureReason
+@onready var _provider_failure_retry_button: Button = %ProviderFailureRetryButton
+@onready var _provider_failure_restart_button: Button = %ProviderFailureRestartButton
+@onready var _provider_failure_status: Label = %ProviderFailureStatus
 @onready var _encountered_stance_panel: PanelContainer = $Overlay/EncounteredStancePanel
 @onready var _encountered_stance_label: Label = %EncounteredStanceLabel
 @onready var _log_shade: ColorRect = %LogShade
@@ -79,7 +89,6 @@ const OUTCOME_ACTOR_IDS: PackedStringArray = [
 @onready var _close_log_button: Button = %CloseLogButton
 @onready var _outcome_shade: ColorRect = %OutcomeShade
 @onready var _outcome_title: Label = %OutcomeTitle
-@onready var _outcome_fallback_badge: Label = %OutcomeFallbackBadge
 @onready var _outcome_verdict_label: Label = %OutcomeVerdictLabel
 @onready var _outcome_vouch_label: Label = %OutcomeVouchLabel
 @onready var _outcome_body: RichTextLabel = %OutcomeBody
@@ -133,6 +142,11 @@ var _outcome_presented_testimonies: Array[Dictionary] = []
 var _outcome_recap_lines: Array[String] = []
 var _outcome_presented_recap: Array[Dictionary] = []
 var _hearing_fade_tween: Tween
+var _provider_failure: Dictionary = {}
+var _provider_failure_can_retry := false
+var _provider_failure_can_restart := false
+var _provider_failure_busy_action := ""
+var _provider_failure_restart_error := false
 
 
 func _ready() -> void:
@@ -155,6 +169,10 @@ func _ready() -> void:
 	_conversation_free_input.text_changed.connect(_on_free_input_text_changed)
 	_conversation_free_input.text_change_rejected.connect(_on_free_input_text_change_rejected)
 	_end_conversation_button.pressed.connect(_on_end_conversation_retry_pressed)
+	_provider_failure_retry_button.pressed.connect(_on_provider_failure_retry_pressed)
+	_provider_failure_restart_button.pressed.connect(
+		_on_provider_failure_restart_pressed
+	)
 	_close_log_button.pressed.connect(close_log)
 	_restart_button.pressed.connect(_on_restart_pressed)
 	_prompt_panel.visible = false
@@ -169,15 +187,17 @@ func _ready() -> void:
 	_retry_button_mode = &"end"
 	_refresh_retry_button_text()
 	_end_conversation_button.visible = false
+	_provider_failure_panel.visible = false
 	_encountered_stance_panel.visible = false
 	_log_shade.visible = false
 	_log_error_label.visible = false
 	_log_busy_label.visible = false
 	_outcome_shade.visible = false
-	_outcome_fallback_badge.visible = false
 	_outcome_status_label.visible = false
 	_hearing_fade.visible = false
 	_debug_panel.visible = false
+	$Overlay.resized.connect(_layout_conversation_panel)
+	call_deferred("_layout_conversation_panel")
 
 
 func _notification(what: int) -> void:
@@ -371,6 +391,10 @@ func fade_from_hearing() -> void:
 func show_outcome(result: Dictionary) -> void:
 	if result.is_empty():
 		return
+	var failed_meta := _provider_failure_from_result(result)
+	if not failed_meta.is_empty():
+		show_provider_failure(failed_meta, false)
+		return
 	stop_hesitation_timer()
 	if _settings_visible:
 		_set_settings_visible(false)
@@ -407,7 +431,6 @@ func set_outcome_busy(value: bool, error_key := StringName()) -> void:
 
 
 func outcome_snapshot() -> Dictionary:
-	var outcome_provider_meta := _outcome_provider_meta()
 	return {
 		"visible": _outcome_visible,
 		"busy": _outcome_busy,
@@ -418,13 +441,6 @@ func outcome_snapshot() -> Dictionary:
 		"verdictDisplay": _outcome_verdict_label.text,
 		"vouchCount": _outcome_vouch_count(),
 		"requiredVouches": 4,
-		"fallbackVisible": _outcome_fallback_badge.visible,
-		"fallbackReason": str(outcome_provider_meta.get("fallbackReason", "")),
-		"fallbackReasonText": (
-			_provider_fallback_reason_text(outcome_provider_meta)
-			if _outcome_fallback_badge.visible
-			else ""
-		),
 		"testimonies": _outcome_presented_testimonies.duplicate(true),
 		"recapLines": _outcome_recap_lines.duplicate(),
 		"recapEntries": _outcome_presented_recap.duplicate(true),
@@ -435,6 +451,102 @@ func outcome_snapshot() -> Dictionary:
 		"body": _outcome_body.text,
 		"status": _outcome_status_label.text if _outcome_status_label.visible else "",
 		"restartDisabled": _restart_button.disabled,
+	}
+
+
+func show_provider_failure(
+	failure: Dictionary,
+	can_retry: bool,
+	can_restart := false
+) -> void:
+	if failure.is_empty():
+		return
+	var normalized := _normalize_provider_failure(failure)
+	if normalized.is_empty():
+		return
+	_provider_failure = normalized
+	_provider_failure_can_retry = can_retry
+	_provider_failure_can_restart = can_restart
+	_provider_failure_busy_action = ""
+	_provider_failure_restart_error = false
+	_provider_failure_retry_button.disabled = false
+	_provider_failure_restart_button.disabled = false
+	_provider_failure_status.text = ""
+	_provider_failure_status.visible = false
+	# A provider failure is not a terminal verdict. If a malformed or legacy
+	# response tries to pair the two, remove the verdict surface rather than
+	# presenting deterministic content as though the model authored it.
+	_outcome_visible = false
+	_outcome_busy = false
+	_outcome_result = {}
+	_outcome_presented_testimonies.clear()
+	_outcome_recap_lines.clear()
+	_outcome_presented_recap.clear()
+	_outcome_shade.visible = false
+	_outcome_title.text = ""
+	_outcome_verdict_label.text = ""
+	_outcome_vouch_label.text = ""
+	_outcome_body.text = ""
+	_outcome_status_label.text = ""
+	_outcome_status_label.visible = false
+	_restart_button.disabled = false
+	_provider_meta = {}
+	_refresh_provider_label()
+	_refresh_provider_failure()
+	_provider_failure_panel.visible = true
+
+
+func clear_provider_failure() -> void:
+	_provider_failure = {}
+	_provider_failure_can_retry = false
+	_provider_failure_can_restart = false
+	_provider_failure_busy_action = ""
+	_provider_failure_restart_error = false
+	_provider_failure_panel.visible = false
+	_provider_failure_retry_button.disabled = false
+	_provider_failure_restart_button.disabled = false
+	_provider_failure_status.text = ""
+	_provider_failure_status.visible = false
+
+
+func set_provider_failure_retry_busy(value: bool) -> void:
+	set_provider_failure_action_busy(value, &"retry" if value else &"")
+
+
+func set_provider_failure_action_busy(value: bool, action := StringName()) -> void:
+	_provider_failure_busy_action = str(action) if value else ""
+	_provider_failure_retry_button.disabled = value
+	_provider_failure_restart_button.disabled = value
+	if value:
+		_provider_failure_restart_error = false
+	_refresh_provider_failure()
+
+
+func show_provider_failure_restart_error() -> void:
+	_provider_failure_busy_action = ""
+	_provider_failure_restart_error = true
+	_provider_failure_retry_button.disabled = false
+	_provider_failure_restart_button.disabled = false
+	_refresh_provider_failure()
+
+
+func provider_failure_snapshot() -> Dictionary:
+	return {
+		"visible": _provider_failure_panel.visible,
+		"title": _provider_failure_title.text,
+		"body": _provider_failure_body.text,
+		"reason": _provider_failure_reason.text,
+		"retryVisible": _provider_failure_retry_button.visible,
+		"retryDisabled": _provider_failure_retry_button.disabled,
+		"restartVisible": _provider_failure_restart_button.visible,
+		"restartDisabled": _provider_failure_restart_button.disabled,
+		"busyAction": _provider_failure_busy_action,
+		"status": (
+			_provider_failure_status.text
+			if _provider_failure_status.visible
+			else ""
+		),
+		"failure": _provider_failure.duplicate(true),
 	}
 
 
@@ -459,6 +571,7 @@ func configure_preferences(
 func set_ui_scale(value: float) -> void:
 	_ensure_runtime_theme()
 	_runtime_theme.default_base_scale = clampf(value, 0.8, 1.5)
+	call_deferred("_layout_conversation_panel")
 
 
 func refresh_localized_text() -> void:
@@ -819,6 +932,7 @@ func presentation_snapshot() -> Dictionary:
 		),
 		"busy": _conversation_busy,
 		"thinking": _conversation_busy,
+		"conversationTurnActionable": conversation_turn_actionable(),
 		"hesitationTimerVisible": _conversation_timer_label.visible,
 		"hesitationTimer": hesitation_timer_snapshot(),
 		"uiScale": UI_SCALE_OPTIONS[_ui_scale_option.selected],
@@ -847,10 +961,42 @@ func presentation_snapshot() -> Dictionary:
 		},
 		"debugVisible": _debug_visible,
 		"provider": _provider_meta.duplicate(true),
+		"providerFailure": provider_failure_snapshot(),
 		"ambientSubtitle": ambient_subtitle_snapshot(),
 		"contactCue": contact_cue_snapshot(),
 		"outcome": outcome_snapshot(),
 	}
+
+
+func conversation_turn_actionable() -> bool:
+	if not _conversation_visible or _conversation_busy or _current_turn.is_empty():
+		return false
+	for button in _choice_buttons:
+		if button.visible and not button.disabled:
+			return true
+	return (
+		_conversation_input_row.visible
+		and _conversation_free_input.visible
+		and _conversation_free_input.editable
+		and not _conversation_submit_button.disabled
+	)
+
+
+func _layout_conversation_panel() -> void:
+	if not is_instance_valid(_conversation_panel) or not is_instance_valid($Overlay):
+		return
+	var viewport_size: Vector2 = $Overlay.size
+	var horizontal_margin := 24.0
+	var vertical_margin := 24.0
+	var panel_width := minf(1120.0, maxf(0.0, viewport_size.x - horizontal_margin * 2.0))
+	_conversation_panel.anchor_left = 0.5
+	_conversation_panel.anchor_top = 0.0
+	_conversation_panel.anchor_right = 0.5
+	_conversation_panel.anchor_bottom = 1.0
+	_conversation_panel.offset_left = -panel_width * 0.5
+	_conversation_panel.offset_top = vertical_margin
+	_conversation_panel.offset_right = panel_width * 0.5
+	_conversation_panel.offset_bottom = -vertical_margin
 
 
 func _set_settings_visible(should_show: bool) -> void:
@@ -991,6 +1137,28 @@ func _on_restart_pressed() -> void:
 	restart_requested.emit()
 
 
+func _on_provider_failure_retry_pressed() -> void:
+	if (
+		_provider_failure.is_empty()
+		or not _provider_failure_can_retry
+		or not _provider_failure_busy_action.is_empty()
+	):
+		return
+	set_provider_failure_action_busy(true, &"retry")
+	provider_failure_retry_requested.emit()
+
+
+func _on_provider_failure_restart_pressed() -> void:
+	if (
+		_provider_failure.is_empty()
+		or not _provider_failure_can_restart
+		or not _provider_failure_busy_action.is_empty()
+	):
+		return
+	set_provider_failure_action_busy(true, &"restart")
+	provider_failure_restart_requested.emit()
+
+
 func _configure_hesitation_timer(turn: Dictionary) -> void:
 	_reset_hesitation_timer()
 	if (
@@ -1059,14 +1227,6 @@ func _refresh_outcome() -> void:
 	_outcome_vouch_label.text = str(tr(&"hud.m3r.outcome.vouches")).format({
 		"count": _outcome_vouch_count(),
 		"required": 4,
-	})
-	var provider_meta := _outcome_provider_meta()
-	_outcome_fallback_badge.visible = (
-		str(provider_meta.get("transport", "")) == "fallback"
-		or bool(provider_meta.get("usedFallback", false))
-	)
-	_outcome_fallback_badge.text = str(tr(&"hud.m3r.outcome.fallback")).format({
-		"reason": _provider_fallback_reason_text(provider_meta),
 	})
 	_outcome_presented_testimonies.clear()
 	var body_lines: Array[String] = [str(tr(&"hud.m3r.outcome.testimonies"))]
@@ -1219,6 +1379,7 @@ func _apply_localized_text() -> void:
 	_refresh_log_body()
 	_refresh_ambient_subtitle_text()
 	_refresh_contact_cue()
+	_refresh_provider_failure()
 	if _outcome_visible:
 		_refresh_outcome()
 	_populate_language_options()
@@ -1321,17 +1482,32 @@ func _refresh_provider_label() -> void:
 		_conversation_provider_label.visible = true
 		return
 	if transport == "fallback" or bool(_provider_meta.get("usedFallback", false)):
-		_conversation_provider_label.text = str(
-			tr(&"hud.m3r.provider.fallback_format")
-		).format({"reason": _provider_fallback_reason_text(_provider_meta)})
-		_conversation_provider_label.visible = true
+		_provider_failure = _normalize_provider_failure({
+			"profileId": str(_provider_meta.get("profileId", "unknown")),
+			"reason": str(_provider_meta.get("fallbackReason", "unknown")),
+			"purpose": "conversation_turn",
+			"operationKey": "legacy-fallback-meta",
+		})
+		_provider_failure_can_retry = false
+		_provider_failure_can_restart = false
+		_provider_failure_busy_action = ""
+		_provider_failure_restart_error = false
+		_provider_failure_retry_button.disabled = false
+		_provider_failure_restart_button.disabled = false
+		_provider_failure_status.text = ""
+		_provider_failure_status.visible = false
+		_provider_failure_panel.visible = true
+		_refresh_provider_failure()
+		_provider_meta = {}
+		_conversation_provider_label.text = ""
+		_conversation_provider_label.visible = false
 		return
 	_conversation_provider_label.text = ""
 	_conversation_provider_label.visible = false
 
 
-func _provider_fallback_reason_text(meta: Dictionary) -> String:
-	var reason := str(meta.get("fallbackReason", "unknown"))
+func _provider_failure_reason_text(failure: Dictionary) -> String:
+	var reason := str(failure.get("reason", "unknown"))
 	if reason not in [
 		"missing_credentials",
 		"unavailable",
@@ -1343,6 +1519,64 @@ func _provider_fallback_reason_text(meta: Dictionary) -> String:
 	]:
 		reason = "unknown"
 	return str(tr("hud.m3r.provider.reason.%s" % reason))
+
+
+func _refresh_provider_failure() -> void:
+	if not is_instance_valid(_provider_failure_panel) or _provider_failure.is_empty():
+		return
+	_provider_failure_title.text = str(tr(&"hud.m3r.provider_failure.title"))
+	_provider_failure_body.text = str(tr(&"hud.m3r.provider_failure.body"))
+	_provider_failure_reason.text = str(
+		tr(&"hud.m3r.provider_failure.reason")
+	).format({"reason": _provider_failure_reason_text(_provider_failure)})
+	_provider_failure_retry_button.visible = _provider_failure_can_retry
+	_provider_failure_retry_button.text = str(tr(
+		&"hud.m3r.provider_failure.retrying"
+		if _provider_failure_busy_action == "retry"
+		else &"hud.m3r.provider_failure.retry"
+	))
+	_provider_failure_restart_button.visible = _provider_failure_can_restart
+	_provider_failure_restart_button.text = str(tr(
+		&"hud.m3r.provider_failure.restarting"
+		if _provider_failure_busy_action == "restart"
+		else &"hud.m3r.provider_failure.restart"
+	))
+	_provider_failure_status.text = (
+		str(tr(&"hud.m3r.provider_failure.restart_error"))
+		if _provider_failure_restart_error
+		else ""
+	)
+	_provider_failure_status.visible = _provider_failure_restart_error
+
+
+func _normalize_provider_failure(failure: Dictionary) -> Dictionary:
+	var reason := str(failure.get("reason", failure.get("fallbackReason", "unknown")))
+	if reason not in [
+		"missing_credentials",
+		"unavailable",
+		"timeout",
+		"rate_limited",
+		"invalid_envelope",
+		"budget_exhausted",
+		"transport_error",
+	]:
+		reason = "unknown"
+	return {
+		"profileId": str(failure.get("profileId", "unknown")),
+		"reason": reason,
+		"purpose": str(failure.get("purpose", "unknown")),
+		"operationKey": str(failure.get("operationKey", "")),
+	}
+
+
+func _provider_failure_from_result(result: Dictionary) -> Dictionary:
+	var direct_value: Variant = result.get("providerFailure")
+	if direct_value is Dictionary:
+		return _normalize_provider_failure(direct_value as Dictionary)
+	var meta := _dictionary_or_empty(result.get("proposalMeta"))
+	if str(meta.get("transport", "")) == "fallback" or bool(meta.get("usedFallback", false)):
+		return _normalize_provider_failure(meta)
+	return {}
 
 
 func _refresh_encountered_stances() -> void:

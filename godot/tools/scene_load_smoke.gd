@@ -4065,6 +4065,9 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		_failures.append("%s provider failure surface lost its retry affordance" % label)
 	if not hud.provider_failure_visible():
 		_failures.append("%s provider failure surface does not expose its modal ownership" % label)
+	hud.open_settings()
+	if hud.settings_visible():
+		_failures.append("%s provider failure allowed settings behind its modal" % label)
 	if (
 		retry_button == null
 		or restart_button == null

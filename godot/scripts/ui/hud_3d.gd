@@ -238,6 +238,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed("cancel") or event.is_action_pressed("open_log"):
 			get_viewport().set_input_as_handled()
 		return
+	if provider_failure_visible():
+		# The focused recovery buttons receive GUI keyboard input before this
+		# callback. Consume every remaining gameplay shortcut so a failure
+		# cannot open settings/log surfaces behind its modal ownership.
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("open_log") and not _conversation_visible and not _settings_visible:
 		toggle_log()
 		get_viewport().set_input_as_handled()
@@ -476,6 +482,11 @@ func show_provider_failure(
 	_provider_failure_can_restart = can_restart
 	_provider_failure_busy_action = ""
 	_provider_failure_restart_error = false
+	if _settings_visible:
+		_set_settings_visible(false)
+	if _log_visible:
+		_set_log_busy(false)
+		_set_log_visible(false)
 	_provider_failure_retry_button.disabled = false
 	_provider_failure_restart_button.disabled = false
 	_provider_failure_status.text = ""
@@ -709,7 +720,12 @@ func clear_ambient_subtitles() -> void:
 
 
 func open_settings() -> void:
-	if _conversation_visible or _log_visible or _outcome_visible:
+	if (
+		_conversation_visible
+		or _log_visible
+		or _outcome_visible
+		or provider_failure_visible()
+	):
 		return
 	_set_settings_visible(true)
 

@@ -97,17 +97,15 @@ func _process(delta: float) -> void:
 		_update_player_brief_visibility()
 		return
 	if _modal_surface == "conversation":
-		# Opening the modal starts the provider-backed wait, not the player's
-		# response window. Keep the one-time input lesson hidden and untimed
-		# until HUD3D exposes a real enabled choice or free-text control.
-		_set_suppressed(not _conversation_turn_actionable)
+		# The conversation surface labels its 1–3 shortcuts on the actual
+		# buttons. Keep the detached onboarding card hidden so large UI scales
+		# never cover the modal's free-input row.
+		_set_suppressed(true)
 		_update_player_brief_visibility()
 		if not _conversation_turn_actionable:
 			return
 		if not _dialogue_hint_shown:
 			_dialogue_hint_shown = true
-			_show_hint(DIALOGUE_HINT, 8.0)
-		_update_hint_timer(delta)
 		return
 	_set_suppressed(false)
 	_update_player_brief_visibility()

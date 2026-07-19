@@ -430,6 +430,7 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 				_failures.append("hud_3d exposes no presentation snapshot")
 			else:
 				_check_social_hud_contract(label, instance as HUD3D)
+			await _check_hud_scale_layout(label, instance as HUD3D)
 		"town_3d":
 			_require_node(label, instance, "Environment/WorldEnvironment")
 			_require_node(label, instance, "Geometry/Ground/TownGround/Collision")
@@ -539,6 +540,86 @@ func _check_runtime_shape(label: String, instance: Node) -> void:
 			var playtest_surface := instance.get_node_or_null("AgentPlaytestSurface")
 			if playtest_surface == null or not playtest_surface.has_method("snapshot"):
 				_failures.append("main_3d has no AgentPlaytestSurface snapshot")
+
+
+func _check_hud_scale_layout(label: String, hud: HUD3D) -> void:
+	var overlay := hud.get_node_or_null("Overlay") as Control
+	var settings_panel := hud.get_node_or_null(
+		"Overlay/SettingsShade/SettingsPanel"
+	) as PanelContainer
+	var conversation_panel := hud.get_node_or_null(
+		"Overlay/ConversationShade/ConversationPanel"
+	) as PanelContainer
+	if overlay == null or settings_panel == null or conversation_panel == null:
+		return
+	hud.set_ui_scale(1.5)
+	# A standalone CanvasLayer inherits the headless smoke window's tiny
+	# viewport. Stage the production 1920x1080 geometry explicitly so this
+	# check protects the rendered layout contract instead of the dummy window.
+	overlay.size = Vector2(1920.0, 1080.0)
+	hud.call("_layout_responsive_panels")
+	var expected_settings_size := Vector2(
+		minf(520.0 * 1.5, maxf(0.0, overlay.size.x - 32.0)),
+		minf(680.0 * 1.5, maxf(0.0, overlay.size.y - 32.0))
+	)
+	if not settings_panel.size.is_equal_approx(expected_settings_size):
+		_failures.append(
+			"%s 150%% settings panel is not viewport-bounded: got %s expected %s"
+			% [label, settings_panel.size, expected_settings_size]
+		)
+	var expected_conversation_width := minf(
+		1120.0 * 1.5,
+		maxf(0.0, overlay.size.x - 48.0)
+	)
+	if not is_equal_approx(conversation_panel.size.x, expected_conversation_width):
+		_failures.append(
+			"%s 150%% conversation panel did not use available width: got %s expected %s"
+			% [label, conversation_panel.size.x, expected_conversation_width]
+		)
+	hud.begin_conversation({"actorId": "NPC_Park_Caretaker"})
+	if not hud.show_turn({
+		"turnId": "scale-smoke#0",
+		"beatId": "scale-smoke",
+		"speakerId": "NPC_Park_Caretaker",
+		"prompt": "Scale smoke prompt.",
+		"acceptsFreeInput": true,
+		"continueConversation": true,
+		"procedure": "ordinary",
+		"hesitationMs": 0,
+		"choices": [
+			{"choiceId": "scale-smoke-1", "line": "One"},
+			{"choiceId": "scale-smoke-2", "line": "Two"},
+			{"choiceId": "scale-smoke-3", "line": "Three"},
+		],
+		"proposalMeta": {"transport": "scripted"},
+	}):
+		_failures.append("%s 150%% conversation turn was not actionable" % label)
+	var first_choice := hud.get_node_or_null(
+		"Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices/ConversationChoice1"
+	) as Button
+	if first_choice == null or not first_choice.text.begins_with("1 — "):
+		_failures.append("%s conversation choices do not expose keyboard shortcuts" % label)
+	hud.close_conversation()
+	if hud.get_viewport().gui_get_focus_owner() != null:
+		_failures.append("%s closed conversation retained hidden GUI focus" % label)
+	hud.open_log()
+	var close_log_event := InputEventKey.new()
+	close_log_event.physical_keycode = KEY_TAB
+	close_log_event.pressed = true
+	Input.parse_input_event(close_log_event)
+	await process_frame
+	close_log_event.pressed = false
+	Input.parse_input_event(close_log_event)
+	if hud.log_visible():
+		_failures.append("%s focused log close button consumed Tab without closing" % label)
+	if hud.get_viewport().gui_get_focus_owner() != null:
+		_failures.append("%s closed log retained hidden GUI focus" % label)
+	hud.open_settings()
+	hud.close_settings()
+	if hud.get_viewport().gui_get_focus_owner() != null:
+		_failures.append("%s closed settings retained hidden GUI focus" % label)
+	hud.set_ui_scale(1.0)
+	await process_frame
 
 
 func _check_conversation_start_retry_contract(label: String, instance: Node) -> void:

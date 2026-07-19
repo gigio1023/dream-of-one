@@ -40,6 +40,7 @@ const OUTCOME_ACTOR_IDS: PackedStringArray = [
 @onready var _ambient_subtitle_panel: PanelContainer = %AmbientSubtitlePanel
 @onready var _ambient_subtitle_label: Label = %AmbientSubtitleLabel
 @onready var _settings_shade: ColorRect = %SettingsShade
+@onready var _settings_panel: PanelContainer = $Overlay/SettingsShade/SettingsPanel
 @onready var _settings_title: Label = $Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns/SettingsTitle
 @onready var _sensitivity_label: Label = $Overlay/SettingsShade/SettingsPanel/SettingsMargin/SettingsColumns/SensitivityLabel
 @onready var _sensitivity_slider: HSlider = %SensitivitySlider
@@ -175,6 +176,7 @@ func _ready() -> void:
 	)
 	_configure_keyboard_focus_paths()
 	_close_log_button.pressed.connect(close_log)
+	_close_log_button.gui_input.connect(_on_close_log_button_gui_input)
 	_restart_button.pressed.connect(_on_restart_pressed)
 	_prompt_panel.visible = false
 	_contact_cue_panel.visible = false
@@ -197,8 +199,8 @@ func _ready() -> void:
 	_outcome_status_label.visible = false
 	_hearing_fade.visible = false
 	_debug_panel.visible = false
-	$Overlay.resized.connect(_layout_conversation_panel)
-	call_deferred("_layout_conversation_panel")
+	$Overlay.resized.connect(_layout_responsive_panels)
+	call_deferred("_layout_responsive_panels")
 
 
 func _notification(what: int) -> void:
@@ -644,7 +646,7 @@ func configure_preferences(
 func set_ui_scale(value: float) -> void:
 	_ensure_runtime_theme()
 	_runtime_theme.default_base_scale = clampf(value, 0.8, 1.5)
-	call_deferred("_layout_conversation_panel")
+	call_deferred("_layout_responsive_panels")
 
 
 func refresh_localized_text() -> void:
@@ -895,7 +897,10 @@ func show_turn(turn: Dictionary) -> bool:
 			return false
 		var choice := choice_value as Dictionary
 		_choice_ids[index] = str(choice.get("choiceId", ""))
-		_choice_buttons[index].text = str(choice.get("line", ""))
+		_choice_buttons[index].text = "%d — %s" % [
+			index + 1,
+			str(choice.get("line", "")),
+		]
 		_choice_buttons[index].visible = true
 	_conversation_input_row.visible = accepts_free_input
 	_input_limit_rejected = false
@@ -1001,6 +1006,7 @@ func close_conversation() -> void:
 	_conversation_shade.visible = false
 	_conversation_thinking_label.visible = false
 	_end_conversation_button.visible = false
+	get_viewport().gui_release_focus()
 	_refresh_encountered_stances()
 	_refresh_ambient_subtitle_visibility()
 	_refresh_contact_cue()
@@ -1068,13 +1074,50 @@ func conversation_turn_actionable() -> bool:
 	)
 
 
+func _layout_responsive_panels() -> void:
+	_layout_settings_panel()
+	_layout_conversation_panel()
+
+
+func _layout_settings_panel() -> void:
+	if not is_instance_valid(_settings_panel) or not is_instance_valid($Overlay):
+		return
+	var viewport_size: Vector2 = $Overlay.size
+	var user_scale := 1.0
+	if _runtime_theme != null:
+		user_scale = clampf(_runtime_theme.default_base_scale, 0.8, 1.5)
+	var safe_margin := 16.0
+	var panel_width := minf(
+		520.0 * maxf(1.0, user_scale),
+		maxf(0.0, viewport_size.x - safe_margin * 2.0)
+	)
+	var panel_height := minf(
+		680.0 * maxf(1.0, user_scale),
+		maxf(0.0, viewport_size.y - safe_margin * 2.0)
+	)
+	_settings_panel.anchor_left = 0.5
+	_settings_panel.anchor_top = 0.5
+	_settings_panel.anchor_right = 0.5
+	_settings_panel.anchor_bottom = 0.5
+	_settings_panel.offset_left = -panel_width * 0.5
+	_settings_panel.offset_top = -panel_height * 0.5
+	_settings_panel.offset_right = panel_width * 0.5
+	_settings_panel.offset_bottom = panel_height * 0.5
+
+
 func _layout_conversation_panel() -> void:
 	if not is_instance_valid(_conversation_panel) or not is_instance_valid($Overlay):
 		return
 	var viewport_size: Vector2 = $Overlay.size
+	var user_scale := 1.0
+	if _runtime_theme != null:
+		user_scale = clampf(_runtime_theme.default_base_scale, 0.8, 1.5)
 	var horizontal_margin := 24.0
 	var vertical_margin := 24.0
-	var panel_width := minf(1120.0, maxf(0.0, viewport_size.x - horizontal_margin * 2.0))
+	var panel_width := minf(
+		1120.0 * maxf(1.0, user_scale),
+		maxf(0.0, viewport_size.x - horizontal_margin * 2.0)
+	)
 	_conversation_panel.anchor_left = 0.5
 	_conversation_panel.anchor_top = 0.0
 	_conversation_panel.anchor_right = 0.5
@@ -1096,6 +1139,7 @@ func _set_settings_visible(should_show: bool) -> void:
 		_prompt_panel.visible = false
 		_encountered_stance_panel.visible = false
 	else:
+		get_viewport().gui_release_focus()
 		_refresh_encountered_stances()
 		set_focus(_focused_target)
 	_refresh_ambient_subtitle_visibility()
@@ -1120,6 +1164,7 @@ func _set_log_visible(should_show: bool) -> void:
 		_refresh_log_body()
 		_close_log_button.grab_focus()
 	else:
+		get_viewport().gui_release_focus()
 		clear_log_error()
 		_refresh_encountered_stances()
 		set_focus(_focused_target)
@@ -1150,6 +1195,14 @@ func _on_look_setting_changed(_value: float) -> void:
 
 func _on_invert_y_toggled(_enabled: bool) -> void:
 	_on_look_setting_changed(0.0)
+
+
+func _on_close_log_button_gui_input(event: InputEvent) -> void:
+	if not _log_visible:
+		return
+	if event.is_action_pressed("open_log") or event.is_action_pressed("cancel"):
+		close_log()
+		get_viewport().set_input_as_handled()
 
 
 func _on_ui_scale_selected(index: int) -> void:

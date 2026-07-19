@@ -15,6 +15,7 @@ import {
   conversationProposalSchemaForLocale,
   conversationProposalSchemaForRequest,
   hearingJudgmentJsonSchema,
+  hearingJudgmentJsonSchemaForRequest,
   hearingJudgmentSchemaForLocale,
   hearingJudgmentSchemaForRequest,
   MAX_SPEECH_RECORD_CITATIONS,
@@ -2554,6 +2555,7 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   assert.equal(textGen.requests[0].purpose, "hearing_verdict");
   assert.equal(textGen.requests[0].schemaName, "station_hearing_judgment");
   assert.equal(textGen.requests[0].timeoutMs, 120_000);
+  assert.equal(textGen.requests[0].maxOutputTokens, 3_200);
   assert.match(textGen.requests[0].instructions, /resident's own supplied memories/);
   assert.match(textGen.requests[0].instructions, /publicIdentity and voice guide wording only/);
   assert.match(textGen.requests[0].instructions, /derive contactBasis exactly/);
@@ -2567,8 +2569,105 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   assert.match(textGen.requests[0].instructions, /run locale is ko-KR/);
   const providerInput = JSON.parse(textGen.requests[0].input);
   assert.equal(providerInput.residents.length, 6);
+  assert.deepEqual(
+    providerInput.residentEvidenceContract,
+    request.residents.map(resident => ({
+      actorId: resident.actorId,
+      requiredContactBasis: resident.actorId === "NPC_Station_Officer"
+        ? "limited_firsthand"
+        : resident.actorId === "NPC_Roaming_Liaison"
+          ? "never_conversed"
+          : "meaningful_firsthand",
+      allowedMemoryIds: resident.memories.map(memory => memory.memoryId),
+      meaningfulFirsthandMemoryIds: resident.memories
+        .filter(memory => memory.meaningfulFirsthand)
+        .map(memory => memory.memoryId),
+    })),
+  );
   assert.deepEqual(providerInput.records, request.records);
   assert.deepEqual(providerInput.ledgerEvents, request.ledgerEvents);
+
+  const scopedSchema = hearingJudgmentJsonSchemaForRequest(request);
+  const scopedProperties = scopedSchema.properties as Record<string, Record<string, unknown>>;
+  const assessmentItems = scopedProperties.residentAssessments.items as {
+    anyOf: Array<{ properties: Record<string, Record<string, unknown>> }>;
+  };
+  assert.equal(assessmentItems.anyOf.length, 6);
+  assessmentItems.anyOf.forEach((branch, index) => {
+    const resident = request.residents[index]!;
+    assert.equal(branch.properties.actorId.const, resident.actorId);
+    assert.equal(
+      branch.properties.contactBasis.const,
+      index < 4
+        ? "meaningful_firsthand"
+        : index === 4
+          ? "limited_firsthand"
+          : "never_conversed",
+    );
+    const citedMemoryIds = branch.properties.citedMemoryIds;
+    if (resident.memories.length === 0) {
+      assert.equal(citedMemoryIds.maxItems, 0);
+    } else {
+      assert.deepEqual(
+        (citedMemoryIds.items as Record<string, unknown>).enum,
+        resident.memories.map(memory => memory.memoryId),
+      );
+    }
+  });
+});
+
+test("a length-limited hearing response is repaired even when its partial text parses", async () => {
+  const valid = validHearingJudgment();
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(valid), finishReason: "length" },
+    { text: JSON.stringify(valid), finishReason: "stop" },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/hearing-length-repair",
+    textGen,
+    maxOutputTokensPerCall: 1_600,
+    maxTokensPerSession: 450_000,
+  });
+
+  const result = await service.judgeHearing(hearingRequest());
+
+  assert.deepEqual(result.proposal, valid);
+  assert.deepEqual(
+    textGen.requests.map(request => [request.purpose, request.maxOutputTokens]),
+    [["hearing_verdict", 3_200], ["repair", 3_200]],
+  );
+  const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
+    generationIssue?: string;
+  };
+  assert.equal(repairInput.generationIssue, "output_truncated_at_token_limit");
+});
+
+test("two length-limited hearing responses fail closed even when their text parses", async () => {
+  const validText = JSON.stringify(validHearingJudgment());
+  const textGen = new FakeTextGen([
+    { text: validText, finishReason: "length" },
+    { text: validText, finishReason: "length" },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/hearing-length-failure",
+    textGen,
+    maxTokensPerSession: 450_000,
+  });
+  const originalWarn = console.warn;
+  console.warn = () => undefined;
+  try {
+    await expectProviderFailure(service.judgeHearing(hearingRequest()), {
+      profileId: "test/hearing-length-failure",
+      reason: "invalid_envelope",
+      purpose: "hearing_verdict",
+    });
+  } finally {
+    console.warn = originalWarn;
+  }
+  assert.deepEqual(
+    textGen.requests.map(request => request.purpose),
+    ["hearing_verdict", "repair"],
+  );
 });
 
 test("an invalid hearing envelope receives one repair before returning live", async () => {
@@ -2582,6 +2681,7 @@ test("an invalid hearing envelope receives one repair before returning live", as
   const service = new ProviderService({
     profileId: "test/hearing-repair",
     textGen,
+    maxTokensPerSession: 450_000,
   });
   const result = await service.judgeHearing(hearingRequest());
 
@@ -2651,6 +2751,7 @@ test("request-scoped hearing semantic failures receive one repair and remain liv
     const service = new ProviderService({
       profileId: `test/hearing-semantic-repair-${candidate.name}`,
       textGen,
+      maxTokensPerSession: 450_000,
     });
     const result = await service.judgeHearing(request);
 
@@ -2694,6 +2795,7 @@ test("hearing semantic repair failure fails closed without a verdict", async () 
   const service = new ProviderService({
     profileId: "test/hearing-semantic-repair-failure",
     textGen,
+    maxTokensPerSession: 450_000,
   });
   const warnings: unknown[][] = [];
   const originalWarn = console.warn;
@@ -4439,9 +4541,14 @@ test("Qwen profile timeout governs both its transport and ProviderService bounda
 });
 
 test("the final hearing can outlive the ordinary Qwen profile timeout inside the game ceiling", async () => {
+  const sentMaxTokens: unknown[] = [];
+  let requestCount = 0;
   const server = Bun.serve({
     port: 0,
-    async fetch() {
+    async fetch(request) {
+      const body = await request.json() as { max_tokens?: unknown };
+      sentMaxTokens.push(body.max_tokens);
+      requestCount += 1;
       await Bun.sleep(80);
       return Response.json({
         id: "chatcmpl-hearing-timeout-contract",
@@ -4452,7 +4559,7 @@ test("the final hearing can outlive the ordinary Qwen profile timeout inside the
           {
             index: 0,
             message: { role: "assistant", content: JSON.stringify(validHearingJudgment()) },
-            finish_reason: "stop",
+            finish_reason: requestCount === 1 ? "length" : "stop",
           },
         ],
         usage: { prompt_tokens: 101, completion_tokens: 67, total_tokens: 168 },
@@ -4475,7 +4582,10 @@ test("the final hearing can outlive the ordinary Qwen profile timeout inside the
     assert.equal(result.meta.transport, "live");
     assert.equal(result.meta.usedFallback, false);
     assert.equal(result.proposal.residentAssessments.length, 6);
-    assert.equal(proposalPort.auditSnapshot(hearingRequest().runId).calls[0]?.outcome, "success");
+    assert.deepEqual(sentMaxTokens, [3_200, 3_200]);
+    const audit = proposalPort.auditSnapshot(hearingRequest().runId);
+    assert.deepEqual(audit.calls.map(call => call.purpose), ["hearing_verdict", "repair"]);
+    assert.ok(audit.calls.every(call => call.outcome === "success"));
   } finally {
     server.stop(true);
   }

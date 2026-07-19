@@ -1448,17 +1448,38 @@ export const hearingJudgmentJsonSchema: Record<string, unknown> = {
   },
 };
 
-/** Keep the generic export stable while narrowing impossible verdicts per run. */
+/** Keep the generic export stable while narrowing evidence provenance per run. */
 export function hearingJudgmentJsonSchemaForRequest(
   request: HearingJudgmentRequest,
 ): Record<string, unknown> {
   const schema = structuredClone(hearingJudgmentJsonSchema);
+  const properties = schema.properties as Record<string, Record<string, unknown>>;
+  const residentAssessments = properties.residentAssessments;
+  const genericAssessment = residentAssessments.items as Record<string, unknown>;
+  residentAssessments.items = {
+    anyOf: request.residents.map(resident => {
+      const assessment = structuredClone(genericAssessment);
+      const assessmentProperties = assessment.properties as Record<
+        string,
+        Record<string, unknown>
+      >;
+      assessmentProperties.actorId.const = resident.actorId;
+      assessmentProperties.contactBasis.const = hearingContactBasisForMemories(
+        resident.memories,
+      );
+      delete assessmentProperties.contactBasis.enum;
+      const citedMemoryIds = assessmentProperties.citedMemoryIds;
+      const memoryIds = uniqueStrings(resident.memories.map(memory => memory.memoryId));
+      if (memoryIds.length === 0) citedMemoryIds.maxItems = 0;
+      else (citedMemoryIds.items as Record<string, unknown>).enum = memoryIds;
+      return assessment;
+    }),
+  };
   const possibleEvidenceBackedVouches = request.residents.filter(
     resident =>
       hearingContactBasisForMemories(resident.memories) === "meaningful_firsthand",
   ).length;
   if (possibleEvidenceBackedVouches < 4) {
-    const properties = schema.properties as Record<string, Record<string, unknown>>;
     properties.proposedVerdict.enum = ["abnormal"];
   }
   annotatePlayerVisibleDescriptions(schema, request.locale);

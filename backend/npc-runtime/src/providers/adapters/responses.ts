@@ -44,7 +44,7 @@ export class ResponsesAdapter implements TextGenPort {
         model: this.options.model,
         instructions: request.instructions,
         input: request.input,
-        max_output_tokens: this.options.maxTokens,
+        max_output_tokens: request.maxOutputTokens ?? this.options.maxTokens,
         reasoning: this.options.reasoningEffort
           ? { effort: this.options.reasoningEffort }
           : undefined,
@@ -59,11 +59,19 @@ export class ResponsesAdapter implements TextGenPort {
       },
       { timeout: request.timeoutMs ?? this.options.timeoutMs, signal },
     );
-    if (!response.output_text) {
+    const finishReason = response.incomplete_details?.reason === "max_output_tokens"
+      ? "length"
+      : response.incomplete_details?.reason === "content_filter"
+        ? "content_filter"
+        : response.status === "completed"
+          ? "stop"
+          : "other";
+    if (!response.output_text && finishReason !== "length") {
       throw new Error("Responses API returned no output_text");
     }
     return {
       text: response.output_text,
+      finishReason,
       usage: response.usage
         ? {
             inputTokens: response.usage.input_tokens,

@@ -22,6 +22,7 @@ import {
 } from "../localization/supported-locales.js";
 import type { ToolName } from "../agentloop/tools.js";
 import type { ObservePacket } from "../agentloop/context.js";
+import { hearingContactBasisForMemories } from "../runtime/run-hearing.js";
 import { ProviderBudgetReservedError, ProviderFailureError } from "./ports.js";
 import type {
   AmbientReplyJudgment,
@@ -538,6 +539,7 @@ type ProviderBudgetAdmission = "admitted" | "hard_exhausted" | "caller_reserved"
 
 const MAX_AUDIT_RESOLUTIONS = 256;
 const HEARING_PROVIDER_TIMEOUT_MS = 120_000;
+const HEARING_MAX_OUTPUT_TOKENS = 3_200;
 
 export interface ProviderServiceOptions {
   profileId: string;
@@ -1058,6 +1060,19 @@ export class ProviderService implements NpcProposalPort {
       finalDefense: request.finalDefense,
       institutionalPressure: request.institutionalPressure,
       residents: request.residents,
+      residentEvidenceContract: request.residents.map(resident => ({
+        actorId: resident.actorId,
+        requiredContactBasis: hearingContactBasisForMemories(resident.memories),
+        allowedMemoryIds: resident.memories.map(memory => memory.memoryId),
+        meaningfulFirsthandMemoryIds: resident.memories
+          .filter(
+            memory =>
+              memory.kind === "player_conversation" &&
+              memory.sourceActorId === "player" &&
+              memory.meaningfulFirsthand,
+          )
+          .map(memory => memory.memoryId),
+      })),
       records: request.records,
       ledgerEvents: request.ledgerEvents,
       playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
@@ -1072,6 +1087,10 @@ export class ProviderService implements NpcProposalPort {
         schemaName: "station_hearing_judgment",
         jsonSchema: hearingJudgmentJsonSchemaForRequest(request),
         timeoutMs: Math.max(this.timeoutMs, HEARING_PROVIDER_TIMEOUT_MS),
+        maxOutputTokens: Math.max(
+          this.maxOutputTokensPerCall,
+          HEARING_MAX_OUTPUT_TOKENS,
+        ),
       },
       schema: hearingJudgmentSchemaForRequest(request),
       repairContext: requestContext,
@@ -1141,7 +1160,10 @@ export class ProviderService implements NpcProposalPort {
         callSeqs,
         input.budgetCeiling,
       );
-      const parsed = this.parseJson(input.schema, first.text);
+      const firstWasLengthLimited = first.finishReason === "length";
+      const parsed = firstWasLengthLimited
+        ? input.schema.safeParse(undefined)
+        : this.parseJson(input.schema, first.text);
       let candidate: T;
       let combinedUsage = first.usage;
       if (parsed.success) {
@@ -1156,6 +1178,9 @@ export class ProviderService implements NpcProposalPort {
               ? {}
               : { requestContext: input.repairContext }),
             invalidOutput: first.text,
+            ...(firstWasLengthLimited
+              ? { generationIssue: "output_truncated_at_token_limit" }
+              : {}),
             validationIssues: parsed.error.issues.map(providerRepairValidationIssue),
           }),
         };
@@ -1176,7 +1201,9 @@ export class ProviderService implements NpcProposalPort {
           callSeqs,
           input.budgetCeiling,
         );
-        const repaired = this.parseJson(input.schema, repair.text);
+        const repaired = repair.finishReason === "length"
+          ? input.schema.safeParse(undefined)
+          : this.parseJson(input.schema, repair.text);
         if (!repaired.success) {
           const sensitiveFragments = [
             ...outputStringFragments(first.text),
@@ -1264,7 +1291,7 @@ export class ProviderService implements NpcProposalPort {
       `${request.instructions}\n${request.input}\n${JSON.stringify(request.jsonSchema)}`,
       "utf-8",
     );
-    return inputBytes + this.maxOutputTokensPerCall + 2_048;
+    return inputBytes + (request.maxOutputTokens ?? this.maxOutputTokensPerCall) + 2_048;
   }
 
   private parseJson<T>(schema: z.ZodType<T>, text: string) {

@@ -346,11 +346,17 @@ export interface TextGenRequest {
   jsonSchema: Record<string, unknown>;
   /** Optional per-operation transport ceiling; the provider default remains authoritative otherwise. */
   timeoutMs?: number;
+  /** Optional per-operation output ceiling; the provider default remains authoritative otherwise. */
+  maxOutputTokens?: number;
 }
+
+export type TextGenFinishReason = "stop" | "length" | "content_filter" | "other";
 
 export interface TextGenResult {
   text: string;
   usage?: ProviderUsage;
+  /** Normalized transport finish state. Omitted by deterministic test adapters that do not model it. */
+  finishReason?: TextGenFinishReason;
 }
 
 /** API-shape port implemented only by vendor/transport adapters. */

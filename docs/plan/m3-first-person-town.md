@@ -1,9 +1,9 @@
 # M3R — First-Person Town
 
-**Status: acceptance closure active (2026-07-16).** Created at the
+**Status: owner acceptance checks active (2026-07-19).** Created at the
 direction-conversion boundary that killed the 2D M3
 ([`roadmap.md`](roadmap.md) history). The implementation is substantially
-complete; the ordered closure slices below are the remaining work. Direction
+complete; native IME and owner closeout below are the remaining work. Direction
 source: the owner-approved interview closure (2026-07-11) recorded in
 [`../vision/design-pillars.md`](../vision/design-pillars.md) and
 [`../vision/pitch.md`](../vision/pitch.md).
@@ -304,7 +304,7 @@ not a substitute for the acceptance checklist below.
   failures, drops, and truncation. Legacy fallback metadata is accepted only
   at compatibility decoding boundaries and is rejected before simulation
   state can change.
-- The fail-closed checkpoint described here passes all 256 backend checks.
+- The fail-closed checkpoint described here passes all 258 backend checks.
   Godot 4.7 headless import and the 19-scene fixture smoke pass; the localization
   smoke verifies 168 exact keys/placeholders across all six locales at 100%
   and 150% UI scale. Earlier route, NPC movement, physical prop, Godot AI
@@ -373,70 +373,66 @@ physical calls, 59,595 charged tokens, zero failed/fallback/dropped/truncated
 evidence, and `allExpectedProfileLiveNoFallback=true`. This closes the ambient
 capture part of ordered item 1, not its traversal, conversation-friction, or
 fun-route requirements.
+
+The same correction branch then completed the remaining automatable acceptance
+routes. Ordinary run `run-aa3e2230-68bf-4f29-acfb-ddfb6ee28f7c` traversed
+park → Studio → park → Office → park → Station → park → Studio → park,
+including grounded jump, open portals, readable ambient activity, and all six
+resident contacts. Four meaningful-firsthand vouches produced the ordinary
+hearing verdict. Its final audit used 66 physical calls and 290,993 charged
+tokens. Materially different abnormal run
+`run-c299bdf7-aa58-4082-93f6-c6031bfedd7e` used an invented secret-bureau
+claim, only two direct conversations, an ignored contact that expired into
+factual memory, and a visible Station Officer
+`uncertain → oppose → uncertain` recovery before the abnormal verdict. Its
+final audit used 58 physical calls and 246,027 charged tokens. Both audits
+were complete and quiescent on `modelscope/qwen3.7-plus`, with live
+transport and zero failed, fallback, dropped, truncated, or in-flight
+evidence.
+
+The production-provider interruption route was also rendered through the
+sidecar with a connection-failing proxy rather than a scripted adapter. The
+same pending request resumed exactly once after the identical provider was
+restored; abandoning instead created clean run
+`run-5d1b06d2-14ca-484e-a92d-fa867d1ba2f0` with no verdict or invented
+mutation. The interruption panel was then inspected in all six locales.
+Normal Qwen opening → answer → why-line rounds were rendered in all six
+locales at 100%, and the same long-text/why-line surfaces were inspected at
+150%. Commit `bd01185e` makes settings and conversation panels
+viewport-bounded, exposes the `1–3` shortcuts on their buttons, suppresses
+the detached onboarding card over conversations, and releases hidden button
+focus when a modal closes.
+
+After the two full routes, the honest five-minute fun answer is **yes,
+narrowly**. Different player claims produced different social trajectories,
+recoverable suspicion, contact bases, and hearing verdicts worth replaying.
+Generated choices can still invent more backstory than the player intended,
+and the sparse wayfinding/world presentation reduce the immediate replay
+pull.
+
 Detailed live-evidence policy and prior runs remain in
 [`../tech/verification.md`](../tech/verification.md).
 
-### Ordered remaining work
+### Remaining owner checks
 
-Complete these as playable slices. Do not add another tracker, harness, or
-evidence system; update this section and the checklist in place.
+The automatable correction and acceptance routes are complete. Do not add
+another tracker, harness, or evidence system; update this section and the
+checklist in place.
 
-1. **Close first-playable readability and route feel.** Start one Korean
-   Qwen-live run in the park, remain in earshot through the first complete
-   two-resident meeting, and capture both attributed subtitles plus the speech
-   blips before following the listener to its disclosed judgment. In the same
-   run, walk park → Studio → Office → Station → park and verify open-portal
-   steering, collision, jump, mouse capture, and absence of arbitrary invisible
-   walls. If correctly delivered ambient speech is still routinely missed,
-   tune the existing subtitle duration/queue/contrast or spatial cue and rerun
-   this exact route; do not add a second dialogue log. Separately reproduce the
-   mandatory three-answer friction and either keep it as an explicit design
-   choice or add a clean early-exit affordance only for ordinary optional
-   conversations. Station interrogation and hearing remain non-dismissible.
-2. **Complete an ordinary full run.** In one sitting, earn four meaningful
-   firsthand vouches, survive any pre-hearing interrogation, demonstrate one
-   visible recovery that lowers a wary resident's suspicion, submit the final
-   defense, and receive an ordinary verdict. Before restart, record all six
-   contact-basis labels, testimony consistency, citations, recap, and a
-   complete/quiescent Qwen audit below 120 calls and 450,000 tokens. Any
-   provider interruption invalidates this acceptance run and becomes the next
-   repair slice.
-3. **Complete an abnormal full run.** Use materially different player speech
-   and fewer than four evidenced vouches, survive rather than terminate at any
-   earlier interrogation, and reach the scheduled abnormal verdict. Confirm
-   that limited or never-conversed witnesses do not vouch, hearsay is labeled
-   correctly, and the terminal audit satisfies the same Qwen/live/no-failure
-   and budget requirements.
-4. **Render the provider-unavailable route.** With the production provider
-   intentionally unavailable, trigger one player-owned model operation. The
-   HUD must visibly identify a simulation interruption, the exact request must
-   remain retryable, and no speech, judgment, action, memory, record,
-   testimony, verdict, or world delta may be invented. Restore the same
-   provider and prove that the exact retry can continue; also prove the player
-   can explicitly abandon the interrupted run and start a clean one. No
-   scripted adapter may substitute. This is failure-honesty evidence, not an
-   LLM fun-gate run.
-5. **Close rendered localization and input.** For each of `ko-KR`, `en-US`,
-   `it-IT`, `zh-CN`, `fr-FR`, and `ja-JP`, render one opening → answer →
-   why-line round at 100% and 150% UI scale, confirm no raw key or clipped text,
-   and inspect the localized provider-interruption surface. The existing Qwen provider round trip
-   already covers all six locales; the remaining claim is the rendered client.
-   Verify native Korean, Simplified Chinese, and Japanese IME preedit/commit in
-   a real window. Godot AI Unicode injection and headless finalized text do not
-   count as OS IME evidence.
-6. **Integrate each remaining acceptance slice without losing the restart
-   point.** After this checkpoint is merged, begin the next branch from updated
-   `main` and resume at item 1 rather than rebuilding completed systems. Keep
-   this checkpoint and its acceptance boxes current only from completed
-   evidence, attach the smallest useful rendered captures to the active PR, and
-   replace the current narrow fun answer with the honest answer from the two
-   full hearing routes. M3R closes only when every acceptance item is supported
-   and no M4/M5 work has been pulled forward.
+1. In a native window, use the operating system's Korean, Simplified Chinese,
+   and Japanese IMEs in the conversation `LineEdit`. At both 100% and 150%,
+   observe preedit, commit one reply, and confirm that the committed text is
+   neither clipped nor corrupted and reaches Qwen exactly once. Godot AI
+   Unicode injection and already-finalized text do not count.
+2. The owner reviews the latest build and may supersede the **yes, narrowly**
+   fun answer above. Closing M3R and opening the branch's PR to `main` remain
+   owner decisions. Until then, leave M3R active even though the automated
+   acceptance routes and checks pass.
 
 ## Acceptance
 
-- [ ] First playable proof (above) holds in a live run.
-- [ ] The park-idle test: stand still in the park for two minutes of world
+- [x] First playable proof (above) holds in a live run.
+- [x] The park-idle test: stand still in the park for two minutes of world
       time — at least one NPC-to-NPC conversation occurs within potential
       earshot, its validated utterances enter the actual listener's attributed
       memory, and schedule/hearing time advances. If stance moves, the player
@@ -444,37 +440,37 @@ evidence system; update this section and the checklist in place.
       not, that no-change judgment is visible in diagnostics. Waiting was not
       free because no vouch can be earned without firsthand conversation and
       a meeting window was spent.
-- [ ] Walking from park into all three interiors and back crosses no loading
+- [x] Walking from park into all three interiors and back crosses no loading
       screen and no invisible wall that reads as arbitrary.
-- [ ] A full run is completable both ways: hearing passed (classified
+- [x] A full run is completable both ways: hearing passed (classified
       ordinary, with four evidenced vouches) and hearing failed (definitive
       verdict), inside one sitting. No pre-hearing interrogation ends the run.
-- [ ] Interrogation before the hearing remains survivable by argument, and
+- [x] Interrogation before the hearing remains survivable by argument, and
       an in-run recovery path visibly lowers a wary NPC's suspicion.
-- [ ] During ordinary exploration, no provider call blocks the player except
+- [x] During ordinary exploration, no provider call blocks the player except
       the merged judgment+reply call. The already-staged terminal hearing may
       block once on its final model judgment. Ambient calls never pause free
       exploration, stale results cannot mutate a newer world revision, and
       any result completed during the player's modal pause waits to apply
       until resume.
-- [ ] Provider-call accounting shows event-driven wake-ups only — zero
+- [x] Provider-call accounting shows event-driven wake-ups only — zero
       per-tick provider calls; a full run stays inside the configured
       call/token budget.
-- [ ] Each hearing assessment declares the exact memory-derived contact basis:
+- [x] Each hearing assessment declares the exact memory-derived contact basis:
       meaningful firsthand, limited direct conversation, or never conversed.
       The player sees that validated basis beside the model's testimony, whose
       live wording stays consistent with it; attributed ambient memory may
       still support oppose or uncertain, but never a vouch.
-- [ ] Every off-screen stance/record change the player encounters arrives with
+- [x] Every off-screen stance/record change the player encounters arrives with
       its allowed provenance (who spoke or wrote, who heard or read, source
       memory, and why), while the open-questions surface reveals only content
       the player has actually encountered.
-- [ ] No timer exists outside Station interrogation; interrogation allows at
+- [x] No timer exists outside Station interrogation; interrogation allows at
       least 40 seconds.
-- [ ] Provider failure visibly interrupts the exact operation, applies no
+- [x] Provider failure visibly interrupts the exact operation, applies no
       substitute social/world event, preserves exact retry, and allows an
       explicit clean-run restart without pretending the hearing completed.
-- [ ] Every LLM-backed acceptance and fun-gate run is driven by GPT-5.6 Sol
+- [x] Every LLM-backed acceptance and fun-gate run is driven by GPT-5.6 Sol
       ultra through Godot AI with the Qwen profile pinned, and the resulting
       packets show `profileId=modelscope/qwen3.7-plus`, `transport=live`, and
       no provider interruption. Fixture/scripted checks remain valid engineering

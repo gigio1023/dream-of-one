@@ -173,6 +173,7 @@ func _ready() -> void:
 	_provider_failure_restart_button.pressed.connect(
 		_on_provider_failure_restart_pressed
 	)
+	_configure_keyboard_focus_paths()
 	_close_log_button.pressed.connect(close_log)
 	_restart_button.pressed.connect(_on_restart_pressed)
 	_prompt_panel.visible = false
@@ -494,6 +495,8 @@ func show_provider_failure(
 	_refresh_provider_label()
 	_refresh_provider_failure()
 	_provider_failure_panel.visible = true
+	_focus_provider_failure_action()
+	call_deferred("_focus_provider_failure_action")
 
 
 func clear_provider_failure() -> void:
@@ -509,6 +512,10 @@ func clear_provider_failure() -> void:
 	_provider_failure_status.visible = false
 
 
+func provider_failure_visible() -> bool:
+	return _provider_failure_panel.visible and not _provider_failure.is_empty()
+
+
 func set_provider_failure_retry_busy(value: bool) -> void:
 	set_provider_failure_action_busy(value, &"retry" if value else &"")
 
@@ -520,6 +527,8 @@ func set_provider_failure_action_busy(value: bool, action := StringName()) -> vo
 	if value:
 		_provider_failure_restart_error = false
 	_refresh_provider_failure()
+	if not value:
+		_focus_provider_failure_action()
 
 
 func show_provider_failure_restart_error() -> void:
@@ -528,6 +537,51 @@ func show_provider_failure_restart_error() -> void:
 	_provider_failure_retry_button.disabled = false
 	_provider_failure_restart_button.disabled = false
 	_refresh_provider_failure()
+	_focus_provider_failure_action(true)
+
+
+func _configure_keyboard_focus_paths() -> void:
+	_conversation_free_input.focus_next = _conversation_free_input.get_path_to(
+		_conversation_submit_button
+	)
+	_conversation_free_input.focus_neighbor_right = (
+		_conversation_free_input.get_path_to(_conversation_submit_button)
+	)
+	_conversation_submit_button.focus_previous = _conversation_submit_button.get_path_to(
+		_conversation_free_input
+	)
+	_conversation_submit_button.focus_neighbor_left = (
+		_conversation_submit_button.get_path_to(_conversation_free_input)
+	)
+	_provider_failure_retry_button.focus_next = (
+		_provider_failure_retry_button.get_path_to(_provider_failure_restart_button)
+	)
+	_provider_failure_retry_button.focus_neighbor_bottom = (
+		_provider_failure_retry_button.get_path_to(_provider_failure_restart_button)
+	)
+	_provider_failure_restart_button.focus_previous = (
+		_provider_failure_restart_button.get_path_to(_provider_failure_retry_button)
+	)
+	_provider_failure_restart_button.focus_neighbor_top = (
+		_provider_failure_restart_button.get_path_to(_provider_failure_retry_button)
+	)
+
+
+func _focus_provider_failure_action(prefer_restart := false) -> void:
+	if not _provider_failure_panel.visible or not _provider_failure_busy_action.is_empty():
+		return
+	if (
+		prefer_restart
+		and _provider_failure_restart_button.visible
+		and not _provider_failure_restart_button.disabled
+	):
+		_provider_failure_restart_button.grab_focus()
+		return
+	if _provider_failure_retry_button.visible and not _provider_failure_retry_button.disabled:
+		_provider_failure_retry_button.grab_focus()
+		return
+	if _provider_failure_restart_button.visible and not _provider_failure_restart_button.disabled:
+		_provider_failure_restart_button.grab_focus()
 
 
 func provider_failure_snapshot() -> Dictionary:
@@ -826,7 +880,9 @@ func show_turn(turn: Dictionary) -> bool:
 		_refresh_input_feedback()
 	_configure_hesitation_timer(turn)
 	set_conversation_busy(false)
-	if hearing_turn:
+	if provider_failure_visible():
+		_focus_provider_failure_action()
+	elif hearing_turn:
 		_conversation_free_input.call_deferred("grab_focus")
 	else:
 		_choice_buttons[0].grab_focus()
@@ -877,7 +933,10 @@ func show_conversation_error(key: StringName, allow_end_retry := false) -> void:
 	_end_conversation_button.visible = allow_end_retry
 	if allow_end_retry:
 		clear_turn_controls()
-		_end_conversation_button.grab_focus()
+		if provider_failure_visible():
+			_focus_provider_failure_action()
+		else:
+			_end_conversation_button.grab_focus()
 
 
 func show_conversation_start_retry() -> void:
@@ -887,7 +946,10 @@ func show_conversation_start_retry() -> void:
 	_refresh_retry_button_text()
 	clear_turn_controls()
 	_end_conversation_button.visible = true
-	_end_conversation_button.grab_focus()
+	if provider_failure_visible():
+		_focus_provider_failure_action()
+	else:
+		_end_conversation_button.grab_focus()
 
 
 func show_conversation_ended() -> void:
@@ -1498,6 +1560,7 @@ func _refresh_provider_label() -> void:
 		_provider_failure_status.visible = false
 		_provider_failure_panel.visible = true
 		_refresh_provider_failure()
+		_focus_provider_failure_action()
 		_provider_meta = {}
 		_conversation_provider_label.text = ""
 		_conversation_provider_label.visible = false

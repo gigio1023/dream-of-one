@@ -1193,6 +1193,8 @@ func _begin_conversation(
 ) -> void:
 	if _run_status != "active":
 		return
+	if _hud.provider_failure_visible():
+		return
 	if _conversation_target != null or _resolving_answer or _ending_conversation:
 		return
 	if _hud.settings_visible() or _hud.log_visible() or _record_encounter_in_flight:

@@ -3783,6 +3783,12 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		_failures.append("%s hearing open rolled provider evidence backward" % label)
 	var staged_hud := hud.presentation_snapshot()
 	var staged_turn := staged_hud.get("currentTurn", {}) as Dictionary
+	var hearing_input := hud.get_node_or_null(
+		"Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow/ConversationFreeInput"
+	) as LineEdit
+	var hearing_submit := hud.get_node_or_null(
+		"Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationInputRow/ConversationSubmitButton"
+	) as Button
 	var expected_player_value: Variant = town.navigation_position("Station.hearing_player")
 	var expected_focus_value: Variant = town.anchor_position("Station.hearing_table")
 	var facing_ok := false
@@ -3809,6 +3815,14 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		or not facing_ok
 	):
 		_failures.append("%s hearing staging lost one-shot, anchor, focus, or modal invariants" % label)
+	if (
+		hearing_input == null
+		or hearing_submit == null
+		or hud.get_viewport().gui_get_focus_owner() != hearing_input
+		or hearing_input.find_next_valid_focus() != hearing_submit
+		or hearing_submit.find_prev_valid_focus() != hearing_input
+	):
+		_failures.append("%s hearing input and submit button lack a keyboard focus route" % label)
 
 	var answer_packet := endpoints.get("runHearingAnswer", {}) as Dictionary
 	var answer_request := answer_packet.get("request", {}) as Dictionary
@@ -3998,6 +4012,12 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		"operationKey": "hearing_verdict:fixture",
 	}, true, true)
 	var retryable_failure := hud.provider_failure_snapshot()
+	var retry_button := hud.get_node_or_null(
+		"Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns/ProviderFailureRetryButton"
+	) as Button
+	var restart_button := hud.get_node_or_null(
+		"Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns/ProviderFailureRestartButton"
+	) as Button
 	if (
 		not bool(retryable_failure.get("visible", false))
 		or not bool(retryable_failure.get("retryVisible", false))
@@ -4007,6 +4027,16 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		or str(retryable_failure.get("reason", "")).is_empty()
 	):
 		_failures.append("%s provider failure surface lost its retry affordance" % label)
+	if not hud.provider_failure_visible():
+		_failures.append("%s provider failure surface does not expose its modal ownership" % label)
+	if (
+		retry_button == null
+		or restart_button == null
+		or hud.get_viewport().gui_get_focus_owner() != retry_button
+		or retry_button.find_next_valid_focus() != restart_button
+		or restart_button.find_prev_valid_focus() != retry_button
+	):
+		_failures.append("%s provider failure actions lack a keyboard focus route" % label)
 	hud.set_provider_failure_action_busy(true, &"retry")
 	var locked_actions := hud.provider_failure_snapshot()
 	if (
@@ -4023,6 +4053,8 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		or bool(restart_error.get("restartDisabled", true))
 	):
 		_failures.append("%s provider restart failure was not recoverable" % label)
+	if restart_button != null and hud.get_viewport().gui_get_focus_owner() != restart_button:
+		_failures.append("%s failed new-run action did not restore keyboard focus" % label)
 	if not hud.provider_failure_retry_requested.is_connected(
 		Callable(instance, "_on_provider_failure_retry_requested")
 	):

@@ -19,9 +19,9 @@ signal provider_failure_restart_requested
 
 const UI_SCALE_OPTIONS: Array[float] = [0.8, 1.0, 1.25, 1.5]
 const TYPEWRITER_CHARACTERS_PER_SECOND := 42.0
-const AMBIENT_SUBTITLE_MIN_SECONDS := 2.4
-const AMBIENT_SUBTITLE_MAX_SECONDS := 6.0
-const AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER := 0.055
+const AMBIENT_SUBTITLE_MIN_SECONDS := 4.0
+const AMBIENT_SUBTITLE_MAX_SECONDS := 8.0
+const AMBIENT_SUBTITLE_SECONDS_PER_CHARACTER := 0.065
 const OUTCOME_ACTOR_IDS: PackedStringArray = [
 	"NPC_Studio_Receptionist",
 	"NPC_Studio_Manager",
@@ -215,7 +215,13 @@ func _process(delta: float) -> void:
 	_process_hesitation_timer(delta)
 	if _current_ambient_subtitle.is_empty():
 		return
-	if _conversation_visible or _settings_visible or _log_visible:
+	if (
+		_conversation_visible
+		or _settings_visible
+		or _log_visible
+		or _outcome_visible
+		or provider_failure_visible()
+	):
 		return
 	_ambient_subtitle_remaining = maxf(0.0, _ambient_subtitle_remaining - delta)
 	if is_zero_approx(_ambient_subtitle_remaining):
@@ -495,6 +501,7 @@ func show_provider_failure(
 	_refresh_provider_label()
 	_refresh_provider_failure()
 	_provider_failure_panel.visible = true
+	_refresh_ambient_subtitle_visibility()
 	_focus_provider_failure_action()
 	call_deferred("_focus_provider_failure_action")
 
@@ -510,6 +517,7 @@ func clear_provider_failure() -> void:
 	_provider_failure_restart_button.disabled = false
 	_provider_failure_status.text = ""
 	_provider_failure_status.visible = false
+	_refresh_ambient_subtitle_visibility()
 
 
 func provider_failure_visible() -> bool:
@@ -1560,6 +1568,7 @@ func _refresh_provider_label() -> void:
 		_provider_failure_status.visible = false
 		_provider_failure_panel.visible = true
 		_refresh_provider_failure()
+		_refresh_ambient_subtitle_visibility()
 		_focus_provider_failure_action()
 		_provider_meta = {}
 		_conversation_provider_label.text = ""
@@ -1905,6 +1914,7 @@ func _refresh_ambient_subtitle_visibility() -> void:
 		and not _settings_visible
 		and not _log_visible
 		and not _outcome_visible
+		and not provider_failure_visible()
 	)
 
 
@@ -1928,12 +1938,20 @@ func _refresh_contact_cue() -> void:
 		_contact_cue_label.text = ""
 		_contact_cue_panel.visible = false
 		return
+	var speaker := _actor_label(_contact_cue_actor_id)
+	var localization := get_node_or_null("/root/Localization")
+	var subject_particle := (
+		str(localization.call("korean_particle", speaker, "이", "가"))
+		if localization != null
+		else "이(가)"
+	)
 	_contact_cue_label.text = str(tr(
 		&"hud.m3r.contact.ready"
 		if _contact_cue_ready
 		else &"hud.m3r.contact.approaching"
 	)).format({
-		"speaker": _actor_label(_contact_cue_actor_id),
+		"speaker": speaker,
+		"subject_particle": subject_particle,
 	})
 	_contact_cue_panel.visible = (
 		not _conversation_visible

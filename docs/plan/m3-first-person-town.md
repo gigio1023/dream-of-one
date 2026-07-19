@@ -349,6 +349,30 @@ ambient exchange and listener memory structurally, but did not capture both
 live ambient subtitles and speech blips while they were visibly on-screen.
 It also did not reach interrogation, hearing, provider-interruption
 presentation, or OS IME.
+
+A 2026-07-19 correction run on `codex/m3r-acceptance-corrections` resolved the
+missed-subtitle defect without widening speech geometry. The exact reported
+player point `(0.28, 0.05, -6.89)` and west-meeting speaker slot are both in
+`AUD_PUBLIC_CENTER`, 8.06 m apart, and therefore pass the existing 13 m
+audibility contract; this is now protected by the scene smoke. The client
+instead retains hidden ambient subtitles while logs, settings, outcomes, or
+provider-interruption UI obscure them, pauses their lifetime until they can be
+shown, and gives readable lines a 4–8 second lifetime. Korean contact cues now
+select `이/가` from the final Hangul syllable, so `관리인이` is produced by the
+localization template rather than a one-off corrected string.
+
+The native Godot AI rerun then stood at the authored park spawn and captured
+the two-turn Manager/Caretaker exchange in earshot. The first subtitle was
+attributed to `이보 · 스튜디오 관리자` with a left cue at 12.87 m; the queued
+reply was captured on-screen as `솔 · 공원 관리인 · 왼쪽`. Both sequential
+events used `modelscope/qwen3.7-plus`, live transport, and no fallback. The
+spatial blip nodes had generated streams and the same 13 m maximum distance;
+the immediate fixture smoke verifies `playing=true` for each matching turn
+(the blip itself lasts 0.14 seconds). At quiescence the live run reported 19
+physical calls, 59,595 charged tokens, zero failed/fallback/dropped/truncated
+evidence, and `allExpectedProfileLiveNoFallback=true`. This closes the ambient
+capture part of ordered item 1, not its traversal, conversation-friction, or
+fun-route requirements.
 Detailed live-evidence policy and prior runs remain in
 [`../tech/verification.md`](../tech/verification.md).
 

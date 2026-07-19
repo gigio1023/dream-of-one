@@ -104,6 +104,38 @@ consequence they protect.
   tell the user and wait until that notice has been delivered. Otherwise, do not
   interrupt their desktop work.
 
+### Godot AI stack liveness (check before any MCP work)
+
+Godot AI work needs two locally running processes, and neither is guaranteed
+to be up when a session starts. Check first, launch what is missing, then
+work — in every harness (Claude Code, Codex, Cursor, ...):
+
+1. **godot-ai MCP server + editor (one unit).** The editor plugin spawns the
+   Python MCP server on the ports in Godot editor settings
+   (`godot_ai/http_port` / `godot_ai/ws_port`, per-device; MCP clients
+   register the matching `http://127.0.0.1:<http_port>/mcp` endpoint
+   per-device). Check: list `godot-ai` MCP sessions, or probe the registered
+   HTTP endpoint. Healthy means: one session whose `project_path` is this
+   checkout's `godot/`, Godot 4.7.x, plugin/server 2.9.1, `readiness=ready`.
+   If down: launch the editor detached from the repo root
+   (`nohup "$GODOT_BIN" --editor --path godot >/dev/null 2>&1 &`), poll the
+   endpoint (allow ~60s for import + plugin spawn), then re-list sessions and
+   match the canonical path. Editor and server lifetimes are coupled: after
+   any editor exit, re-check before trusting old session ids. Do not open a
+   second editor when one already owns this checkout.
+2. **npc-runtime sidecar (live game runs only).** Required only when the game
+   runs in HTTP mode; launch and guard it exactly per the "live game run"
+   block in [`docs/tech/verification.md`](docs/tech/verification.md), and
+   stop any sidecar you started when done.
+
+A rejected or failed MCP call in a non-interactive harness is a routing
+blocker to report, not a reason to fall back to screen automation or to fake
+the evidence. Verified 2026-07-18: Codex companion/background tasks auto-deny
+every MCP tool call ("user rejected MCP tool call") even with the server
+registered and serving — route godot-ai MCP work through a harness with
+native MCP access (e.g. a Claude Code session or its in-session subagent);
+Codex remains fine for file/CLI work.
+
 The exact evidence boundary and maintained commands live in
 [`docs/tech/verification.md`](docs/tech/verification.md). `CLAUDE.md` is a
 symlink to this file, so this policy is shared by Codex and Claude Code.

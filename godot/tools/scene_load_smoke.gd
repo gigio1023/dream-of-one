@@ -1732,6 +1732,42 @@ func _check_player_brief_contract(label: String, instance: Node) -> void:
 func _check_social_hud_contract(label: String, hud: HUD3D) -> void:
 	if hud == null:
 		return
+	var localization := root.get_node_or_null("Localization")
+	if localization == null:
+		_failures.append("%s has no Localization autoload for particle selection" % label)
+	else:
+		var unknown_particle := str(
+			localization.call("korean_particle", "Tom", "이", "가", "ko")
+		)
+		if (
+			str(localization.call(
+				"korean_particle", "공원 관리인", "이", "가", "ko"
+			)) != "이"
+			or str(localization.call(
+				"korean_particle", "토마", "이", "가", "ko"
+			)) != "가"
+			or unknown_particle != "이(가)"
+			or not str(localization.call(
+				"korean_particle", "공원 관리인", "이", "가", "en"
+			)).is_empty()
+		):
+			_failures.append(
+				"%s Korean particle selection does not follow the final syllable" % label
+			)
+		var saved_locale := str(localization.call("locale"))
+		localization.call("set_locale", "ko")
+		hud.show_contact_ready("contact-particle-smoke", "NPC_Park_Caretaker")
+		var contact_text := str(hud.contact_cue_snapshot().get("text", ""))
+		if (
+			not contact_text.contains("관리인이 말을")
+			or contact_text.contains("관리인가 말을")
+		):
+			_failures.append(
+				"%s contact cue did not apply the Korean subject particle" % label
+			)
+		hud.clear_contact_approach("contact-particle-smoke")
+		if not saved_locale.is_empty():
+			localization.call("set_locale", saved_locale)
 	var preparing_npc := NPC3D.new()
 	preparing_npc.set_conversation_state(true, false)
 	hud.set_focus(null)
@@ -4037,6 +4073,47 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		or restart_button.find_prev_valid_focus() != retry_button
 	):
 		_failures.append("%s provider failure actions lack a keyboard focus route" % label)
+	var player_position := player.global_position
+	hud.enqueue_ambient_subtitle({
+		"seq": 9001,
+		"speakerActorId": "NPC_Park_Caretaker",
+		"line": "가려진 동안에도 이 말은 사라지지 않습니다.",
+		"audibility": {
+			"volumeId": "AUD_STATION",
+			"maxSpeechDistanceM": 9.0,
+			"speakerPosition": [player_position.x, player_position.y, player_position.z],
+		},
+	}, &"center")
+	var blocked_subtitle := hud.ambient_subtitle_snapshot()
+	var blocked_current := blocked_subtitle.get("current", {}) as Dictionary
+	var blocked_remaining := float(blocked_current.get("remainingSeconds", -1.0))
+	hud.call("_process", 1.0)
+	var held_subtitle := hud.ambient_subtitle_snapshot()
+	if (
+		bool(blocked_subtitle.get("visible", true))
+		or int(blocked_current.get("seq", -1)) != 9001
+		or blocked_remaining < 4.0
+		or not is_equal_approx(
+			float((held_subtitle.get("current", {}) as Dictionary).get(
+				"remainingSeconds", -2.0
+			)),
+			blocked_remaining
+		)
+	):
+		_failures.append(
+			"%s provider interruption consumed or exposed a hidden ambient subtitle"
+			% label
+		)
+	hud.clear_provider_failure()
+	if not bool(hud.ambient_subtitle_snapshot().get("visible", false)):
+		_failures.append("%s hidden ambient subtitle did not resume after interruption" % label)
+	hud.clear_ambient_subtitles()
+	hud.show_provider_failure({
+		"profileId": "fixture-live-profile",
+		"reason": "timeout",
+		"purpose": "hearing_verdict",
+		"operationKey": "hearing_verdict:fixture",
+	}, true, true)
 	hud.set_provider_failure_action_busy(true, &"retry")
 	var locked_actions := hud.provider_failure_snapshot()
 	if (
@@ -5122,6 +5199,7 @@ func _check_ambient_speech(
 		_failures.append("%s ambient speech smoke requires DREAM_SESSION_MODE=fixture" % label)
 		return
 	var player := instance.get_node_or_null("Town/Actors/Player3D") as CharacterBody3D
+	var town := instance.get_node_or_null("Town") as Town3D
 	var hud := instance.get_node_or_null("HUD3D") as HUD3D
 	var run_session := instance.get_node_or_null("RunSession") as RunSession3D
 	var manager := instance.get_node_or_null(
@@ -5132,6 +5210,7 @@ func _check_ambient_speech(
 	) as NPC3D
 	if (
 		player == null
+		or town == null
 		or hud == null
 		or run_session == null
 		or manager == null
@@ -5158,6 +5237,42 @@ func _check_ambient_speech(
 	if not run_ready:
 		_failures.append("%s fixture run did not start for ambient speech" % label)
 		return
+
+	# The reported north-edge miss is not a radius or authored-volume gap:
+	# this exact position is inside AUD_PUBLIC_CENTER and 8.06 m from the
+	# office/liaison west-meeting speaker slot. Keep that fact explicit so a
+	# future geometry change cannot silently recreate the audit symptom.
+	if player_inside and not leave_before_second and not log_during_delivery:
+		var edge_speaker_value: Variant = town.anchor_position(
+			"Park.meeting_west_north"
+		)
+		if not edge_speaker_value is Vector3:
+			_failures.append("%s has no west-meeting speaker anchor" % label)
+			return
+		var edge_speaker := edge_speaker_value as Vector3
+		player.global_position = Vector3(0.28, 0.05, -6.89)
+		player.velocity = Vector3.ZERO
+		await physics_frame
+		var edge_audibility := town.player_speech_audibility({
+			"volumeId": "AUD_PUBLIC_CENTER",
+			"maxSpeechDistanceM": 13.0,
+			"speakerPosition": [edge_speaker.x, edge_speaker.y, edge_speaker.z],
+		})
+		if (
+			not bool(edge_audibility.get("audible", false))
+			or not str(edge_audibility.get("reason", "missing")).is_empty()
+			or not bool(edge_audibility.get("playerInVolume", false))
+			or not bool(edge_audibility.get("speakerInVolume", false))
+			or absf(float(edge_audibility.get("distanceM", 0.0)) - 8.06) > 0.05
+			or not is_equal_approx(
+				float(edge_audibility.get("maxDistanceM", 0.0)),
+				13.0
+			)
+		):
+			_failures.append(
+				"%s north-edge speech diverged from the authored 13 m volume: %s"
+				% [label, edge_audibility]
+			)
 
 	var endpoints: Dictionary = fixture.get("endpoints", {})
 	var decision_packet: Dictionary = endpoints.get("npcDecision", {})

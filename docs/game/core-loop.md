@@ -39,11 +39,16 @@ visibility of context, tool validation, and a session that always ends.
   visible context, not stored in the storylet. A suggestion is an uncommitted
   possible utterance, not something the player has already said and not a world
   fact. The three options express *relative exposure*, not truth labels: the
-  safe option is the least exposing plausible answer and may still be a modest
-  cover claim; the uncertain option hedges or asks; the risky option may make a
-  bolder lie. Only the line the player chooses becomes speech, evidence, and
-  memory. Choosing one is identical to typing that line — either way the NPC's
-  model reads the content.
+  safe option is non-assertive or cites supplied evidence for every factual
+  claim; the uncertain option stays non-assertive and hedges or asks; only the
+  risky option may introduce unsupported backstory, and it marks that fact in
+  its hidden metadata. Every suggestion carries request-scoped evidence ids
+  plus an `introducesNewClaim` flag. Only the line the player chooses becomes
+  speech, evidence, and memory; the runtime persists that selected metadata
+  beside the statement. Each spoken player line receives a stable id from its
+  conversation session and unique turn id, so repeated beat names cannot merge
+  two statements. Choosing one is identical to typing that line — either way
+  the NPC's model reads the content.
 - **Typed free input** — a bounded text field ("기타…"). This is real
   conversation: the NPC understands the content and responds to it. The bound
   is ergonomics (typing fatigue) and injection surface control, not a limit on

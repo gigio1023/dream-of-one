@@ -10,27 +10,27 @@ const TURNS: Record<string, ConversationProposal> = {
   routine: {
     utterance: "오늘도 같은 걸로 드릴까요?",
     suggestedReplies: [
-      { text: "네, 같은 걸로 부탁해요.", intent: "safe/local" },
-      { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair" },
-      { text: "오늘 처음 왔는데요.", intent: "risky/weird" },
+      { text: "네, 같은 걸로 부탁해요.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "오늘 처음 왔는데요.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: true },
     ],
     continueConversation: true,
   },
   probe: {
     utterance: "상점 기록에는 같은 주문이라고 적혀 있습니다. 맞습니까?",
     suggestedReplies: [
-      { text: "맞습니다. 제가 착각했습니다.", intent: "safe/local" },
-      { text: "어제 일이 조금 흐릿해서 확인했습니다.", intent: "uncertain/repair" },
-      { text: "저는 여기 사람이 아닙니다.", intent: "risky/weird" },
+      { text: "맞습니다. 제가 착각했습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "어제 일이 조금 흐릿해서 확인했습니다.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "저는 여기 사람이 아닙니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: true },
     ],
     continueConversation: true,
   },
   reconciliation: {
     utterance: "상점 기록과 지금 진술이 다릅니다. 어느 쪽을 정정합니까?",
     suggestedReplies: [
-      { text: "처음 왔다는 답변을 정정합니다.", intent: "safe/local" },
-      { text: "상점 절차를 몰라 확인하려 했습니다.", intent: "uncertain/repair" },
-      { text: "둘 다 맞습니다. 저는 여기 사람이 아닙니다.", intent: "risky/weird" },
+      { text: "처음 왔다는 답변을 정정합니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "상점 절차를 몰라 확인하려 했습니다.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "둘 다 맞습니다. 저는 여기 사람이 아닙니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: true },
     ],
     continueConversation: false,
   },

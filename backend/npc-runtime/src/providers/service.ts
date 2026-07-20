@@ -268,16 +268,21 @@ const PRIVATE_ACTOR_CONTEXT_GUIDE =
 const CONVERSATION_PARTICIPANT_GUIDE =
   "conversationFrame is authoritative about participation and location. The residentSpeaker is the only NPC speaking now, and the playerInterlocutor is always the person being addressed; every other actor named in residentContext, attributedHeardSpeech, or memoryEvidence is a third party, never the player. residentSpeaker.locationId belongs only to the resident. The player's location is known only when playerInterlocutor.locationId is non-null; never copy or infer the resident's location as the player's location. For an opening, write one fresh line addressed to the player. Prior resident speech and attributed NPC-to-NPC speech are evidence only: never replay either as if it were the resident's new opening line.";
 const CONVERSATION_VISIBLE_FACT_GUIDE =
-  "The groundingContract is a hard validity boundary for NPC speech, judgment reasons, questions, and every concrete claim about the player or world; it is not a style suggestion. Missing context means unknown, never absent. The resident's public role may ground generic job topics and ordinary capabilities when phrased without a concrete claim: a receptionist may conditionally ask whether the visit concerns a schedule or paperwork and may offer general reception guidance. It does not establish that this visitor has an appointment, that a particular document or record exists, or that anything was checked, missing, required, approved, owned, received, or completed. objective, goals, policy, and private motivation explain priorities but are not evidence of those concrete facts. A question can still make an invalid presupposition: 'Who arranged this appointment?' and localized equivalents assert that the interlocutor has an appointment, so they are invalid until the player or visible evidence establishes one. Ask the purpose first; only after the player establishes a concrete schedule, booking, document, or procedure may the resident narrow its source or details. The NPC may ask a neutral or conditional question about an unknown, but must not claim a specific record or item exists, was checked, is missing, is required, or belongs to anyone. Suggested player replies are different: they are uncommitted possible utterances, not observations, world facts, or statements the player has already made. safe/local is the least exposing plausible answer and may use a modest cover claim; uncertain/repair may hedge, qualify, or expose uncertainty; risky/weird may offer a bolder unsupported cover claim or lie so the player can choose that social risk. Never use any candidate suggestion as evidence in the NPC utterance, whyLine, openQuestion, or another suggestion, and never imply that it was selected. Each suggestion must be a self-contained in-character utterance that can be spoken verbatim: never narrate what the player says or label the speaker, and explicitly preserve the person, object, source, or claim being answered whenever omission could make a role, name, or noun phrase sound like the player's own identity or possession. Never emit a bare name, role, object, yes/no fragment, or copular noun phrase whose referent exists only in the NPC question.";
+  "The groundingContract is a hard validity boundary for NPC speech, judgment reasons, questions, and every concrete claim about the player or world; it is not a style suggestion. Missing context means unknown, never absent. The resident's public role may ground generic job topics and ordinary capabilities when phrased without a concrete claim: a receptionist may conditionally ask whether the visit concerns a schedule or paperwork and may offer general reception guidance. It does not establish that this visitor has an appointment, that a particular document or record exists, or that anything was checked, missing, required, approved, owned, received, or completed. objective, goals, policy, and private motivation explain priorities but are not evidence of those concrete facts. A question can still make an invalid presupposition: 'Who arranged this appointment?' and localized equivalents assert that the interlocutor has an appointment, so they are invalid until the player or visible evidence establishes one. Ask the purpose first; only after the player establishes a concrete schedule, booking, document, or procedure may the resident narrow its source or details. The NPC may ask a neutral or conditional question about an unknown, but must not claim a specific record or item exists, was checked, is missing, is required, or belongs to anyone. Suggested player replies are uncommitted possible utterances, not observations, world facts, or statements the player has already made. Every suggestion must cite supporting request-scoped evidenceIds for its factual claims or be non-assertive. uncertain/repair must be non-assertive; safe/local must be non-assertive or evidence-grounded; only risky/weird may establish unsupported backstory, and it must set introducesNewClaim=true so the player can knowingly choose it. Never use any candidate suggestion as evidence in the NPC utterance, whyLine, openQuestion, or another suggestion, and never imply that it was selected. Each suggestion must be a self-contained in-character utterance that can be spoken verbatim: never narrate what the player says or label the speaker, and explicitly preserve the person, object, source, or claim being answered whenever omission could make a role, name, or noun phrase sound like the player's own identity or possession. Never emit a bare name, role, object, yes/no fragment, or copular noun phrase whose referent exists only in the NPC question.";
 const CONVERSATION_REPLY_BINDING_GUIDE =
   "Interpret playerLine as a direct answer to answerBinding.answeredNpcLine, not as an isolated sentence. Preserve the semantic slot and referent established by that NPC question. Ellipsis in a displayed or typed answer fills the requested slot; it does not become a claim about the player's identity, job, possession, or biography unless the player explicitly says so. Judge the contextual proposition that the two lines express together.";
 const CONVERSATION_GROUNDING_SELF_CHECK =
-  "Before final JSON, silently perform this grounding check: (1) in NPC speech, why-lines, open questions, and every concrete world claim, identify each person-specific appointment, booking, required step, document, record, reference number, possession, past action, and claimed access to a specific institutional resource; (2) locate the exact supplied scene fact, player statement, visible fact, record, heard line, or memory that supports it; (3) if no support exists, make the NPC wording generic or conditional without claiming the fact applies to this visitor; (4) inspect suggestions separately as uncommitted literal candidate speech, make their relative social risk legible, and ensure no other field treats any suggestion as selected or true. A statement that the visitor wants to confirm steps before a hearing establishes that purpose and the hearing, but not a concrete appointment, reference number, notice, dossier, paperwork, visitor record, or a completed check.";
+  "Before final JSON, silently perform this grounding check: (1) in NPC speech, why-lines, open questions, suggestions, and every concrete world claim, identify each person-specific appointment, booking, required step, document, record, reference number, possession, past action, and claimed access to a specific institutional resource; (2) locate the exact supplied evidenceCatalog entry that supports it; (3) if no support exists in resident-authored prose, make the wording generic or conditional without claiming the fact applies to this visitor; (4) for each uncommitted suggestion, cite every supporting evidenceId, keep uncertain/repair non-assertive, and confine any unsupported new backstory to risky/weird with introducesNewClaim=true; (5) ensure no other field treats a suggestion as selected or true. A statement that the visitor wants to confirm steps before a hearing establishes that purpose and the hearing, but not a concrete appointment, reference number, notice, dossier, paperwork, visitor record, or a completed check.";
 
 function latestNpcLine(
-  history: readonly { speakerId: string; line: string }[],
+  history: readonly { speakerId: string; line: string; evidenceId: string | null }[],
 ): string | null {
   return [...history].reverse().find(entry => entry.speakerId !== "player")?.line ?? null;
+}
+
+interface ReplyEvidenceCatalogEntry extends Record<string, unknown> {
+  evidenceId: string;
+  evidenceType: string;
 }
 
 function conversationGroundingContract(
@@ -287,17 +292,133 @@ function conversationGroundingContract(
     | MergedConversationTurnRequest,
   newestPlayerLine?: string,
 ) {
-  const playerStatements = request.conversationHistory
-    .filter(line => line.speakerId === "player")
-    .map(line => line.line);
-  if (newestPlayerLine !== undefined) playerStatements.push(newestPlayerLine);
-  const heardSpeech = [...request.observePacket.heardSpeech];
-  if (newestPlayerLine !== undefined) {
-    const duplicateIndex = heardSpeech.lastIndexOf(newestPlayerLine);
-    if (duplicateIndex >= 0) heardSpeech.splice(duplicateIndex, 1);
+  const evidenceCatalog = new Map<string, ReplyEvidenceCatalogEntry>();
+  const addEvidence = (entry: ReplyEvidenceCatalogEntry): void => {
+    if (evidenceCatalog.has(entry.evidenceId)) {
+      throw new Error(`duplicate conversation evidence id: ${entry.evidenceId}`);
+    }
+    evidenceCatalog.set(entry.evidenceId, entry);
+  };
+  request.conversationHistory.forEach(entry => {
+    if (entry.speakerId !== "player") return;
+    if (!entry.evidenceId) {
+      throw new Error("player conversation history requires a stable evidence id");
+    }
+    addEvidence({
+      evidenceId: entry.evidenceId,
+      evidenceType: "player_statement",
+      speakerActorId: "player",
+      statement: entry.line,
+    });
+  });
+  const currentPlayerStatementEvidenceId =
+    newestPlayerLine === undefined
+      ? null
+      : "playerStatementEvidenceId" in request
+        ? request.playerStatementEvidenceId
+        : null;
+  if (newestPlayerLine !== undefined && !currentPlayerStatementEvidenceId) {
+    throw new Error("current player statement requires a stable evidence id");
   }
+  if (newestPlayerLine !== undefined && currentPlayerStatementEvidenceId) {
+    addEvidence({
+      evidenceId: currentPlayerStatementEvidenceId,
+      evidenceType: "player_statement",
+      speakerActorId: "player",
+      statement: newestPlayerLine,
+    });
+  }
+  for (const speech of request.observePacket.heardSpeech) {
+    const canonicalStatement = evidenceCatalog.get(speech.source.id);
+    if (canonicalStatement?.evidenceType === "player_statement") {
+      if (
+        speech.speakerActorId !== "player" ||
+        speech.source.kind !== "player_statement" ||
+        speech.line !== canonicalStatement.statement
+      ) {
+        throw new Error(`player statement evidence collision: ${speech.source.id}`);
+      }
+      continue;
+    }
+    addEvidence({
+      evidenceId: speech.source.id,
+      evidenceType: speech.source.kind,
+      speakerActorId: speech.speakerActorId,
+      statement: speech.line,
+    });
+  }
+  for (const memory of request.observePacket.actorMemory.evidence) {
+    const evidenceId = `resident_memory:${memory.memoryId}`;
+    if (memory.evidenceType === "player_conversation_exchange") {
+      addEvidence({
+        evidenceId,
+        evidenceType: "resident_memory",
+        memoryKind: memory.evidenceType,
+        sourceActorId: memory.sourceActorId,
+        playerLine: memory.playerLine,
+        residentReply: memory.residentReply,
+        judgmentReason: memory.judgmentReason,
+      });
+    } else if (memory.evidenceType === "utterance") {
+      addEvidence({
+        evidenceId,
+        evidenceType: "resident_memory",
+        memoryKind: memory.memoryKind,
+        sourceActorId: memory.sourceActorId,
+        summary: memory.line,
+      });
+    } else {
+      addEvidence({
+        evidenceId,
+        evidenceType: "resident_memory",
+        memoryKind: memory.memoryKind,
+        sourceActorId: memory.sourceActorId,
+        summary: memory.summary,
+      });
+    }
+  }
+  request.observePacket.visibleRecords.forEach(record => addEvidence({
+    evidenceId: `record:${record.recordId}@${record.recordRevision ?? "visible"}`,
+    evidenceType: "visible_record",
+    recordId: record.recordId,
+    recordRevision: record.recordRevision,
+    kind: record.kind,
+    stateBody: record.stateBody,
+  }));
+  request.observePacket.visibleLedgerEvents.forEach(event => addEvidence({
+    evidenceId: `ledger:${event.eventId}`,
+    evidenceType: "visible_ledger_event",
+    ...event,
+  }));
+  if ("sceneFacts" in request) {
+    request.sceneFacts.forEach((fact, index) => addEvidence({
+      evidenceId: `scene_fact:${request.beatId}:${index + 1}`,
+      evidenceType: "scene_fact",
+      fact,
+    }));
+  }
+  request.observePacket.visibleObjects.forEach(object => addEvidence({
+    evidenceId: `visible_object:${object.objectId}`,
+    evidenceType: "visible_object_fact",
+    ...object,
+  }));
+  request.observePacket.visibleActors.forEach(actorId => addEvidence({
+    evidenceId: `visible_actor:${actorId}`,
+    evidenceType: "visible_actor_fact",
+    actorId,
+  }));
+  addEvidence({
+    evidenceId: `resident_location:${request.observePacket.actorId}:${request.observePacket.landmarkId}`,
+    evidenceType: "resident_location_fact",
+    actorId: request.observePacket.actorId,
+    landmarkId: request.observePacket.landmarkId,
+  });
+  const playerStatements = [...evidenceCatalog.values()]
+    .filter(entry => entry.evidenceType === "player_statement")
+    .map(entry => entry.statement as string);
   return {
     knowledgeMode: "closed_world",
+    evidenceCatalog: [...evidenceCatalog.values()],
     suppliedSceneContext: "sceneFacts" in request ? request.sceneFacts : [],
     suppliedPlayerStatements: playerStatements,
     visibleObjectFacts: request.observePacket.visibleObjects.map(object => ({
@@ -310,28 +431,19 @@ function conversationGroundingContract(
       stateBody: record.stateBody,
       recordRevision: record.recordRevision,
     })),
-    attributedHeardSpeech: heardSpeech.map(line => {
-      const attributedNpcSpeech = /^(NPC_[A-Za-z0-9_]+):\s+([\s\S]+)$/.exec(line);
-      if (attributedNpcSpeech) {
-        return {
-          sourceType: "third_party_npc" as const,
-          speakerActorId: attributedNpcSpeech[1],
-          line: attributedNpcSpeech[2],
-        };
-      }
-      return {
-        sourceType: "player" as const,
-        speakerActorId: "player" as const,
-        line,
-      };
-    }),
+    attributedHeardSpeech: request.observePacket.heardSpeech.map(speech => ({
+      sourceType: speech.source.kind,
+      sourceId: speech.source.id,
+      speakerActorId: speech.speakerActorId,
+      line: speech.line,
+    })),
     validityRules: [
       "Treat every unlisted person, identity, role, item, document, record, approval, appointment, possession, and past event as unknown.",
       "Do not convert unknown into absent, missing, checked, expected, owned, received, or completed.",
       "A public role may support generic job topics and ordinary capabilities, but objectives, goals, and private context do not establish that a concrete procedure, register entry, required document, appointment, approval, or next step exists for this visitor.",
       "A question must not presuppose an unknown fact: asking who arranged 'this appointment' is invalid until the player or visible evidence establishes that an appointment exists and concerns the player.",
       "Generic role guidance may be offered conditionally, but do not state that the resident checked or can access a specific unsupplied record, document, system, or institutional resource.",
-      "Suggested replies are uncommitted candidate speech, not evidence: safe/local is least exposing, uncertain/repair may hedge, and risky/weird may offer a bolder cover claim or lie. Only the one the player selects or types becomes a supplied player statement.",
+      "Suggested replies are uncommitted candidate speech, not evidence. Cite only evidenceIds in evidenceCatalog. uncertain/repair must be non-assertive; safe/local must be non-assertive or cite its support; only risky/weird may set introducesNewClaim=true. Only the line the player selects or types becomes a supplied player statement.",
       "Attributed heard speech is prior evidence, not a line in the current player conversation; preserve its named speaker and never present it as the resident's new utterance.",
     ],
   };
@@ -347,56 +459,57 @@ function residentProviderContext(packet: ObservePacket) {
     actorContext: packet.actorContext,
     selfContext: packet.selfContext,
     memoryNotes: packet.actorMemory.ownActionNotes,
+    memoryEvidence: packet.actorMemory.evidence.map(memory => ({ ...memory })),
   };
 }
 
 function conversationMemoryEvidence(packet: ObservePacket) {
-  return packet.actorMemory.ownActionNotes.map(note => {
-    const heard = /^\[heard_from=([^\]]+)\]\s*([\s\S]*)$/.exec(note);
-    if (heard) {
+  return packet.actorMemory.evidence.map(memory => {
+    if (memory.evidenceType === "player_conversation_exchange") {
       return {
-        evidenceType: "heard_third_party_npc" as const,
-        speakerActorId: heard[1],
-        note: heard[2],
-      };
-    }
-    const selfUtterance = /^\[self_utterance\]\s*([\s\S]*)$/.exec(note);
-    if (selfUtterance) {
-      return {
-        evidenceType: "resident_prior_utterance" as const,
-        speakerActorId: packet.actorId,
-        note: selfUtterance[1],
-      };
-    }
-    if (note.startsWith("[player_utterance]")) {
-      const exchange = /^\[player_utterance\]\s*([\s\S]*?)\s*\/\s*\[self_reply\]\s*([\s\S]*?)\s*\/\s*\[judgment_reason\]\s*([\s\S]*)$/.exec(note);
-      if (exchange) {
-        return {
-          evidenceType: "player_conversation_exchange" as const,
-          playerSpeakerActorId: "player" as const,
-          residentSpeakerActorId: packet.actorId,
-          playerLine: exchange[1],
-          residentReply: exchange[2],
-          judgmentReason: exchange[3],
-        };
-      }
-      return {
-        evidenceType: "player_conversation_exchange" as const,
+        evidenceType: memory.evidenceType,
+        memoryId: memory.memoryId,
         playerSpeakerActorId: "player" as const,
         residentSpeakerActorId: packet.actorId,
-        note,
+        playerLine: memory.playerLine,
+        residentReply: memory.residentReply,
+        judgmentReason: memory.judgmentReason,
+      };
+    }
+    if (memory.evidenceType === "utterance" && memory.sourceActorId === packet.actorId) {
+      return {
+        evidenceType: "resident_prior_utterance" as const,
+        memoryId: memory.memoryId,
+        speakerActorId: packet.actorId,
+        note: memory.line,
+      };
+    }
+    if (memory.evidenceType === "utterance") {
+      return {
+        evidenceType: "heard_third_party_npc" as const,
+        memoryId: memory.memoryId,
+        speakerActorId: memory.sourceActorId,
+        note: memory.line,
       };
     }
     return {
       evidenceType: "resident_memory" as const,
+      memoryId: memory.memoryId,
       holderActorId: packet.actorId,
-      note,
+      sourceActorId: memory.sourceActorId,
+      memoryKind: memory.memoryKind,
+      note: memory.summary,
     };
   });
 }
 
 function conversationResidentContext(packet: ObservePacket) {
-  const { landmarkId: _landmarkId, memoryNotes: _memoryNotes, ...resident } =
+  const {
+    landmarkId: _landmarkId,
+    memoryNotes: _memoryNotes,
+    memoryEvidence: _memoryEvidence,
+    ...resident
+  } =
     residentProviderContext(packet);
   return {
     ...resident,
@@ -479,8 +592,17 @@ function agentObserveContext(packet: ObservePacket, tools: readonly ToolName[]) 
 
 function ambientListenerContext(request: AmbientReplyRequest) {
   const heardSpeech = [...request.observePacket.heardSpeech];
-  const exactSource = `${request.sourceSpeakerActorId}: ${request.sourceUtterance}`;
-  const duplicateIndex = heardSpeech.lastIndexOf(exactSource);
+  let duplicateIndex = -1;
+  for (let index = heardSpeech.length - 1; index >= 0; index -= 1) {
+    const speech = heardSpeech[index];
+    if (
+      speech?.speakerActorId === request.sourceSpeakerActorId &&
+      speech.line === request.sourceUtterance
+    ) {
+      duplicateIndex = index;
+      break;
+    }
+  }
   if (duplicateIndex >= 0) heardSpeech.splice(duplicateIndex, 1);
   return {
     ...residentProviderContext(request.observePacket),
@@ -621,13 +743,17 @@ export class ProviderService implements NpcProposalPort {
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>> {
     const visibleRecordIds = request.observePacket.visibleRecords.map(record => record.recordId);
+    const groundingContract = conversationGroundingContract(request);
+    const replyEvidenceIds = groundingContract.evidenceCatalog.map(entry => entry.evidenceId);
     const proposalSchema = conversationProposalSchemaForRequest(
       request.locale,
       visibleRecordIds,
+      replyEvidenceIds,
     );
     const proposalJsonSchema = conversationProposalJsonSchemaForRequest(
       request.locale,
       visibleRecordIds,
+      replyEvidenceIds,
     );
     const instructions = [
       "You are the resident described in requestContext. Speak and reason only from inside that resident's world.",
@@ -641,10 +767,10 @@ export class ProviderService implements NpcProposalPort {
       ),
       "Return one resident utterance and exactly three short visitor reply suggestions.",
       "citedRecordIds must contain every currently visible record whose content the resident utterance meaningfully conveys, and no other id. Use [] when the utterance cites no record. The reply suggestions must not introduce resident-only record content absent from the resident utterance or prior visitor speech.",
-      "Use the intent labels only as a relative social-risk gradient: safe/local is the least exposing plausible answer, uncertain/repair hedges or clarifies, and risky/weird may offer a bolder cover claim or lie. They are hidden candidate metadata and never decide suspicion or world truth.",
+      "Use the intent labels only as a relative social-risk gradient. uncertain/repair must stay non-assertive; safe/local must stay non-assertive or cite valid supporting evidenceIds; only risky/weird may introduce unsupported backstory, and it must set introducesNewClaim=true. These fields never decide NPC judgment or world truth.",
       "Do not claim a verdict, hidden fact, or world mutation.",
       CONVERSATION_GROUNDING_SELF_CHECK,
-      "Before returning JSON, remove every unsupported concrete world claim from resident-authored speech and questions. Do not erase a candidate cover claim; keep it clearly confined to that unselected suggestion.",
+      "Before returning JSON, remove every unsupported concrete world claim from resident-authored speech and questions. A suggestion may establish unsupported backstory only in risky/weird with introducesNewClaim=true; rewrite unsupported safe/local and uncertain/repair suggestions instead of licensing a hidden cover claim.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
     const requestContext = {
@@ -652,7 +778,7 @@ export class ProviderService implements NpcProposalPort {
       conversationFrame: conversationFrame(request.observePacket, "opening"),
       residentContext: conversationResidentContext(request.observePacket),
       conversationHistory: request.conversationHistory.slice(-6),
-      groundingContract: conversationGroundingContract(request),
+      groundingContract,
       playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
     const input = JSON.stringify(requestContext);
@@ -735,10 +861,13 @@ export class ProviderService implements NpcProposalPort {
     request: MergedConversationTurnRequest,
   ): Promise<ResolvedProposal<MergedConversationTurn>> {
     const visibleRecordIds = request.observePacket.visibleRecords.map(record => record.recordId);
+    const groundingContract = conversationGroundingContract(request, request.playerLine);
+    const replyEvidenceIds = groundingContract.evidenceCatalog.map(entry => entry.evidenceId);
     const continuationAllowed = request.continuationAllowed !== false;
     const proposalSchema = mergedConversationTurnSchemaForRequest(
       request.locale,
       visibleRecordIds,
+      replyEvidenceIds,
     )
       .superRefine(
         (value, context) => requireReachableSuspicionDelta(
@@ -778,7 +907,11 @@ export class ProviderService implements NpcProposalPort {
         }
       });
     const proposalJsonSchema = withSuspicionDeltaBounds(
-      mergedConversationTurnJsonSchemaForRequest(request.locale, visibleRecordIds),
+      mergedConversationTurnJsonSchemaForRequest(
+        request.locale,
+        visibleRecordIds,
+        replyEvidenceIds,
+      ),
       request.suspicionBefore,
     );
     const instructions = [
@@ -807,14 +940,14 @@ export class ProviderService implements NpcProposalPort {
       "continuationAllowed is a hard runtime capacity boundary. When it is false, set continueConversation=false but preserve any genuinely unanswered tracked question as open; never invent a resolution merely because the modal must end. When it is true, an oppose or uncertain stance with status=open requires continueConversation=true so the visitor can answer immediately instead of chasing the resident later. A vouch may close with a still-open external procedural question because that question does not negate the resident's bounded personal testimony.",
       "utterance is your next in-character line after hearing the visitor.",
       "citedRecordIds must contain every currently visible record whose content the resident utterance meaningfully conveys, and no other id. Use [] when the utterance cites no record. whyLine, openQuestion, and reply suggestions must not introduce resident-only record content absent from the resident utterance or prior visitor speech.",
-      "Use the intent labels only as a relative social-risk gradient: safe/local is the least exposing plausible answer, uncertain/repair hedges or clarifies, and risky/weird may offer a bolder cover claim or lie. They are hidden candidate metadata and never decide suspicion or world truth.",
+      "Use the intent labels only as a relative social-risk gradient. uncertain/repair must stay non-assertive; safe/local must stay non-assertive or cite valid supporting evidenceIds; only risky/weird may introduce unsupported backstory, and it must set introducesNewClaim=true. These fields never decide NPC judgment or world truth.",
       ...localeOutputInstructions(
         request.locale,
         "whyLine, openQuestion text/whyLine, utterance, and all three suggestion texts",
       ),
       "Do not decide any verdict or session outcome, and do not claim a hidden fact or world mutation.",
       CONVERSATION_GROUNDING_SELF_CHECK,
-      "Before returning JSON, remove every unsupported concrete world claim from resident-authored speech, reasons, and questions. Do not erase a candidate cover claim; keep it clearly confined to that unselected suggestion.",
+      "Before returning JSON, remove every unsupported concrete world claim from resident-authored speech, reasons, and questions. A suggestion may establish unsupported backstory only in risky/weird with introducesNewClaim=true; rewrite unsupported safe/local and uncertain/repair suggestions instead of licensing a hidden cover claim.",
       "Return only JSON matching the supplied schema.",
     ].join(" ");
     const requestContext = {
@@ -832,7 +965,7 @@ export class ProviderService implements NpcProposalPort {
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
       currentOpenQuestion: request.currentOpenQuestion ?? null,
       continuationAllowed,
-      groundingContract: conversationGroundingContract(request, request.playerLine),
+      groundingContract,
       playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
     const input = JSON.stringify(requestContext);

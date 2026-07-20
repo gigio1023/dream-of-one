@@ -56,6 +56,7 @@
           "entries": []
         },
         "lastProposalMeta": null,
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
@@ -255,8 +256,7 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     },
     "runAdvanceHearingDue": {
@@ -568,8 +568,8 @@
         "terminalResult": {
           "hearingId": "hearing-fixture-1",
           "verdict": "abnormal",
-          "verdictWhyLine": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
-          "officerLine": "제출된 증언과 최종 진술을 검토했습니다. 비정상으로 판정합니다.",
+          "verdictWhyLine": "직접 대화에 근거한 보증이 충분하지 않았습니다.",
+          "officerLine": "비정상 방문자로 판정합니다.",
           "finalDefense": "제 최종 진술을 제출합니다.",
           "evidencedVouchCount": 0,
           "residentAssessments": [
@@ -578,7 +578,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -586,7 +586,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -594,7 +594,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -602,7 +602,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -610,7 +610,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -618,7 +618,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             }
           ],
@@ -634,43 +634,43 @@
             {
               "kind": "testimony",
               "actorId": "NPC_Studio_Receptionist",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Studio_Manager",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Office_Worker",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Park_Caretaker",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Station_Officer",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Roaming_Liaison",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "verdict",
               "actorId": "NPC_Station_Officer",
-              "line": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
+              "line": "직접 대화에 근거한 보증이 충분하지 않았습니다.",
               "sourceIds": []
             }
           ],
@@ -728,42 +728,42 @@
               "actorId": "NPC_Studio_Receptionist",
               "stance": "uncertain",
               "stanceRevision": 3,
-              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "whyLine": "직접 대화한 적이 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Studio_Manager",
               "stance": "uncertain",
               "stanceRevision": 3,
-              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "whyLine": "직접 대화한 적이 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Office_Worker",
               "stance": "uncertain",
               "stanceRevision": 3,
-              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "whyLine": "직접 대화한 적이 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Park_Caretaker",
               "stance": "uncertain",
               "stanceRevision": 3,
-              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "whyLine": "직접 대화한 적이 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Station_Officer",
               "stance": "uncertain",
               "stanceRevision": 3,
-              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "whyLine": "직접 대화한 적이 없습니다.",
               "provenance": null
             },
             {
               "actorId": "NPC_Roaming_Liaison",
               "stance": "uncertain",
               "stanceRevision": 3,
-              "whyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "whyLine": "직접 대화한 적이 없습니다.",
               "provenance": null
             }
           ],
@@ -785,8 +785,8 @@
         "terminalResult": {
           "hearingId": "hearing-fixture-1",
           "verdict": "abnormal",
-          "verdictWhyLine": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
-          "officerLine": "제출된 증언과 최종 진술을 검토했습니다. 비정상으로 판정합니다.",
+          "verdictWhyLine": "직접 대화에 근거한 보증이 충분하지 않았습니다.",
+          "officerLine": "비정상 방문자로 판정합니다.",
           "finalDefense": "제 최종 진술을 제출합니다.",
           "evidencedVouchCount": 0,
           "residentAssessments": [
@@ -795,7 +795,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -803,7 +803,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -811,7 +811,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -819,7 +819,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -827,7 +827,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             },
             {
@@ -835,7 +835,7 @@
               "contactBasis": "never_conversed",
               "proposedStance": "uncertain",
               "appliedStance": "uncertain",
-              "testimonyLine": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "testimonyLine": "직접 대화한 적이 없습니다.",
               "citedMemoryIds": []
             }
           ],
@@ -851,43 +851,43 @@
             {
               "kind": "testimony",
               "actorId": "NPC_Studio_Receptionist",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Studio_Manager",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Office_Worker",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Park_Caretaker",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Station_Officer",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "testimony",
               "actorId": "NPC_Roaming_Liaison",
-              "line": "직접 대화한 적이 없어 이 방문자를 보증할 수 없습니다.",
+              "line": "직접 대화한 적이 없습니다.",
               "sourceIds": []
             },
             {
               "kind": "verdict",
               "actorId": "NPC_Station_Officer",
-              "line": "직접 대화를 근거로 한 주민 보증이 네 건에 미치지 못했습니다.",
+              "line": "직접 대화에 근거한 보증이 충분하지 않았습니다.",
               "sourceIds": []
             }
           ],
@@ -1408,6 +1408,7 @@
           "entries": []
         },
         "lastProposalMeta": null,
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
@@ -1653,8 +1654,7 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     },
     "runAdvanceArrival": {
@@ -2404,6 +2404,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
@@ -2603,8 +2604,7 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     },
     "npcDecision": {
@@ -2676,7 +2676,7 @@
               "NPC_Studio_Manager",
               "NPC_Roaming_Liaison"
             ],
-            "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+            "line": "그 말은 기억해 두겠습니다.",
             "citedRecords": [],
             "worldSeconds": 90,
             "observedWorldRevision": 18,
@@ -2764,7 +2764,7 @@
                 "NPC_Studio_Manager",
                 "NPC_Roaming_Liaison"
               ],
-              "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+              "line": "그 말은 기억해 두겠습니다.",
               "citedRecords": [],
               "worldSeconds": 90,
               "observedWorldRevision": 18,
@@ -2905,6 +2905,7 @@
             }
           ]
         },
+        "providerFailure": null,
         "socialView": {
           "revision": 0,
           "hearing": {
@@ -2919,8 +2920,7 @@
           "openQuestions": [],
           "encounteredRecords": []
         },
-        "activeContact": null,
-        "providerFailure": null
+        "activeContact": null
       }
     },
     "runAdvanceSpatialFacts": {
@@ -3094,7 +3094,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:e18a2c21dc58c4b4",
+            "sourceId": "goal:1439f96c1bc2d14b",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -3107,7 +3107,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:5ef78e6fc0f99473",
+            "sourceId": "goal:f788c9b1e0a4a6f3",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -3120,7 +3120,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:dca168d816e3bd2f",
+            "sourceId": "goal:2e87c463a0219f55",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -3133,7 +3133,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:6bc7a2737e7251e6",
+            "sourceId": "goal:6c0088304920109a",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -3146,7 +3146,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:4921d06c5167bb84",
+            "sourceId": "goal:e425e9d9cdc7ebb9",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -3159,7 +3159,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:98b72e2961adbee7",
+            "sourceId": "goal:6e23ecff398bdd6d",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -3290,7 +3290,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -3303,7 +3303,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -3316,7 +3316,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -3329,7 +3329,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -3342,7 +3342,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -3355,7 +3355,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -3563,7 +3563,7 @@
                 "NPC_Studio_Manager",
                 "NPC_Roaming_Liaison"
               ],
-              "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+              "line": "그 말은 기억해 두겠습니다.",
               "citedRecords": [],
               "worldSeconds": 90,
               "observedWorldRevision": 18,
@@ -3651,7 +3651,7 @@
                   "NPC_Studio_Manager",
                   "NPC_Roaming_Liaison"
                 ],
-                "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+                "line": "그 말은 기억해 두겠습니다.",
                 "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
@@ -3792,6 +3792,7 @@
               }
             ]
           },
+          "providerFailure": null,
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -3806,8 +3807,7 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null,
-          "providerFailure": null
+          "activeContact": null
         }
       },
       {
@@ -3867,6 +3867,7 @@
               }
             ]
           },
+          "providerFailure": null,
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -3881,8 +3882,7 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null,
-          "providerFailure": null
+          "activeContact": null
         }
       },
       {
@@ -3950,6 +3950,7 @@
               }
             ]
           },
+          "providerFailure": null,
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -3964,8 +3965,7 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null,
-          "providerFailure": null
+          "activeContact": null
         }
       },
       {
@@ -4041,6 +4041,7 @@
               }
             ]
           },
+          "providerFailure": null,
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -4055,8 +4056,7 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null,
-          "providerFailure": null
+          "activeContact": null
         }
       },
       {
@@ -4140,6 +4140,7 @@
               }
             ]
           },
+          "providerFailure": null,
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -4154,8 +4155,7 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null,
-          "providerFailure": null
+          "activeContact": null
         }
       },
       {
@@ -4247,6 +4247,7 @@
               }
             ]
           },
+          "providerFailure": null,
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -4261,8 +4262,7 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null,
-          "providerFailure": null
+          "activeContact": null
         }
       },
       {
@@ -4362,6 +4362,7 @@
               }
             ]
           },
+          "providerFailure": null,
           "socialView": {
             "revision": 0,
             "hearing": {
@@ -4376,8 +4377,7 @@
             "openQuestions": [],
             "encounteredRecords": []
           },
-          "activeContact": null,
-          "providerFailure": null
+          "activeContact": null
         }
       }
     ],
@@ -4545,7 +4545,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:10",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:947139f9592d1e1a",
+            "sourceId": "goal:b3d6cbb68ebb72b5",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -4582,7 +4582,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -4595,7 +4595,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -4608,7 +4608,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -4621,7 +4621,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:947139f9592d1e1a",
+              "sourceId": "goal:b3d6cbb68ebb72b5",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -4830,6 +4830,7 @@
             }
           ]
         },
+        "providerFailure": null,
         "socialView": {
           "revision": 0,
           "hearing": {
@@ -4854,8 +4855,7 @@
           "expiresAtSeconds": 120,
           "reason": "현재 역할과 기억을 바탕으로 방문자에게 직접 확인할 필요가 있습니다.",
           "procedure": "ordinary"
-        },
-        "providerFailure": null
+        }
       }
     },
     "sessionPreloadPlayerContact": {
@@ -5106,7 +5106,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -5119,7 +5119,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -5132,7 +5132,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:1",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -5352,17 +5352,23 @@
             {
               "choiceId": "resident_opening_studio_receptionist.generated.1",
               "intent": "safe/local",
-              "line": "안내받은 절차를 확인하러 왔습니다."
+              "line": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
             },
             {
               "choiceId": "resident_opening_studio_receptionist.generated.2",
               "intent": "uncertain/repair",
-              "line": "먼저 어떤 접수인지 설명해 주세요."
+              "line": "먼저 어떤 접수인지 설명해 주세요.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
             },
             {
               "choiceId": "resident_opening_studio_receptionist.generated.3",
               "intent": "risky/weird",
-              "line": "여기 사람이 아니라서 잘 모르겠습니다."
+              "line": "여기 사람이 아니라서 잘 모르겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": true
             }
           ],
           "proposalMeta": {
@@ -5699,6 +5705,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
@@ -5766,7 +5773,7 @@
                   "NPC_Studio_Manager",
                   "NPC_Roaming_Liaison"
                 ],
-                "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+                "line": "그 말은 기억해 두겠습니다.",
                 "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
@@ -5855,7 +5862,7 @@
                   "NPC_Studio_Manager",
                   "NPC_Roaming_Liaison"
                 ],
-                "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+                "line": "그 말은 기억해 두겠습니다.",
                 "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
@@ -5892,7 +5899,7 @@
                 "stanceBefore": "uncertain",
                 "proposedStance": "uncertain",
                 "appliedStance": "uncertain",
-                "whyLine": "방금 들은 말만으로는 방문자에 대한 제 판단을 바꿀 근거가 충분하지 않습니다.",
+                "whyLine": "테스트 대화만으로는 판단을 바꾸지 않았습니다.",
                 "openQuestion": null,
                 "worldSeconds": 90,
                 "worldRevision": 21,
@@ -5969,7 +5976,7 @@
                   "NPC_Studio_Manager",
                   "NPC_Roaming_Liaison"
                 ],
-                "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+                "line": "그 말은 기억해 두겠습니다.",
                 "citedRecords": [],
                 "worldSeconds": 90,
                 "observedWorldRevision": 18,
@@ -6165,7 +6172,7 @@
                 "NPC_Studio_Manager",
                 "NPC_Roaming_Liaison"
               ],
-              "line": "말씀하신 내용은 알겠습니다. 제가 확인한 것은 따로 기억해 두겠습니다.",
+              "line": "그 말은 기억해 두겠습니다.",
               "citedRecords": [],
               "worldSeconds": 90,
               "observedWorldRevision": 18,
@@ -6204,8 +6211,7 @@
           "encounteredResidents": [],
           "openQuestions": [],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     },
     "sessionPreloads": [
@@ -6837,7 +6843,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:e18a2c21dc58c4b4",
+            "sourceId": "goal:1439f96c1bc2d14b",
             "actorIds": [
               "NPC_Office_Worker"
             ],
@@ -6850,7 +6856,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:5ef78e6fc0f99473",
+            "sourceId": "goal:f788c9b1e0a4a6f3",
             "actorIds": [
               "NPC_Park_Caretaker"
             ],
@@ -6863,7 +6869,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:dca168d816e3bd2f",
+            "sourceId": "goal:2e87c463a0219f55",
             "actorIds": [
               "NPC_Roaming_Liaison"
             ],
@@ -6876,7 +6882,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:6bc7a2737e7251e6",
+            "sourceId": "goal:6c0088304920109a",
             "actorIds": [
               "NPC_Station_Officer"
             ],
@@ -6889,7 +6895,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:4921d06c5167bb84",
+            "sourceId": "goal:e425e9d9cdc7ebb9",
             "actorIds": [
               "NPC_Studio_Manager"
             ],
@@ -6902,7 +6908,7 @@
             "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
             "kind": "goal",
             "phase": "due",
-            "sourceId": "goal:98b72e2961adbee7",
+            "sourceId": "goal:6e23ecff398bdd6d",
             "actorIds": [
               "NPC_Studio_Receptionist"
             ],
@@ -7002,7 +7008,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -7015,7 +7021,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -7028,7 +7034,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -7041,7 +7047,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -7054,7 +7060,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -7067,7 +7073,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -7262,17 +7268,23 @@
             {
               "choiceId": "resident_opening_studio_receptionist.generated.1",
               "intent": "safe/local",
-              "line": "안내받은 절차를 확인하러 왔습니다."
+              "line": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
             },
             {
               "choiceId": "resident_opening_studio_receptionist.generated.2",
               "intent": "uncertain/repair",
-              "line": "먼저 어떤 접수인지 설명해 주세요."
+              "line": "먼저 어떤 접수인지 설명해 주세요.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
             },
             {
               "choiceId": "resident_opening_studio_receptionist.generated.3",
               "intent": "risky/weird",
-              "line": "여기 사람이 아니라서 잘 모르겠습니다."
+              "line": "여기 사람이 아니라서 잘 모르겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": true
             }
           ],
           "proposalMeta": {
@@ -7332,7 +7344,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "evidenceIds": [],
+          "introducesNewClaim": false,
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
           "citedRecords": [],
           "signals": [],
@@ -7395,7 +7410,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -7608,7 +7626,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -7658,7 +7679,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "evidenceIds": [],
+          "introducesNewClaim": false,
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
           "citedRecords": [],
           "signals": [],
@@ -7807,6 +7831,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": "sess-fixture-1",
         "actors": [
           {
@@ -7844,7 +7869,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": false,
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
                 "citedRecords": [],
                 "signals": [],
@@ -7933,7 +7961,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -7946,7 +7974,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -7959,7 +7987,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -7972,7 +8000,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -7985,7 +8013,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -7998,7 +8026,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -8179,8 +8207,7 @@
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     },
     "sessionEnd": {
@@ -8229,7 +8256,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -8430,6 +8460,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
@@ -8467,7 +8498,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": false,
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
                 "citedRecords": [],
                 "signals": [],
@@ -8556,7 +8590,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -8569,7 +8603,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -8582,7 +8616,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -8595,7 +8629,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -8608,7 +8642,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -8621,7 +8655,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -8802,31 +8836,60 @@
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     },
     "administrationWriteDecision": {
       "endpoint": "POST /v1/npc/decision",
       "request": {
         "runId": "run-fixture-1",
-        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:6",
-        "observedWorldRevision": 6
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+        "observedWorldRevision": 7
       },
       "response": {
         "runId": "run-fixture-1",
-        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:6",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
         "decisionKind": "actor_goal",
         "wakeKind": "goal",
         "actorIds": [
           "NPC_Studio_Receptionist"
         ],
         "status": "completed",
-        "observedWorldRevision": 6,
-        "worldRevision": 7,
+        "observedWorldRevision": 7,
+        "worldRevision": 9,
         "conversationId": null,
         "participantActorIds": [],
-        "speechEvents": [],
+        "speechEvents": [
+          {
+            "seq": 1,
+            "eventId": "speech:run-fixture-1:1",
+            "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+            "conversationId": "administration:wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+            "turnId": "administration:wake:run-fixture-1:goal:NPC_Studio_Receptionist:7#0",
+            "speakerActorId": "NPC_Studio_Receptionist",
+            "targetActorId": "NPC_Studio_Receptionist",
+            "listenerActorIds": [],
+            "line": "직접 들은 진술을 접수 확인 기록으로 남기겠습니다.",
+            "citedRecords": [],
+            "worldSeconds": 0,
+            "observedWorldRevision": 7,
+            "worldRevision": 9,
+            "audibility": {
+              "volumeId": "AUD_STUDIO",
+              "maxSpeechDistanceM": 9,
+              "speakerPosition": [
+                -2,
+                0,
+                -14.2
+              ]
+            },
+            "proposalMeta": {
+              "profileId": "scripted/test",
+              "transport": "scripted",
+              "usedFallback": false
+            }
+          }
+        ],
         "actorReadinessDeltas": [
           {
             "actorId": "NPC_Station_Officer",
@@ -8835,6 +8898,11 @@
           },
           {
             "actorId": "NPC_Studio_Manager",
+            "playerConversationReady": false,
+            "reason": "preload_required"
+          },
+          {
+            "actorId": "NPC_Studio_Receptionist",
             "playerConversationReady": false,
             "reason": "preload_required"
           },
@@ -8869,7 +8937,7 @@
               ],
               "textSurfaceId": "TS_Studio_ReviewRecords",
               "createdWorldSeconds": 0,
-              "createdWorldRevision": 7,
+              "createdWorldRevision": 8,
               "recordRevision": 1,
               "lastLedgerEventId": "ledger:run-fixture-1:1"
             },
@@ -8891,17 +8959,49 @@
                 "NPC_Studio_Receptionist",
                 "player"
               ],
-              "whyLine": "접수 담당자가 직접 들은 진술을 확인 기록으로 남겼습니다.",
+              "whyLine": "직접 들은 진술을 접수 확인 기록으로 남기겠습니다.",
               "openQuestion": {
                 "status": "open",
                 "text": "접수 기록에 남은 방문 경위는 무엇인가?",
                 "whyLine": "접수 담당자의 기록이 방문 경위에 관한 구체적인 의문을 남겼습니다."
               },
               "worldSeconds": 0,
-              "worldRevision": 7
+              "worldRevision": 8
             },
             "pressureBefore": 0,
             "pressureAfter": 15
+          },
+          {
+            "kind": "speech",
+            "speechEvent": {
+              "seq": 1,
+              "eventId": "speech:run-fixture-1:1",
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+              "conversationId": "administration:wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+              "turnId": "administration:wake:run-fixture-1:goal:NPC_Studio_Receptionist:7#0",
+              "speakerActorId": "NPC_Studio_Receptionist",
+              "targetActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [],
+              "line": "직접 들은 진술을 접수 확인 기록으로 남기겠습니다.",
+              "citedRecords": [],
+              "worldSeconds": 0,
+              "observedWorldRevision": 7,
+              "worldRevision": 9,
+              "audibility": {
+                "volumeId": "AUD_STUDIO",
+                "maxSpeechDistanceM": 9,
+                "speakerPosition": [
+                  -2,
+                  0,
+                  -14.2
+                ]
+              },
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
           },
           {
             "kind": "readiness",
@@ -8915,6 +9015,14 @@
             "kind": "readiness",
             "readinessDelta": {
               "actorId": "NPC_Studio_Manager",
+              "playerConversationReady": false,
+              "reason": "preload_required"
+            }
+          },
+          {
+            "kind": "readiness",
+            "readinessDelta": {
+              "actorId": "NPC_Studio_Receptionist",
               "playerConversationReady": false,
               "reason": "preload_required"
             }
@@ -8975,11 +9083,20 @@
                 "transport": "scripted",
                 "usedFallback": false
               }
+            },
+            {
+              "seq": 4,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
             }
           ]
         },
+        "providerFailure": null,
         "socialView": {
-          "revision": 1,
+          "revision": 2,
           "hearing": {
             "atSeconds": 900,
             "due": false
@@ -8991,68 +9108,67 @@
           "encounteredResidents": [
             {
               "actorId": "NPC_Studio_Receptionist",
-              "stance": "oppose",
-              "stanceRevision": 4,
-              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "stance": "uncertain",
+              "stanceRevision": 5,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
           ],
           "openQuestions": [
             {
-              "questionId": "question:mem-fixture-2",
+              "questionId": "question:mem-fixture-3",
               "subjectActorId": "NPC_Studio_Receptionist",
               "status": "open",
-              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
-              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
           ],
           "encounteredRecords": []
         },
-        "activeContact": null,
-        "providerFailure": null
+        "activeContact": null
       }
     },
     "administrationReadDecision": {
       "endpoint": "POST /v1/npc/decision",
       "request": {
         "runId": "run-fixture-1",
-        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:8",
-        "observedWorldRevision": 8
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
+        "observedWorldRevision": 10
       },
       "response": {
         "runId": "run-fixture-1",
-        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:8",
+        "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:10",
         "decisionKind": "actor_goal",
         "wakeKind": "goal",
         "actorIds": [
           "NPC_Studio_Manager"
         ],
         "status": "completed",
-        "observedWorldRevision": 8,
-        "worldRevision": 9,
+        "observedWorldRevision": 10,
+        "worldRevision": 11,
         "conversationId": null,
         "participantActorIds": [],
         "speechEvents": [],
@@ -9098,7 +9214,7 @@
               ],
               "textSurfaceId": "TS_Studio_ReviewRecords",
               "createdWorldSeconds": 0,
-              "createdWorldRevision": 7,
+              "createdWorldRevision": 8,
               "recordRevision": 1,
               "lastLedgerEventId": "ledger:run-fixture-1:2"
             },
@@ -9127,7 +9243,7 @@
                 "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다."
               },
               "worldSeconds": 0,
-              "worldRevision": 9
+              "worldRevision": 11
             },
             "pressureBefore": 15,
             "pressureAfter": 15
@@ -9212,11 +9328,20 @@
                 "transport": "scripted",
                 "usedFallback": false
               }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
             }
           ]
         },
+        "providerFailure": null,
         "socialView": {
-          "revision": 1,
+          "revision": 2,
           "hearing": {
             "atSeconds": 900,
             "due": false
@@ -9228,48 +9353,47 @@
           "encounteredResidents": [
             {
               "actorId": "NPC_Studio_Receptionist",
-              "stance": "oppose",
-              "stanceRevision": 4,
-              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "stance": "uncertain",
+              "stanceRevision": 5,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
           ],
           "openQuestions": [
             {
-              "questionId": "question:mem-fixture-2",
+              "questionId": "question:mem-fixture-3",
               "subjectActorId": "NPC_Studio_Receptionist",
               "status": "open",
-              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
-              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
           ],
           "encounteredRecords": []
         },
-        "activeContact": null,
-        "providerFailure": null
+        "activeContact": null
       }
     },
     "administrationRecordEncounter": {
@@ -9291,7 +9415,7 @@
         "runId": "run-fixture-1",
         "encounterId": "fixture-admin-encounter-1",
         "socialView": {
-          "revision": 2,
+          "revision": 3,
           "hearing": {
             "atSeconds": 900,
             "due": false
@@ -9303,41 +9427,41 @@
           "encounteredResidents": [
             {
               "actorId": "NPC_Studio_Receptionist",
-              "stance": "oppose",
-              "stanceRevision": 4,
-              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "stance": "uncertain",
+              "stanceRevision": 5,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
           ],
           "openQuestions": [
             {
-              "questionId": "question:mem-fixture-2",
+              "questionId": "question:mem-fixture-3",
               "subjectActorId": "NPC_Studio_Receptionist",
               "status": "open",
-              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
-              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             },
             {
@@ -9395,7 +9519,7 @@
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v6",
-        "worldRevision": 9,
+        "worldRevision": 11,
         "runStatus": "active",
         "hearingProcedure": null,
         "terminalResult": null,
@@ -9468,6 +9592,14 @@
                 "transport": "scripted",
                 "usedFallback": false
               }
+            },
+            {
+              "seq": 5,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
             }
           ]
         },
@@ -9476,14 +9608,15 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
             "actorId": "NPC_Studio_Receptionist",
             "role": "studio_receptionist",
             "locationId": "Studio",
-            "stance": "oppose",
-            "suspicion": 35,
+            "stance": "uncertain",
+            "suspicion": 40,
             "playerConversationReady": false,
             "hasMeaningfulFirsthandConversation": true,
             "memories": [
@@ -9513,7 +9646,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": true,
                 "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
                 "citedRecords": [],
                 "signals": [
@@ -9542,6 +9678,75 @@
                   "transport": "scripted",
                   "usedFallback": false
                 }
+              },
+              {
+                "memoryId": "mem-fixture-3",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#1",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#1",
+                "playerLine": "안내받은 내용을 차근히 설명하겠습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": false,
+                "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+                "citedRecords": [],
+                "signals": [],
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+                "suspicionBefore": 35,
+                "suspicionAfter": 40,
+                "suspicionDelta": 5,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "uncertain",
+                "appliedStance": "uncertain",
+                "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "open",
+                  "text": "접수 목적은 무엇인가?",
+                  "whyLine": "방문 목적이 아직 분명하지 않습니다."
+                },
+                "worldSeconds": 0,
+                "worldRevision": 5,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "seq": 1,
+                "eventId": "speech:run-fixture-1:1",
+                "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+                "conversationId": "administration:wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+                "turnId": "administration:wake:run-fixture-1:goal:NPC_Studio_Receptionist:7#0",
+                "speakerActorId": "NPC_Studio_Receptionist",
+                "targetActorId": "NPC_Studio_Receptionist",
+                "listenerActorIds": [],
+                "line": "직접 들은 진술을 접수 확인 기록으로 남기겠습니다.",
+                "citedRecords": [],
+                "worldSeconds": 0,
+                "observedWorldRevision": 7,
+                "worldRevision": 9,
+                "audibility": {
+                  "volumeId": "AUD_STUDIO",
+                  "maxSpeechDistanceM": 9,
+                  "speakerPosition": [
+                    -2,
+                    0,
+                    -14.2
+                  ]
+                },
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                },
+                "memoryId": "mem-fixture-4",
+                "kind": "ambient_utterance"
               }
             ]
           },
@@ -9555,7 +9760,7 @@
             "hasMeaningfulFirsthandConversation": false,
             "memories": [
               {
-                "memoryId": "mem-fixture-3",
+                "memoryId": "mem-fixture-5",
                 "kind": "record_read",
                 "sourceActorId": "NPC_Studio_Receptionist",
                 "listenerActorId": "NPC_Studio_Manager",
@@ -9566,7 +9771,7 @@
                 "whyLine": "관리자가 접수 기록의 출처와 내용을 직접 확인했습니다.",
                 "ledgerEventId": "ledger:run-fixture-1:2",
                 "worldSeconds": 0,
-                "worldRevision": 9
+                "worldRevision": 11
               }
             ]
           },
@@ -9619,7 +9824,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:2",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -9632,7 +9837,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:2",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -9645,7 +9850,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:2",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -9655,28 +9860,15 @@
               "status": "pending"
             },
             {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:8",
+              "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:10",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:f24cecfd874044f7",
+              "sourceId": "goal:704b7a10fc7fe62d",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
               "scheduledAtSeconds": 0,
-              "observedWorldRevision": 8,
-              "requiresDecision": true,
-              "status": "pending"
-            },
-            {
-              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:8",
-              "kind": "goal",
-              "phase": "due",
-              "sourceId": "goal:5d06338cef902429",
-              "actorIds": [
-                "NPC_Studio_Receptionist"
-              ],
-              "scheduledAtSeconds": 0,
-              "observedWorldRevision": 8,
+              "observedWorldRevision": 10,
               "requiresDecision": true,
               "status": "pending"
             }
@@ -9793,8 +9985,38 @@
           ]
         },
         "ambientSpeech": {
-          "cursor": 0,
-          "events": [],
+          "cursor": 1,
+          "events": [
+            {
+              "seq": 1,
+              "eventId": "speech:run-fixture-1:1",
+              "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+              "conversationId": "administration:wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
+              "turnId": "administration:wake:run-fixture-1:goal:NPC_Studio_Receptionist:7#0",
+              "speakerActorId": "NPC_Studio_Receptionist",
+              "targetActorId": "NPC_Studio_Receptionist",
+              "listenerActorIds": [],
+              "line": "직접 들은 진술을 접수 확인 기록으로 남기겠습니다.",
+              "citedRecords": [],
+              "worldSeconds": 0,
+              "observedWorldRevision": 7,
+              "worldRevision": 9,
+              "audibility": {
+                "volumeId": "AUD_STUDIO",
+                "maxSpeechDistanceM": 9,
+                "speakerPosition": [
+                  -2,
+                  0,
+                  -14.2
+                ]
+              },
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
+            }
+          ],
           "activeConversation": null
         },
         "activeContact": null,
@@ -9820,7 +10042,7 @@
             ],
             "textSurfaceId": "TS_Studio_ReviewRecords",
             "createdWorldSeconds": 0,
-            "createdWorldRevision": 7,
+            "createdWorldRevision": 8,
             "recordRevision": 1,
             "lastLedgerEventId": "ledger:run-fixture-1:2"
           }
@@ -9844,14 +10066,14 @@
               "NPC_Studio_Receptionist",
               "player"
             ],
-            "whyLine": "접수 담당자가 직접 들은 진술을 확인 기록으로 남겼습니다.",
+            "whyLine": "직접 들은 진술을 접수 확인 기록으로 남기겠습니다.",
             "openQuestion": {
               "status": "open",
               "text": "접수 기록에 남은 방문 경위는 무엇인가?",
               "whyLine": "접수 담당자의 기록이 방문 경위에 관한 구체적인 의문을 남겼습니다."
             },
             "worldSeconds": 0,
-            "worldRevision": 7
+            "worldRevision": 8
           },
           {
             "eventId": "ledger:run-fixture-1:2",
@@ -9878,11 +10100,11 @@
               "whyLine": "관리자가 기록을 읽고 추가 확인 대상을 정해야 한다고 판단했습니다."
             },
             "worldSeconds": 0,
-            "worldRevision": 9
+            "worldRevision": 11
           }
         ],
         "socialView": {
-          "revision": 2,
+          "revision": 3,
           "hearing": {
             "atSeconds": 900,
             "due": false
@@ -9894,41 +10116,41 @@
           "encounteredResidents": [
             {
               "actorId": "NPC_Studio_Receptionist",
-              "stance": "oppose",
-              "stanceRevision": 4,
-              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "stance": "uncertain",
+              "stanceRevision": 5,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
           ],
           "openQuestions": [
             {
-              "questionId": "question:mem-fixture-2",
+              "questionId": "question:mem-fixture-3",
               "subjectActorId": "NPC_Studio_Receptionist",
               "status": "open",
-              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
-              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             },
             {
@@ -9974,8 +10196,7 @@
               }
             }
           ]
-        },
-        "providerFailure": null
+        }
       }
     }
   },
@@ -12668,7 +12889,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "evidenceIds": [],
+          "introducesNewClaim": false,
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
           "citedRecords": [],
           "signals": [],
@@ -12731,7 +12955,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -12937,7 +13164,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -12987,7 +13217,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "evidenceIds": [],
+          "introducesNewClaim": false,
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
           "citedRecords": [],
           "signals": [],
@@ -13130,6 +13363,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": "sess-fixture-1",
         "actors": [
           {
@@ -13167,7 +13401,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": false,
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
                 "citedRecords": [],
                 "signals": [],
@@ -13256,7 +13493,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -13269,7 +13506,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -13282,7 +13519,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -13295,7 +13532,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -13308,7 +13545,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -13321,7 +13558,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -13502,8 +13739,7 @@
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -13545,7 +13781,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -13740,6 +13979,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
@@ -13777,7 +14017,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": false,
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
                 "citedRecords": [],
                 "signals": [],
@@ -13866,7 +14109,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -13879,7 +14122,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -13892,7 +14135,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -13905,7 +14148,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -13918,7 +14161,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -13931,7 +14174,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -14112,8 +14355,7 @@
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     },
     {
@@ -14150,7 +14392,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+          "evidenceIds": [],
+          "introducesNewClaim": false,
           "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
           "citedRecords": [],
           "signals": [],
@@ -14213,7 +14458,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
               "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -14243,7 +14491,46 @@
             }
           ]
         },
-        "nextTurn": null,
+        "nextTurn": {
+          "turnId": "sess-fixture-1#1",
+          "beatId": "resident_follow_up_studio_receptionist_1",
+          "promptId": "resident_follow_up",
+          "choiceSetId": "resident_follow_up_studio_receptionist_1.generated",
+          "speakerId": "NPC_Studio_Receptionist",
+          "prompt": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+          "acceptsFreeInput": true,
+          "continueConversation": false,
+          "procedure": "ordinary",
+          "hesitationMs": 0,
+          "choices": [
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.1",
+              "intent": "safe/local",
+              "line": "제가 아는 내용을 말씀드리겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            },
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.2",
+              "intent": "uncertain/repair",
+              "line": "필요한 질문을 해 주세요.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            },
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.3",
+              "intent": "risky/weird",
+              "line": "그냥 지나가다 들어왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": true
+            }
+          ],
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
         "proposalMeta": {
           "profileId": "scripted/test",
           "transport": "scripted",
@@ -14383,7 +14670,7 @@
         "sessionId": "sess-fixture-1",
         "actorId": "NPC_Studio_Receptionist",
         "worldRevision": 9,
-        "status": "awaiting_end",
+        "status": "active",
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
@@ -14419,7 +14706,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
               "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -14449,7 +14739,46 @@
             }
           ]
         },
-        "nextTurn": null,
+        "nextTurn": {
+          "turnId": "sess-fixture-1#1",
+          "beatId": "resident_follow_up_studio_receptionist_1",
+          "promptId": "resident_follow_up",
+          "choiceSetId": "resident_follow_up_studio_receptionist_1.generated",
+          "speakerId": "NPC_Studio_Receptionist",
+          "prompt": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+          "acceptsFreeInput": true,
+          "continueConversation": false,
+          "procedure": "ordinary",
+          "hesitationMs": 0,
+          "choices": [
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.1",
+              "intent": "safe/local",
+              "line": "제가 아는 내용을 말씀드리겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            },
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.2",
+              "intent": "uncertain/repair",
+              "line": "필요한 질문을 해 주세요.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            },
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.3",
+              "intent": "risky/weird",
+              "line": "그냥 지나가다 들어왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": true
+            }
+          ],
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
         "lastJudgment": {
           "signals": [],
           "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
@@ -14469,7 +14798,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+          "evidenceIds": [],
+          "introducesNewClaim": false,
           "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
           "citedRecords": [],
           "signals": [],
@@ -14612,6 +14944,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": "sess-fixture-1",
         "actors": [
           {
@@ -14649,7 +14982,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+                "evidenceIds": [],
+                "introducesNewClaim": false,
                 "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
                 "citedRecords": [],
                 "signals": [],
@@ -14738,7 +15074,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -14751,7 +15087,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -14764,7 +15100,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -14777,7 +15113,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -14790,7 +15126,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -14803,7 +15139,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -14984,20 +15320,19 @@
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       },
       "endResponse": {
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "ended": true,
-        "worldRevision": 10,
+        "worldRevision": 11,
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
           "locationId": "Studio",
           "stance": "uncertain",
-          "suspicion": 5,
+          "suspicion": 10,
           "playerConversationReady": false,
           "hasMeaningfulFirsthandConversation": true,
           "memories": [
@@ -15027,7 +15362,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
               "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -15054,12 +15392,50 @@
                 "transport": "scripted",
                 "usedFallback": false
               }
+            },
+            {
+              "memoryId": "mem-fixture-3",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#1",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#1",
+              "playerLine": "제가 아는 내용을 말씀드리겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
+              "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+              "citedRecords": [],
+              "signals": [],
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+              "suspicionBefore": 5,
+              "suspicionAfter": 10,
+              "suspicionDelta": 5,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "open",
+                "text": "접수 목적은 무엇인가?",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
+              },
+              "worldSeconds": 0,
+              "worldRevision": 10,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
             }
           ]
         },
         "queuedRunDeltas": [],
         "socialView": {
-          "revision": 1,
+          "revision": 2,
           "hearing": {
             "atSeconds": 900,
             "due": false
@@ -15072,25 +15448,25 @@
             {
               "actorId": "NPC_Studio_Receptionist",
               "stance": "uncertain",
-              "stanceRevision": 9,
+              "stanceRevision": 10,
               "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
+                "sourceExcerpt": "제가 아는 내용을 말씀드리겠습니다.",
                 "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
           ],
           "openQuestions": [
             {
-              "questionId": "question:mem-fixture-2",
+              "questionId": "question:mem-fixture-3",
               "subjectActorId": "NPC_Studio_Receptionist",
               "status": "open",
               "text": "접수 목적은 무엇인가?",
@@ -15100,11 +15476,11 @@
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
+                "sourceExcerpt": "제가 아는 내용을 말씀드리겠습니다.",
                 "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
@@ -15117,7 +15493,7 @@
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v6",
-        "worldRevision": 10,
+        "worldRevision": 11,
         "runStatus": "active",
         "hearingProcedure": null,
         "terminalResult": null,
@@ -15214,6 +15590,14 @@
                 "transport": "scripted",
                 "usedFallback": false
               }
+            },
+            {
+              "seq": 8,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
             }
           ]
         },
@@ -15222,6 +15606,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
@@ -15229,7 +15614,7 @@
             "role": "studio_receptionist",
             "locationId": "Studio",
             "stance": "uncertain",
-            "suspicion": 5,
+            "suspicion": 10,
             "playerConversationReady": false,
             "hasMeaningfulFirsthandConversation": true,
             "memories": [
@@ -15259,7 +15644,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "먼저 어떤 접수인지 설명해 주세요.",
+                "evidenceIds": [],
+                "introducesNewClaim": false,
                 "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
                 "citedRecords": [],
                 "signals": [],
@@ -15281,6 +15669,44 @@
                 },
                 "worldSeconds": 0,
                 "worldRevision": 9,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-3",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#1",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#1",
+                "playerLine": "제가 아는 내용을 말씀드리겠습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": false,
+                "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+                "citedRecords": [],
+                "signals": [],
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+                "suspicionBefore": 5,
+                "suspicionAfter": 10,
+                "suspicionDelta": 5,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "uncertain",
+                "appliedStance": "uncertain",
+                "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "open",
+                  "text": "접수 목적은 무엇인가?",
+                  "whyLine": "방문 목적이 아직 분명하지 않습니다."
+                },
+                "worldSeconds": 0,
+                "worldRevision": 10,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -15348,7 +15774,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -15361,7 +15787,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -15374,7 +15800,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -15387,7 +15813,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -15400,7 +15826,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -15413,7 +15839,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -15543,7 +15969,7 @@
         "records": [],
         "ledgerEvents": [],
         "socialView": {
-          "revision": 1,
+          "revision": 2,
           "hearing": {
             "atSeconds": 900,
             "due": false
@@ -15556,25 +15982,25 @@
             {
               "actorId": "NPC_Studio_Receptionist",
               "stance": "uncertain",
-              "stanceRevision": 9,
+              "stanceRevision": 10,
               "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
+                "sourceExcerpt": "제가 아는 내용을 말씀드리겠습니다.",
                 "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
           ],
           "openQuestions": [
             {
-              "questionId": "question:mem-fixture-2",
+              "questionId": "question:mem-fixture-3",
               "subjectActorId": "NPC_Studio_Receptionist",
               "status": "open",
               "text": "접수 목적은 무엇인가?",
@@ -15584,18 +16010,17 @@
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "먼저 어떤 접수인지 설명해 주세요.",
+                "sourceExcerpt": "제가 아는 내용을 말씀드리겠습니다.",
                 "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     },
     {
@@ -15634,7 +16059,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+          "evidenceIds": [],
+          "introducesNewClaim": true,
           "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
           "citedRecords": [],
           "signals": [
@@ -15699,7 +16127,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": true,
               "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
               "citedRecords": [],
               "signals": [
@@ -15731,7 +16162,46 @@
             }
           ]
         },
-        "nextTurn": null,
+        "nextTurn": {
+          "turnId": "sess-fixture-1#1",
+          "beatId": "resident_follow_up_studio_receptionist_1",
+          "promptId": "resident_follow_up",
+          "choiceSetId": "resident_follow_up_studio_receptionist_1.generated",
+          "speakerId": "NPC_Studio_Receptionist",
+          "prompt": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+          "acceptsFreeInput": true,
+          "continueConversation": false,
+          "procedure": "ordinary",
+          "hesitationMs": 0,
+          "choices": [
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.1",
+              "intent": "safe/local",
+              "line": "안내받은 내용을 차근히 설명하겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            },
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.2",
+              "intent": "uncertain/repair",
+              "line": "어떤 부분부터 확인할까요?",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            },
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.3",
+              "intent": "risky/weird",
+              "line": "확인할 필요는 없습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            }
+          ],
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
         "proposalMeta": {
           "profileId": "scripted/test",
           "transport": "scripted",
@@ -15871,7 +16341,7 @@
         "sessionId": "sess-fixture-1",
         "actorId": "NPC_Studio_Receptionist",
         "worldRevision": 9,
-        "status": "awaiting_end",
+        "status": "active",
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
@@ -15907,7 +16377,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": true,
               "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
               "citedRecords": [],
               "signals": [
@@ -15939,7 +16412,46 @@
             }
           ]
         },
-        "nextTurn": null,
+        "nextTurn": {
+          "turnId": "sess-fixture-1#1",
+          "beatId": "resident_follow_up_studio_receptionist_1",
+          "promptId": "resident_follow_up",
+          "choiceSetId": "resident_follow_up_studio_receptionist_1.generated",
+          "speakerId": "NPC_Studio_Receptionist",
+          "prompt": "그렇다면 방문 경위를 더 확인해야겠습니다.",
+          "acceptsFreeInput": true,
+          "continueConversation": false,
+          "procedure": "ordinary",
+          "hesitationMs": 0,
+          "choices": [
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.1",
+              "intent": "safe/local",
+              "line": "안내받은 내용을 차근히 설명하겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            },
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.2",
+              "intent": "uncertain/repair",
+              "line": "어떤 부분부터 확인할까요?",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            },
+            {
+              "choiceId": "resident_follow_up_studio_receptionist_1.generated.3",
+              "intent": "risky/weird",
+              "line": "확인할 필요는 없습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false
+            }
+          ],
+          "proposalMeta": {
+            "profileId": "scripted/test",
+            "transport": "scripted",
+            "usedFallback": false
+          }
+        },
         "lastJudgment": {
           "signals": [
             "role_script_break"
@@ -15961,7 +16473,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+          "evidenceIds": [],
+          "introducesNewClaim": true,
           "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
           "citedRecords": [],
           "signals": [
@@ -16106,6 +16621,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": "sess-fixture-1",
         "actors": [
           {
@@ -16143,7 +16659,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": true,
                 "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
                 "citedRecords": [],
                 "signals": [
@@ -16234,7 +16753,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -16247,7 +16766,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -16260,7 +16779,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -16273,7 +16792,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -16286,7 +16805,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -16299,7 +16818,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -16480,20 +16999,19 @@
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       },
       "endResponse": {
         "runId": "run-fixture-1",
         "sessionId": "sess-fixture-1",
         "ended": true,
-        "worldRevision": 10,
+        "worldRevision": 11,
         "actor": {
           "actorId": "NPC_Studio_Receptionist",
           "role": "studio_receptionist",
           "locationId": "Studio",
-          "stance": "oppose",
-          "suspicion": 35,
+          "stance": "uncertain",
+          "suspicion": 40,
           "playerConversationReady": false,
           "hasMeaningfulFirsthandConversation": true,
           "memories": [
@@ -16523,7 +17041,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": true,
               "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
               "citedRecords": [],
               "signals": [
@@ -16552,12 +17073,50 @@
                 "transport": "scripted",
                 "usedFallback": false
               }
+            },
+            {
+              "memoryId": "mem-fixture-3",
+              "kind": "player_conversation",
+              "sourceActorId": "player",
+              "listenerActorId": "NPC_Studio_Receptionist",
+              "conversationId": "sess-fixture-1",
+              "turnId": "sess-fixture-1#1",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#1",
+              "playerLine": "안내받은 내용을 차근히 설명하겠습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": false,
+              "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+              "citedRecords": [],
+              "signals": [],
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+              "suspicionBefore": 35,
+              "suspicionAfter": 40,
+              "suspicionDelta": 5,
+              "reportPressureBefore": 0,
+              "reportPressureAfter": 0,
+              "reportDelta": 0,
+              "institutionalPressureDelta": 0,
+              "proposedStance": "uncertain",
+              "appliedStance": "uncertain",
+              "meaningfulFirsthand": true,
+              "openQuestion": {
+                "status": "open",
+                "text": "접수 목적은 무엇인가?",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
+              },
+              "worldSeconds": 0,
+              "worldRevision": 10,
+              "proposalMeta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
             }
           ]
         },
         "queuedRunDeltas": [],
         "socialView": {
-          "revision": 1,
+          "revision": 2,
           "hearing": {
             "atSeconds": 900,
             "due": false
@@ -16569,41 +17128,41 @@
           "encounteredResidents": [
             {
               "actorId": "NPC_Studio_Receptionist",
-              "stance": "oppose",
-              "stanceRevision": 9,
-              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "stance": "uncertain",
+              "stanceRevision": 10,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
           ],
           "openQuestions": [
             {
-              "questionId": "question:mem-fixture-2",
+              "questionId": "question:mem-fixture-3",
               "subjectActorId": "NPC_Studio_Receptionist",
               "status": "open",
-              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
-              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
           ],
@@ -16615,7 +17174,7 @@
         "runId": "run-fixture-1",
         "worldId": "m3r_first_person_town",
         "layoutRevision": "rev-first-person-town-v6",
-        "worldRevision": 10,
+        "worldRevision": 11,
         "runStatus": "active",
         "hearingProcedure": null,
         "terminalResult": null,
@@ -16712,6 +17271,14 @@
                 "transport": "scripted",
                 "usedFallback": false
               }
+            },
+            {
+              "seq": 8,
+              "meta": {
+                "profileId": "scripted/test",
+                "transport": "scripted",
+                "usedFallback": false
+              }
             }
           ]
         },
@@ -16720,14 +17287,15 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
             "actorId": "NPC_Studio_Receptionist",
             "role": "studio_receptionist",
             "locationId": "Studio",
-            "stance": "oppose",
-            "suspicion": 35,
+            "stance": "uncertain",
+            "suspicion": 40,
             "playerConversationReady": false,
             "hasMeaningfulFirsthandConversation": true,
             "memories": [
@@ -16757,7 +17325,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "여기 사람이 아니라서 잘 모르겠습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": true,
                 "npcLine": "그렇다면 방문 경위를 더 확인해야겠습니다.",
                 "citedRecords": [],
                 "signals": [
@@ -16781,6 +17352,44 @@
                 },
                 "worldSeconds": 0,
                 "worldRevision": 9,
+                "proposalMeta": {
+                  "profileId": "scripted/test",
+                  "transport": "scripted",
+                  "usedFallback": false
+                }
+              },
+              {
+                "memoryId": "mem-fixture-3",
+                "kind": "player_conversation",
+                "sourceActorId": "player",
+                "listenerActorId": "NPC_Studio_Receptionist",
+                "conversationId": "sess-fixture-1",
+                "turnId": "sess-fixture-1#1",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#1",
+                "playerLine": "안내받은 내용을 차근히 설명하겠습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": false,
+                "npcLine": "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
+                "citedRecords": [],
+                "signals": [],
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
+                "suspicionBefore": 35,
+                "suspicionAfter": 40,
+                "suspicionDelta": 5,
+                "reportPressureBefore": 0,
+                "reportPressureAfter": 0,
+                "reportDelta": 0,
+                "institutionalPressureDelta": 0,
+                "proposedStance": "uncertain",
+                "appliedStance": "uncertain",
+                "meaningfulFirsthand": true,
+                "openQuestion": {
+                  "status": "open",
+                  "text": "접수 목적은 무엇인가?",
+                  "whyLine": "방문 목적이 아직 분명하지 않습니다."
+                },
+                "worldSeconds": 0,
+                "worldRevision": 10,
                 "proposalMeta": {
                   "profileId": "scripted/test",
                   "transport": "scripted",
@@ -16848,7 +17457,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -16861,7 +17470,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -16874,7 +17483,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -16887,7 +17496,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -16900,7 +17509,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -16913,7 +17522,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -17043,7 +17652,7 @@
         "records": [],
         "ledgerEvents": [],
         "socialView": {
-          "revision": 1,
+          "revision": 2,
           "hearing": {
             "atSeconds": 900,
             "due": false
@@ -17055,47 +17664,46 @@
           "encounteredResidents": [
             {
               "actorId": "NPC_Studio_Receptionist",
-              "stance": "oppose",
-              "stanceRevision": 9,
-              "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다.",
+              "stance": "uncertain",
+              "stanceRevision": 10,
+              "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "이곳 사람의 절차를 전혀 모른다는 답이 의문을 남겼습니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "접수 목적이 아직 분명하지 않아 판단을 보류했습니다."
               }
             }
           ],
           "openQuestions": [
             {
-              "questionId": "question:mem-fixture-2",
+              "questionId": "question:mem-fixture-3",
               "subjectActorId": "NPC_Studio_Receptionist",
               "status": "open",
-              "text": "이 방문자는 왜 마을 절차를 전혀 모르는가?",
-              "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다.",
+              "text": "접수 목적은 무엇인가?",
+              "whyLine": "방문 목적이 아직 분명하지 않습니다.",
               "provenance": {
                 "originKind": "speech",
                 "originActorId": "player",
                 "recipientKind": "listener",
                 "recipientActorId": "NPC_Studio_Receptionist",
-                "sourceMemoryId": "mem-fixture-2",
+                "sourceMemoryId": "mem-fixture-3",
                 "recordId": null,
                 "recordRevision": null,
                 "ledgerEventId": null,
-                "sourceExcerpt": "여기 사람이 아니라서 잘 모르겠습니다.",
-                "whyLine": "외부인이라고 밝힌 진술의 경위를 더 확인해야 합니다."
+                "sourceExcerpt": "안내받은 내용을 차근히 설명하겠습니다.",
+                "whyLine": "방문 목적이 아직 분명하지 않습니다."
               }
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     },
     {
@@ -17132,7 +17740,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "evidenceIds": [],
+          "introducesNewClaim": null,
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
           "citedRecords": [],
           "signals": [],
@@ -17195,7 +17806,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": null,
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -17401,7 +18015,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": null,
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -17451,7 +18068,10 @@
           "listenerActorId": "NPC_Studio_Receptionist",
           "conversationId": "sess-fixture-1",
           "turnId": "sess-fixture-1#0",
+          "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
           "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+          "evidenceIds": [],
+          "introducesNewClaim": null,
           "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
           "citedRecords": [],
           "signals": [],
@@ -17594,6 +18214,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": "sess-fixture-1",
         "actors": [
           {
@@ -17631,7 +18252,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": null,
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
                 "citedRecords": [],
                 "signals": [],
@@ -17720,7 +18344,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -17733,7 +18357,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -17746,7 +18370,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -17759,7 +18383,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -17772,7 +18396,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -17785,7 +18409,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -17966,8 +18590,7 @@
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       },
       "endResponse": {
         "runId": "run-fixture-1",
@@ -18009,7 +18632,10 @@
               "listenerActorId": "NPC_Studio_Receptionist",
               "conversationId": "sess-fixture-1",
               "turnId": "sess-fixture-1#0",
+              "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
               "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+              "evidenceIds": [],
+              "introducesNewClaim": null,
               "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
               "citedRecords": [],
               "signals": [],
@@ -18204,6 +18830,7 @@
           "transport": "scripted",
           "usedFallback": false
         },
+        "providerFailure": null,
         "activeConversationId": null,
         "actors": [
           {
@@ -18241,7 +18868,10 @@
                 "listenerActorId": "NPC_Studio_Receptionist",
                 "conversationId": "sess-fixture-1",
                 "turnId": "sess-fixture-1#0",
+                "statementEvidenceId": "player_statement:sess-fixture-1:sess-fixture-1#0",
                 "playerLine": "안내받은 절차를 확인하러 왔습니다.",
+                "evidenceIds": [],
+                "introducesNewClaim": null,
                 "npcLine": "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
                 "citedRecords": [],
                 "signals": [],
@@ -18330,7 +18960,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Office_Worker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:e18a2c21dc58c4b4",
+              "sourceId": "goal:1439f96c1bc2d14b",
               "actorIds": [
                 "NPC_Office_Worker"
               ],
@@ -18343,7 +18973,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Park_Caretaker:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:5ef78e6fc0f99473",
+              "sourceId": "goal:f788c9b1e0a4a6f3",
               "actorIds": [
                 "NPC_Park_Caretaker"
               ],
@@ -18356,7 +18986,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Roaming_Liaison:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:dca168d816e3bd2f",
+              "sourceId": "goal:2e87c463a0219f55",
               "actorIds": [
                 "NPC_Roaming_Liaison"
               ],
@@ -18369,7 +18999,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Station_Officer:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:6bc7a2737e7251e6",
+              "sourceId": "goal:6c0088304920109a",
               "actorIds": [
                 "NPC_Station_Officer"
               ],
@@ -18382,7 +19012,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Manager:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:4921d06c5167bb84",
+              "sourceId": "goal:e425e9d9cdc7ebb9",
               "actorIds": [
                 "NPC_Studio_Manager"
               ],
@@ -18395,7 +19025,7 @@
               "wakeId": "wake:run-fixture-1:goal:NPC_Studio_Receptionist:7",
               "kind": "goal",
               "phase": "due",
-              "sourceId": "goal:98b72e2961adbee7",
+              "sourceId": "goal:6e23ecff398bdd6d",
               "actorIds": [
                 "NPC_Studio_Receptionist"
               ],
@@ -18576,8 +19206,7 @@
             }
           ],
           "encounteredRecords": []
-        },
-        "providerFailure": null
+        }
       }
     }
   ]

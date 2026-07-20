@@ -125,6 +125,17 @@ function scriptedStance(
   return signalCount === 0 ? "vouch" : "uncertain";
 }
 
+function normalizeScriptedConversationProposal<T extends ConversationProposal>(proposal: T): T {
+  return {
+    ...proposal,
+    suggestedReplies: proposal.suggestedReplies.map(reply => ({
+      ...reply,
+      evidenceIds: [...reply.evidenceIds],
+      introducesNewClaim: reply.introducesNewClaim,
+    })) as T["suggestedReplies"],
+  };
+}
+
 export interface ScriptedNpcHandlers {
   conversation(request: ConversationTurnRequest): ConversationProposal | Promise<ConversationProposal>;
   nextStep(request: AgentStepRequest): AgentStepProposal | Promise<AgentStepProposal>;
@@ -160,7 +171,9 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
     request: ConversationTurnRequest,
   ): Promise<ResolvedProposal<ConversationProposal>> {
     return {
-      proposal: await this.handlers.conversation(request),
+      proposal: normalizeScriptedConversationProposal(
+        await this.handlers.conversation(request),
+      ),
       meta: {
         profileId: this.profileId,
         transport: "scripted",
@@ -196,7 +209,9 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
   ): Promise<ResolvedProposal<MergedConversationTurn>> {
     if (this.handlers.mergedTurn) {
       return {
-        proposal: await this.handlers.mergedTurn(request),
+        proposal: normalizeScriptedConversationProposal(
+          await this.handlers.mergedTurn(request),
+        ),
         meta: {
           profileId: this.profileId,
           transport: "scripted",
@@ -215,7 +230,11 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
       observePacket: request.observePacket,
       conversationHistory: [
         ...request.conversationHistory,
-        { speakerId: "player", line: request.playerLine },
+        {
+          speakerId: "player",
+          line: request.playerLine,
+          evidenceId: request.playerStatementEvidenceId,
+        },
       ],
     });
     return {

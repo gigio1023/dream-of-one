@@ -104,7 +104,12 @@ function observePacket() {
     },
     goals: ["평소 주문을 확인한다"],
     policy: DEFAULT_ROLE_POLICIES.store_clerk,
-    memory: { actorId: "NPC_Store_Clerk", ownActionNotes: [], observedLedgerEventIds: [] },
+    memory: {
+      actorId: "NPC_Store_Clerk",
+      ownActionNotes: [],
+      observedLedgerEventIds: [],
+      evidence: [],
+    },
     heardSpeech: [],
   });
   packet.audibleActorIds = ["player", "NPC_Store_Manager"];
@@ -164,9 +169,9 @@ const validConversation = JSON.stringify({
   utterance: "평소 주문으로 준비할까요?",
   citedRecordIds: [],
   suggestedReplies: [
-    { text: "네, 부탁합니다.", intent: "safe/local" },
-    { text: "제가 뭘 주문했죠?", intent: "uncertain/repair" },
-    { text: "처음 왔습니다.", intent: "risky/weird" },
+    { text: "네, 부탁합니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+    { text: "제가 뭘 주문했죠?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+    { text: "처음 왔습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
   ],
   continueConversation: true,
 });
@@ -179,8 +184,13 @@ function judgmentRequest() {
     promptId: "store.same_order.routine",
     actorId: "NPC_Store_Clerk",
     playerLine: "꿈에서 봤던 세계라서 기억이 흐려요.",
+    playerStatementEvidenceId: "player_statement:session-provider-test:turn-routine-1",
     conversationHistory: [
-      { speakerId: "NPC_Store_Clerk", line: "오늘도 같은 걸로 드릴까요?" },
+      {
+        speakerId: "NPC_Store_Clerk",
+        line: "오늘도 같은 걸로 드릴까요?",
+        evidenceId: null,
+      },
     ],
     observePacket: observePacket(),
     suspicionBefore: 0,
@@ -206,9 +216,9 @@ const validMergedTurn = JSON.stringify({
   utterance: "방문 목적을 확인했습니다.",
   citedRecordIds: [],
   suggestedReplies: [
-    { text: "확인해 주셔서 감사합니다.", intent: "safe/local" },
-    { text: "다음 절차를 알려 주세요.", intent: "uncertain/repair" },
-    { text: "더 말하지 않겠습니다.", intent: "risky/weird" },
+    { text: "확인해 주셔서 감사합니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+    { text: "다음 절차를 알려 주세요.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+    { text: "더 말하지 않겠습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
   ],
   continueConversation: false,
 });
@@ -217,7 +227,11 @@ function ambientReplyRequest(locale = "ko-KR"): AmbientReplyRequest {
   const packet = observePacket();
   packet.visibleActors = ["NPC_Store_Manager"];
   packet.audibleActorIds = ["NPC_Store_Manager"];
-  packet.heardSpeech = ["NPC_Store_Manager: 방문자가 앞서 다른 설명을 했습니다."];
+  packet.heardSpeech = [{
+    speakerActorId: "NPC_Store_Manager",
+    source: { kind: "ambient_utterance", id: "memory:ambient-manager-1" },
+    line: "방문자가 앞서 다른 설명을 했습니다.",
+  }];
   return {
     sessionId: "run-ambient-provider-test",
     locale,
@@ -2197,11 +2211,11 @@ test("provider service returns schema-validated live conversation proposals", as
   assert.match(textGen.requests[0].instructions, /Missing context means unknown, never absent/);
   assert.match(
     textGen.requests[0].instructions,
-    /Suggested player replies are different: they are uncommitted possible utterances/,
+    /Suggested player replies are uncommitted possible utterances/,
   );
   assert.match(
     textGen.requests[0].instructions,
-    /risky\/weird may offer a bolder unsupported cover claim or lie/,
+    /only risky\/weird may establish unsupported backstory/,
   );
   assert.match(
     textGen.requests[0].instructions,
@@ -2233,7 +2247,7 @@ test("provider service returns schema-validated live conversation proposals", as
   );
   assert.match(
     JSON.stringify(textGen.requests[0].jsonSchema),
-    /safe\/local is the least exposing plausible answer/,
+    /safe\/local must be non-assertive or cite request evidenceIds/,
   );
   const duplicateIntentProposal = JSON.parse(validConversation);
   duplicateIntentProposal.suggestedReplies[1].intent = "safe/local";
@@ -2260,7 +2274,7 @@ test("provider service returns schema-validated live conversation proposals", as
   );
   assert.ok(
     providerInput.groundingContract.validityRules.some((rule: string) =>
-      rule.includes("Only the one the player selects or types")
+      rule.includes("Only the line the player selects or types")
     ),
   );
   assert.deepEqual(service.auditSnapshot("session-provider-test"), {
@@ -2292,6 +2306,210 @@ test("provider service returns schema-validated live conversation proposals", as
     }],
   });
   providerAuditSnapshotSchema.parse(service.auditSnapshot("session-provider-test"));
+});
+
+test("production reply evidence slots repair invalid claims once and fail closed after one repair", async () => {
+  const compliant = {
+    ...JSON.parse(validConversation),
+    suggestedReplies: [
+      {
+        text: "단골로 안내받았습니다.",
+        intent: "safe/local",
+        evidenceIds: ["scene_fact:routine:1"],
+        introducesNewClaim: false,
+      },
+      {
+        text: "무슨 뜻인지 다시 말씀해 주세요.",
+        intent: "uncertain/repair",
+        evidenceIds: [],
+        introducesNewClaim: false,
+      },
+      {
+        text: "어제 시장과 약속했습니다.",
+        intent: "risky/weird",
+        evidenceIds: [],
+        introducesNewClaim: true,
+      },
+    ],
+  };
+  const invalidCases = [
+    {
+      name: "all replies marked as new claims",
+      mutate(proposal: typeof compliant) {
+        for (const reply of proposal.suggestedReplies) reply.introducesNewClaim = true;
+      },
+    },
+    {
+      name: "uncertain reply marked as a new claim",
+      mutate(proposal: typeof compliant) {
+        proposal.suggestedReplies[1].introducesNewClaim = true;
+      },
+    },
+    {
+      name: "reply cites an id outside the request catalog",
+      mutate(proposal: typeof compliant) {
+        proposal.suggestedReplies[0].evidenceIds = ["scene_fact:unknown:1"];
+      },
+    },
+  ];
+
+  for (const candidate of invalidCases) {
+    const invalid = structuredClone(compliant);
+    candidate.mutate(invalid);
+    const textGen = new FakeTextGen([
+      { text: JSON.stringify(invalid) },
+      { text: JSON.stringify(compliant) },
+    ]);
+    const service = new ProviderService({
+      profileId: `test/reply-evidence-${candidate.name}`,
+      textGen,
+    });
+    const result = await service.proposeConversationTurn(conversationRequest());
+    assert.deepEqual(result.proposal.suggestedReplies, compliant.suggestedReplies, candidate.name);
+    assert.deepEqual(
+      textGen.requests.map(request => request.purpose),
+      ["conversation", "repair"],
+      candidate.name,
+    );
+  }
+
+  const acceptedTextGen = new FakeTextGen([{ text: JSON.stringify(compliant) }]);
+  const acceptedService = new ProviderService({
+    profileId: "test/reply-evidence-compliant",
+    textGen: acceptedTextGen,
+  });
+  const accepted = await acceptedService.proposeConversationTurn(conversationRequest());
+  assert.deepEqual(accepted.proposal.suggestedReplies, compliant.suggestedReplies);
+  assert.equal(acceptedTextGen.requests.length, 1);
+
+  const alwaysInvalid = structuredClone(compliant);
+  invalidCases[0].mutate(alwaysInvalid);
+  const failedTextGen = new FakeTextGen([
+    { text: JSON.stringify(alwaysInvalid) },
+    { text: JSON.stringify(alwaysInvalid) },
+  ]);
+  const failedService = new ProviderService({
+    profileId: "test/reply-evidence-fail-closed",
+    textGen: failedTextGen,
+  });
+  await expectProviderFailure(
+    failedService.proposeConversationTurn(conversationRequest()),
+    {
+      profileId: "test/reply-evidence-fail-closed",
+      reason: "invalid_envelope",
+      purpose: "conversation",
+    },
+  );
+  assert.deepEqual(failedTextGen.requests.map(request => request.purpose), ["conversation", "repair"]);
+});
+
+test("merged post-answer reply evidence contract accepts, repairs, and fails closed", async () => {
+  const request = {
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["상점에서 점원과 직접 대화하고 있다."],
+    stanceBefore: "uncertain" as const,
+    hasMeaningfulFirsthandConversation: false,
+  };
+  const priorEvidenceId = "player_statement:session-provider-test:turn-prior-1";
+  request.conversationHistory.push({
+    speakerId: "player",
+    line: "앞서 방문 목적을 설명했습니다.",
+    evidenceId: priorEvidenceId,
+  });
+  request.observePacket.heardSpeech = [
+    {
+      speakerActorId: "player",
+      source: { kind: "player_statement", id: priorEvidenceId },
+      line: "앞서 방문 목적을 설명했습니다.",
+    },
+    {
+      speakerActorId: "player",
+      source: { kind: "player_statement", id: request.playerStatementEvidenceId },
+      line: request.playerLine,
+    },
+  ];
+  const compliant = {
+    ...JSON.parse(validMergedTurn),
+    suggestedReplies: [
+      {
+        text: "제가 방금 설명한 내용을 기준으로 확인해 주세요.",
+        intent: "safe/local",
+        evidenceIds: [request.playerStatementEvidenceId],
+        introducesNewClaim: false,
+      },
+      {
+        text: "어떤 부분을 다시 설명할까요?",
+        intent: "uncertain/repair",
+        evidenceIds: [],
+        introducesNewClaim: false,
+      },
+      {
+        text: "시장이 저를 보냈습니다.",
+        intent: "risky/weird",
+        evidenceIds: [],
+        introducesNewClaim: true,
+      },
+    ],
+  };
+  const invalid = structuredClone(compliant);
+  for (const reply of invalid.suggestedReplies) reply.introducesNewClaim = true;
+
+  const repairedTextGen = new FakeTextGen([
+    { text: JSON.stringify(invalid) },
+    { text: JSON.stringify(compliant) },
+  ]);
+  const repairedService = new ProviderService({
+    profileId: "test/merged-reply-evidence-repair",
+    textGen: repairedTextGen,
+    maxTokensPerSession: 200_000,
+  });
+  const repaired = await repairedService.judgeAndProposeConversationTurn(request);
+  assert.deepEqual(repaired.proposal.suggestedReplies, compliant.suggestedReplies);
+  assert.deepEqual(
+    repairedTextGen.requests.map(providerRequest => providerRequest.purpose),
+    ["conversation_turn", "repair"],
+  );
+  const firstInput = JSON.parse(repairedTextGen.requests[0].input);
+  assert.deepEqual(
+    firstInput.groundingContract.evidenceCatalog
+      .filter((entry: { evidenceType: string }) => entry.evidenceType === "player_statement")
+      .map((entry: { evidenceId: string }) => entry.evidenceId),
+    [priorEvidenceId, request.playerStatementEvidenceId],
+    "history and typed heardSpeech project each player turn exactly once",
+  );
+
+  const acceptedTextGen = new FakeTextGen([{ text: JSON.stringify(compliant) }]);
+  const acceptedService = new ProviderService({
+    profileId: "test/merged-reply-evidence-compliant",
+    textGen: acceptedTextGen,
+    maxTokensPerSession: 200_000,
+  });
+  const accepted = await acceptedService.judgeAndProposeConversationTurn(request);
+  assert.deepEqual(accepted.proposal.suggestedReplies, compliant.suggestedReplies);
+  assert.equal(acceptedTextGen.requests.length, 1);
+
+  const failedTextGen = new FakeTextGen([
+    { text: JSON.stringify(invalid) },
+    { text: JSON.stringify(invalid) },
+  ]);
+  const failedService = new ProviderService({
+    profileId: "test/merged-reply-evidence-fail-closed",
+    textGen: failedTextGen,
+    maxTokensPerSession: 200_000,
+  });
+  await expectProviderFailure(
+    failedService.judgeAndProposeConversationTurn(request),
+    {
+      profileId: "test/merged-reply-evidence-fail-closed",
+      reason: "invalid_envelope",
+      purpose: "conversation_turn",
+    },
+  );
+  assert.deepEqual(
+    failedTextGen.requests.map(providerRequest => providerRequest.purpose),
+    ["conversation_turn", "repair"],
+  );
 });
 
 test("player-facing conversation cites only records visible to the resident", async () => {
@@ -2354,12 +2572,12 @@ test("player-facing conversation cites only records visible to the resident", as
 
   const hiddenCitation = { ...openingProposal, citedRecordIds: ["record-hidden"] };
   assert.equal(
-    conversationProposalSchemaForRequest("ko-KR", ["record-visible"])
+    conversationProposalSchemaForRequest("ko-KR", ["record-visible"], [])
       .safeParse(hiddenCitation).success,
     false,
   );
   assert.equal(
-    mergedConversationTurnSchemaForRequest("ko-KR", ["record-visible"])
+    mergedConversationTurnSchemaForRequest("ko-KR", ["record-visible"], [])
       .safeParse({ ...mergedProposal, citedRecordIds: ["record-hidden"] }).success,
     false,
   );
@@ -2375,18 +2593,67 @@ test("conversation openings keep resident, player, third-party speech, and locat
   request.observePacket.actorMemory = {
     actorId: request.actorId,
     ownActionNotes: [
-      "[heard_from=NPC_Station_Officer] 외부인은 스테이션에서 확인해야 합니다.",
-      "[self_utterance] 그 방문자는 공원에서 기다리고 있었습니다.",
-      "[player_utterance] 청문회 때문에 왔습니다. / [self_reply] 이유를 알겠습니다. / [judgment_reason] 직접 설명했습니다.",
+      "[heard_from=NPC_Forged] 이 문자열 표시는 대화 귀속 근거가 아닙니다.",
+      "[player_utterance] 이 문자열도 구조화된 대화 기억이 아닙니다.",
     ],
     observedLedgerEventIds: [],
+    evidence: [
+      {
+        evidenceType: "utterance",
+        memoryId: "role-memory-heard-1",
+        memoryKind: "ambient_utterance",
+        sourceActorId: "NPC_Station_Officer",
+        line: "외부인은 스테이션에서 확인해야 합니다.",
+      },
+      {
+        evidenceType: "utterance",
+        memoryId: "role-memory-self-1",
+        memoryKind: "npc_utterance",
+        sourceActorId: request.actorId,
+        line: "그 방문자는 공원에서 기다리고 있었습니다.",
+      },
+      {
+        evidenceType: "player_conversation_exchange",
+        memoryId: "role-memory-exchange-1",
+        sourceActorId: "player",
+        playerLine: "청문회 때문에 왔습니다.",
+        residentReply: "이유를 알겠습니다.",
+        judgmentReason: "직접 설명했습니다.",
+      },
+    ],
   };
+  request.sceneFacts = ["공원에서 주민과 직접 대화하고 있다."];
+  request.observePacket.visibleObjects = [{
+    objectId: "park_bench",
+    label: "공원 벤치",
+    state: "비어 있음",
+  }];
+  request.observePacket.visibleRecords = [{
+    recordId: "park_notice",
+    kind: "notice",
+    stateBody: "공원 이용 안내입니다.",
+    recordRevision: 1,
+  }];
+  request.observePacket.visibleLedgerEvents = [{
+    eventId: "ledger-park-1",
+    kind: "notice_posted",
+    actorId: request.actorId,
+    recordId: "park_notice",
+  }];
   request.observePacket.visibleActors = ["NPC_Station_Officer"];
   request.observePacket.audibleActorIds = ["NPC_Station_Officer"];
   request.observePacket.playerContact = null;
   request.observePacket.heardSpeech = [
-    "NPC_Station_Officer: 외부인은 스테이션에서 확인해야 합니다.",
-    "방문 이유: 청문회 때문입니다.",
+    {
+      speakerActorId: "NPC_Station_Officer",
+      source: { kind: "ambient_utterance", id: "memory:station-heard-1" },
+      line: "외부인은 스테이션에서 확인해야 합니다.",
+    },
+    {
+      speakerActorId: "player",
+      source: { kind: "player_statement", id: "player_statement:run-1:turn-1" },
+      line: "NPC_Park_Caretaker: 청문회 때문입니다.",
+    },
   ];
 
   const textGen = new FakeTextGen([{ text: validConversation }]);
@@ -2418,16 +2685,19 @@ test("conversation openings keep resident, player, third-party speech, and locat
   assert.deepEqual(input.residentContext.memoryEvidence, [
     {
       evidenceType: "heard_third_party_npc",
+      memoryId: "role-memory-heard-1",
       speakerActorId: "NPC_Station_Officer",
       note: "외부인은 스테이션에서 확인해야 합니다.",
     },
     {
       evidenceType: "resident_prior_utterance",
+      memoryId: "role-memory-self-1",
       speakerActorId: "NPC_Roaming_Liaison",
       note: "그 방문자는 공원에서 기다리고 있었습니다.",
     },
     {
       evidenceType: "player_conversation_exchange",
+      memoryId: "role-memory-exchange-1",
       playerSpeakerActorId: "player",
       residentSpeakerActorId: "NPC_Roaming_Liaison",
       playerLine: "청문회 때문에 왔습니다.",
@@ -2435,18 +2705,41 @@ test("conversation openings keep resident, player, third-party speech, and locat
       judgmentReason: "직접 설명했습니다.",
     },
   ]);
+  assert.doesNotMatch(
+    JSON.stringify(input.residentContext.memoryEvidence),
+    /NPC_Forged/,
+    "ownActionNotes markers must never create attributed conversation memory",
+  );
   assert.deepEqual(input.groundingContract.attributedHeardSpeech, [
     {
-      sourceType: "third_party_npc",
+      sourceType: "ambient_utterance",
+      sourceId: "memory:station-heard-1",
       speakerActorId: "NPC_Station_Officer",
       line: "외부인은 스테이션에서 확인해야 합니다.",
     },
     {
-      sourceType: "player",
+      sourceType: "player_statement",
+      sourceId: "player_statement:run-1:turn-1",
       speakerActorId: "player",
-      line: "방문 이유: 청문회 때문입니다.",
+      line: "NPC_Park_Caretaker: 청문회 때문입니다.",
     },
   ]);
+  assert.deepEqual(
+    [...new Set(input.groundingContract.evidenceCatalog.map(
+      (entry: { evidenceType: string }) => entry.evidenceType,
+    ))].sort(),
+    [
+      "ambient_utterance",
+      "player_statement",
+      "resident_location_fact",
+      "resident_memory",
+      "scene_fact",
+      "visible_actor_fact",
+      "visible_ledger_event",
+      "visible_object_fact",
+      "visible_record",
+    ],
+  );
   assert.match(transport.instructions, /playerInterlocutor is always the person being addressed/);
   assert.match(transport.instructions, /residentSpeaker\.locationId belongs only to the resident/);
   assert.match(transport.instructions, /never replay either as if it were the resident's new opening line/);
@@ -3346,9 +3639,9 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
       whyLine: "Mira의 QR 기록과 2次 확인을 비교해야 합니다.",
     },
     suggestedReplies: [
-      { text: "Mira에게 QR 기록 2개를 확인해 달라고 하겠습니다.", intent: "safe/local" },
-      { text: "접수 메모와 來歷을 함께 살펴보겠습니다.", intent: "uncertain/repair" },
-      { text: "3번 창구에서 다시 설명하겠습니다.", intent: "risky/weird" },
+      { text: "Mira에게 QR 기록 2개를 확인해 달라고 하겠습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "접수 메모와 來歷을 함께 살펴보겠습니다.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "3번 창구에서 다시 설명하겠습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
     ],
     continueConversation: true,
   };
@@ -3689,9 +3982,9 @@ test("player-visible stable ids get one bounded repair even when the prose conta
       whyLine: "NPC_Studio_Manager의 mem-question-1을 확인해야 합니다.",
     },
     suggestedReplies: [
-      { text: "Mira에게 다시 묻겠습니다.", intent: "safe/local" },
-      { text: "TS_Studio_ReviewRecords를 확인하겠습니다.", intent: "uncertain/repair" },
-      { text: "아직 판단하지 않겠습니다.", intent: "risky/weird" },
+      { text: "Mira에게 다시 묻겠습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "TS_Studio_ReviewRecords를 확인하겠습니다.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "아직 판단하지 않겠습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
     ],
   };
   const textGen = new FakeTextGen([
@@ -3928,9 +4221,9 @@ test("invalid first and repair envelopes emit one sanitized structured warning",
   const repairInvalid = {
     utterance: `방문자가 ${offendingLatinToken}를 다시 말했습니다.`,
     suggestedReplies: [
-      { text: "I can explain the procedure.", intent: "safe/local" },
-      { text: "Please clarify the question.", intent: "uncertain/repair" },
-      { text: "I have nothing to add.", intent: "risky/weird" },
+      { text: "I can explain the procedure.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "Please clarify the question.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "I have nothing to add.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
     ],
     continueConversation: "yes",
     [sentinel]: "private extra field",

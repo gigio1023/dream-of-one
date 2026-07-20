@@ -142,7 +142,13 @@ const nextTurnSchema = z
     acceptsFreeInput: z.boolean(),
     continueConversation: z.boolean(),
     choices: z.array(
-      z.object({ choiceId: nonEmpty, intent: intentEnum, line: nonEmpty }).strict(),
+      z.object({
+        choiceId: nonEmpty,
+        intent: intentEnum,
+        line: nonEmpty,
+        evidenceIds: z.array(nonEmpty),
+        introducesNewClaim: z.boolean(),
+      }).strict(),
     ),
     proposalMeta: proposalMetaSchema,
     /** Station interrogation only; omit on ordinary conversation turns. */

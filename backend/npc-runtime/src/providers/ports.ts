@@ -138,6 +138,21 @@ export interface SuggestedReply {
   text: string;
   /** Prompt-shaping hint only. Runtime classification never trusts this value. */
   intent: ConversationChoiceIntent;
+  /** Request-scoped sources that already support the candidate's factual claims. */
+  evidenceIds: string[];
+  /** Model-owned disclosure that this candidate establishes unsupported backstory. */
+  introducesNewClaim: boolean;
+}
+
+export function playerStatementEvidenceId(sessionId: string, turnId: string): string {
+  return `player_statement:${sessionId}:${turnId}`;
+}
+
+/** Ordered dialogue with explicit evidence identity for player-authored lines. */
+export interface ConversationHistoryEntry {
+  speakerId: string;
+  line: string;
+  evidenceId: string | null;
 }
 
 export interface ConversationProposal {
@@ -189,7 +204,7 @@ export interface ConversationTurnRequest {
   objective: string;
   sceneFacts: string[];
   observePacket: ObservePacket;
-  conversationHistory: Array<{ speakerId: string; line: string }>;
+  conversationHistory: ConversationHistoryEntry[];
 }
 
 /**
@@ -231,8 +246,10 @@ export interface ConversationJudgmentRequest {
   /** The NPC doing the judging. */
   actorId: string;
   playerLine: string;
+  /** Stable evidence id assigned by the runtime to this exact player statement. */
+  playerStatementEvidenceId: string;
   /** Both sides of the exchange so far, excluding the line being judged. */
-  conversationHistory: Array<{ speakerId: string; line: string }>;
+  conversationHistory: ConversationHistoryEntry[];
   observePacket: ObservePacket;
   suspicionBefore: number;
   reportPressureBefore: number;

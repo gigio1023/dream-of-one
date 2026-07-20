@@ -116,6 +116,7 @@ test("legacy observe packets carry no M3R actor or self context", () => {
       actorId: "NPC_Store_Clerk",
       ownActionNotes: [],
       observedLedgerEventIds: [],
+      evidence: [],
     },
     heardSpeech: [],
   });

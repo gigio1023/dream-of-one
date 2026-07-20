@@ -3,10 +3,13 @@ import type { ConversationChoiceIntent, ConversationSuspicionSignal } from "../c
 export interface ConversationMemoryLine {
   turnId: string;
   promptId: string;
+  statementEvidenceId: string;
   line: string;
   selectedChoiceId?: string;
   freeInputHash?: string;
   intent?: ConversationChoiceIntent;
+  evidenceIds: readonly string[];
+  introducesNewClaim: boolean | null;
   signals?: readonly ConversationSuspicionSignal[];
 }
 
@@ -258,7 +261,10 @@ export function ruleJudgeConversationTurn(input: RuleJudgmentInput): {
     memory: input.priorPlayerLines.map((line, index) => ({
       turnId: `prior-${index}`,
       promptId: input.promptId,
+      statementEvidenceId: `player_statement:rule-judgment:prior-${index}`,
       line,
+      evidenceIds: [],
+      introducesNewClaim: null,
     })),
     suspicionBefore: input.suspicionBefore,
     reportWeightBefore: input.reportPressureBefore,

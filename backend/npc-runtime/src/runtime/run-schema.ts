@@ -429,7 +429,10 @@ export const runPlayerConversationMemorySchema = z
     listenerActorId: nonEmpty,
     conversationId: nonEmpty,
     turnId: nonEmpty,
+    statementEvidenceId: nonEmpty,
     playerLine: nonEmpty,
+    evidenceIds: z.array(nonEmpty),
+    introducesNewClaim: z.boolean().nullable(),
     npcLine: nonEmpty,
     citedRecords: z.array(runRecordCitationSchema).default([]),
     signals: z.array(signalSchema),
@@ -866,6 +869,8 @@ const suggestedReplySchema = z
     choiceId: nonEmpty,
     intent: intentSchema,
     line: nonEmpty,
+    evidenceIds: z.array(nonEmpty),
+    introducesNewClaim: z.boolean(),
   })
   .strict();
 

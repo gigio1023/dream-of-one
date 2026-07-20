@@ -71,7 +71,21 @@ const forbiddenPlayerVisibleMetaByPresentationId: Record<string, RegExp> = {
 const frenchInfinitiveUserContexts =
   /\b(?:à|de|pour|sans|peut|peuvent|pourrait|pourraient|doit|doivent|va|vont)\s+user\b/giu;
 const intentSchema = z.enum(CONVERSATION_CHOICE_INTENTS);
-const suggestedReplySchema = z.object({ text: nonEmpty, intent: intentSchema }).strict();
+const suggestedReplyEvidenceIdsSchema = z.array(nonEmpty).superRefine((ids, context) => {
+  if (new Set(ids).size === ids.length) return;
+  context.addIssue({
+    code: "custom",
+    message: "suggested reply evidence ids must be unique",
+  });
+});
+const suggestedReplySchema = z
+  .object({
+    text: nonEmpty,
+    intent: intentSchema,
+    evidenceIds: suggestedReplyEvidenceIdsSchema,
+    introducesNewClaim: z.boolean(),
+  })
+  .strict();
 const mergedSuggestedReplySchema = z.preprocess(
   value => normalizeMergedSuggestedReplyIntents(value),
   z.tuple([
@@ -93,7 +107,7 @@ const suggestedReplyJsonString = {
     "Player-visible natural-language prose only. Stay entirely in fiction: never call anyone a player, user, or NPC, and never mention games, AI, language models, prompts, or system messages. Never include an internal stable id, identifier token, or underscore name. This is an uncommitted candidate utterance, not an established fact or a line the speaker has already chosen; it becomes evidence only if selected. The reply must be a complete, self-contained, in-character first-person utterance that can be spoken verbatim. Never narrate, summarize, or label the speaker. Explicitly preserve the person, object, source, or claim being answered whenever omission could make a noun phrase sound like the speaker's own identity or possession; never return a bare name, role, object, yes/no fragment, or context-dependent copular noun phrase.",
 } as const;
 const suggestedReplySetJsonDescription =
-  "Return exactly one candidate for each intent in this fixed array order: safe/local first, uncertain/repair second, risky/weird third. Make their relative social risk clear from the wording. safe/local is the least exposing plausible answer and may use a modest cover claim; uncertain/repair hedges, qualifies, admits uncertainty, or asks for clarification; risky/weird may make a bolder unsupported cover claim or lie. All three remain uncommitted until selected, and intent never determines the NPC judgment.";
+  "Return exactly one candidate for each intent in this fixed array order: safe/local first, uncertain/repair second, risky/weird third. Make their relative social risk clear from the wording. uncertain/repair must be non-assertive. safe/local must be non-assertive or cite request evidenceIds that support every factual claim. Only risky/weird may establish unsupported backstory, and it must disclose that choice with introducesNewClaim=true. All three remain uncommitted until selected, and intent never determines the NPC judgment.";
 const nullablePlayerVisibleJsonString = {
   type: ["string", "null"],
   description:
@@ -114,7 +128,11 @@ const nullableTransientWorldUtteranceJsonString = {
 
 function addSuggestedReplyIntentIssues(
   context: z.RefinementCtx,
-  replies: readonly { intent: ConversationChoiceIntent }[],
+  replies: readonly {
+    intent: ConversationChoiceIntent;
+    evidenceIds: readonly string[];
+    introducesNewClaim: boolean;
+  }[],
 ): void {
   const counts = new Map<ConversationChoiceIntent, number>();
   for (const reply of replies) {
@@ -126,6 +144,42 @@ function addSuggestedReplyIntentIssues(
     path: ["suggestedReplies"],
     message:
       "suggested replies must contain exactly one safe/local, one uncertain/repair, and one risky/weird intent",
+  });
+}
+
+function addSuggestedReplyClaimIssues(
+  context: z.RefinementCtx,
+  replies: readonly {
+    intent: ConversationChoiceIntent;
+    introducesNewClaim: boolean;
+  }[],
+): void {
+  replies.forEach((reply, index) => {
+    if (reply.intent !== "risky/weird" && reply.introducesNewClaim) {
+      context.addIssue({
+        code: "custom",
+        path: ["suggestedReplies", index, "introducesNewClaim"],
+        message: `${reply.intent} must not introduce a new claim`,
+      });
+    }
+  });
+}
+
+function addSuggestedReplyEvidenceScopeIssues(
+  context: z.RefinementCtx,
+  replies: readonly { evidenceIds: readonly string[] }[],
+  evidenceIds: readonly string[],
+): void {
+  const available = new Set(evidenceIds);
+  replies.forEach((reply, replyIndex) => {
+    reply.evidenceIds.forEach((evidenceId, evidenceIndex) => {
+      if (available.has(evidenceId)) return;
+      context.addIssue({
+        code: "custom",
+        path: ["suggestedReplies", replyIndex, "evidenceIds", evidenceIndex],
+        message: `suggested reply evidence ${evidenceId} is not in this request`,
+      });
+    });
   });
 }
 
@@ -289,6 +343,7 @@ export const conversationProposalSchema = z
   .strict()
   .superRefine((value, context) => {
     addSuggestedReplyIntentIssues(context, value.suggestedReplies);
+    addSuggestedReplyClaimIssues(context, value.suggestedReplies);
   });
 
 // Deltas are validated as integers only; the runtime clamps them to the
@@ -326,6 +381,7 @@ export const mergedConversationTurnSchema = z
   .strict()
   .superRefine((value, context) => {
     addSuggestedReplyIntentIssues(context, value.suggestedReplies);
+    addSuggestedReplyClaimIssues(context, value.suggestedReplies);
   });
 
 export const ambientReplyJudgmentSchema = z
@@ -454,9 +510,11 @@ function addVisibleConversationRecordCitationIssues(
 export function conversationProposalSchemaForRequest(
   locale: string,
   visibleIds: readonly string[],
+  evidenceIds: readonly string[],
 ) {
   return conversationProposalSchemaForLocale(locale).superRefine((value, context) => {
     addVisibleConversationRecordCitationIssues(context, value.citedRecordIds, visibleIds);
+    addSuggestedReplyEvidenceScopeIssues(context, value.suggestedReplies, evidenceIds);
   });
 }
 
@@ -496,9 +554,11 @@ export function mergedConversationTurnSchemaForLocale(locale: string) {
 export function mergedConversationTurnSchemaForRequest(
   locale: string,
   visibleIds: readonly string[],
+  evidenceIds: readonly string[],
 ) {
   return mergedConversationTurnSchemaForLocale(locale).superRefine((value, context) => {
     addVisibleConversationRecordCitationIssues(context, value.citedRecordIds, visibleIds);
+    addSuggestedReplyEvidenceScopeIssues(context, value.suggestedReplies, evidenceIds);
   });
 }
 
@@ -1155,10 +1215,16 @@ export const conversationProposalJsonSchema: Record<string, unknown> = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["text", "intent"],
+        required: ["text", "intent", "evidenceIds", "introducesNewClaim"],
         properties: {
           text: suggestedReplyJsonString,
           intent: { type: "string", enum: [...CONVERSATION_CHOICE_INTENTS] },
+          evidenceIds: {
+            type: "array",
+            uniqueItems: true,
+            items: { type: "string", minLength: 1 },
+          },
+          introducesNewClaim: { type: "boolean" },
         },
       },
     },
@@ -1187,14 +1253,31 @@ function constrainConversationRecordCitations(
   return schema;
 }
 
+function constrainSuggestedReplyEvidenceIds(
+  schema: Record<string, unknown>,
+  evidenceIds: readonly string[],
+): Record<string, unknown> {
+  const properties = schema.properties as Record<string, Record<string, unknown>>;
+  const suggestions = properties.suggestedReplies;
+  const item = suggestions.items as Record<string, unknown>;
+  const replyProperties = item.properties as Record<string, Record<string, unknown>>;
+  const evidence = replyProperties.evidenceIds;
+  const evidenceItems = evidence.items as Record<string, unknown>;
+  const available = uniqueStrings(evidenceIds);
+  if (available.length === 0) evidence.maxItems = 0;
+  else evidenceItems.enum = available;
+  return schema;
+}
+
 export function conversationProposalJsonSchemaForRequest(
   locale: string,
   visibleIds: readonly string[],
+  evidenceIds: readonly string[],
 ): Record<string, unknown> {
-  return constrainConversationRecordCitations(
+  return constrainSuggestedReplyEvidenceIds(constrainConversationRecordCitations(
     conversationProposalJsonSchemaForLocale(locale),
     visibleIds,
-  );
+  ), evidenceIds);
 }
 
 export const conversationJudgmentJsonSchema: Record<string, unknown> = {
@@ -1283,10 +1366,16 @@ export const mergedConversationTurnJsonSchema: Record<string, unknown> = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["text", "intent"],
+        required: ["text", "intent", "evidenceIds", "introducesNewClaim"],
         properties: {
           text: suggestedReplyJsonString,
           intent: { type: "string", enum: [...CONVERSATION_CHOICE_INTENTS] },
+          evidenceIds: {
+            type: "array",
+            uniqueItems: true,
+            items: { type: "string", minLength: 1 },
+          },
+          introducesNewClaim: { type: "boolean" },
         },
       },
     },
@@ -1305,11 +1394,12 @@ export function mergedConversationTurnJsonSchemaForLocale(
 export function mergedConversationTurnJsonSchemaForRequest(
   locale: string,
   visibleIds: readonly string[],
+  evidenceIds: readonly string[],
 ): Record<string, unknown> {
-  return constrainConversationRecordCitations(
+  return constrainSuggestedReplyEvidenceIds(constrainConversationRecordCitations(
     mergedConversationTurnJsonSchemaForLocale(locale),
     visibleIds,
-  );
+  ), evidenceIds);
 }
 
 export const ambientReplyJudgmentJsonSchema: Record<string, unknown> = {

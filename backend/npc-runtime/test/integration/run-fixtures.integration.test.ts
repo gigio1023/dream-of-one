@@ -440,7 +440,7 @@ test("the fixture proves one attributable Studio stance change without instituti
   assert.equal(fixtures.endpoints.runSnapshotAfterEnd.response.activeConversationId, null);
 });
 
-test("fixture replay covers every issued choice plus bounded free input", () => {
+test("fixture replay covers every opening choice plus bounded free input and recovery", () => {
   const variants = fixtures.sessionAnswerVariants;
   assert.equal(variants.length, 4);
   const issuedChoiceIds = fixtures.endpoints.sessionStart.response.nextTurn.choices.map(
@@ -458,7 +458,13 @@ test("fixture replay covers every issued choice plus bounded free input", () => 
     const runSnapshot = runSnapshotSchema.parse(variant.runSnapshotResponse);
     const end = runSessionEndResponseSchema.parse(variant.endResponse);
     const endRunSnapshot = runSnapshotSchema.parse(variant.endRunSnapshotResponse);
-    assert.equal(response.nextTurn, null);
+    if (response.nextTurn) {
+      assert.equal(
+        response.nextTurn.continueConversation,
+        false,
+        "a forced recovery must be the final bounded turn",
+      );
+    }
     assert.equal(sessionSnapshot.actor.stance, response.actor.stance);
     assert.equal(runSnapshot.actors[0].stance, response.actor.stance);
     assert.equal(end.ended, true);

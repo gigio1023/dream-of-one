@@ -19,7 +19,7 @@ function clerk(): ActorContextLite {
 }
 
 function emptyMemory(actorId: string): ActorMemory {
-  return { actorId, ownActionNotes: [], observedLedgerEventIds: [] };
+  return { actorId, ownActionNotes: [], observedLedgerEventIds: [], evidence: [] };
 }
 
 function adapterFor(steps: AgentStepProposal[]): ScriptedNpcAdapter {
@@ -27,9 +27,9 @@ function adapterFor(steps: AgentStepProposal[]): ScriptedNpcAdapter {
     conversation: () => ({
       utterance: "테스트 질문",
       suggestedReplies: [
-        { text: "네", intent: "safe/local" },
-        { text: "확인할게요", intent: "uncertain/repair" },
-        { text: "아니요", intent: "risky/weird" },
+        { text: "네", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+        { text: "확인할게요", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+        { text: "아니요", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
       ],
       continueConversation: true,
     }),

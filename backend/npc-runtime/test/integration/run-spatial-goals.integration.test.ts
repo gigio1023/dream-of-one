@@ -1309,15 +1309,30 @@ test("provider run observations bound recent history without deleting runtime or
   );
   assert.deepEqual(
     observed.observePacket.actorMemory.ownActionNotes,
-    expectedLines(RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT).map(
-      line => `[heard_from=NPC_Park_Caretaker] ${line}`,
+    expectedIds(RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT).map(
+      memoryId => `[ambient_utterance_memory=${memoryId}]`,
     ),
   );
   assert.deepEqual(
+    observed.observePacket.actorMemory.evidence,
+    expectedLines(RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT).map((line, offset) => ({
+      evidenceType: "utterance",
+      memoryId: expectedIds(RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT)[offset],
+      memoryKind: "ambient_utterance",
+      sourceActorId: "NPC_Park_Caretaker",
+      line,
+    })),
+  );
+  assert.deepEqual(
     observed.observePacket.heardSpeech,
-    expectedLines(RUN_OBSERVE_HEARD_SPEECH_LIMIT).map(
-      line => `NPC_Park_Caretaker: ${line}`,
-    ),
+    expectedLines(RUN_OBSERVE_HEARD_SPEECH_LIMIT).map((line, offset) => ({
+      speakerActorId: "NPC_Park_Caretaker",
+      source: {
+        kind: "ambient_utterance",
+        id: `memory:${expectedIds(RUN_OBSERVE_HEARD_SPEECH_LIMIT)[offset]}`,
+      },
+      line,
+    })),
   );
   assert.deepEqual(
     observed.observePacket.administrativeSources.map(source => source.memoryId),

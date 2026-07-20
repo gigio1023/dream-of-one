@@ -4,7 +4,7 @@ import { startSessionServer, type RunningSessionServer } from "../../src/api/htt
 import { SessionService } from "../../src/runtime/session/service.js";
 import { createSameOrderScriptedAdapter } from "../../src/providers/testing/same-order-script.js";
 import { ScriptedNpcAdapter } from "../../src/providers/testing/scripted-npc-adapter.js";
-import { ProviderFailureError } from "../../src/providers/ports.js";
+import { ProviderFailureError, playerStatementEvidenceId } from "../../src/providers/ports.js";
 
 type Answer = { type: "choice" | "free_input" | "hesitation"; choiceId?: string; text?: string };
 
@@ -184,9 +184,9 @@ test("Session API exposes a blocked tool result followed by a provider re-plan",
     conversation: () => ({
       utterance: "오늘도 같은 걸로 드릴까요?",
       suggestedReplies: [
-        { text: "네, 같은 걸로 부탁해요.", intent: "safe/local" },
-        { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair" },
-        { text: "오늘 처음 왔는데요.", intent: "risky/weird" },
+        { text: "네, 같은 걸로 부탁해요.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+        { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+        { text: "오늘 처음 왔는데요.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
       ],
       continueConversation: true,
     }),
@@ -249,9 +249,9 @@ test("legacy session/end waits for delayed answer aftermath before freezing the 
     conversation: () => ({
       utterance: "평소 주문으로 마칠까요?",
       suggestedReplies: [
-        { text: "네, 같은 걸로 부탁해요.", intent: "safe/local" },
-        { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair" },
-        { text: "오늘 처음 왔는데요.", intent: "risky/weird" },
+        { text: "네, 같은 걸로 부탁해요.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+        { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+        { text: "오늘 처음 왔는데요.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
       ],
       continueConversation: false,
     }),
@@ -327,9 +327,9 @@ test("an over-eager model judgment is clamped by the per-turn validity cap", asy
     conversation: () => ({
       utterance: "오늘도 같은 걸로 드릴까요?",
       suggestedReplies: [
-        { text: "네, 같은 걸로 부탁해요.", intent: "safe/local" },
-        { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair" },
-        { text: "오늘 처음 왔는데요.", intent: "risky/weird" },
+        { text: "네, 같은 걸로 부탁해요.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+        { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+        { text: "오늘 처음 왔는데요.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
       ],
       continueConversation: true,
     }),
@@ -362,16 +362,20 @@ test("an over-eager model judgment is clamped by the per-turn validity cap", asy
 });
 
 test("the provider sees both sides of the dialogue, including the NPC's own prior line", async () => {
-  const histories: Array<Array<{ speakerId: string; line: string }>> = [];
+  const histories: Array<Array<{
+    speakerId: string;
+    line: string;
+    evidenceId: string | null;
+  }>> = [];
   const adapter = new ScriptedNpcAdapter({
     conversation: request => {
       histories.push(request.conversationHistory.map(entry => ({ ...entry })));
       return {
         utterance: request.beatId === "routine" ? "오늘도 같은 걸로 드릴까요?" : "기록과 다르지 않습니까?",
         suggestedReplies: [
-          { text: "네, 같은 걸로 부탁해요.", intent: "safe/local" },
-          { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair" },
-          { text: "오늘 처음 왔는데요.", intent: "risky/weird" },
+          { text: "네, 같은 걸로 부탁해요.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+          { text: "제가 보통 뭘 시켰죠?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+          { text: "오늘 처음 왔는데요.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
         ],
         continueConversation: true,
       };
@@ -393,8 +397,19 @@ test("the provider sees both sides of the dialogue, including the NPC's own prio
     const secondHistory = histories[1];
     assert.ok(secondHistory, "expected a second conversation turn request");
     assert.deepEqual(secondHistory, [
-      { speakerId: "NPC_Store_Clerk", line: "오늘도 같은 걸로 드릴까요?" },
-      { speakerId: "player", line: "네, 같은 걸로 부탁해요." },
+      {
+        speakerId: "NPC_Store_Clerk",
+        line: "오늘도 같은 걸로 드릴까요?",
+        evidenceId: null,
+      },
+      {
+        speakerId: "player",
+        line: "네, 같은 걸로 부탁해요.",
+        evidenceId: playerStatementEvidenceId(
+          start.json.sessionId,
+          start.json.nextTurn.turnId,
+        ),
+      },
     ]);
   } finally {
     await running.close();
@@ -406,9 +421,9 @@ test("provider conversation pacing may close within the deterministic storylet b
     conversation: () => ({
       utterance: "평소 주문으로 마칠까요?",
       suggestedReplies: [
-        { text: "네, 마칩니다.", intent: "safe/local" },
-        { text: "잠깐 확인해 주세요.", intent: "uncertain/repair" },
-        { text: "처음 왔습니다.", intent: "risky/weird" },
+        { text: "네, 마칩니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+        { text: "잠깐 확인해 주세요.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+        { text: "처음 왔습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
       ],
       continueConversation: false,
     }),

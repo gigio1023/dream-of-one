@@ -1551,9 +1551,16 @@ test("one meeting decision is single-flight and uses two calls with an exact gro
   );
   assert.ok(!JSON.stringify(requests[0]?.observePacket).includes("현재 방문자인지는 식별"));
   assert.ok(!JSON.stringify(ambientRequests[0]?.observePacket).includes("예외를 한 번 승인"));
-  assert.equal(
+  assert.deepEqual(
     ambientRequests[0]?.observePacket.heardSpeech.at(-1),
-    `NPC_Studio_Manager: ${first.speechEvents[0]?.line}`,
+    {
+      speakerActorId: "NPC_Studio_Manager",
+      source: {
+        kind: "ambient_utterance",
+        id: `ambient_speech:${meeting.request.wakeId}:1`,
+      },
+      line: first.speechEvents[0]?.line,
+    },
   );
 
   const retried = await service.decision(meeting.request);
@@ -2026,15 +2033,17 @@ test("player opening context includes a listener's ambient memory but never leak
   assert.ok(officeRequest);
   assert.deepEqual(managerRequest.observePacket.visibleActors, []);
   assert.ok(managerRequest.observePacket.heardSpeech.some(
-    line => line.startsWith("NPC_Park_Caretaker:"),
+    speech => speech.speakerActorId === "NPC_Park_Caretaker",
   ));
-  assert.ok(managerRequest.observePacket.actorMemory.ownActionNotes.some(
-    line => line.includes("[heard_from=NPC_Park_Caretaker]"),
+  assert.ok(managerRequest.observePacket.actorMemory.evidence.some(
+    evidence =>
+      evidence.evidenceType === "utterance" &&
+      evidence.sourceActorId === "NPC_Park_Caretaker",
   ));
   assert.deepEqual(officeRequest.observePacket.visibleActors, []);
   assert.deepEqual(officeRequest.observePacket.heardSpeech, []);
-  assert.ok(officeRequest.observePacket.actorMemory.ownActionNotes.every(
-    line => !line.includes("NPC_Park_Caretaker"),
+  assert.ok(officeRequest.observePacket.actorMemory.evidence.every(
+    evidence => evidence.sourceActorId !== "NPC_Park_Caretaker",
   ));
 });
 

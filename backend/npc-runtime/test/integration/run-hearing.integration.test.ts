@@ -408,9 +408,9 @@ test("immediate hearing open reports held live background transport accurately",
         text: JSON.stringify({
           utterance: "방문 목적을 말씀해 주시겠습니까?",
           suggestedReplies: [
-            { text: "업무 때문에 왔습니다.", intent: "safe/local" },
-            { text: "무엇을 확인하시는 건가요?", intent: "uncertain/repair" },
-            { text: "꿈에서 이곳을 봤습니다.", intent: "risky/weird" },
+            { text: "업무 때문에 왔습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+            { text: "무엇을 확인하시는 건가요?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+            { text: "꿈에서 이곳을 봤습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
           ],
           continueConversation: true,
         }),

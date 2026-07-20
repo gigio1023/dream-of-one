@@ -186,7 +186,7 @@ surface is:
 |---|---|
 | `POST /v1/run/start` | Idempotently create one run from a client `startId`, six actor workspaces, clock, revision, budgets, and initial snapshot |
 | `POST /v1/run/advance` | Submit a bounded unpaused-time delta plus validated physical/world observations; returns due wakes and deltas |
-| `GET  /v1/run/snapshot` | Full run snapshot for HUD hydrate, reconnect, and debug inspection |
+| `GET  /v1/run/snapshot` | Default-loopback debug/hydration snapshot with all six actors' complete memories; a non-loopback transport requires a separate filtered serializer |
 | `POST /v1/run/encounter` | Idempotently acknowledge one actually presented ambient speech event or explicitly inspected record surface; returns the encountered-only `socialView` without changing `worldRevision` |
 | `POST /v1/session/preload` | Resolve and cache an opening from strict `{runId, actorId, interactionZoneId, locale}`; returns the ready actor plus `ProposalMeta` without starting or pausing a child conversation |
 | `POST /v1/session/start` | Consume that opening from the same strict actor/zone/locale packet with zero provider calls; an optional `contactId` proves a validated NPC-initiated approach and returns the same modal conversation view |
@@ -199,9 +199,12 @@ surface is:
 | `POST /v1/run/abandon` | Idempotently close a nonterminal run with an unresolved provider interruption; returns failure/accounting evidence but never a verdict or terminal result |
 
 Debug-capable responses retain `ProposalMeta`, transcript deltas, and raw
-`ledgerEvents[]`. Normal player presentation reads only the sanitized
-`socialView`, whose encountered residents, questions, records, provenance, and
-qualitative pressure never reveal undisclosed state.
+`ledgerEvents[]`. The default-loopback `/v1/run/snapshot` endpoint also
+intentionally returns all six actors' complete memories for local hydration and
+inspection. It is not a remote presentation contract: any non-loopback
+transport requires a separate filtered serializer. Normal player presentation
+reads only the sanitized `socialView`, whose encountered residents, questions,
+records, provenance, and qualitative pressure never reveal undisclosed state.
 
 Each public provenance item carries a player-readable `sourceExcerpt` instead
 of exposing an internal source id. The runtime derives that excerpt only from
@@ -372,14 +375,24 @@ Spatial facts remain a separate
 commit-time signature and a 600-world-second refresh trigger measured from the
 latest admission and restamped when a delayed wake is claimed. They can
 invalidate a stale action without turning ordinary movement into a provider
-treadmill. Provider-facing observations retain the newest 12 memory-derived
-own-action notes, eight historical heard-speech lines, and eight unadministered
-administrative sources in chronological order. Unadministered player memories
-with a nonzero model-authored report inclination take those bounded slots
-before newer zero-inclination ambient sources can evict them; current-turn
-speech is appended after that historical bound. Full actor memory remains in
-run state, snapshots, and hearing requests, so this is prompt budgeting rather
-than memory loss.
+treadmill. Provider-facing observations select at most 12 memory candidates
+for own-action notes and typed evidence plus eight canonical heard-speech entries.
+Within each window the runtime deduplicates by memory id, deliberately retains
+the earliest player contact, then prefers the newest stance-changing player
+contacts, cited player contacts, and the latest still-open question-bearing
+player or ambient judgment before filling with newest eligible memory. An
+ambient question-bearing judgment protects its exact source utterance in the
+speech window. The runtime restores chronological order after selection.
+Historical player and listener-owned ambient prose appears once, canonically,
+in typed `heardSpeech`; player-exchange and ambient-judgment evidence references
+that exact speech id while retaining the resident reply, judgment reason, and
+complete model-authored question object. Evidence whose canonical speech was
+not retained is omitted rather than leaving a dangling or duplicated prose
+copy. Eight unadministered administrative sources keep their separate
+report-inclination-first policy, and current-turn speech is appended after the
+historical heard-speech bound. Full actor memory remains in run state,
+default-loopback snapshots, and hearing requests, so this is prompt budgeting
+rather than memory loss.
 
 The offered tool catalog is derived from current facts rather than role alone:
 `wait` remains available; `move_to`, `look`, `talk_to`, `read_record`,
@@ -509,11 +522,18 @@ An `ambient_stance_judgment` memory links the source speech event, the exact
 listener-owned `ambient_utterance` memory, speaker, listener, before/after
 suspicion, proposed/applied stance, why-line, and provider metadata. It is
 available in debug snapshots and hearing context but is not an administrative
-record source. Only a later successful `session/start` with that resident may
-copy the newest undisclosed material judgment into `socialView`, preserving
-`speaker → listener → sourceMemory → why`; a pure no-change judgment remains
-diagnostic memory, and preload or overhearing alone does not reveal another
-resident's internal opinion.
+record source. The ambient-reply request also carries that listener's exact
+currently open question from actor memory. When one exists, the same ambient
+model result must return one complete open or resolved object; null is invalid
+and cannot silently erase it. With no tracked question, null means that exact
+exchange creates or resolves none. Provider interruption commits neither a
+reply nor a question change. Only a later successful `session/start` with that
+resident may copy the newest undisclosed material judgment into `socialView`,
+preserving `speaker → listener → sourceMemory → why`; a pure no-change judgment
+remains diagnostic memory, and preload or overhearing alone does not reveal
+another resident's internal opinion. A model-authored question object replaces
+that resident's disclosed question exactly; null preserves the existing entry,
+and record-authored questions remain separate.
 
 Spoken records have one disclosure rule across free-world and modal speech.
 The provider returns at most eight speaker-visible `citedRecordIds`; the

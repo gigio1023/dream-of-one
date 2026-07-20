@@ -71,7 +71,7 @@ export class ChatCompletionsAdapter implements TextGenPort {
         { role: "user", content: request.input },
       ],
       response_format: responseFormat,
-      max_tokens: this.options.maxTokens,
+      max_tokens: request.maxOutputTokens ?? this.options.maxTokens,
       temperature: this.options.temperature,
       ...(this.options.enableThinking === undefined
         ? {}
@@ -81,13 +81,22 @@ export class ChatCompletionsAdapter implements TextGenPort {
       body,
       { timeout: request.timeoutMs ?? this.options.timeoutMs, signal },
     );
-    const text = completion.choices?.[0]?.message.content;
-    if (!text) {
+    const choice = completion.choices?.[0];
+    const text = choice?.message.content;
+    const finishReason = choice?.finish_reason === "stop"
+      ? "stop"
+      : choice?.finish_reason === "length"
+        ? "length"
+        : choice?.finish_reason === "content_filter"
+          ? "content_filter"
+          : "other";
+    if (!text && finishReason !== "length") {
       throw new Error("chat completion returned no message content");
     }
     const usage = completion.usage;
     return {
-      text,
+      text: text ?? "",
+      finishReason,
       usage: usage
         ? {
             inputTokens: usage.prompt_tokens,

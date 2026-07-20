@@ -22,9 +22,9 @@ const LIVE_PROFILE_ID = "test/provider-evidence-live";
 const liveOpening = JSON.stringify({
   utterance: "방문 목적을 말씀해 주시면 접수 절차를 확인하겠습니다.",
   suggestedReplies: [
-    { text: "안내받은 절차를 확인하러 왔습니다.", intent: "safe/local" },
-    { text: "먼저 필요한 절차를 설명해 주세요.", intent: "uncertain/repair" },
-    { text: "그냥 지나가다 들어왔습니다.", intent: "risky/weird" },
+    { text: "안내받은 절차를 확인하러 왔습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+    { text: "먼저 필요한 절차를 설명해 주세요.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+    { text: "그냥 지나가다 들어왔습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
   ],
   continueConversation: true,
 });

@@ -11,6 +11,7 @@ import {
   type WorldRole,
   type WorldState,
 } from "../runtime/world/index.js";
+import type { CoarseStance } from "../contracts/types.js";
 import {
   recordKindsForRole,
   toolCatalogForRole,
@@ -26,11 +27,73 @@ export interface ActorPolicy {
   forbiddenClaims: string[];
 }
 
+export interface ActorMemoryOpenQuestion {
+  status: "open" | "resolved";
+  text: string;
+  whyLine: string;
+}
+
+/** Typed memory context; attribution and exchange roles never come from prose markers. */
+export type ActorMemoryEvidence =
+  | {
+      evidenceType: "player_conversation_exchange";
+      memoryId: string;
+      sourceActorId: "player";
+      /** Canonical player prose lives in heardSpeech under this exact id. */
+      playerStatementEvidenceId: string;
+      residentReply: string;
+      judgmentReason: string;
+      openQuestion: ActorMemoryOpenQuestion | null;
+    }
+  | {
+      evidenceType: "ambient_stance_judgment";
+      memoryId: string;
+      sourceActorId: string;
+      sourceMemoryId: string;
+      /** Canonical source prose lives in heardSpeech under this exact id. */
+      sourceSpeechEvidenceId: string;
+      appliedStance: CoarseStance;
+      judgmentReason: string;
+      openQuestion: ActorMemoryOpenQuestion | null;
+    }
+  | {
+      evidenceType: "utterance";
+      memoryId: string;
+      memoryKind: "npc_utterance" | "ambient_utterance";
+      sourceActorId: string;
+      line: string;
+    }
+  | {
+      evidenceType: "memory_fact";
+      memoryId: string;
+      memoryKind: string;
+      sourceActorId: string;
+      summary: string;
+    };
+
 /** The NPC's own validated actions + ledger events it actually observed. */
 export interface ActorMemory {
   actorId: string;
   ownActionNotes: string[];
   observedLedgerEventIds: string[];
+  /** Bounded, source-identified memory facts available to the current request. */
+  evidence: ActorMemoryEvidence[];
+}
+
+export type HeardSpeechSourceKind =
+  | "player_statement"
+  | "npc_utterance"
+  | "ambient_utterance";
+
+/** Speech attribution is data, never a convention reparsed from the line. */
+export interface HeardSpeechRecord {
+  speakerActorId: string;
+  source: {
+    kind: HeardSpeechSourceKind;
+    /** Stable run/session source id used by the request evidence catalog. */
+    id: string;
+  };
+  line: string;
 }
 
 /** Authored identity and voice for this exact actor, never another resident. */
@@ -96,7 +159,7 @@ export interface ObservePacket {
     reachable: boolean;
     safeDistanceM: number;
   };
-  heardSpeech: string[];
+  heardSpeech: HeardSpeechRecord[];
   toolCatalog: ToolName[];
   administrativeSources: Array<{
     memoryId: string;
@@ -117,7 +180,7 @@ export interface AssembleObserveInput {
   goals: string[];
   policy: ActorPolicy;
   memory: ActorMemory;
-  heardSpeech: string[];
+  heardSpeech: HeardSpeechRecord[];
 }
 
 export function assembleObservePacket(world: WorldState, input: AssembleObserveInput): ObservePacket {
@@ -144,6 +207,7 @@ export function assembleObservePacket(world: WorldState, input: AssembleObserveI
       observedLedgerEventIds: [
         ...new Set([...input.memory.observedLedgerEventIds, ...observedLedger.map(e => e.eventId)]),
       ],
+      evidence: input.memory.evidence.map(item => ({ ...item })),
     },
     visibleObjects: visibleObjects(world, actor.role).map(o => ({
       objectId: o.objectId,
@@ -165,7 +229,11 @@ export function assembleObservePacket(world: WorldState, input: AssembleObserveI
     audibleActorIds: [],
     reachableAnchorRefs: [],
     playerContact: null,
-    heardSpeech: [...input.heardSpeech],
+    heardSpeech: input.heardSpeech.map(speech => ({
+      speakerActorId: speech.speakerActorId,
+      source: { ...speech.source },
+      line: speech.line,
+    })),
     toolCatalog: toolCatalogForRole(actor.role),
     administrativeSources: [],
     administrativeAuthority: {

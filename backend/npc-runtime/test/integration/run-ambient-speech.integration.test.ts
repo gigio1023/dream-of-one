@@ -1551,9 +1551,16 @@ test("one meeting decision is single-flight and uses two calls with an exact gro
   );
   assert.ok(!JSON.stringify(requests[0]?.observePacket).includes("현재 방문자인지는 식별"));
   assert.ok(!JSON.stringify(ambientRequests[0]?.observePacket).includes("예외를 한 번 승인"));
-  assert.equal(
+  assert.deepEqual(
     ambientRequests[0]?.observePacket.heardSpeech.at(-1),
-    `NPC_Studio_Manager: ${first.speechEvents[0]?.line}`,
+    {
+      speakerActorId: "NPC_Studio_Manager",
+      source: {
+        kind: "ambient_utterance",
+        id: `ambient_speech:${meeting.request.wakeId}:1`,
+      },
+      line: first.speechEvents[0]?.line,
+    },
   );
 
   const retried = await service.decision(meeting.request);
@@ -2025,16 +2032,24 @@ test("player opening context includes a listener's ambient memory but never leak
   assert.ok(managerRequest);
   assert.ok(officeRequest);
   assert.deepEqual(managerRequest.observePacket.visibleActors, []);
-  assert.ok(managerRequest.observePacket.heardSpeech.some(
-    line => line.startsWith("NPC_Park_Caretaker:"),
+  const managerHeardCaretaker = managerRequest.observePacket.heardSpeech.find(
+    speech => speech.speakerActorId === "NPC_Park_Caretaker",
+  );
+  assert.ok(managerHeardCaretaker);
+  assert.ok(managerRequest.observePacket.actorMemory.evidence.every(
+    evidence => evidence.sourceActorId !== "NPC_Park_Caretaker",
   ));
-  assert.ok(managerRequest.observePacket.actorMemory.ownActionNotes.some(
-    line => line.includes("[heard_from=NPC_Park_Caretaker]"),
-  ));
+  assert.equal(
+    JSON.stringify(managerRequest.observePacket.actorMemory.evidence).includes(
+      managerHeardCaretaker.line,
+    ),
+    false,
+    "listener-owned ambient prose stays canonical in heardSpeech",
+  );
   assert.deepEqual(officeRequest.observePacket.visibleActors, []);
   assert.deepEqual(officeRequest.observePacket.heardSpeech, []);
-  assert.ok(officeRequest.observePacket.actorMemory.ownActionNotes.every(
-    line => !line.includes("NPC_Park_Caretaker"),
+  assert.ok(officeRequest.observePacket.actorMemory.evidence.every(
+    evidence => evidence.sourceActorId !== "NPC_Park_Caretaker",
   ));
 });
 
@@ -2386,10 +2401,25 @@ test("an ambiguous ambient source memory stays hidden instead of guessing an exc
   assert.deepEqual(started.socialView.openQuestions, []);
 });
 
-test("a newer no-change ambient judgment cannot hide or misattribute an earlier material change", async () => {
+test("a newer no-change ambient judgment explicitly preserves the tracked question", async () => {
   const adapter = createStudioReceptionScriptedAdapter();
+  const trackedQuestion = {
+    status: "open" as const,
+    text: "방문자는 왜 관리자에게 다른 설명을 했을까?",
+    whyLine: "관리자에게 들은 말과 직접 확인할 내용이 남았습니다.",
+  };
+  const receivedCurrentQuestions: unknown[] = [];
   let replyIndex = 0;
+  let interruptTrackedReply = true;
   adapter.judgeAndProposeAmbientReply = async request => {
+    receivedCurrentQuestions.push(structuredClone(request.currentOpenQuestion));
+    if (replyIndex === 1 && interruptTrackedReply) {
+      throw new ProviderFailureError(
+        adapter.profileId,
+        "timeout",
+        "ambient_reply",
+      );
+    }
     replyIndex += 1;
     if (replyIndex === 1) {
       return {
@@ -2401,11 +2431,7 @@ test("a newer no-change ambient judgment cannot hide or misattribute an earlier 
           suspicionDelta: 24,
           proposedStance: "oppose",
           whyLine: "스튜디오 관리자가 전한 말 때문에 방문자의 설명을 의심하게 됐습니다.",
-          openQuestion: {
-            status: "open",
-            text: "방문자는 왜 관리자에게 다른 설명을 했을까?",
-            whyLine: "관리자에게 들은 말과 직접 확인할 내용이 남았습니다.",
-          },
+          openQuestion: trackedQuestion,
         },
         meta: {
           profileId: "scripted/ambient-material-then-neutral",
@@ -2423,7 +2449,7 @@ test("a newer no-change ambient judgment cannot hide or misattribute an earlier 
         suspicionDelta: 0,
         proposedStance: request.stanceBefore,
         whyLine: "새로 들은 말만으로는 방문자에 대한 판단이 달라지지 않았습니다.",
-        openQuestion: null,
+        openQuestion: request.currentOpenQuestion,
       },
       meta: {
         profileId: "scripted/ambient-material-then-neutral",
@@ -2458,7 +2484,17 @@ test("a newer no-change ambient judgment cannot hide or misattribute an earlier 
     "ambient-material-then-neutral:second",
     "MEET_RECEPTIONIST_CARETAKER",
   );
-  await service.decision(secondMeeting.request);
+  const beforeInterruption = service.snapshot(firstMeeting.started.runId);
+  const interrupted = await service.decision(secondMeeting.request);
+  assert.equal(interrupted.status, "failed");
+  const afterInterruption = service.snapshot(firstMeeting.started.runId);
+  assert.equal(afterInterruption.worldRevision, beforeInterruption.worldRevision);
+  assert.deepEqual(afterInterruption.actors, beforeInterruption.actors);
+  assert.equal(afterInterruption.providerFailure?.purpose, "ambient_reply");
+
+  interruptTrackedReply = false;
+  const recovered = await service.decision(secondMeeting.request);
+  assert.equal(recovered.status, "completed");
   const hidden = service.snapshot(firstMeeting.started.runId);
   const caretaker = hidden.actors.find(actor => actor.actorId === "NPC_Park_Caretaker");
   assert.ok(caretaker);
@@ -2472,7 +2508,8 @@ test("a newer no-change ambient judgment cannot hide or misattribute an earlier 
   assert.ok(noChange.worldRevision > material.worldRevision);
   assert.equal(noChange.suspicionDelta, 0);
   assert.equal(noChange.appliedStance, noChange.stanceBefore);
-  assert.equal(noChange.openQuestion, null);
+  assert.deepEqual(noChange.openQuestion, trackedQuestion);
+  assert.deepEqual(receivedCurrentQuestions, [null, trackedQuestion, trackedQuestion]);
   assert.deepEqual(hidden.socialView.encounteredResidents, []);
 
   await service.preloadConversation(
@@ -2500,18 +2537,27 @@ test("a newer no-change ambient judgment cannot hide or misattribute an earlier 
   assert.ok(disclosed);
   assert.equal(disclosed.stance, caretaker.stance, "the disclosed stance is the current stance");
   assert.equal(disclosed.stance, "oppose");
-  assert.equal(disclosed.stanceRevision, material.worldRevision);
-  assert.equal(disclosed.whyLine, material.whyLine);
-  assert.equal(disclosed.provenance?.originActorId, material.sourceActorId);
-  assert.equal(disclosed.provenance?.sourceMemoryId, material.sourceMemoryId);
+  assert.equal(disclosed.stanceRevision, noChange.worldRevision);
+  assert.equal(disclosed.whyLine, noChange.whyLine);
+  assert.equal(disclosed.provenance?.originActorId, noChange.sourceActorId);
+  assert.equal(disclosed.provenance?.sourceMemoryId, noChange.sourceMemoryId);
   const materialSource = caretaker.memories.find(
     memory => memory.kind === "ambient_utterance" && memory.memoryId === material.sourceMemoryId,
   );
   assert.ok(materialSource && materialSource.kind === "ambient_utterance");
-  assert.equal(disclosed.provenance?.sourceExcerpt, materialSource.line);
-  assert.equal(disclosed.provenance?.whyLine, material.whyLine);
-  assert.notEqual(disclosed.provenance?.originActorId, noChange.sourceActorId);
-  assert.notEqual(disclosed.provenance?.sourceMemoryId, noChange.sourceMemoryId);
+  const noChangeSource = caretaker.memories.find(
+    memory => memory.kind === "ambient_utterance" && memory.memoryId === noChange.sourceMemoryId,
+  );
+  assert.ok(noChangeSource && noChangeSource.kind === "ambient_utterance");
+  assert.equal(disclosed.provenance?.sourceExcerpt, noChangeSource.line);
+  assert.equal(disclosed.provenance?.whyLine, noChange.whyLine);
+  const disclosedQuestion = started.socialView.openQuestions.find(
+    question => question.subjectActorId === caretaker.actorId,
+  );
+  assert.ok(disclosedQuestion);
+  assert.equal(disclosedQuestion.status, trackedQuestion.status);
+  assert.equal(disclosedQuestion.text, trackedQuestion.text);
+  assert.equal(disclosedQuestion.whyLine, trackedQuestion.whyLine);
 
   const socialRevision = started.socialView.revision;
   const retried = await service.startConversation(

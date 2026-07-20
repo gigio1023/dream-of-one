@@ -1,6 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import {
   DEFAULT_ROLE_POLICIES,
+  type ActorMemoryEvidence,
+  type HeardSpeechRecord,
   type ObservePacket,
 } from "../agentloop/context.js";
 import {
@@ -35,6 +37,7 @@ import type {
 } from "../providers/ports.js";
 import {
   emptyProviderAuditSnapshot,
+  playerStatementEvidenceId,
   ProviderBudgetReservedError,
   ProviderFailureError,
 } from "../providers/ports.js";
@@ -107,6 +110,7 @@ import type {
   RunHearingResponse,
   RunInterrogationOutcomeMemory,
   RunJudgment,
+  RunLedgerEvent,
   RunMemory,
   RunMovementDelta,
   RunNpcDecisionRequest,
@@ -259,6 +263,7 @@ interface AmbientListenerState {
   stance: CoarseStance;
   suspicion: number;
   hasMeaningfulFirsthandConversation: boolean;
+  currentOpenQuestion: RunOpenQuestion | null;
 }
 
 interface AmbientListenerJudgment extends AmbientListenerState {
@@ -423,7 +428,7 @@ interface ConversationState {
   procedure: "ordinary" | "interrogation";
   interrogationLedgerSeq: number | null;
   status: "active" | "awaiting_end" | "ended";
-  dialogue: Array<{ speakerId: string; line: string }>;
+  dialogue: Array<{ speakerId: string; line: string; evidenceId: string | null }>;
   turnCount: number;
   activeTurn: RunGeneratedNextTurn | null;
   answerCache: Map<string, CachedAnswer>;
@@ -778,13 +783,112 @@ function semanticGoalKeyFromAdmission(goalKey: string): string {
   return markerIndex >= 0 ? goalKey.slice(0, markerIndex) : goalKey;
 }
 
+type QuestionCapableMemory =
+  | RunPlayerConversationMemory
+  | RunAmbientStanceJudgmentMemory;
+
+function latestQuestionCapableMemory(
+  memories: readonly RunMemory[],
+): QuestionCapableMemory | null {
+  for (let index = memories.length - 1; index >= 0; index -= 1) {
+    const memory = memories[index];
+    if (
+      memory?.kind === "player_conversation" ||
+      memory?.kind === "ambient_stance_judgment"
+    ) return memory;
+  }
+  return null;
+}
+
 /**
- * Choose the newest bounded history without changing the chronological order
- * presented to the provider. Run-owned memory remains complete; current-turn
- * evidence is appended separately after this historical selection.
+ * Bound provider history by durable social value, then restore chronology.
+ * The full memory list remains authoritative for category derivation and is
+ * never truncated by this prompt-only projection.
  */
-function selectRecentChronological<T>(values: readonly T[], limit: number): T[] {
-  return values.slice(Math.max(0, values.length - limit));
+function selectPrioritizedProviderMemories(
+  memories: readonly RunMemory[],
+  records: readonly RunRecord[],
+  ledgerEvents: readonly RunLedgerEvent[],
+  limit: number,
+  eligible: (memory: RunMemory) => boolean = () => true,
+): RunMemory[] {
+  if (limit <= 0) return [];
+
+  const chronological: RunMemory[] = [];
+  const seenMemoryIds = new Set<string>();
+  for (const memory of memories) {
+    if (seenMemoryIds.has(memory.memoryId)) continue;
+    seenMemoryIds.add(memory.memoryId);
+    chronological.push(memory);
+  }
+
+  const selectedIds = new Set<string>();
+  const add = (memory: RunMemory | undefined): void => {
+    if (
+      memory &&
+      selectedIds.size < limit &&
+      eligible(memory)
+    ) selectedIds.add(memory.memoryId);
+  };
+  const addNewest = (candidates: readonly RunMemory[]): void => {
+    for (
+      let index = candidates.length - 1;
+      index >= 0 && selectedIds.size < limit;
+      index -= 1
+    ) add(candidates[index]);
+  };
+
+  // First contact is deliberately the earliest, even though every other
+  // overflowing category keeps its newest members.
+  add(chronological.find(memory => memory.kind === "player_conversation"));
+
+  let derivedStance: CoarseStance = "uncertain";
+  const stanceChangingContacts: RunPlayerConversationMemory[] = [];
+  for (const memory of chronological) {
+    if (memory.kind === "player_conversation") {
+      if (memory.appliedStance !== derivedStance) stanceChangingContacts.push(memory);
+      derivedStance = memory.appliedStance;
+    } else if (memory.kind === "ambient_stance_judgment") {
+      derivedStance = memory.appliedStance;
+    }
+  }
+  addNewest(stanceChangingContacts);
+
+  const recordOrLedgerSourceIds = new Set<string>([
+    ...records.flatMap(record => record.sourceRefs.map(source => source.sourceMemoryId)),
+    ...ledgerEvents.map(event => event.sourceMemoryId),
+  ]);
+  const playerContacts = chronological.filter(
+    (memory): memory is RunPlayerConversationMemory => memory.kind === "player_conversation",
+  );
+  const citedContacts = playerContacts.filter((memory, index) => {
+    if (recordOrLedgerSourceIds.has(memory.memoryId)) return true;
+    const evidenceIds = [
+      memory.statementEvidenceId,
+      `resident_memory:${memory.memoryId}`,
+    ];
+    return playerContacts.slice(index + 1).some(later =>
+      evidenceIds.some(evidenceId => later.evidenceIds.includes(evidenceId))
+    );
+  });
+  addNewest(citedContacts);
+
+  const latestQuestionMemory = latestQuestionCapableMemory(chronological);
+  if (latestQuestionMemory?.openQuestion?.status === "open") {
+    if (eligible(latestQuestionMemory)) {
+      add(latestQuestionMemory);
+    } else if (latestQuestionMemory.kind === "ambient_stance_judgment") {
+      // Heard-speech projections retain the exact utterance that grounds the
+      // selected typed ambient judgment instead of dropping its source.
+      add(chronological.find(memory =>
+        memory.kind === "ambient_utterance" &&
+        memory.memoryId === latestQuestionMemory.sourceMemoryId
+      ));
+    }
+  }
+
+  addNewest(chronological);
+  return chronological.filter(memory => selectedIds.has(memory.memoryId));
 }
 
 /**
@@ -2466,7 +2570,7 @@ export class RunService {
         procedure,
         interrogationLedgerSeq,
         status: "active",
-        dialogue: [{ speakerId: actorId, line: nextTurn.prompt }],
+        dialogue: [{ speakerId: actorId, line: nextTurn.prompt, evidenceId: null }],
         turnCount: 0,
         activeTurn: nextTurn,
         answerCache: new Map(),
@@ -2530,7 +2634,16 @@ export class RunService {
         );
       }
 
-      const playerLine = this.resolvePlayerLine(conversation.activeTurn, answer, run.locale);
+      const resolvedPlayerAnswer = this.resolvePlayerAnswer(
+        conversation.activeTurn,
+        answer,
+        run.locale,
+      );
+      const playerLine = resolvedPlayerAnswer.line;
+      const statementEvidenceId = playerStatementEvidenceId(
+        conversation.sessionId,
+        conversation.activeTurn.turnId,
+      );
       const operationKey = `conversation_turn:${sessionId}:${turnId}:${signature}`;
       const actor = this.requireActor(run, conversation.actorId);
       const stanceBefore = actor.stance;
@@ -2546,7 +2659,11 @@ export class RunService {
         actor,
         ["player"],
         this.conversationGoals(actor, conversation.procedure),
-        [playerLine],
+        [{
+          speakerActorId: "player",
+          source: { kind: "player_statement", id: statementEvidenceId },
+          line: playerLine,
+        }],
         run.spatialFacts?.actors.get(actor.actorId),
       );
       let resolved: ResolvedProposal<MergedConversationTurn>;
@@ -2558,6 +2675,7 @@ export class RunService {
           promptId: conversation.activeTurn.promptId,
           actorId: actor.actorId,
           playerLine,
+          playerStatementEvidenceId: statementEvidenceId,
           conversationHistory: clone(conversation.dialogue.slice(-10)),
           observePacket,
           suspicionBefore,
@@ -2566,11 +2684,7 @@ export class RunService {
           sceneFacts: this.conversationSceneFacts(actor, conversation.procedure),
           stanceBefore,
           hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
-          currentOpenQuestion: clone(
-            conversation.lastMemory?.kind === "player_conversation"
-              ? conversation.lastMemory.openQuestion
-              : null,
-          ),
+          currentOpenQuestion: this.currentActorOpenQuestion(actor),
           continuationAllowed,
         });
         this.rejectFallbackProposalMeta(resolved.meta, "conversation_turn");
@@ -2639,7 +2753,10 @@ export class RunService {
         listenerActorId: actor.actorId,
         conversationId: sessionId,
         turnId,
+        statementEvidenceId,
         playerLine,
+        evidenceIds: [...resolvedPlayerAnswer.evidenceIds],
+        introducesNewClaim: resolvedPlayerAnswer.introducesNewClaim,
         npcLine: resolved.proposal.utterance,
         citedRecords: clone(citedRecords),
         signals: [...signals],
@@ -2674,8 +2791,8 @@ export class RunService {
       );
       conversation.turnCount += 1;
       conversation.dialogue.push(
-        { speakerId: "player", line: playerLine },
-        { speakerId: actor.actorId, line: resolved.proposal.utterance },
+        { speakerId: "player", line: playerLine, evidenceId: statementEvidenceId },
+        { speakerId: actor.actorId, line: resolved.proposal.utterance, evidenceId: null },
       );
       const requiresRecoveryTurn =
         continuationAllowed &&
@@ -3667,6 +3784,7 @@ export class RunService {
             suspicionBefore: claim.listenerState.suspicion,
             hasMeaningfulFirsthandConversation:
               claim.listenerState.hasMeaningfulFirsthandConversation,
+            currentOpenQuestion: clone(claim.listenerState.currentOpenQuestion),
             observePacket: clone(claim.observePacket),
             ...(request.budgetCeiling ? { budgetCeiling: request.budgetCeiling } : {}),
           };
@@ -3817,7 +3935,14 @@ export class RunService {
       target,
       targetFacts.visibleActorIds,
       [goal],
-      [`${attempt.actorId}: ${action.utterance}`],
+      [{
+        speakerActorId: attempt.actorId,
+        source: {
+          kind: "npc_utterance",
+          id: `goal_speech:${attempt.request.wakeId}:1`,
+        },
+        line: action.utterance,
+      }],
       targetFacts,
     );
     observePacket.toolCatalog = ["talk_to"];
@@ -4749,7 +4874,14 @@ export class RunService {
           }
           const firstTurn = attempt.resolvedTurns[0];
           if (turnIndex === 1 && firstTurn) {
-            observePacket.heardSpeech.push(`${firstTurn.speakerActorId}: ${firstTurn.line}`);
+            observePacket.heardSpeech.push({
+              speakerActorId: firstTurn.speakerActorId,
+              source: {
+                kind: "ambient_utterance",
+                id: `ambient_speech:${attempt.request.wakeId}:1`,
+              },
+              line: firstTurn.line,
+            });
           }
           const current = this.requireRun(runId);
           const budgetCeiling = {
@@ -4804,6 +4936,7 @@ export class RunService {
                 suspicionBefore: listenerState.suspicion,
                 hasMeaningfulFirsthandConversation:
                   listenerState.hasMeaningfulFirsthandConversation,
+                currentOpenQuestion: clone(listenerState.currentOpenQuestion),
                 observePacket,
                 budgetCeiling,
               }),
@@ -5185,14 +5318,20 @@ export class RunService {
     const parsed = ambientReplyJudgmentSchema.safeParse(resolved.proposal);
     if (!parsed.success) return null;
     const proposal = parsed.data;
-    const exactHeardLine = `${context.sourceSpeakerActorId}: ${context.sourceUtterance}`;
     if (
       context.targetActorId !== context.sourceSpeakerActorId ||
       context.observePacket.actorId !== context.listenerActorId ||
       !context.observePacket.visibleActors.includes(context.targetActorId) ||
       !context.observePacket.audibleActorIds.includes(context.targetActorId) ||
-      !context.observePacket.heardSpeech.includes(exactHeardLine) ||
-      proposal.toolCall.args.actorId !== context.targetActorId
+      !context.observePacket.heardSpeech.some(speech =>
+        speech.speakerActorId === context.sourceSpeakerActorId &&
+        speech.line === context.sourceUtterance
+      ) ||
+      proposal.toolCall.args.actorId !== context.targetActorId ||
+      (
+        context.listenerState.currentOpenQuestion !== null &&
+        proposal.openQuestion === null
+      )
     ) {
       return null;
     }
@@ -5224,6 +5363,7 @@ export class RunService {
       stance: actor.stance,
       suspicion: actor.suspicion,
       hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
+      currentOpenQuestion: this.currentActorOpenQuestion(actor),
     };
   }
 
@@ -5556,6 +5696,38 @@ export class RunService {
     run.socialView.revision += 1;
   }
 
+  private currentActorOpenQuestion(actor: RunActorState): RunOpenQuestion | null {
+    const latest = latestQuestionCapableMemory(actor.memories);
+    return latest?.openQuestion?.status === "open"
+      ? clone(latest.openQuestion)
+      : null;
+  }
+
+  private reconcileResidentQuestion(
+    run: RunState,
+    actorId: string,
+    sourceMemoryId: string,
+    question: RunOpenQuestion | null,
+    provenance: RunSocialProvenance,
+  ): void {
+    // Record-authored questions have subjectActorId=null and are deliberately
+    // outside this one-question-per-resident reconciliation. Null means this
+    // judgment created or resolved no question, so it preserves any prior
+    // disclosed question; only an exact model-authored object replaces it.
+    if (!question) return;
+    run.socialView.openQuestions = run.socialView.openQuestions.filter(
+      entry => entry.subjectActorId !== actorId,
+    );
+    run.socialView.openQuestions.push({
+      questionId: `question:${sourceMemoryId}`,
+      subjectActorId: actorId,
+      status: question.status,
+      text: question.text,
+      whyLine: question.whyLine,
+      provenance: { ...provenance, whyLine: question.whyLine },
+    });
+  }
+
   private discloseResidentJudgment(
     run: RunState,
     actor: RunActorState,
@@ -5585,19 +5757,16 @@ export class RunService {
     );
     if (index >= 0) run.socialView.encounteredResidents[index] = resident;
     else run.socialView.encounteredResidents.push(resident);
-    if (memory.openQuestion) {
-      run.socialView.openQuestions = run.socialView.openQuestions.filter(
-        entry => entry.subjectActorId !== actor.actorId,
-      );
-      run.socialView.openQuestions.push({
-        questionId: `question:${memory.memoryId}`,
-        subjectActorId: actor.actorId,
-        status: memory.openQuestion.status,
-        text: memory.openQuestion.text,
-        whyLine: memory.openQuestion.whyLine,
-        provenance: { ...provenance, whyLine: memory.openQuestion.whyLine },
-      });
-    }
+    const latestQuestionMemory = latestQuestionCapableMemory(actor.memories);
+    this.reconcileResidentQuestion(
+      run,
+      actor.actorId,
+      memory.memoryId,
+      latestQuestionMemory?.memoryId === memory.memoryId
+        ? memory.openQuestion
+        : null,
+      provenance,
+    );
     this.bumpSocialRevision(run);
   }
 
@@ -5643,19 +5812,13 @@ export class RunService {
     );
     if (index >= 0) run.socialView.encounteredResidents[index] = resident;
     else run.socialView.encounteredResidents.push(resident);
-    if (memory.openQuestion) {
-      run.socialView.openQuestions = run.socialView.openQuestions.filter(
-        entry => entry.subjectActorId !== actor.actorId,
-      );
-      run.socialView.openQuestions.push({
-        questionId: `question:${memory.memoryId}`,
-        subjectActorId: actor.actorId,
-        status: memory.openQuestion.status,
-        text: memory.openQuestion.text,
-        whyLine: memory.openQuestion.whyLine,
-        provenance: { ...provenance, whyLine: memory.openQuestion.whyLine },
-      });
-    }
+    this.reconcileResidentQuestion(
+      run,
+      actor.actorId,
+      memory.memoryId,
+      memory.openQuestion,
+      provenance,
+    );
     this.bumpSocialRevision(run);
   }
 
@@ -6873,7 +7036,7 @@ export class RunService {
     actor: RunActorState,
     visibleActorIds: string[],
     goals: string[],
-    additionalSpeech: string[] = [],
+    additionalSpeech: HeardSpeechRecord[] = [],
     spatialFacts?: RunActorSpatialFacts,
   ): ObservePacket {
     const policy = DEFAULT_ROLE_POLICIES[actor.role];
@@ -6889,22 +7052,19 @@ export class RunService {
         sourceMemoryId: record.sourceRefs[0]?.sourceMemoryId,
         textSurfaceId: record.textSurfaceId,
       }));
-    const memoryActionNotes = selectRecentChronological(
+    const providerMemoryHistory = selectPrioritizedProviderMemories(
       actor.memories,
+      run.records,
+      run.ledgerEvents,
       RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT,
-    ).map(memory => {
-      if (memory.kind === "npc_utterance") return `[self_utterance] ${memory.line}`;
+    );
+    const memoryActionNotes = providerMemoryHistory.map(memory => {
+      if (memory.kind === "npc_utterance") return `[npc_utterance_memory=${memory.memoryId}]`;
       if (memory.kind === "player_conversation") {
-        return [
-          `[player_utterance] ${memory.playerLine}`,
-          `[self_reply] ${memory.npcLine}`,
-          `[judgment_reason] ${memory.whyLine}`,
-        ].join(" / ");
+        return `[player_conversation_memory=${memory.memoryId}]`;
       }
       if (memory.kind === "ambient_utterance") {
-        return memory.speakerActorId === actor.actorId
-          ? `[self_utterance] ${memory.line}`
-          : `[heard_from=${memory.speakerActorId}] ${memory.line}`;
+        return `[ambient_utterance_memory=${memory.memoryId}]`;
       }
       if (memory.kind === "ambient_stance_judgment") {
         return [
@@ -6939,20 +7099,124 @@ export class RunService {
       ...memoryActionNotes,
       ...administrativeDispositionNotes,
     ].slice(-RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT);
-    const heardSpeech = selectRecentChronological(
-      actor.memories.flatMap(memory => {
-        if (memory.kind === "player_conversation") return [memory.playerLine];
-        if (
+    const historicalHeardMemories = selectPrioritizedProviderMemories(
+      actor.memories,
+      run.records,
+      run.ledgerEvents,
+      RUN_OBSERVE_HEARD_SPEECH_LIMIT,
+      memory =>
+        memory.kind === "player_conversation" ||
+        (
           memory.kind === "ambient_utterance" &&
           memory.speakerActorId !== actor.actorId &&
           memory.listenerActorIds.includes(actor.actorId)
-        ) {
-          return [`${memory.speakerActorId}: ${memory.line}`];
-        }
-        return [];
-      }),
-      RUN_OBSERVE_HEARD_SPEECH_LIMIT,
+        ),
     );
+    const heardSpeech = historicalHeardMemories.map<HeardSpeechRecord>(memory => {
+      if (memory.kind === "player_conversation") {
+        return {
+          speakerActorId: "player",
+          source: {
+            kind: "player_statement",
+            id: memory.statementEvidenceId,
+          },
+          line: memory.playerLine,
+        };
+      }
+      if (memory.kind !== "ambient_utterance") {
+        throw new Error(`non-speech memory selected for heard speech: ${memory.memoryId}`);
+      }
+      return {
+        speakerActorId: memory.speakerActorId,
+        source: {
+          kind: "ambient_utterance",
+          id: `memory:${memory.memoryId}`,
+        },
+        line: memory.line,
+      };
+    });
+    const heardSpeechEvidenceIds = new Set(heardSpeech.map(speech => speech.source.id));
+    const memoryEvidence = providerMemoryHistory.flatMap<ActorMemoryEvidence>(memory => {
+      if (memory.kind === "player_conversation") {
+        if (!heardSpeechEvidenceIds.has(memory.statementEvidenceId)) return [];
+        return [{
+          evidenceType: "player_conversation_exchange" as const,
+          memoryId: memory.memoryId,
+          sourceActorId: "player" as const,
+          playerStatementEvidenceId: memory.statementEvidenceId,
+          residentReply: memory.npcLine,
+          judgmentReason: memory.whyLine,
+          openQuestion: clone(memory.openQuestion),
+        }];
+      }
+      if (memory.kind === "npc_utterance") {
+        return [{
+          evidenceType: "utterance" as const,
+          memoryId: memory.memoryId,
+          memoryKind: memory.kind,
+          sourceActorId: memory.sourceActorId,
+          line: memory.line,
+        }];
+      }
+      if (memory.kind === "ambient_utterance") {
+        if (memory.speakerActorId !== actor.actorId) return [];
+        return [{
+          evidenceType: "utterance" as const,
+          memoryId: memory.memoryId,
+          memoryKind: memory.kind,
+          sourceActorId: memory.speakerActorId,
+          line: memory.line,
+        }];
+      }
+      if (memory.kind === "ambient_stance_judgment") {
+        const sourceSpeechEvidenceId = `memory:${memory.sourceMemoryId}`;
+        if (!heardSpeechEvidenceIds.has(sourceSpeechEvidenceId)) return [];
+        return [{
+          evidenceType: "ambient_stance_judgment" as const,
+          memoryId: memory.memoryId,
+          sourceActorId: memory.sourceActorId,
+          sourceMemoryId: memory.sourceMemoryId,
+          sourceSpeechEvidenceId,
+          appliedStance: memory.appliedStance,
+          judgmentReason: memory.whyLine,
+          openQuestion: clone(memory.openQuestion),
+        }];
+      }
+      if (memory.kind === "record_read") {
+        return [{
+          evidenceType: "memory_fact" as const,
+          memoryId: memory.memoryId,
+          memoryKind: memory.kind,
+          sourceActorId: memory.sourceActorId,
+          summary: memory.stateBody,
+        }];
+      }
+      if (memory.kind === "player_contact_outcome") {
+        return [{
+          evidenceType: "memory_fact" as const,
+          memoryId: memory.memoryId,
+          memoryKind: memory.kind,
+          sourceActorId: "player",
+          summary: memory.contactReason,
+        }];
+      }
+      if (memory.kind === "interrogation_outcome") {
+        return [{
+          evidenceType: "memory_fact" as const,
+          memoryId: memory.memoryId,
+          memoryKind: memory.kind,
+          sourceActorId: "player",
+          summary: memory.whyLine,
+        }];
+      }
+      return [{
+        evidenceType: "memory_fact" as const,
+        memoryId: memory.memoryId,
+        memoryKind: memory.kind,
+        sourceActorId: "player",
+        summary: `${memory.action}:${memory.propId}`,
+      }];
+    });
     const packet: ObservePacket = {
       actorId: actor.actorId,
       role: actor.role,
@@ -6985,6 +7249,7 @@ export class RunService {
       actorMemory: {
         actorId: actor.actorId,
         ownActionNotes,
+        evidence: memoryEvidence,
         observedLedgerEventIds: run.ledgerEvents
           .filter(event => event.visibleToActorIds.includes(actor.actorId))
           .map(event => event.eventId),
@@ -7142,9 +7407,9 @@ export class RunService {
     proposal: {
       utterance: string;
       suggestedReplies: readonly [
-        { text: string; intent: RunGeneratedNextTurn["choices"][number]["intent"] },
-        { text: string; intent: RunGeneratedNextTurn["choices"][number]["intent"] },
-        { text: string; intent: RunGeneratedNextTurn["choices"][number]["intent"] },
+        Omit<RunGeneratedNextTurn["choices"][number], "choiceId" | "line"> & { text: string },
+        Omit<RunGeneratedNextTurn["choices"][number], "choiceId" | "line"> & { text: string },
+        Omit<RunGeneratedNextTurn["choices"][number], "choiceId" | "line"> & { text: string },
       ];
       continueConversation: boolean;
     },
@@ -7168,6 +7433,8 @@ export class RunService {
         choiceId: `${choiceSetId}.${index + 1}`,
         intent: reply.intent,
         line: reply.text,
+        evidenceIds: [...reply.evidenceIds],
+        introducesNewClaim: reply.introducesNewClaim,
       })) as RunGeneratedNextTurn["choices"],
       proposalMeta: clone(proposalMeta),
     };
@@ -7190,27 +7457,39 @@ export class RunService {
     };
   }
 
-  private resolvePlayerLine(
+  private resolvePlayerAnswer(
     turn: RunGeneratedNextTurn,
     answer: RunSessionAnswer,
     locale: GameplayLocale,
-  ): string {
+  ): {
+    line: string;
+    evidenceIds: string[];
+    introducesNewClaim: boolean | null;
+  } {
     if (answer.type === "choice") {
       const choice = turn.choices.find(candidate => candidate.choiceId === answer.choiceId);
       if (!choice) throw new RunError(`unknown choice: ${answer.choiceId}`, "unknown_choice");
-      return choice.line;
+      return {
+        line: choice.line,
+        evidenceIds: [...choice.evidenceIds],
+        introducesNewClaim: choice.introducesNewClaim,
+      };
     }
     if (answer.type === "hesitation") {
       if (turn.procedure !== "interrogation") {
         throw new RunError("hesitation is available only during interrogation", "invalid_answer");
       }
-      return procedureContent(locale).hesitationMarker;
+      return {
+        line: procedureContent(locale).hesitationMarker,
+        evidenceIds: [],
+        introducesNewClaim: null,
+      };
     }
     const text = answer.text.trim();
     if (text.length === 0 || text.length > 120) {
       throw new RunError("free_input must contain 1..120 characters", "invalid_answer");
     }
-    return text;
+    return { line: text, evidenceIds: [], introducesNewClaim: null };
   }
 
   private validatedStance(proposed: CoarseStance, hasMeaningfulFirsthand: boolean): CoarseStance {

@@ -15,6 +15,7 @@ import {
   conversationProposalSchemaForLocale,
   conversationProposalSchemaForRequest,
   hearingJudgmentJsonSchema,
+  hearingJudgmentJsonSchemaForRequest,
   hearingJudgmentSchemaForLocale,
   hearingJudgmentSchemaForRequest,
   MAX_SPEECH_RECORD_CITATIONS,
@@ -103,7 +104,12 @@ function observePacket() {
     },
     goals: ["평소 주문을 확인한다"],
     policy: DEFAULT_ROLE_POLICIES.store_clerk,
-    memory: { actorId: "NPC_Store_Clerk", ownActionNotes: [], observedLedgerEventIds: [] },
+    memory: {
+      actorId: "NPC_Store_Clerk",
+      ownActionNotes: [],
+      observedLedgerEventIds: [],
+      evidence: [],
+    },
     heardSpeech: [],
   });
   packet.audibleActorIds = ["player", "NPC_Store_Manager"];
@@ -163,9 +169,9 @@ const validConversation = JSON.stringify({
   utterance: "평소 주문으로 준비할까요?",
   citedRecordIds: [],
   suggestedReplies: [
-    { text: "네, 부탁합니다.", intent: "safe/local" },
-    { text: "제가 뭘 주문했죠?", intent: "uncertain/repair" },
-    { text: "처음 왔습니다.", intent: "risky/weird" },
+    { text: "네, 부탁합니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+    { text: "제가 뭘 주문했죠?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+    { text: "처음 왔습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
   ],
   continueConversation: true,
 });
@@ -178,8 +184,13 @@ function judgmentRequest() {
     promptId: "store.same_order.routine",
     actorId: "NPC_Store_Clerk",
     playerLine: "꿈에서 봤던 세계라서 기억이 흐려요.",
+    playerStatementEvidenceId: "player_statement:session-provider-test:turn-routine-1",
     conversationHistory: [
-      { speakerId: "NPC_Store_Clerk", line: "오늘도 같은 걸로 드릴까요?" },
+      {
+        speakerId: "NPC_Store_Clerk",
+        line: "오늘도 같은 걸로 드릴까요?",
+        evidenceId: null,
+      },
     ],
     observePacket: observePacket(),
     suspicionBefore: 0,
@@ -205,9 +216,9 @@ const validMergedTurn = JSON.stringify({
   utterance: "방문 목적을 확인했습니다.",
   citedRecordIds: [],
   suggestedReplies: [
-    { text: "확인해 주셔서 감사합니다.", intent: "safe/local" },
-    { text: "다음 절차를 알려 주세요.", intent: "uncertain/repair" },
-    { text: "더 말하지 않겠습니다.", intent: "risky/weird" },
+    { text: "확인해 주셔서 감사합니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+    { text: "다음 절차를 알려 주세요.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+    { text: "더 말하지 않겠습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
   ],
   continueConversation: false,
 });
@@ -216,7 +227,11 @@ function ambientReplyRequest(locale = "ko-KR"): AmbientReplyRequest {
   const packet = observePacket();
   packet.visibleActors = ["NPC_Store_Manager"];
   packet.audibleActorIds = ["NPC_Store_Manager"];
-  packet.heardSpeech = ["NPC_Store_Manager: 방문자가 앞서 다른 설명을 했습니다."];
+  packet.heardSpeech = [{
+    speakerActorId: "NPC_Store_Manager",
+    source: { kind: "ambient_utterance", id: "memory:ambient-manager-1" },
+    line: "방문자가 앞서 다른 설명을 했습니다.",
+  }];
   return {
     sessionId: "run-ambient-provider-test",
     locale,
@@ -229,6 +244,7 @@ function ambientReplyRequest(locale = "ko-KR"): AmbientReplyRequest {
     stanceBefore: "uncertain",
     suspicionBefore: 10,
     hasMeaningfulFirsthandConversation: false,
+    currentOpenQuestion: null,
     observePacket: packet,
     budgetCeiling: { maxCalls: 100, maxTokens: 250_000 },
   };
@@ -1860,6 +1876,62 @@ test("ambient reply repairs one wrong nonempty target then succeeds or fails clo
   assert.equal(failedAudit.complete, false);
 });
 
+test("ambient reply receives and must explicitly preserve or resolve a tracked question", async () => {
+  const trackedQuestion = {
+    status: "open" as const,
+    text: "방문자는 왜 서로 다른 설명을 했을까?",
+    whyLine: "서로 다른 설명의 이유를 아직 직접 확인하지 못했습니다.",
+  };
+  const request = {
+    ...ambientReplyRequest(),
+    currentOpenQuestion: trackedQuestion,
+  };
+  const erased = {
+    ...JSON.parse(validAmbientReply),
+    openQuestion: null,
+  };
+  const preserved = {
+    ...erased,
+    openQuestion: trackedQuestion,
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(erased) },
+    { text: JSON.stringify(preserved) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/ambient-question-preservation",
+    textGen,
+  });
+
+  const result = await service.judgeAndProposeAmbientReply(request);
+
+  assert.deepEqual(result.proposal.openQuestion, trackedQuestion);
+  assert.deepEqual(textGen.requests.map(entry => entry.purpose), [
+    "ambient_reply",
+    "repair",
+  ]);
+  const initialInput = JSON.parse(textGen.requests[0]?.input ?? "{}") as {
+    currentOpenQuestion: typeof trackedQuestion;
+  };
+  assert.deepEqual(initialInput.currentOpenQuestion, trackedQuestion);
+  assert.match(
+    textGen.requests[0]?.instructions ?? "",
+    /Never return null to erase or silently preserve a tracked question/,
+  );
+  const openQuestionSchema = (
+    textGen.requests[0]?.jsonSchema.properties as Record<string, Record<string, unknown>>
+  ).openQuestion;
+  assert.equal(openQuestionSchema.type, "object");
+  assert.equal("anyOf" in openQuestionSchema, false);
+  const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "openQuestion",
+    message: "a tracked currentOpenQuestion requires one complete open or resolved question object",
+  }]);
+});
+
 test("hearing strict schema requires every property and exactly six unique residents", () => {
   assertEveryObjectPropertyIsRequired(hearingJudgmentJsonSchema);
   const residentArray = (
@@ -2196,11 +2268,11 @@ test("provider service returns schema-validated live conversation proposals", as
   assert.match(textGen.requests[0].instructions, /Missing context means unknown, never absent/);
   assert.match(
     textGen.requests[0].instructions,
-    /Suggested player replies are different: they are uncommitted possible utterances/,
+    /Suggested player replies are uncommitted possible utterances/,
   );
   assert.match(
     textGen.requests[0].instructions,
-    /risky\/weird may offer a bolder unsupported cover claim or lie/,
+    /only risky\/weird may establish unsupported backstory/,
   );
   assert.match(
     textGen.requests[0].instructions,
@@ -2232,7 +2304,7 @@ test("provider service returns schema-validated live conversation proposals", as
   );
   assert.match(
     JSON.stringify(textGen.requests[0].jsonSchema),
-    /safe\/local is the least exposing plausible answer/,
+    /safe\/local must be non-assertive or cite request evidenceIds/,
   );
   const duplicateIntentProposal = JSON.parse(validConversation);
   duplicateIntentProposal.suggestedReplies[1].intent = "safe/local";
@@ -2259,7 +2331,7 @@ test("provider service returns schema-validated live conversation proposals", as
   );
   assert.ok(
     providerInput.groundingContract.validityRules.some((rule: string) =>
-      rule.includes("Only the one the player selects or types")
+      rule.includes("Only the line the player selects or types")
     ),
   );
   assert.deepEqual(service.auditSnapshot("session-provider-test"), {
@@ -2291,6 +2363,210 @@ test("provider service returns schema-validated live conversation proposals", as
     }],
   });
   providerAuditSnapshotSchema.parse(service.auditSnapshot("session-provider-test"));
+});
+
+test("production reply evidence slots repair invalid claims once and fail closed after one repair", async () => {
+  const compliant = {
+    ...JSON.parse(validConversation),
+    suggestedReplies: [
+      {
+        text: "단골로 안내받았습니다.",
+        intent: "safe/local",
+        evidenceIds: ["scene_fact:routine:1"],
+        introducesNewClaim: false,
+      },
+      {
+        text: "무슨 뜻인지 다시 말씀해 주세요.",
+        intent: "uncertain/repair",
+        evidenceIds: [],
+        introducesNewClaim: false,
+      },
+      {
+        text: "어제 시장과 약속했습니다.",
+        intent: "risky/weird",
+        evidenceIds: [],
+        introducesNewClaim: true,
+      },
+    ],
+  };
+  const invalidCases = [
+    {
+      name: "all replies marked as new claims",
+      mutate(proposal: typeof compliant) {
+        for (const reply of proposal.suggestedReplies) reply.introducesNewClaim = true;
+      },
+    },
+    {
+      name: "uncertain reply marked as a new claim",
+      mutate(proposal: typeof compliant) {
+        proposal.suggestedReplies[1].introducesNewClaim = true;
+      },
+    },
+    {
+      name: "reply cites an id outside the request catalog",
+      mutate(proposal: typeof compliant) {
+        proposal.suggestedReplies[0].evidenceIds = ["scene_fact:unknown:1"];
+      },
+    },
+  ];
+
+  for (const candidate of invalidCases) {
+    const invalid = structuredClone(compliant);
+    candidate.mutate(invalid);
+    const textGen = new FakeTextGen([
+      { text: JSON.stringify(invalid) },
+      { text: JSON.stringify(compliant) },
+    ]);
+    const service = new ProviderService({
+      profileId: `test/reply-evidence-${candidate.name}`,
+      textGen,
+    });
+    const result = await service.proposeConversationTurn(conversationRequest());
+    assert.deepEqual(result.proposal.suggestedReplies, compliant.suggestedReplies, candidate.name);
+    assert.deepEqual(
+      textGen.requests.map(request => request.purpose),
+      ["conversation", "repair"],
+      candidate.name,
+    );
+  }
+
+  const acceptedTextGen = new FakeTextGen([{ text: JSON.stringify(compliant) }]);
+  const acceptedService = new ProviderService({
+    profileId: "test/reply-evidence-compliant",
+    textGen: acceptedTextGen,
+  });
+  const accepted = await acceptedService.proposeConversationTurn(conversationRequest());
+  assert.deepEqual(accepted.proposal.suggestedReplies, compliant.suggestedReplies);
+  assert.equal(acceptedTextGen.requests.length, 1);
+
+  const alwaysInvalid = structuredClone(compliant);
+  invalidCases[0].mutate(alwaysInvalid);
+  const failedTextGen = new FakeTextGen([
+    { text: JSON.stringify(alwaysInvalid) },
+    { text: JSON.stringify(alwaysInvalid) },
+  ]);
+  const failedService = new ProviderService({
+    profileId: "test/reply-evidence-fail-closed",
+    textGen: failedTextGen,
+  });
+  await expectProviderFailure(
+    failedService.proposeConversationTurn(conversationRequest()),
+    {
+      profileId: "test/reply-evidence-fail-closed",
+      reason: "invalid_envelope",
+      purpose: "conversation",
+    },
+  );
+  assert.deepEqual(failedTextGen.requests.map(request => request.purpose), ["conversation", "repair"]);
+});
+
+test("merged post-answer reply evidence contract accepts, repairs, and fails closed", async () => {
+  const request = {
+    ...judgmentRequest(),
+    objective: "방문 이유를 확인한다.",
+    sceneFacts: ["상점에서 점원과 직접 대화하고 있다."],
+    stanceBefore: "uncertain" as const,
+    hasMeaningfulFirsthandConversation: false,
+  };
+  const priorEvidenceId = "player_statement:session-provider-test:turn-prior-1";
+  request.conversationHistory.push({
+    speakerId: "player",
+    line: "앞서 방문 목적을 설명했습니다.",
+    evidenceId: priorEvidenceId,
+  });
+  request.observePacket.heardSpeech = [
+    {
+      speakerActorId: "player",
+      source: { kind: "player_statement", id: priorEvidenceId },
+      line: "앞서 방문 목적을 설명했습니다.",
+    },
+    {
+      speakerActorId: "player",
+      source: { kind: "player_statement", id: request.playerStatementEvidenceId },
+      line: request.playerLine,
+    },
+  ];
+  const compliant = {
+    ...JSON.parse(validMergedTurn),
+    suggestedReplies: [
+      {
+        text: "제가 방금 설명한 내용을 기준으로 확인해 주세요.",
+        intent: "safe/local",
+        evidenceIds: [request.playerStatementEvidenceId],
+        introducesNewClaim: false,
+      },
+      {
+        text: "어떤 부분을 다시 설명할까요?",
+        intent: "uncertain/repair",
+        evidenceIds: [],
+        introducesNewClaim: false,
+      },
+      {
+        text: "시장이 저를 보냈습니다.",
+        intent: "risky/weird",
+        evidenceIds: [],
+        introducesNewClaim: true,
+      },
+    ],
+  };
+  const invalid = structuredClone(compliant);
+  for (const reply of invalid.suggestedReplies) reply.introducesNewClaim = true;
+
+  const repairedTextGen = new FakeTextGen([
+    { text: JSON.stringify(invalid) },
+    { text: JSON.stringify(compliant) },
+  ]);
+  const repairedService = new ProviderService({
+    profileId: "test/merged-reply-evidence-repair",
+    textGen: repairedTextGen,
+    maxTokensPerSession: 200_000,
+  });
+  const repaired = await repairedService.judgeAndProposeConversationTurn(request);
+  assert.deepEqual(repaired.proposal.suggestedReplies, compliant.suggestedReplies);
+  assert.deepEqual(
+    repairedTextGen.requests.map(providerRequest => providerRequest.purpose),
+    ["conversation_turn", "repair"],
+  );
+  const firstInput = JSON.parse(repairedTextGen.requests[0].input);
+  assert.deepEqual(
+    firstInput.groundingContract.evidenceCatalog
+      .filter((entry: { evidenceType: string }) => entry.evidenceType === "player_statement")
+      .map((entry: { evidenceId: string }) => entry.evidenceId),
+    [priorEvidenceId, request.playerStatementEvidenceId],
+    "history and typed heardSpeech project each player turn exactly once",
+  );
+
+  const acceptedTextGen = new FakeTextGen([{ text: JSON.stringify(compliant) }]);
+  const acceptedService = new ProviderService({
+    profileId: "test/merged-reply-evidence-compliant",
+    textGen: acceptedTextGen,
+    maxTokensPerSession: 200_000,
+  });
+  const accepted = await acceptedService.judgeAndProposeConversationTurn(request);
+  assert.deepEqual(accepted.proposal.suggestedReplies, compliant.suggestedReplies);
+  assert.equal(acceptedTextGen.requests.length, 1);
+
+  const failedTextGen = new FakeTextGen([
+    { text: JSON.stringify(invalid) },
+    { text: JSON.stringify(invalid) },
+  ]);
+  const failedService = new ProviderService({
+    profileId: "test/merged-reply-evidence-fail-closed",
+    textGen: failedTextGen,
+    maxTokensPerSession: 200_000,
+  });
+  await expectProviderFailure(
+    failedService.judgeAndProposeConversationTurn(request),
+    {
+      profileId: "test/merged-reply-evidence-fail-closed",
+      reason: "invalid_envelope",
+      purpose: "conversation_turn",
+    },
+  );
+  assert.deepEqual(
+    failedTextGen.requests.map(providerRequest => providerRequest.purpose),
+    ["conversation_turn", "repair"],
+  );
 });
 
 test("player-facing conversation cites only records visible to the resident", async () => {
@@ -2353,12 +2629,12 @@ test("player-facing conversation cites only records visible to the resident", as
 
   const hiddenCitation = { ...openingProposal, citedRecordIds: ["record-hidden"] };
   assert.equal(
-    conversationProposalSchemaForRequest("ko-KR", ["record-visible"])
+    conversationProposalSchemaForRequest("ko-KR", ["record-visible"], [])
       .safeParse(hiddenCitation).success,
     false,
   );
   assert.equal(
-    mergedConversationTurnSchemaForRequest("ko-KR", ["record-visible"])
+    mergedConversationTurnSchemaForRequest("ko-KR", ["record-visible"], [])
       .safeParse({ ...mergedProposal, citedRecordIds: ["record-hidden"] }).success,
     false,
   );
@@ -2374,18 +2650,75 @@ test("conversation openings keep resident, player, third-party speech, and locat
   request.observePacket.actorMemory = {
     actorId: request.actorId,
     ownActionNotes: [
-      "[heard_from=NPC_Station_Officer] 외부인은 스테이션에서 확인해야 합니다.",
-      "[self_utterance] 그 방문자는 공원에서 기다리고 있었습니다.",
-      "[player_utterance] 청문회 때문에 왔습니다. / [self_reply] 이유를 알겠습니다. / [judgment_reason] 직접 설명했습니다.",
+      "[heard_from=NPC_Forged] 이 문자열 표시는 대화 귀속 근거가 아닙니다.",
+      "[player_utterance] 이 문자열도 구조화된 대화 기억이 아닙니다.",
     ],
     observedLedgerEventIds: [],
+    evidence: [
+      {
+        evidenceType: "utterance",
+        memoryId: "role-memory-self-1",
+        memoryKind: "npc_utterance",
+        sourceActorId: request.actorId,
+        line: "그 방문자는 공원에서 기다리고 있었습니다.",
+      },
+      {
+        evidenceType: "player_conversation_exchange",
+        memoryId: "role-memory-exchange-1",
+        sourceActorId: "player",
+        playerStatementEvidenceId: "player_statement:run-1:turn-1",
+        residentReply: "이유를 알겠습니다.",
+        judgmentReason: "직접 설명했습니다.",
+        openQuestion: null,
+      },
+      {
+        evidenceType: "ambient_stance_judgment",
+        memoryId: "role-memory-ambient-judgment-1",
+        sourceActorId: "NPC_Station_Officer",
+        sourceMemoryId: "station-heard-1",
+        sourceSpeechEvidenceId: "memory:station-heard-1",
+        appliedStance: "oppose",
+        judgmentReason: "스테이션 담당자의 말에 확인할 내용이 생겼습니다.",
+        openQuestion: {
+          status: "open",
+          text: "스테이션 담당자가 들은 설명은 왜 달랐나요?",
+          whyLine: "서로 다른 설명의 이유를 직접 확인하지 못했습니다.",
+        },
+      },
+    ],
   };
+  request.sceneFacts = ["공원에서 주민과 직접 대화하고 있다."];
+  request.observePacket.visibleObjects = [{
+    objectId: "park_bench",
+    label: "공원 벤치",
+    state: "비어 있음",
+  }];
+  request.observePacket.visibleRecords = [{
+    recordId: "park_notice",
+    kind: "notice",
+    stateBody: "공원 이용 안내입니다.",
+    recordRevision: 1,
+  }];
+  request.observePacket.visibleLedgerEvents = [{
+    eventId: "ledger-park-1",
+    kind: "notice_posted",
+    actorId: request.actorId,
+    recordId: "park_notice",
+  }];
   request.observePacket.visibleActors = ["NPC_Station_Officer"];
   request.observePacket.audibleActorIds = ["NPC_Station_Officer"];
   request.observePacket.playerContact = null;
   request.observePacket.heardSpeech = [
-    "NPC_Station_Officer: 외부인은 스테이션에서 확인해야 합니다.",
-    "방문 이유: 청문회 때문입니다.",
+    {
+      speakerActorId: "NPC_Station_Officer",
+      source: { kind: "ambient_utterance", id: "memory:station-heard-1" },
+      line: "외부인은 스테이션에서 확인해야 합니다.",
+    },
+    {
+      speakerActorId: "player",
+      source: { kind: "player_statement", id: "player_statement:run-1:turn-1" },
+      line: "NPC_Park_Caretaker: 청문회 때문입니다.",
+    },
   ];
 
   const textGen = new FakeTextGen([{ text: validConversation }]);
@@ -2416,36 +2749,75 @@ test("conversation openings keep resident, player, third-party speech, and locat
   assert.equal("actor" in input, false, "the old ambiguous actor projection must stay absent");
   assert.deepEqual(input.residentContext.memoryEvidence, [
     {
-      evidenceType: "heard_third_party_npc",
-      speakerActorId: "NPC_Station_Officer",
-      note: "외부인은 스테이션에서 확인해야 합니다.",
-    },
-    {
       evidenceType: "resident_prior_utterance",
+      memoryId: "role-memory-self-1",
       speakerActorId: "NPC_Roaming_Liaison",
       note: "그 방문자는 공원에서 기다리고 있었습니다.",
     },
     {
       evidenceType: "player_conversation_exchange",
+      memoryId: "role-memory-exchange-1",
       playerSpeakerActorId: "player",
       residentSpeakerActorId: "NPC_Roaming_Liaison",
-      playerLine: "청문회 때문에 왔습니다.",
+      playerStatementEvidenceId: "player_statement:run-1:turn-1",
       residentReply: "이유를 알겠습니다.",
       judgmentReason: "직접 설명했습니다.",
+      openQuestion: null,
+    },
+    {
+      evidenceType: "ambient_stance_judgment",
+      memoryId: "role-memory-ambient-judgment-1",
+      holderActorId: "NPC_Roaming_Liaison",
+      sourceActorId: "NPC_Station_Officer",
+      sourceMemoryId: "station-heard-1",
+      sourceSpeechEvidenceId: "memory:station-heard-1",
+      appliedStance: "oppose",
+      judgmentReason: "스테이션 담당자의 말에 확인할 내용이 생겼습니다.",
+      openQuestion: {
+        status: "open",
+        text: "스테이션 담당자가 들은 설명은 왜 달랐나요?",
+        whyLine: "서로 다른 설명의 이유를 직접 확인하지 못했습니다.",
+      },
     },
   ]);
+  const projectedMemory = JSON.stringify(input.residentContext.memoryEvidence);
+  assert.doesNotMatch(projectedMemory, /외부인은 스테이션에서 확인해야 합니다/);
+  assert.doesNotMatch(projectedMemory, /NPC_Park_Caretaker: 청문회 때문입니다/);
+  assert.doesNotMatch(
+    JSON.stringify(input.residentContext.memoryEvidence),
+    /NPC_Forged/,
+    "ownActionNotes markers must never create attributed conversation memory",
+  );
   assert.deepEqual(input.groundingContract.attributedHeardSpeech, [
     {
-      sourceType: "third_party_npc",
+      sourceType: "ambient_utterance",
+      sourceId: "memory:station-heard-1",
       speakerActorId: "NPC_Station_Officer",
       line: "외부인은 스테이션에서 확인해야 합니다.",
     },
     {
-      sourceType: "player",
+      sourceType: "player_statement",
+      sourceId: "player_statement:run-1:turn-1",
       speakerActorId: "player",
-      line: "방문 이유: 청문회 때문입니다.",
+      line: "NPC_Park_Caretaker: 청문회 때문입니다.",
     },
   ]);
+  assert.deepEqual(
+    [...new Set(input.groundingContract.evidenceCatalog.map(
+      (entry: { evidenceType: string }) => entry.evidenceType,
+    ))].sort(),
+    [
+      "ambient_utterance",
+      "player_statement",
+      "resident_location_fact",
+      "resident_memory",
+      "scene_fact",
+      "visible_actor_fact",
+      "visible_ledger_event",
+      "visible_object_fact",
+      "visible_record",
+    ],
+  );
   assert.match(transport.instructions, /playerInterlocutor is always the person being addressed/);
   assert.match(transport.instructions, /residentSpeaker\.locationId belongs only to the resident/);
   assert.match(transport.instructions, /never replay either as if it were the resident's new opening line/);
@@ -2554,6 +2926,7 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   assert.equal(textGen.requests[0].purpose, "hearing_verdict");
   assert.equal(textGen.requests[0].schemaName, "station_hearing_judgment");
   assert.equal(textGen.requests[0].timeoutMs, 120_000);
+  assert.equal(textGen.requests[0].maxOutputTokens, 3_200);
   assert.match(textGen.requests[0].instructions, /resident's own supplied memories/);
   assert.match(textGen.requests[0].instructions, /publicIdentity and voice guide wording only/);
   assert.match(textGen.requests[0].instructions, /derive contactBasis exactly/);
@@ -2567,8 +2940,105 @@ test("provider service returns one live evidence-grounded hearing judgment", asy
   assert.match(textGen.requests[0].instructions, /run locale is ko-KR/);
   const providerInput = JSON.parse(textGen.requests[0].input);
   assert.equal(providerInput.residents.length, 6);
+  assert.deepEqual(
+    providerInput.residentEvidenceContract,
+    request.residents.map(resident => ({
+      actorId: resident.actorId,
+      requiredContactBasis: resident.actorId === "NPC_Station_Officer"
+        ? "limited_firsthand"
+        : resident.actorId === "NPC_Roaming_Liaison"
+          ? "never_conversed"
+          : "meaningful_firsthand",
+      allowedMemoryIds: resident.memories.map(memory => memory.memoryId),
+      meaningfulFirsthandMemoryIds: resident.memories
+        .filter(memory => memory.meaningfulFirsthand)
+        .map(memory => memory.memoryId),
+    })),
+  );
   assert.deepEqual(providerInput.records, request.records);
   assert.deepEqual(providerInput.ledgerEvents, request.ledgerEvents);
+
+  const scopedSchema = hearingJudgmentJsonSchemaForRequest(request);
+  const scopedProperties = scopedSchema.properties as Record<string, Record<string, unknown>>;
+  const assessmentItems = scopedProperties.residentAssessments.items as {
+    anyOf: Array<{ properties: Record<string, Record<string, unknown>> }>;
+  };
+  assert.equal(assessmentItems.anyOf.length, 6);
+  assessmentItems.anyOf.forEach((branch, index) => {
+    const resident = request.residents[index]!;
+    assert.equal(branch.properties.actorId.const, resident.actorId);
+    assert.equal(
+      branch.properties.contactBasis.const,
+      index < 4
+        ? "meaningful_firsthand"
+        : index === 4
+          ? "limited_firsthand"
+          : "never_conversed",
+    );
+    const citedMemoryIds = branch.properties.citedMemoryIds;
+    if (resident.memories.length === 0) {
+      assert.equal(citedMemoryIds.maxItems, 0);
+    } else {
+      assert.deepEqual(
+        (citedMemoryIds.items as Record<string, unknown>).enum,
+        resident.memories.map(memory => memory.memoryId),
+      );
+    }
+  });
+});
+
+test("a length-limited hearing response is repaired even when its partial text parses", async () => {
+  const valid = validHearingJudgment();
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(valid), finishReason: "length" },
+    { text: JSON.stringify(valid), finishReason: "stop" },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/hearing-length-repair",
+    textGen,
+    maxOutputTokensPerCall: 1_600,
+    maxTokensPerSession: 450_000,
+  });
+
+  const result = await service.judgeHearing(hearingRequest());
+
+  assert.deepEqual(result.proposal, valid);
+  assert.deepEqual(
+    textGen.requests.map(request => [request.purpose, request.maxOutputTokens]),
+    [["hearing_verdict", 3_200], ["repair", 3_200]],
+  );
+  const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
+    generationIssue?: string;
+  };
+  assert.equal(repairInput.generationIssue, "output_truncated_at_token_limit");
+});
+
+test("two length-limited hearing responses fail closed even when their text parses", async () => {
+  const validText = JSON.stringify(validHearingJudgment());
+  const textGen = new FakeTextGen([
+    { text: validText, finishReason: "length" },
+    { text: validText, finishReason: "length" },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/hearing-length-failure",
+    textGen,
+    maxTokensPerSession: 450_000,
+  });
+  const originalWarn = console.warn;
+  console.warn = () => undefined;
+  try {
+    await expectProviderFailure(service.judgeHearing(hearingRequest()), {
+      profileId: "test/hearing-length-failure",
+      reason: "invalid_envelope",
+      purpose: "hearing_verdict",
+    });
+  } finally {
+    console.warn = originalWarn;
+  }
+  assert.deepEqual(
+    textGen.requests.map(request => request.purpose),
+    ["hearing_verdict", "repair"],
+  );
 });
 
 test("an invalid hearing envelope receives one repair before returning live", async () => {
@@ -2582,6 +3052,7 @@ test("an invalid hearing envelope receives one repair before returning live", as
   const service = new ProviderService({
     profileId: "test/hearing-repair",
     textGen,
+    maxTokensPerSession: 450_000,
   });
   const result = await service.judgeHearing(hearingRequest());
 
@@ -2651,6 +3122,7 @@ test("request-scoped hearing semantic failures receive one repair and remain liv
     const service = new ProviderService({
       profileId: `test/hearing-semantic-repair-${candidate.name}`,
       textGen,
+      maxTokensPerSession: 450_000,
     });
     const result = await service.judgeHearing(request);
 
@@ -2694,6 +3166,7 @@ test("hearing semantic repair failure fails closed without a verdict", async () 
   const service = new ProviderService({
     profileId: "test/hearing-semantic-repair-failure",
     textGen,
+    maxTokensPerSession: 450_000,
   });
   const warnings: unknown[][] = [];
   const originalWarn = console.warn;
@@ -3244,9 +3717,9 @@ test("the one blocking merged call returns model-owned stance with firsthand gro
       whyLine: "Mira의 QR 기록과 2次 확인을 비교해야 합니다.",
     },
     suggestedReplies: [
-      { text: "Mira에게 QR 기록 2개를 확인해 달라고 하겠습니다.", intent: "safe/local" },
-      { text: "접수 메모와 來歷을 함께 살펴보겠습니다.", intent: "uncertain/repair" },
-      { text: "3번 창구에서 다시 설명하겠습니다.", intent: "risky/weird" },
+      { text: "Mira에게 QR 기록 2개를 확인해 달라고 하겠습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "접수 메모와 來歷을 함께 살펴보겠습니다.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "3번 창구에서 다시 설명하겠습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
     ],
     continueConversation: true,
   };
@@ -3587,9 +4060,9 @@ test("player-visible stable ids get one bounded repair even when the prose conta
       whyLine: "NPC_Studio_Manager의 mem-question-1을 확인해야 합니다.",
     },
     suggestedReplies: [
-      { text: "Mira에게 다시 묻겠습니다.", intent: "safe/local" },
-      { text: "TS_Studio_ReviewRecords를 확인하겠습니다.", intent: "uncertain/repair" },
-      { text: "아직 판단하지 않겠습니다.", intent: "risky/weird" },
+      { text: "Mira에게 다시 묻겠습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "TS_Studio_ReviewRecords를 확인하겠습니다.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "아직 판단하지 않겠습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
     ],
   };
   const textGen = new FakeTextGen([
@@ -3826,9 +4299,9 @@ test("invalid first and repair envelopes emit one sanitized structured warning",
   const repairInvalid = {
     utterance: `방문자가 ${offendingLatinToken}를 다시 말했습니다.`,
     suggestedReplies: [
-      { text: "I can explain the procedure.", intent: "safe/local" },
-      { text: "Please clarify the question.", intent: "uncertain/repair" },
-      { text: "I have nothing to add.", intent: "risky/weird" },
+      { text: "I can explain the procedure.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "Please clarify the question.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "I have nothing to add.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
     ],
     continueConversation: "yes",
     [sentinel]: "private extra field",
@@ -4439,9 +4912,14 @@ test("Qwen profile timeout governs both its transport and ProviderService bounda
 });
 
 test("the final hearing can outlive the ordinary Qwen profile timeout inside the game ceiling", async () => {
+  const sentMaxTokens: unknown[] = [];
+  let requestCount = 0;
   const server = Bun.serve({
     port: 0,
-    async fetch() {
+    async fetch(request) {
+      const body = await request.json() as { max_tokens?: unknown };
+      sentMaxTokens.push(body.max_tokens);
+      requestCount += 1;
       await Bun.sleep(80);
       return Response.json({
         id: "chatcmpl-hearing-timeout-contract",
@@ -4452,7 +4930,7 @@ test("the final hearing can outlive the ordinary Qwen profile timeout inside the
           {
             index: 0,
             message: { role: "assistant", content: JSON.stringify(validHearingJudgment()) },
-            finish_reason: "stop",
+            finish_reason: requestCount === 1 ? "length" : "stop",
           },
         ],
         usage: { prompt_tokens: 101, completion_tokens: 67, total_tokens: 168 },
@@ -4475,7 +4953,10 @@ test("the final hearing can outlive the ordinary Qwen profile timeout inside the
     assert.equal(result.meta.transport, "live");
     assert.equal(result.meta.usedFallback, false);
     assert.equal(result.proposal.residentAssessments.length, 6);
-    assert.equal(proposalPort.auditSnapshot(hearingRequest().runId).calls[0]?.outcome, "success");
+    assert.deepEqual(sentMaxTokens, [3_200, 3_200]);
+    const audit = proposalPort.auditSnapshot(hearingRequest().runId);
+    assert.deepEqual(audit.calls.map(call => call.purpose), ["hearing_verdict", "repair"]);
+    assert.ok(audit.calls.every(call => call.outcome === "success"));
   } finally {
     server.stop(true);
   }

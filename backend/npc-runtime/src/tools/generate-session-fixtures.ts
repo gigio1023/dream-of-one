@@ -272,9 +272,11 @@ async function main(): Promise<void> {
   const godotPath = resolve(repoRoot, "godot", "data", "fixtures", "session-api-examples.json");
   const body = `${JSON.stringify(fixtures, null, 2)}\n`;
   writeFileSync(backendPath, body, "utf-8");
-  writeFileSync(godotPath, body, "utf-8");
+  if (process.env.SESSION_FIXTURE_BACKEND_ONLY !== "1") {
+    writeFileSync(godotPath, body, "utf-8");
+  }
   console.log(`wrote ${backendPath}`);
-  console.log(`wrote ${godotPath}`);
+  if (process.env.SESSION_FIXTURE_BACKEND_ONLY !== "1") console.log(`wrote ${godotPath}`);
 }
 
 await main();

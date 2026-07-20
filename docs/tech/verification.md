@@ -74,6 +74,43 @@ speech reduced the pull. The worker did not capture both ambient subtitles and
 speech blips while they were visibly on-screen, so the first-playable visual
 claim, full hearing routes, provider-interruption presentation, and IME remain open.
 
+The 2026-07-19 correction branch first ran the opt-in hearing calibration
+against both required evidence shapes. Five consecutive ordinary-eligible
+and five consecutive abnormal hearings returned valid resolutions. Every
+physical call reported `modelscope/qwen3.7-plus`, live transport, and no
+fallback; no result failed, dropped, truncated, or remained in flight. The
+runtime still enforced the four-vouch floor, per-resident citation ownership,
+and contact-basis consistency.
+
+Two native Godot AI runs then completed the full hearing route.
+`run-aa3e2230-68bf-4f29-acfb-ddfb6ee28f7c` traversed every interior,
+contacted all six residents, earned exactly four meaningful-firsthand
+vouches, and ended ordinary. Its complete/quiescent audit used 66 physical
+calls and 290,993 charged tokens. Materially different
+`run-c299bdf7-aa58-4082-93f6-c6031bfedd7e` used only two direct
+conversations, let one ignored contact expire, showed a Station Officer move
+`uncertain → oppose → uncertain`, and ended abnormal. Its audit used 58
+physical calls and 246,027 charged tokens. Both stayed below the configured
+120-call/450,000-token budget with zero provider failure, fallback, dropped
+evidence, truncation, or in-flight remainder.
+
+The production sidecar was next routed through a connection-failing proxy.
+The client rendered a fail-closed interruption, preserved and retried the
+exact pending operation once after the same provider recovered, and also
+abandoned into clean run
+`run-5d1b06d2-14ca-484e-a92d-fa867d1ba2f0` without a verdict or invented
+mutation. The localized interruption surface was rendered in all six
+supported locales. Each locale also completed a normal live-Qwen opening →
+answer → why-line round; 100% and 150% long-text/why-line layouts were
+inspected without raw keys or clipping. Native Korean, Simplified Chinese,
+and Japanese OS IME preedit/commit remains owner-only evidence: injected
+Unicode and finalized text do not satisfy it.
+
+After the two full routes, the honest fun answer is **yes, narrowly**:
+different claims led to recoverable social trajectories and different
+hearing outcomes worth replaying, while over-inventive generated choices and
+sparse wayfinding still weaken the pull.
+
 ### Headless evidence boundary
 
 Headless is the default implementation-time route so automated work does not

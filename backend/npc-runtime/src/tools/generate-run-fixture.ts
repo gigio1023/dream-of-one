@@ -37,6 +37,25 @@ interface VariantSpec {
   answerFor: (turn: RunGeneratedNextTurn) => RunSessionAnswer;
 }
 
+async function drainConversation(
+  service: RunService,
+  runId: string,
+  sessionId: string,
+  initialTurn: RunGeneratedNextTurn | null,
+): Promise<void> {
+  let turn = initialTurn;
+  for (let attempt = 0; turn && attempt < 4; attempt += 1) {
+    const safeChoice = turn.choices.find(choice => choice.intent === "safe/local") ?? turn.choices[0];
+    if (!safeChoice) throw new Error("fixture continuation has no answer choice");
+    const response = await service.answer(runId, sessionId, turn.turnId, {
+      type: "choice",
+      choiceId: safeChoice.choiceId,
+    });
+    turn = response.nextTurn;
+  }
+  if (turn) throw new Error("fixture conversation exceeded its bounded continuation drain");
+}
+
 async function driveHearingSequence() {
   const layout = { ...loadRunLayout(), hearingAtSeconds: 10 };
   const service = new RunService({
@@ -461,6 +480,12 @@ async function driveVariant(spec: VariantSpec) {
     sessionStartResponse.sessionId,
   );
   const runSnapshotAfterAnswerResponse = service.snapshot(runStartResponse.runId);
+  await drainConversation(
+    service,
+    runStartResponse.runId,
+    sessionStartResponse.sessionId,
+    sessionAnswerResponse.nextTurn,
+  );
   const sessionEndResponse = await service.endConversation(
     runStartResponse.runId,
     sessionStartResponse.sessionId,
@@ -520,6 +545,12 @@ async function driveAdministrativeSequence() {
     answerRequest.sessionId,
     answerRequest.turnId,
     answerRequest.answer,
+  );
+  await drainConversation(
+    service,
+    started.runId,
+    conversation.sessionId,
+    answerResponse.nextTurn,
   );
   await service.endConversation(started.runId, conversation.sessionId);
   const beforeFacts = service.snapshot(started.runId);

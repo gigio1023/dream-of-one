@@ -56,10 +56,10 @@ applies runtime movement IDs to projected NavMesh targets, and acknowledges an
 arrival only after the matching NPC physically reaches that target. The first
 park meeting now produces two attributed utterances, exact listener memory,
 direction-aware subtitles, and a short spatial speech blip from the shared
-audibility contract. A line that starts while the non-pausing record log or
-settings surface is open still plays its spatial blip and is acknowledged as
-heard; its hidden subtitle timer waits until that surface closes instead of
-discarding the utterance. On the next batched advance after a material scene change,
+audibility contract. A line that starts while the non-pausing record log,
+settings, outcome, or provider-interruption surface is open remains retained;
+its hidden subtitle timer waits until the blocking surface closes instead of
+discarding unseen speech. On the next batched advance after a material scene change,
 the client reports all six residents' NavMesh reachability, actor-height
 physics-ray line of sight, authored-volume audibility, and positions at one
 observed world revision. Runtime-authored `speech`, `readiness`, `look`,
@@ -334,7 +334,7 @@ which includes both slots of the first scheduled park meeting from the authored
 player spawn; the scene smoke protects that first two-minute social beat from
 falling just outside the semantic boundary. Free-world utterances are capped at
 64 Unicode code points before presentation so a queued subtitle can be read
-within its 2.4–6.0 second lifetime. Short spatial murmurs/blips make in-range
+within its 4.0–8.0 second lifetime. Short spatial murmurs/blips make in-range
 speech audible without adding TTS. The current `AudioFeedback` baseline
 deterministically synthesizes two footstep variants, prop impact, record
 scribble, park ambience, and one shared interior tone at startup, all on the

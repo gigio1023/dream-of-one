@@ -23,9 +23,9 @@ function opening(request: ConversationTurnRequest): ConversationProposal {
     utterance,
     citedRecordIds: [],
     suggestedReplies: [
-      { text: "안내받은 절차를 확인하러 왔습니다.", intent: "safe/local" },
-      { text: "먼저 어떤 접수인지 설명해 주세요.", intent: "uncertain/repair" },
-      { text: "여기 사람이 아니라서 잘 모르겠습니다.", intent: "risky/weird" },
+      { text: "안내받은 절차를 확인하러 왔습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "먼저 어떤 접수인지 설명해 주세요.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "여기 사람이 아니라서 잘 모르겠습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: true },
     ],
     continueConversation: true,
   };
@@ -48,9 +48,9 @@ function mergedTurn(request: MergedConversationTurnRequest): MergedConversationT
       utterance: "방문 목적을 확인했습니다. 접수 내용을 정리해 두겠습니다.",
       citedRecordIds: [],
       suggestedReplies: [
-        { text: "확인해 주셔서 감사합니다.", intent: "safe/local" },
-        { text: "다음 절차도 알려 주세요.", intent: "uncertain/repair" },
-        { text: "더 말할 내용은 없습니다.", intent: "risky/weird" },
+        { text: "확인해 주셔서 감사합니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+        { text: "다음 절차도 알려 주세요.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+        { text: "더 말할 내용은 없습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
       ],
       continueConversation: false,
     };
@@ -71,9 +71,9 @@ function mergedTurn(request: MergedConversationTurnRequest): MergedConversationT
       utterance: "그렇다면 방문 경위를 더 확인해야겠습니다.",
       citedRecordIds: [],
       suggestedReplies: [
-        { text: "안내받은 내용을 차근히 설명하겠습니다.", intent: "safe/local" },
-        { text: "어떤 부분부터 확인할까요?", intent: "uncertain/repair" },
-        { text: "확인할 필요는 없습니다.", intent: "risky/weird" },
+        { text: "안내받은 내용을 차근히 설명하겠습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+        { text: "어떤 부분부터 확인할까요?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+        { text: "확인할 필요는 없습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
       ],
       continueConversation: false,
     };
@@ -93,9 +93,9 @@ function mergedTurn(request: MergedConversationTurnRequest): MergedConversationT
     utterance: "알겠습니다. 지금 확인할 수 있는 내용부터 정리하겠습니다.",
     citedRecordIds: [],
     suggestedReplies: [
-      { text: "제가 아는 내용을 말씀드리겠습니다.", intent: "safe/local" },
-      { text: "필요한 질문을 해 주세요.", intent: "uncertain/repair" },
-      { text: "그냥 지나가다 들어왔습니다.", intent: "risky/weird" },
+      { text: "제가 아는 내용을 말씀드리겠습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "필요한 질문을 해 주세요.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "그냥 지나가다 들어왔습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: true },
     ],
     continueConversation: false,
   };

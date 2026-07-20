@@ -525,9 +525,9 @@ func _check_onboarding_dialogue_hint(hud: Node, onboarding: Node) -> void:
 	var shown := bool(hud.call("show_turn", {
 		"prompt": "Onboarding timing probe",
 		"choices": [
-			{"choiceId": "probe_1", "line": "One"},
-			{"choiceId": "probe_2", "line": "Two"},
-			{"choiceId": "probe_3", "line": "Three"},
+			{"choiceId": "probe_1", "line": "One", "intent": "safe/local", "evidenceIds": [], "introducesNewClaim": false},
+			{"choiceId": "probe_2", "line": "Two", "intent": "uncertain/repair", "evidenceIds": [], "introducesNewClaim": false},
+			{"choiceId": "probe_3", "line": "Three", "intent": "risky/weird", "evidenceIds": [], "introducesNewClaim": true},
 		],
 		"acceptsFreeInput": true,
 	}))
@@ -541,13 +541,21 @@ func _check_onboarding_dialogue_hint(hud: Node, onboarding: Node) -> void:
 		if ready_snapshot_value is Dictionary
 		else {}
 	)
-	if (
-		not bool(ready_snapshot.get("dialogueHintShown", false))
-		or not bool(ready_snapshot.get("conversationTurnActionable", false))
-		or str(ready_snapshot.get("key", "")) != "hud.m3r.onboarding.dialogue"
-		or not bool(ready_snapshot.get("visible", false))
-	):
-		_failures.append("dialogue onboarding hint did not start with actionable controls")
+	if not bool(ready_snapshot.get("dialogueHintShown", false)):
+		_failures.append("dialogue onboarding hint was not acknowledged by actionable controls")
+	if not bool(ready_snapshot.get("conversationTurnActionable", false)):
+		_failures.append("dialogue onboarding did not expose an actionable turn")
+	if bool(ready_snapshot.get("visible", false)):
+		_failures.append("detached dialogue onboarding card overlaps actionable controls")
+	var choice_buttons: Array[Node] = [
+		hud.get_node_or_null("Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices/ConversationChoice1"),
+		hud.get_node_or_null("Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices/ConversationChoice2"),
+		hud.get_node_or_null("Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices/ConversationChoice3"),
+	]
+	for index in choice_buttons.size():
+		var choice_button := choice_buttons[index] as Button
+		if choice_button == null or not choice_button.text.begins_with("%d — " % (index + 1)):
+			_failures.append("dialogue choice %d does not expose its inline shortcut" % (index + 1))
 	hud.call("close_conversation")
 	onboarding.call("_poll_hud_surface")
 
@@ -799,7 +807,12 @@ func _check_long_locale_hud(
 	for index in choices.size():
 		turn_choices.append({
 			"choiceId": "long_%s_%d" % [presentation_id, index + 1],
-			"line": str(choices[index]),
+			# Choices one and three intentionally share the same line. This proves
+			# the marker follows introducesNewClaim instead of a text coincidence.
+			"line": str(choices[0] if index == 2 else choices[index]),
+			"intent": ["safe/local", "uncertain/repair", "risky/weird"][index],
+			"evidenceIds": [],
+			"introducesNewClaim": index == 2,
 		})
 	var shown := bool(hud.call("show_turn", {
 		"prompt": str(text.get("prompt", "")),
@@ -808,6 +821,25 @@ func _check_long_locale_hud(
 	}))
 	if not shown:
 		_failures.append("%s long-form conversation was rejected" % presentation_id)
+	var localized_marker_template := str(localization.call(
+		"content_message",
+		presentation_id,
+		"hud.m3r.conversation.new_claim_choice"
+	))
+	var localized_marker_prefix := localized_marker_template.replace("{line}", "").strip_edges()
+	var localized_marker := localized_marker_template.format({"line": str(choices[0])})
+	var first_choice_button := hud.find_child("ConversationChoice1", true, false) as Button
+	var third_choice_button := hud.find_child("ConversationChoice3", true, false) as Button
+	if (
+		first_choice_button == null
+		or third_choice_button == null
+		or first_choice_button.text.contains(localized_marker_prefix)
+		or not third_choice_button.text.ends_with(localized_marker)
+	):
+		_failures.append(
+			"%s new-claim marker did not follow introducesNewClaim at %d%%"
+			% [presentation_id, roundi(scale * 100.0)]
+		)
 	var input := hud.find_child("ConversationFreeInput", true, false) as LineEdit
 	if input != null:
 		input.text = str(text.get("input", ""))
@@ -908,6 +940,257 @@ func _check_long_locale_hud(
 		"%s provider failure at %d%%" % [presentation_id, roundi(scale * 100.0)]
 	)
 	hud.call("clear_provider_failure")
+	await process_frame
+	await _check_hearing_locale_hud(localization, hud, presentation_id, scale)
+
+
+func _check_hearing_locale_hud(
+	localization: Node,
+	hud: Node,
+	presentation_id: String,
+	scale: float
+) -> void:
+	var assessments: Array[Dictionary] = []
+	for actor_id in HUD3D.OUTCOME_ACTOR_IDS:
+		assessments.append({
+			"actorId": actor_id,
+			"contactBasis": "never_conversed",
+			"proposedStance": "uncertain",
+			"appliedStance": "uncertain",
+			"testimonyLine": "Localized hearing testimony — %s" % presentation_id,
+			"citedMemoryIds": [],
+		})
+	var result := {
+		"hearingId": "localization-hearing-%s" % presentation_id,
+		"verdict": "ordinary",
+		"verdictWhyLine": "Localized verdict reason — %s" % presentation_id,
+		"officerLine": "Localized officer line — %s" % presentation_id,
+		"finalDefense": "Localized final defense — %s" % presentation_id,
+		"evidencedVouchCount": 0,
+		"residentAssessments": assessments,
+		"citedRecordIds": [],
+		"citedLedgerEventIds": [],
+		"recap": [
+			{
+				"kind": "defense",
+				"actorId": null,
+				"line": "Localized defense recap — %s" % presentation_id,
+				"sourceIds": [],
+			},
+			{
+				"kind": "verdict",
+				"actorId": null,
+				"line": "Localized verdict recap — %s" % presentation_id,
+				"sourceIds": [],
+			},
+		],
+		"proposalMeta": {
+			"profileId": "localization-smoke-profile",
+			"transport": "live",
+			"usedFallback": false,
+		},
+	}
+	hud.call("show_outcome", result, {"actors": []})
+	await process_frame
+	var continue_button := hud.find_child("OutcomeContinueButton", true, false) as Button
+	var restart_button := hud.find_child("RestartButton", true, false) as Button
+	var title_label := hud.find_child("OutcomeTitle", true, false) as Label
+	var verdict_label := hud.find_child("OutcomeVerdictLabel", true, false) as Label
+	var vouch_label := hud.find_child("OutcomeVouchLabel", true, false) as Label
+	var body_label := hud.find_child("OutcomeBody", true, false) as RichTextLabel
+	var procedure_title := str(localization.call(
+		"content_message", presentation_id, "hud.m3r.outcome.procedure_title"
+	))
+	var continue_text := str(localization.call(
+		"content_message", presentation_id, "hud.m3r.outcome.continue"
+	))
+	var observed_steps: Array[String] = []
+	for step_index in range(8):
+		var outcome := hud.call("outcome_snapshot") as Dictionary
+		observed_steps.append(str(outcome.get("stepKind", "")))
+		var body := str(outcome.get("body", ""))
+		var expected_fragments: Array[String] = []
+		var expected_verdict_label := ""
+		if step_index < HUD3D.OUTCOME_ACTOR_IDS.size():
+			var actor_id := str(HUD3D.OUTCOME_ACTOR_IDS[step_index])
+			var actor_label := str(localization.call(
+				"content_message", presentation_id, "npc.%s.label" % actor_id
+			))
+			var testimony_line := "Localized hearing testimony — %s" % presentation_id
+			var uncertain_stance := str(localization.call(
+				"content_message", presentation_id, "hud.m3r.stance.uncertain"
+			))
+			expected_verdict_label = str(localization.call(
+				"content_message",
+				presentation_id,
+				"hud.m3r.outcome.testimony_progress"
+			)).format({
+				"current": step_index + 1,
+				"total": HUD3D.OUTCOME_ACTOR_IDS.size(),
+			})
+			expected_fragments = [
+				str(localization.call(
+					"content_message",
+					presentation_id,
+					"hud.m3r.outcome.memory.no_contact"
+				)).format({"actor": actor_label}),
+				str(localization.call(
+					"content_message",
+					presentation_id,
+					"hud.m3r.outcome.contact_basis.never_conversed"
+				)),
+				str(localization.call(
+					"content_message",
+					presentation_id,
+					"hud.m3r.outcome.testimony_entry"
+				)).format({
+					"actor": actor_label,
+					"testimony": testimony_line,
+				}),
+				str(localization.call(
+					"content_message",
+					presentation_id,
+					"hud.m3r.outcome.resulting_stance"
+				)).format({"stance": uncertain_stance}),
+			]
+		elif step_index == 6:
+			expected_verdict_label = str(localization.call(
+				"content_message", presentation_id, "hud.m3r.outcome.title.ordinary"
+			))
+			expected_fragments = [
+				str(localization.call(
+					"content_message",
+					presentation_id,
+					"hud.m3r.outcome.verdict_why"
+				)).format({
+					"reason": "Localized verdict reason — %s" % presentation_id,
+				}),
+				str(localization.call(
+					"content_message",
+					presentation_id,
+					"hud.m3r.outcome.officer_line"
+				)).format({
+					"line": "Localized officer line — %s" % presentation_id,
+				}),
+			]
+			var expected_vouches := str(localization.call(
+				"content_message", presentation_id, "hud.m3r.outcome.vouches"
+			)).format({"count": 0, "required": 4})
+			if (
+				vouch_label == null
+				or not vouch_label.is_visible_in_tree()
+				or vouch_label.text != expected_vouches
+			):
+				_failures.append(
+					"%s verdict vouch label was not localized/formatted at %d%%"
+					% [presentation_id, roundi(scale * 100.0)]
+				)
+		else:
+			expected_verdict_label = str(localization.call(
+				"content_message", presentation_id, "hud.m3r.outcome.recap"
+			))
+			var actor_none := str(localization.call(
+				"content_message", presentation_id, "hud.m3r.outcome.recap.actor_none"
+			))
+			var source_count := str(localization.call(
+				"content_message", presentation_id, "hud.m3r.outcome.recap.source_count"
+			)).format({"count": 0})
+			var recap_template := str(localization.call(
+				"content_message", presentation_id, "hud.m3r.outcome.recap_entry"
+			))
+			expected_fragments = [
+				str(localization.call(
+					"content_message",
+					presentation_id,
+					"hud.m3r.outcome.evidence_counts"
+				)).format({"records": 0, "ledger": 0}),
+				recap_template.format({
+					"kind": str(localization.call(
+						"content_message",
+						presentation_id,
+						"hud.m3r.outcome.recap.kind.defense"
+					)),
+					"actor": actor_none,
+					"entry": "Localized defense recap — %s" % presentation_id,
+					"sources": source_count,
+				}),
+				recap_template.format({
+					"kind": str(localization.call(
+						"content_message",
+						presentation_id,
+						"hud.m3r.outcome.recap.kind.verdict"
+					)),
+					"actor": actor_none,
+					"entry": "Localized verdict recap — %s" % presentation_id,
+					"sources": source_count,
+				}),
+			]
+		var missing_fragments: Array[String] = []
+		for fragment in expected_fragments:
+			if fragment.is_empty() or not body.contains(fragment):
+				missing_fragments.append(fragment)
+		if (
+			title_label == null
+			or verdict_label == null
+			or body_label == null
+			or not title_label.is_visible_in_tree()
+			or not verdict_label.is_visible_in_tree()
+			or not body_label.is_visible_in_tree()
+			or title_label.text != procedure_title
+			or verdict_label.text != expected_verdict_label
+			or str(outcome.get("title", "")) != procedure_title
+			or str(outcome.get("verdictDisplay", "")) != expected_verdict_label
+			or not missing_fragments.is_empty()
+			or (
+				step_index < 7
+				and (
+					continue_button == null
+					or not continue_button.is_visible_in_tree()
+					or continue_button.text != continue_text
+				)
+			)
+		):
+			_failures.append(
+				"%s hearing step %d lacked localized formatted content at %d%%: %s"
+				% [
+					presentation_id,
+					step_index + 1,
+					roundi(scale * 100.0),
+					missing_fragments,
+				]
+			)
+		_check_no_visible_raw_keys(
+			hud,
+			"%s hearing step %d at %d%%" % [
+				presentation_id,
+				step_index + 1,
+				roundi(scale * 100.0),
+			]
+		)
+		if step_index < 7 and continue_button != null:
+			continue_button.pressed.emit()
+			await process_frame
+	var expected_steps: Array[String] = [
+		"testimony", "testimony", "testimony", "testimony",
+		"testimony", "testimony", "verdict", "recap",
+	]
+	if (
+		observed_steps != expected_steps
+		or continue_button == null
+		or restart_button == null
+		or continue_button.visible
+		or not restart_button.visible
+		or restart_button.text != str(localization.call(
+			"content_message", presentation_id, "hud.m3r.outcome.restart"
+		))
+	):
+		_failures.append(
+			"%s hearing strings or eight-step controls failed at %d%%"
+			% [presentation_id, roundi(scale * 100.0)]
+		)
+	# This helper owns only localization presentation; release Outcome so the
+	# next locale can exercise the same public entry point.
+	hud.call("_transition_modal", HUD3D.ModalMode.NONE, true)
 	await process_frame
 
 

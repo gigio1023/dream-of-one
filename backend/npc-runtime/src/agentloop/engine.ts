@@ -10,6 +10,7 @@ import {
   assembleObservePacket,
   type ActorMemory,
   type ActorPolicy,
+  type HeardSpeechRecord,
 } from "./context.js";
 import { validateToolCall, type ActorContextLite, type ToolCall } from "./tools.js";
 import { TranscriptStore, type TranscriptEntry } from "./transcript.js";
@@ -44,7 +45,7 @@ export interface RunBeatInput {
   actor: ActorContextLite;
   policy: ActorPolicy;
   memory: ActorMemory;
-  heardSpeech?: string[];
+  heardSpeech?: HeardSpeechRecord[];
   goal: string;
   proposalPort: NpcProposalPort;
   transcript: TranscriptStore;
@@ -68,6 +69,7 @@ export async function runBeat(input: RunBeatInput): Promise<BeatResult> {
     actorId: input.memory.actorId,
     ownActionNotes: [...input.memory.ownActionNotes],
     observedLedgerEventIds: [...input.memory.observedLedgerEventIds],
+    evidence: input.memory.evidence.map(item => ({ ...item })),
   };
   const loop = await runBoundedProposalLoop<NpcAction>({
     sessionId: input.sessionId,

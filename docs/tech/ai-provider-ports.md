@@ -94,6 +94,15 @@ exact turn is interrupted without applying wording, judgment, or citations.
 Citation scoping narrows only which known record ids may be returned; it does
 not prescribe wording or judgment.
 
+Each `SuggestedReply` also contains `evidenceIds: string[]` and
+`introducesNewClaim: boolean`. The ids must be unique members of that exact
+request's evidence catalog. The envelope rejects a marked new claim in the
+safe or uncertain slots; only `risky/weird` may set the flag. Unknown evidence
+ids, duplicate ids, a marked uncertain reply, or an all-marked reply receive
+the same single bounded repair and then fail closed. This is typed contract
+enforcement, not a rule-authored judgment of natural-language truth: the
+provider self-check is responsible for labeling factual claims honestly.
+
 `ConversationProposal` contains an NPC utterance and three generated reply
 suggestions, plus the same request-scoped record citations for an opening
 utterance. Reply intent labels shape variety only; they never decide
@@ -106,25 +115,38 @@ validates every tool against visibility, role authority, object state, and
 the offered catalog.
 
 The three suggestions are explicitly uncommitted candidate speech. Their intent
-labels express relative social exposure, not truth: `safe/local` is the least
-exposing plausible answer and may still be a modest cover claim,
-`uncertain/repair` hedges or clarifies, and `risky/weird` may offer a bolder lie.
+labels express relative social exposure, not truth: `safe/local` is
+non-assertive or grounded by its `evidenceIds`, `uncertain/repair` is
+non-assertive and hedges or clarifies, and only `risky/weird` may introduce
+unsupported backstory with `introducesNewClaim=true`.
 None of those candidates enters conversation history, memory, or judgment until
-the player selects it; selection is identical to typing that line. NPC
+the player selects it; selection is identical to typing that line. The runtime
+stores the selected evidence ids and claim marker alongside the resulting
+player statement. NPC
 utterances, reasons, and questions may never treat an unselected candidate as
 true or mutate the world from it.
 
 Conversation requests also carry a machine-readable `groundingContract` built
-from supplied scene context, the player's supplied statements, visible object
-and record facts, and heard speech. Visible record facts retain their stable id
-and exact revision so the provider can cite without exposing either token in
-player-visible prose. It is closed-world for player-visible prose:
+as a request-scoped evidence catalog. It assigns stable ids to prior and current
+player statements, typed attributed speech, bounded resident memory, visible
+records and ledger events, supplied scene facts, visible objects and actors,
+and the resident's location. Visible record facts retain their stable id and
+exact revision so the provider can cite without exposing either token in
+player-visible prose. Speech attribution comes from `speakerActorId` and a
+typed source `{ kind, id }`; provider code never reparses prefixes such as
+`NPC_*:` from the line. Player-statement ids combine the conversation session
+id with its unique turn id; prior dialogue and typed heard-speech copies must
+match exactly and project into the catalog once. Resident memories likewise
+use typed exchange, utterance, or fact records. Conversation context never
+reconstructs a speaker, player reply, resident reply, or judgment reason from
+delimiters embedded in `ownActionNotes`. The catalog is closed-world for
+player-visible prose:
 an unlisted identity, role, possession, document, approval, appointment, or
 past event is unknown, not missing or completed. The NPC may ask about an
 unknown, but its speech, reasons, and questions may not turn it into a fact.
-Suggested replies follow the separate uncommitted-candidate rule above and may
-not introduce resident-only record content that the NPC has not spoken or the
-player has not already supplied. This boundary is repeated in the provider
+Suggested replies cite only catalog ids and follow the slot rules above. They
+may not introduce resident-only record content that the NPC has not spoken or
+the player has not already supplied. This boundary is repeated in the provider
 instructions and retained in the one repair request; model-authored wording
 remains free inside that factual boundary.
 
@@ -142,8 +164,9 @@ its source or details.
 Conversation generation repeats this boundary as a final silent self-check.
 The provider reviews visitor-specific nouns and claimed access to concrete
 records in NPC speech, reasons, questions, and world claims against an exact
-supplied fact. It reviews suggestions separately so their relative exposure is
-legible and every cover claim stays confined to unselected candidate speech. A request to learn
+catalog entry. It reviews each suggestion separately, cites its supporting ids,
+keeps safe and uncertain slots within their constraints, and marks unsupported
+new backstory only in the risky slot. A request to learn
 the steps before a hearing establishes that purpose and the hearing, but not an
 appointment, reference number, notice, dossier, paperwork, visitor record, or
 the resident's ability to check one.

@@ -138,6 +138,21 @@ export interface SuggestedReply {
   text: string;
   /** Prompt-shaping hint only. Runtime classification never trusts this value. */
   intent: ConversationChoiceIntent;
+  /** Request-scoped sources that already support the candidate's factual claims. */
+  evidenceIds: string[];
+  /** Model-owned disclosure that this candidate establishes unsupported backstory. */
+  introducesNewClaim: boolean;
+}
+
+export function playerStatementEvidenceId(sessionId: string, turnId: string): string {
+  return `player_statement:${sessionId}:${turnId}`;
+}
+
+/** Ordered dialogue with explicit evidence identity for player-authored lines. */
+export interface ConversationHistoryEntry {
+  speakerId: string;
+  line: string;
+  evidenceId: string | null;
 }
 
 export interface ConversationProposal {
@@ -157,6 +172,12 @@ export interface AgentStepProposal {
   done: boolean;
 }
 
+export interface ProviderOpenQuestion {
+  status: "open" | "resolved";
+  text: string;
+  whyLine: string;
+}
+
 /**
  * One NPC listener's grounded reply to an exact ambient utterance plus the
  * listener's model-owned personal judgment of the player. Administrative
@@ -173,7 +194,7 @@ export interface AmbientReplyJudgment {
   suspicionDelta: number;
   proposedStance: CoarseStance;
   whyLine: string;
-  openQuestion: { status: "open" | "resolved"; text: string; whyLine: string } | null;
+  openQuestion: ProviderOpenQuestion | null;
 }
 
 export interface ResolvedProposal<T> {
@@ -189,7 +210,7 @@ export interface ConversationTurnRequest {
   objective: string;
   sceneFacts: string[];
   observePacket: ObservePacket;
-  conversationHistory: Array<{ speakerId: string; line: string }>;
+  conversationHistory: ConversationHistoryEntry[];
 }
 
 /**
@@ -215,7 +236,7 @@ export interface MergedConversationTurn extends ConversationJudgment {
   /** Whether the exchange contained enough firsthand substance to support a vouch. */
   meaningfulFirsthand: boolean;
   /** Provider-authored player log entry; null when this exchange opens no question. */
-  openQuestion: { status: "open" | "resolved"; text: string; whyLine: string } | null;
+  openQuestion: ProviderOpenQuestion | null;
   utterance: string;
   /** Resident-visible records whose contents are meaningfully conveyed by utterance. */
   citedRecordIds?: string[];
@@ -231,8 +252,10 @@ export interface ConversationJudgmentRequest {
   /** The NPC doing the judging. */
   actorId: string;
   playerLine: string;
+  /** Stable evidence id assigned by the runtime to this exact player statement. */
+  playerStatementEvidenceId: string;
   /** Both sides of the exchange so far, excluding the line being judged. */
-  conversationHistory: Array<{ speakerId: string; line: string }>;
+  conversationHistory: ConversationHistoryEntry[];
   observePacket: ObservePacket;
   suspicionBefore: number;
   reportPressureBefore: number;
@@ -245,11 +268,7 @@ export interface MergedConversationTurnRequest extends ConversationJudgmentReque
   stanceBefore?: CoarseStance;
   hasMeaningfulFirsthandConversation?: boolean;
   /** Exact question tracked from this conversation's previous judged turn. */
-  currentOpenQuestion?: {
-    status: "open" | "resolved";
-    text: string;
-    whyLine: string;
-  } | null;
+  currentOpenQuestion?: ProviderOpenQuestion | null;
   /** Whether the runtime has capacity to present another modal turn after this answer. */
   continuationAllowed?: boolean;
 }
@@ -302,6 +321,8 @@ export interface AmbientReplyRequest {
   stanceBefore: CoarseStance;
   suspicionBefore: number;
   hasMeaningfulFirsthandConversation: boolean;
+  /** Exact currently open listener-owned question, if one survives prior judgments. */
+  currentOpenQuestion: ProviderOpenQuestion | null;
   observePacket: ObservePacket;
   budgetCeiling?: { maxCalls: number; maxTokens: number };
 }
@@ -346,11 +367,17 @@ export interface TextGenRequest {
   jsonSchema: Record<string, unknown>;
   /** Optional per-operation transport ceiling; the provider default remains authoritative otherwise. */
   timeoutMs?: number;
+  /** Optional per-operation output ceiling; the provider default remains authoritative otherwise. */
+  maxOutputTokens?: number;
 }
+
+export type TextGenFinishReason = "stop" | "length" | "content_filter" | "other";
 
 export interface TextGenResult {
   text: string;
   usage?: ProviderUsage;
+  /** Normalized transport finish state. Omitted by deterministic test adapters that do not model it. */
+  finishReason?: TextGenFinishReason;
 }
 
 /** API-shape port implemented only by vendor/transport adapters. */

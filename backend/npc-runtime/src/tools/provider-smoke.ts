@@ -5,7 +5,7 @@ import {
   SUPPORTED_GAMEPLAY_LOCALES,
   gameplayLocaleSchema,
 } from "../localization/supported-locales.js";
-import type { ProposalMeta } from "../providers/ports.js";
+import { playerStatementEvidenceId, type ProposalMeta } from "../providers/ports.js";
 import { createProviderFromEnvironment } from "../providers/registry.js";
 import { loadRunCast } from "../runtime/run-cast.js";
 import { loadRunLayout } from "../runtime/run-layout.js";
@@ -96,6 +96,7 @@ const observePacket: ObservePacket = {
     actorId,
     ownActionNotes: [],
     observedLedgerEventIds: [],
+    evidence: [],
   },
   visibleObjects: [],
   visibleRecords: [],
@@ -141,7 +142,12 @@ const answer = await proposalPort.judgeAndProposeConversationTurn({
   promptId: "studio.reception.first_contact",
   actorId,
   playerLine,
-  conversationHistory: [{ speakerId: actorId, line: opening.proposal.utterance }],
+  playerStatementEvidenceId: playerStatementEvidenceId(scopeId, "smoke-turn-1"),
+  conversationHistory: [{
+    speakerId: actorId,
+    line: opening.proposal.utterance,
+    evidenceId: null,
+  }],
   observePacket,
   suspicionBefore: 0,
   reportPressureBefore: 0,

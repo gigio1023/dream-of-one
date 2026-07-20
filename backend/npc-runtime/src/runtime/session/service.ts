@@ -1,9 +1,14 @@
 import { createHash, randomUUID } from "node:crypto";
-import { DEFAULT_ROLE_POLICIES, assembleObservePacket, type ActorMemory } from "../../agentloop/context.js";
+import {
+  DEFAULT_ROLE_POLICIES,
+  assembleObservePacket,
+  type ActorMemory,
+} from "../../agentloop/context.js";
 import { runBeat, type NpcAction } from "../../agentloop/engine.js";
 import type { ActorContextLite } from "../../agentloop/tools.js";
 import { TranscriptStore, type TranscriptEntry } from "../../agentloop/transcript.js";
 import {
+  playerStatementEvidenceId,
   ProviderFailureError,
   type NpcProposalPort,
   type ProposalMeta,
@@ -83,7 +88,13 @@ export interface NextTurn {
   prompt: string;
   acceptsFreeInput: boolean;
   continueConversation: boolean;
-  choices: Array<{ choiceId: string; intent: ConversationChoiceIntent; line: string }>;
+  choices: Array<{
+    choiceId: string;
+    intent: ConversationChoiceIntent;
+    line: string;
+    evidenceIds: string[];
+    introducesNewClaim: boolean;
+  }>;
   proposalMeta: ProposalMeta;
   hesitationMs?: number;
 }
@@ -205,7 +216,7 @@ interface SessionState {
   signalsSeen: Set<ConversationSuspicionSignal>;
   turns: ConversationMemoryLine[];
   /** Both sides of the conversation, in order. NPCs must remember their own lines. */
-  dialogue: Array<{ speakerId: string; line: string }>;
+  dialogue: Array<{ speakerId: string; line: string; evidenceId: string | null }>;
   processedTurnIds: Set<string>;
   finalRoute?: RouteId;
   terminal: boolean;
@@ -214,6 +225,7 @@ interface SessionState {
   pendingAftermath?: {
     speakerId: string;
     playerLine: string;
+    statementEvidenceId: string;
     goal: string;
   };
   /** Latest deferred speaker beat results (tests / client drain). */
@@ -385,6 +397,10 @@ export class SessionService {
     const beat = session.storylet.beats[session.beatIndex];
     const priorContinue = session.activeTurn.continueConversation;
     const classified = this.classifyAnswer(session, answer);
+    const statementEvidenceId = playerStatementEvidenceId(
+      sessionId,
+      session.activeTurn.turnId,
+    );
     const judgmentHistory = session.dialogue.slice(-10);
 
     const actor = this.actorContext(session, beat.speakerId);
@@ -394,7 +410,11 @@ export class SessionService {
       goals: [beat.objective],
       policy: DEFAULT_ROLE_POLICIES[actor.role],
       memory,
-      heardSpeech: [classified.line],
+      heardSpeech: [{
+        speakerActorId: "player",
+        source: { kind: "player_statement", id: statementEvidenceId },
+        line: classified.line,
+      }],
     });
 
     // Next-beat context shapes the reply half of the merged call when the
@@ -412,6 +432,7 @@ export class SessionService {
       promptId: beat.promptId,
       actorId: beat.speakerId,
       playerLine: classified.line,
+      playerStatementEvidenceId: statementEvidenceId,
       conversationHistory: judgmentHistory,
       observePacket,
       suspicionBefore: session.suspicion,
@@ -423,7 +444,11 @@ export class SessionService {
     this.trackProposalMeta(session, [merged.meta]);
     session.processedTurnIds.add(turnId);
     session.turnCount += 1;
-    session.dialogue.push({ speakerId: "player", line: classified.line });
+    session.dialogue.push({
+      speakerId: "player",
+      line: classified.line,
+      evidenceId: statementEvidenceId,
+    });
 
     const suspicionBefore = session.suspicion;
     const reportPressureBefore = session.reportPressure;
@@ -437,10 +462,13 @@ export class SessionService {
     session.turns.push({
       turnId,
       promptId: beat.promptId,
+      statementEvidenceId,
       line: classified.line,
       selectedChoiceId: classified.choiceId,
       freeInputHash: classified.freeInputHash,
       intent: classified.intent,
+      evidenceIds: classified.evidenceIds,
+      introducesNewClaim: classified.introducesNewClaim,
       signals: merged.proposal.signals,
     });
 
@@ -456,7 +484,11 @@ export class SessionService {
       session.beatIndex = session.storylet.beats.indexOf(candidateNext);
       nextTurn = this.nextTurnFromMerged(session, candidateNext, merged.proposal, merged.meta);
       session.activeTurn = nextTurn;
-      session.dialogue.push({ speakerId: candidateNext.speakerId, line: merged.proposal.utterance });
+      session.dialogue.push({
+        speakerId: candidateNext.speakerId,
+        line: merged.proposal.utterance,
+        evidenceId: null,
+      });
       routeState = this.routeState(this.stageForBeat(candidateNext), projectedRoute, false, session);
     } else {
       session.finalRoute = projectedRoute;
@@ -468,6 +500,7 @@ export class SessionService {
     session.pendingAftermath = {
       speakerId: beat.speakerId,
       playerLine: classified.line,
+      statementEvidenceId,
       goal: `conversation: beat=${beat.beatId} suspicion=${session.suspicion} reportPressure=${session.reportPressure}`,
     };
 
@@ -513,7 +546,11 @@ export class SessionService {
       policy: DEFAULT_ROLE_POLICIES[actor.role],
       memory,
       goal: pending.goal,
-      heardSpeech: [pending.playerLine],
+      heardSpeech: [{
+        speakerActorId: "player",
+        source: { kind: "player_statement", id: pending.statementEvidenceId },
+        line: pending.playerLine,
+      }],
       proposalPort: this.proposalPort,
       transcript: session.transcript,
       budget: 3,
@@ -553,6 +590,8 @@ export class SessionService {
         choiceId: `${beat.beatId}.generated.${index + 1}`,
         intent: reply.intent,
         line: reply.text,
+        evidenceIds: [...reply.evidenceIds],
+        introducesNewClaim: reply.introducesNewClaim,
       })),
       proposalMeta: meta,
       ...(beat.hesitationMs !== undefined ? { hesitationMs: beat.hesitationMs } : {}),
@@ -682,7 +721,15 @@ export class SessionService {
       goals: [beat.objective],
       policy: DEFAULT_ROLE_POLICIES[actor.role],
       memory: this.memoryFor(session, beat.speakerId),
-      heardSpeech: session.turns.slice(-3).map(turn => turn.line),
+      heardSpeech: session.turns.slice(-3).map(turn => ({
+        speakerActorId: "player",
+        source: {
+          kind: "player_statement" as const,
+          id:
+            turn.statementEvidenceId,
+        },
+        line: turn.line,
+      })),
     });
     const resolved = await this.proposalPort.proposeConversationTurn({
       sessionId: session.sessionId,
@@ -696,7 +743,11 @@ export class SessionService {
     });
     this.rejectFallbackProposalMeta(resolved.meta, "conversation");
     this.trackProposalMeta(session, [resolved.meta]);
-    session.dialogue.push({ speakerId: beat.speakerId, line: resolved.proposal.utterance });
+    session.dialogue.push({
+      speakerId: beat.speakerId,
+      line: resolved.proposal.utterance,
+      evidenceId: null,
+    });
     const choiceSetId = `${beat.promptId}.generated`;
     const turnId = `${session.storylet.conversationId}#${session.beatIndex}#${session.turnCount}`;
     return {
@@ -712,6 +763,8 @@ export class SessionService {
         choiceId: `${beat.beatId}.generated.${index + 1}`,
         intent: reply.intent,
         line: reply.text,
+        evidenceIds: [...reply.evidenceIds],
+        introducesNewClaim: reply.introducesNewClaim,
       })),
       proposalMeta: resolved.meta,
       ...(beat.hesitationMs !== undefined ? { hesitationMs: beat.hesitationMs } : {}),
@@ -723,18 +776,35 @@ export class SessionService {
     intent?: ConversationChoiceIntent;
     choiceId?: string;
     freeInputHash?: string;
+    evidenceIds: string[];
+    introducesNewClaim: boolean | null;
   } {
     if (answer.type === "choice") {
       const choice = session.activeTurn?.choices.find(candidate => candidate.choiceId === answer.choiceId);
       if (!choice) throw new SessionError(`unknown choice: ${answer.choiceId ?? "(none)"}`, "unknown_choice");
-      return { line: choice.line, intent: choice.intent, choiceId: choice.choiceId };
+      return {
+        line: choice.line,
+        intent: choice.intent,
+        choiceId: choice.choiceId,
+        evidenceIds: [...choice.evidenceIds],
+        introducesNewClaim: choice.introducesNewClaim,
+      };
     }
     if (answer.type === "free_input") {
       const text = (answer.text ?? "").trim();
       if (!text) throw new SessionError("free_input requires non-empty text", "invalid_answer");
-      return { line: text, freeInputHash: hashText(text) };
+      return {
+        line: text,
+        freeInputHash: hashText(text),
+        evidenceIds: [],
+        introducesNewClaim: null,
+      };
     }
-    return { line: procedureContent(session.locale).hesitationMarker };
+    return {
+      line: procedureContent(session.locale).hesitationMarker,
+      evidenceIds: [],
+      introducesNewClaim: null,
+    };
   }
 
   private projectRoute(session: SessionState): RouteId {
@@ -787,6 +857,7 @@ export class SessionService {
       actorId,
       ownActionNotes: [],
       observedLedgerEventIds: [],
+      evidence: [],
     };
   }
 

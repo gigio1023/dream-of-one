@@ -15,7 +15,12 @@ function sampleRequest(): MergedConversationTurnRequest {
     promptId: "store.same_order.routine",
     actorId: "NPC_Store_Clerk",
     playerLine: "오늘 처음 왔는데요.",
-    conversationHistory: [{ speakerId: "NPC_Store_Clerk", line: "오늘도 같은 걸로 드릴까요?" }],
+    playerStatementEvidenceId: "player_statement:session-1:turn-1",
+    conversationHistory: [{
+      speakerId: "NPC_Store_Clerk",
+      line: "오늘도 같은 걸로 드릴까요?",
+      evidenceId: null,
+    }],
     observePacket: assembleObservePacket(world, {
       actor: {
         actorId: "NPC_Store_Clerk",
@@ -26,8 +31,17 @@ function sampleRequest(): MergedConversationTurnRequest {
       },
       goals: ["어제 기록과 맞춰 본다."],
       policy: DEFAULT_ROLE_POLICIES.store_clerk,
-      memory: { actorId: "NPC_Store_Clerk", ownActionNotes: [], observedLedgerEventIds: [] },
-      heardSpeech: ["오늘 처음 왔는데요."],
+      memory: {
+        actorId: "NPC_Store_Clerk",
+        ownActionNotes: [],
+        observedLedgerEventIds: [],
+        evidence: [],
+      },
+      heardSpeech: [{
+        speakerActorId: "player",
+        source: { kind: "player_statement", id: "player_statement:session-1:prior" },
+        line: "오늘 처음 왔는데요.",
+      }],
     }),
     suspicionBefore: 0,
     reportPressureBefore: 0,
@@ -47,9 +61,9 @@ test("merged conversation turn schema accepts a valid judgment-plus-reply envelo
     openQuestion: null,
     utterance: "어제 기록에는 같은 주문이라고 적혀 있습니다. 맞습니까?",
     suggestedReplies: [
-      { text: "네, 맞습니다.", intent: "safe/local" },
-      { text: "제가 헷갈렸나 봅니다.", intent: "uncertain/repair" },
-      { text: "저는 여기 사람이 아닙니다.", intent: "risky/weird" },
+      { text: "네, 맞습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "제가 헷갈렸나 봅니다.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "저는 여기 사람이 아닙니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
     ],
     continueConversation: true,
   });
@@ -68,9 +82,9 @@ test("merged conversation requires either null or one complete nonblank open que
     openQuestion: null,
     utterance: "방문 목적을 조금 더 설명해 주세요.",
     suggestedReplies: [
-      { text: "청문 절차를 확인하러 왔습니다.", intent: "safe/local" },
-      { text: "기억이 흐릿해서 아는 만큼만 말씀드리겠습니다.", intent: "uncertain/repair" },
-      { text: "설명할 이유가 없습니다.", intent: "risky/weird" },
+      { text: "청문 절차를 확인하러 왔습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+      { text: "기억이 흐릿해서 아는 만큼만 말씀드리겠습니다.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+      { text: "설명할 이유가 없습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
     ],
     continueConversation: true,
   } as const;
@@ -105,9 +119,9 @@ test("scripted merged turn keeps judgment clamps available to the session path",
     conversation: () => ({
       utterance: "기록과 다르지 않습니까?",
       suggestedReplies: [
-        { text: "네, 같습니다.", intent: "safe/local" },
-        { text: "확인해 볼게요.", intent: "uncertain/repair" },
-        { text: "처음 왔습니다.", intent: "risky/weird" },
+        { text: "네, 같습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+        { text: "확인해 볼게요.", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+        { text: "처음 왔습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
       ],
       continueConversation: true,
     }),

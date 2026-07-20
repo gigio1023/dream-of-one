@@ -378,6 +378,30 @@ func t(key: String, args: Dictionary = {}) -> String:
 		return resolved
 	return resolved.format(args)
 
+## Select a Korean particle from the final Hangul syllable in player-facing
+## text. Callers append the result through a localization placeholder;
+## sentence templates in other locales own their grammar and receive no
+## particle from this helper.
+func korean_particle(
+	text: String,
+	consonant_particle: String,
+	vowel_particle: String,
+	locale_name := ""
+) -> String:
+	var requested := locale() if locale_name.is_empty() else presentation_locale(locale_name)
+	if requested != "ko":
+		return ""
+	for index in range(text.length() - 1, -1, -1):
+		var codepoint := text.unicode_at(index)
+		if codepoint < 0xAC00 or codepoint > 0xD7A3:
+			continue
+		return (
+			consonant_particle
+			if (codepoint - 0xAC00) % 28 != 0
+			else vowel_particle
+		)
+	return "%s(%s)" % [consonant_particle, vowel_particle]
+
 ## True when a key exists directly in one locale table (never via fallback).
 func has_key(key: String, locale_name := "") -> bool:
 	var requested := locale() if locale_name.is_empty() else presentation_locale(locale_name)

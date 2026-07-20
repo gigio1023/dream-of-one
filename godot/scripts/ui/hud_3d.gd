@@ -2009,7 +2009,7 @@ func _refresh_contact_cue() -> void:
 		return
 	var speaker := _actor_label(_contact_cue_actor_id)
 	var localization := get_node_or_null("/root/Localization")
-	var subject_particle := (
+	var speaker_subject := speaker + (
 		str(localization.call("korean_particle", speaker, "이", "가"))
 		if localization != null
 		else "이(가)"
@@ -2019,8 +2019,7 @@ func _refresh_contact_cue() -> void:
 		if _contact_cue_ready
 		else &"hud.m3r.contact.approaching"
 	)).format({
-		"speaker": speaker,
-		"subject_particle": subject_particle,
+		"speaker_subject": speaker_subject,
 	})
 	_contact_cue_panel.visible = (
 		not _conversation_visible

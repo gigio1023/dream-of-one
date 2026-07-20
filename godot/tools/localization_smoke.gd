@@ -541,13 +541,21 @@ func _check_onboarding_dialogue_hint(hud: Node, onboarding: Node) -> void:
 		if ready_snapshot_value is Dictionary
 		else {}
 	)
-	if (
-		not bool(ready_snapshot.get("dialogueHintShown", false))
-		or not bool(ready_snapshot.get("conversationTurnActionable", false))
-		or str(ready_snapshot.get("key", "")) != "hud.m3r.onboarding.dialogue"
-		or not bool(ready_snapshot.get("visible", false))
-	):
-		_failures.append("dialogue onboarding hint did not start with actionable controls")
+	if not bool(ready_snapshot.get("dialogueHintShown", false)):
+		_failures.append("dialogue onboarding hint was not acknowledged by actionable controls")
+	if not bool(ready_snapshot.get("conversationTurnActionable", false)):
+		_failures.append("dialogue onboarding did not expose an actionable turn")
+	if bool(ready_snapshot.get("visible", false)):
+		_failures.append("detached dialogue onboarding card overlaps actionable controls")
+	var choice_buttons: Array[Node] = [
+		hud.get_node_or_null("Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices/ConversationChoice1"),
+		hud.get_node_or_null("Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices/ConversationChoice2"),
+		hud.get_node_or_null("Overlay/ConversationShade/ConversationPanel/ConversationMargin/ConversationColumns/ConversationChoices/ConversationChoice3"),
+	]
+	for index in choice_buttons.size():
+		var choice_button := choice_buttons[index] as Button
+		if choice_button == null or not choice_button.text.begins_with("%d — " % (index + 1)):
+			_failures.append("dialogue choice %d does not expose its inline shortcut" % (index + 1))
 	hud.call("close_conversation")
 	onboarding.call("_poll_hud_surface")
 

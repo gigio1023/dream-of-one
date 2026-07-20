@@ -5,10 +5,14 @@ below is scoped so that one agent can read it plus its linked references and
 start working. If a document is not reachable from this index, it is not
 active.
 
-Status: **M3R owner acceptance checks active (2026-07-19).** The first-person town,
-run-scoped NPC runtime, and Qwen-backed social loop are substantially
-implemented; both full hearing outcomes, provider interruption, and the
-six-locale rendered routes now pass. Native CJK IME and owner closeout remain.
+Status: **M3R corrective playable slices active (2026-07-19 comprehensive
+review).** The first-person town, run-scoped NPC runtime, both full hearing
+outcomes, and the live Qwen social loop are substantially implemented. The
+latest fresh play nevertheless failed the fun gate after generated choices
+forced unsupported player backstory; player-voice provenance, exact locale
+placeholder parity, provider-failure modal ownership, native CJK IME, and
+owner closeout remain. The dated findings and restart order live in
+[`plan/m3-first-person-town.md`](plan/m3-first-person-town.md).
 The owner-approved direction
 interview converted the game to a seamless first-person 3D town;
 the 2D M3 was killed the day it activated (kill paragraph in

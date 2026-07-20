@@ -32,6 +32,8 @@
 [ext_resource type="PackedScene" path="res://assets/kaykit/prototype_bits/pallet_small_decorated_b.gltf" id="density_30"]
 [ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/cabinet_small_decorated.gltf" id="density_31"]
 [ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/shelf_b_large_decorated.gltf" id="density_32"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/lamp_standing.gltf" id="density_33"]
+[ext_resource type="PackedScene" path="res://assets/kaykit/furniture_bits/table_medium_long.gltf" id="density_34"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_density_tree"]
 height = 2.2
@@ -215,26 +217,6 @@ position = Vector3(7.6, 0.1, 1.2)
 rotation = Vector3(0, 0.9299999999999999, 0)
 scale = Vector3(2.5, 2.5, 2.5)
 
-[node name="ParkLowBush03" parent="Park/GroundLayer" instance=ExtResource("density_04")]
-position = Vector3(-3.4, 0.1, -1.3)
-rotation = Vector3(0, -0.7, 0)
-scale = Vector3(2.5, 2.5, 2.5)
-
-[node name="ParkLowBush05" parent="Park/GroundLayer" instance=ExtResource("density_04")]
-position = Vector3(2.6, 0.1, -1.8)
-rotation = Vector3(0, 0.8, 0)
-scale = Vector3(2.5, 2.5, 2.5)
-
-[node name="ParkLowBush06" parent="Park/GroundLayer" instance=ExtResource("density_04")]
-position = Vector3(-2.7, 0.1, 1.4)
-rotation = Vector3(0, 0.4, 0)
-scale = Vector3(2.5, 2.5, 2.5)
-
-[node name="ParkLowBush04" parent="Park/GroundLayer" instance=ExtResource("density_04")]
-position = Vector3(3.3, 0.1, 1.1)
-rotation = Vector3(0, -0.5, 0)
-scale = Vector3(2.5, 2.5, 2.5)
-
 [node name="ParkLowBush07" parent="Park/GroundLayer" instance=ExtResource("density_04")]
 position = Vector3(-6.2, 0.1, -2)
 rotation = Vector3(0, 1.1, 0)
@@ -255,44 +237,10 @@ position = Vector3(5.7, 0.1, 6.1)
 rotation = Vector3(0, -0.3, 0)
 scale = Vector3(2.5, 2.5, 2.5)
 
-[node name="ParkLowBush10" parent="Park/GroundLayer" instance=ExtResource("density_04")]
-position = Vector3(-1.8, 0.1, 6.6)
-rotation = Vector3(0, 0.9, 0)
-scale = Vector3(2.5, 2.5, 2.5)
-
 [node name="ParkLowBush02" parent="Park/GroundLayer" instance=ExtResource("density_04")]
 position = Vector3(1.2, 0.1, 5.9)
 rotation = Vector3(0, -0.8, 0)
 scale = Vector3(2.5, 2.5, 2.5)
-
-[node name="ParkTrash01" parent="Park/EyeLevelLayer" instance=ExtResource("density_05")]
-position = Vector3(-5.8, 0.03, 5.1)
-rotation = Vector3(0, -0.68, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="ParkTrash02" parent="Park/EyeLevelLayer" instance=ExtResource("density_06")]
-position = Vector3(-6.2, 0.03, 4.5)
-rotation = Vector3(0, -0.34, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="ParkTrash03" parent="Park/EyeLevelLayer" instance=ExtResource("density_05")]
-position = Vector3(5.8, 0.03, 5.1)
-scale = Vector3(5, 5, 5)
-
-[node name="ParkTrash04" parent="Park/EyeLevelLayer" instance=ExtResource("density_06")]
-position = Vector3(6.2, 0.03, 4.5)
-rotation = Vector3(0, 0.34, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="ParkTrash05" parent="Park/EyeLevelLayer" instance=ExtResource("density_05")]
-position = Vector3(-9.8, 0.03, 4.5)
-rotation = Vector3(0, 0.68, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="ParkTrash06" parent="Park/EyeLevelLayer" instance=ExtResource("density_06")]
-position = Vector3(9.8, 0.03, 4.5)
-rotation = Vector3(0, 1.02, 0)
-scale = Vector3(5, 5, 5)
 
 [node name="ParkEyeBush01" parent="Park/EyeLevelLayer" instance=ExtResource("density_04")]
 position = Vector3(-7.9, 0.1, -3.7)
@@ -395,55 +343,6 @@ position = Vector3(8.6, 0.1, 2.1)
 rotation = Vector3(0, 0.58, 0)
 scale = Vector3(2.5, 2.5, 2.5)
 
-[node name="StreetLooseTrash09" parent="Street/GroundLayer" instance=ExtResource("density_05")]
-position = Vector3(-8.35, 0.03, -18.25)
-rotation = Vector3(0, -0.8400000000000001, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetLooseTrash10" parent="Street/GroundLayer" instance=ExtResource("density_06")]
-position = Vector3(-6.95, 0.03, -18.75)
-rotation = Vector3(0, -0.56, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetLooseTrash11" parent="Street/GroundLayer" instance=ExtResource("density_05")]
-position = Vector3(-18.55, 0.03, 6.75)
-rotation = Vector3(0, -0.28, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetLooseTrash12" parent="Street/GroundLayer" instance=ExtResource("density_06")]
-position = Vector3(-17.65, 0.03, 7.9)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetLooseTrash13" parent="Street/GroundLayer" instance=ExtResource("density_05")]
-position = Vector3(18.65, 0.03, 6.75)
-rotation = Vector3(0, 0.28, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetLooseTrash14" parent="Street/GroundLayer" instance=ExtResource("density_06")]
-position = Vector3(17.75, 0.03, 7.9)
-rotation = Vector3(0, 0.56, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetLooseTrash15" parent="Street/GroundLayer" instance=ExtResource("density_05")]
-position = Vector3(-8.5, 0.03, 17)
-rotation = Vector3(0, 0.8400000000000001, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetLooseTrash16" parent="Street/GroundLayer" instance=ExtResource("density_06")]
-position = Vector3(-6.1, 0.03, 18.2)
-rotation = Vector3(0, -0.8400000000000001, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetLooseTrash17" parent="Street/GroundLayer" instance=ExtResource("density_05")]
-position = Vector3(8.2, 0.03, 16.8)
-rotation = Vector3(0, -0.56, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetLooseTrash18" parent="Street/GroundLayer" instance=ExtResource("density_06")]
-position = Vector3(5.8, 0.03, 18.2)
-rotation = Vector3(0, -0.28, 0)
-scale = Vector3(5, 5, 5)
-
 [node name="StreetLooseTrash19" parent="Street/GroundLayer" instance=ExtResource("density_05")]
 position = Vector3(-1.8, 0.03, 17.7)
 scale = Vector3(5, 5, 5)
@@ -451,35 +350,6 @@ scale = Vector3(5, 5, 5)
 [node name="StreetLooseTrash20" parent="Street/GroundLayer" instance=ExtResource("density_06")]
 position = Vector3(1.8, 0.03, 17.7)
 rotation = Vector3(0, 0.28, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetTrash01" parent="Street/GroundLayer" instance=ExtResource("density_05")]
-position = Vector3(-8.65, 0.03, -18.9)
-rotation = Vector3(0, -0.82, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetTrash02" parent="Street/GroundLayer" instance=ExtResource("density_06")]
-position = Vector3(-6.7, 0.03, -18.2)
-rotation = Vector3(0, -0.41, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetTrash03" parent="Street/GroundLayer" instance=ExtResource("density_05")]
-position = Vector3(-18.8, 0.03, 8.3)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetTrash04" parent="Street/GroundLayer" instance=ExtResource("density_06")]
-position = Vector3(-17.6, 0.03, 6.6)
-rotation = Vector3(0, 0.41, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetTrash05" parent="Street/GroundLayer" instance=ExtResource("density_05")]
-position = Vector3(18.9, 0.03, 8.3)
-rotation = Vector3(0, 0.82, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="StreetTrash06" parent="Street/GroundLayer" instance=ExtResource("density_06")]
-position = Vector3(17.7, 0.03, 6.6)
-rotation = Vector3(0, 1.23, 0)
 scale = Vector3(5, 5, 5)
 
 [node name="StreetTrash07" parent="Street/GroundLayer" instance=ExtResource("density_05")]
@@ -538,16 +408,6 @@ rotation = Vector3(0, 2.2, 0)
 [node name="StationServiceBox03" parent="Street/EyeLevelLayer" instance=ExtResource("density_22")]
 position = Vector3(18.55, 0.01, 6.78)
 rotation = Vector3(0, 2.67, 0)
-
-[node name="StreetBush01" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
-position = Vector3(-8.8, 0.1, -14.4)
-rotation = Vector3(0, -0.72, 0)
-scale = Vector3(2.5, 2.5, 2.5)
-
-[node name="StreetBush02" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
-position = Vector3(8.8, 0.1, -14.4)
-rotation = Vector3(0, -0.36, 0)
-scale = Vector3(2.5, 2.5, 2.5)
 
 [node name="StreetBush03" parent="Street/VerticalLayer" instance=ExtResource("density_04")]
 position = Vector3(-20.8, 0.1, -5)
@@ -656,6 +516,18 @@ position = Vector3(-1.55, 0.79, -15.55)
 rotation = Vector3(0, 3.1415927, 0)
 scale = Vector3(2, 2, 2)
 
+[node name="StudioWorktable" parent="Studio/EyeLevelLayer" instance=ExtResource("density_34")]
+position = Vector3(-4.1, 0, -18.45)
+rotation = Vector3(0, 0.08, 0)
+
+[node name="StudioWorktableBooks" parent="Studio/EyeLevelLayer" instance=ExtResource("density_08")]
+position = Vector3(-4.15, 1.02, -18.3)
+rotation = Vector3(0, -0.18, 0)
+
+[node name="StudioWorktableLamp" parent="Studio/VerticalLayer" instance=ExtResource("density_33")]
+position = Vector3(-5.1, 0, -18.85)
+rotation = Vector3(0, 0.22, 0)
+
 [node name="StudioWall01" parent="Studio/VerticalLayer" instance=ExtResource("density_11")]
 position = Vector3(-4.4, 1.7, -19.82)
 
@@ -758,6 +630,18 @@ scale = Vector3(2, 2, 2)
 [node name="OfficeEye12" parent="Office/EyeLevelLayer" instance=ExtResource("density_17")]
 position = Vector3(-15.7, 0.79, -1.2)
 scale = Vector3(2, 2, 2)
+
+[node name="OfficeArchiveCabinet" parent="Office/EyeLevelLayer" instance=ExtResource("density_31")]
+position = Vector3(-19.4, 0, 1.8)
+rotation = Vector3(0, 1.5707963, 0)
+
+[node name="OfficeArchiveBooks" parent="Office/EyeLevelLayer" instance=ExtResource("density_08")]
+position = Vector3(-18.95, 0.84, 1.65)
+rotation = Vector3(0, 1.42, 0)
+
+[node name="OfficeArchivePlant" parent="Office/EyeLevelLayer" instance=ExtResource("density_10")]
+position = Vector3(-18.85, 0, 2.65)
+rotation = Vector3(0, -0.24, 0)
 
 [node name="OfficeWall01" parent="Office/VerticalLayer" instance=ExtResource("density_11")]
 position = Vector3(-18.7, 1.7, -5.82)
@@ -1058,8 +942,12 @@ rotation = Vector3(0, -0.31, 0)
 position = Vector3(18.15, 0.52, 3.3)
 rotation = Vector3(0, 0.42, 0)
 
+[node name="StationArchiveShelf" parent="Station/VerticalLayer" instance=ExtResource("density_32")]
+position = Vector3(19.4, 0.1, 0.1)
+rotation = Vector3(0, -1.5707963, 0)
+
 [node name="Blockers" type="Node3D" parent="." groups=["town_navigation_source"]]
-editor_description = "Project-owned primitive collision for every added tree, vehicle, table, seat, pallet, barrel, cabinet, and shelf; included in the committed navigation bake."
+editor_description = "Project-owned primitive collision for the original navigation-affecting density anchors; later wall-hugging presentation clusters remain render-only."
 
 [node name="TreeWestNorthBlocker" type="StaticBody3D" parent="Blockers"]
 position = Vector3(-9, 1.1, -2.8)

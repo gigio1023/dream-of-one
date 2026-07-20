@@ -329,6 +329,9 @@ roughness = 0.92
 material = SubResource("StandardMaterial3D_record_surface")
 size = Vector3(1.4, 0.8, 0.06)
 
+[sub_resource type="BoxMesh" id="BoxMesh_station_landmark_crown"]
+size = Vector3(0.34, 0.5, 3.2)
+
 [sub_resource type="BoxShape3D" id="BoxShape3D_record_surface"]
 size = Vector3(1.4, 0.8, 0.08)
 
@@ -368,17 +371,20 @@ shadow_enabled = true
 
 [node name="StudioLight" type="OmniLight3D" parent="Environment" unique_id=1780059720]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.35, -16)
-light_energy = 4.0
+light_color = Color(1, 0.89, 0.76, 1)
+light_energy = 3.1
 omni_range = 7.0
 
 [node name="OfficeLight" type="OmniLight3D" parent="Environment" unique_id=1362390918]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 2.35, 0)
-light_energy = 4.0
+light_color = Color(1, 0.92, 0.82, 1)
+light_energy = 3.0
 omni_range = 7.0
 
 [node name="StationLight" type="OmniLight3D" parent="Environment" unique_id=1545978821]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 2.35, 0)
-light_energy = 4.0
+light_color = Color(0.84, 0.89, 1, 1)
+light_energy = 2.7
 omni_range = 7.0
 
 [node name="Geometry" type="Node3D" parent="." unique_id=238009825]
@@ -932,7 +938,7 @@ position = Vector3(10.5, 0, -4.8)
 scale = Vector3(5, 5, 5)
 
 [node name="BuildingTrim" type="Node3D" parent="Props/ExteriorDressing"]
-editor_description = "Commercial-kit trim stays on solid wall spans and never covers an open portal."
+editor_description = "Collisionless commercial-kit trim and greybox crown stay above open portals and do not own gameplay architecture."
 
 [node name="BuildingSigns" type="Node3D" parent="Props/ExteriorDressing"]
 editor_description = "Localized entrance labels keep all three permanently open buildings legible from the park."
@@ -966,11 +972,30 @@ rotation = Vector3(0, -1.5707963, 0)
 auto_translate_mode = 1
 text = "world.location.station"
 font = ExtResource("54_sign_font")
-font_size = 64
-outline_size = 14
-modulate = Color(0.98, 0.94, 0.82, 1)
-outline_modulate = Color(0.18, 0.1, 0.06, 1)
+font_size = 76
+outline_size = 16
+modulate = Color(0.84, 0.9, 1, 1)
+outline_modulate = Color(0.05, 0.1, 0.18, 1)
 pixel_size = 0.006
+
+[node name="StudioPortalCanopy" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("33_overhang")]
+position = Vector3(0, 2.82, -12.05)
+scale = Vector3(5, 5, 5)
+
+[node name="OfficePortalCanopy" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("33_overhang")]
+position = Vector3(-12.05, 2.82, 0)
+rotation = Vector3(0, 1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StationPortalCanopy" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("33_overhang")]
+position = Vector3(12.05, 2.86, 0)
+rotation = Vector3(0, -1.5707963, 0)
+scale = Vector3(5, 5, 5)
+
+[node name="StationPortalCrown" type="MeshInstance3D" parent="Props/ExteriorDressing/BuildingTrim"]
+position = Vector3(11.84, 2.76, 0)
+material_override = ExtResource("8_7hdwp")
+mesh = SubResource("BoxMesh_station_landmark_crown")
 
 [node name="StudioAwningLeft" parent="Props/ExteriorDressing/BuildingTrim" instance=ExtResource("32_awning")]
 position = Vector3(-3.2, 1.05, -12.05)
@@ -1162,19 +1187,9 @@ position = Vector3(-5.3, 0.03, 5.3)
 rotation = Vector3(0, 0.2, 0)
 scale = Vector3(5, 5, 5)
 
-[node name="TrashBenchWestB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
-position = Vector3(-5.8, 0.03, 4.8)
-rotation = Vector3(0, -0.9, 0)
-scale = Vector3(5, 5, 5)
-
 [node name="TrashBenchEastA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]
 position = Vector3(5.3, 0.03, 5.3)
 rotation = Vector3(0, -0.4, 0)
-scale = Vector3(5, 5, 5)
-
-[node name="TrashBenchEastB" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("51_city_trash_b")]
-position = Vector3(5.8, 0.03, 4.8)
-rotation = Vector3(0, 0.8, 0)
 scale = Vector3(5, 5, 5)
 
 [node name="TrashSouthWestA" parent="Props/ExteriorDressing/CityBuilderDressing/LooseStreetClutter" instance=ExtResource("50_city_trash_a")]

@@ -6,6 +6,12 @@
 ![Development Bun 1.3.14](https://img.shields.io/badge/development-Bun%201.3.14-FBF0DF?logo=bun&logoColor=black)
 ![Korean first](https://img.shields.io/badge/content-Korean--first-B86055)
 
+<p align="center">
+  <img src="docs/assets/readme-m3r-park.png" alt="First-person view across the park toward the Studio in Dream of One" width="100%">
+  <br>
+  <sub>The active M3R development build: one small town, six residents, and a hearing that remembers what happened.</sub>
+</p>
+
 Dream of One is a first-person social-simulation game set in one small 3D
 town. Six persistent residents move on ordinary game-AI schedules, meet and
 talk to one another, remember what they heard, and use an LLM to form their
@@ -15,6 +21,10 @@ The player arrives as an outsider and must change those beliefs through
 conversation before a scheduled Station hearing. Four residents need
 meaningful first-hand grounds to vouch for the player, but the model still
 owns every resident assessment and the final ordinary/abnormal verdict.
+
+**Development status:** active prototype. The source build is playable, but
+visual polish and final rendered acceptance are still in progress. There is no
+packaged release yet.
 
 The current active milestone and build truth live in
 [`docs/plan/m3-first-person-town.md`](docs/plan/m3-first-person-town.md).
@@ -41,6 +51,34 @@ speech, judgment, action, memory, testimony, or verdict. The HUD displays a
 simulation interruption and preserves the exact request for retry or lets the
 player abandon the interrupted run. Fixed responses exist only in explicitly
 selected test fixtures.
+
+## Screenshots
+
+These are captures from the active M3R development line, not concept art or a
+final visual target.
+
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/assets/readme-m3r-office-route.png" alt="First-person route from the park toward the Office">
+      <br><sub>Walk between the park, Studio, Office, and Station without a loading screen.</sub>
+    </td>
+    <td width="50%">
+      <img src="docs/assets/readme-m3r-studio.png" alt="Low-fi Studio interior with desks, lamps, shelves, and seating">
+      <br><sub>The Studio is one of several open, single-storey social spaces.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/assets/readme-m3r-hearing.png" alt="Station hearing interface asking the player for a final defense in Korean">
+      <br><sub>The Station hearing asks for the player's own final defense before presenting resident testimony.</sub>
+    </td>
+    <td width="50%">
+      <img src="docs/assets/readme-m3r-interruption.png" alt="Simulation interruption interface with retry and restart actions in Korean">
+      <br><sub>If the model path fails, the event stops visibly instead of inventing a social outcome.</sub>
+    </td>
+  </tr>
+</table>
 
 ## Run the game
 

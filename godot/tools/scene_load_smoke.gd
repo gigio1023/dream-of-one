@@ -4215,6 +4215,28 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 	)
 	if progress_after_steps != terminal_provider_progress:
 		_failures.append("%s hearing continue steps changed provider call accounting" % label)
+	# Work that began before the hearing committed may still return a snapshot
+	# carrying an older provider-failure marker. Terminal authority wins: the late
+	# marker must neither erase the completed verdict nor open an actionless modal.
+	var outcome_before_late_marker := hud.outcome_snapshot()
+	instance.call("_sync_provider_failure_marker", {
+		"providerFailure": {
+			"profileId": "fixture-live-profile",
+			"reason": "timeout",
+			"purpose": "agent_step",
+			"operationKey": "agent_step:late-after-terminal",
+		},
+	})
+	if (
+		hud.outcome_snapshot() != outcome_before_late_marker
+		or hud.provider_failure_visible()
+		or hud.modal_mode() != HUD3D.ModalMode.OUTCOME
+		or (instance.get("_terminal_result") as Dictionary) != terminal_result
+	):
+		_failures.append(
+			"%s late provider marker replaced an authoritative terminal outcome"
+			% label
+		)
 	var malformed_verdict := terminal_result.duplicate(true)
 	malformed_verdict["verdict"] = "unknown"
 	if bool(instance.call(

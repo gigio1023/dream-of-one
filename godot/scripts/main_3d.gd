@@ -4393,6 +4393,13 @@ func _resolve_provider_failure(
 
 
 func _sync_provider_failure_marker(authoritative_response: Dictionary) -> void:
+	# Once the runtime has committed a terminal result, a response from work that
+	# started earlier cannot reopen provider recovery or erase the verdict. A
+	# malformed/fallback-marked terminal envelope is handled synchronously by
+	# _terminal_result_requires_cleanup() before Outcome is shown; later snapshot
+	# markers are stale with respect to that terminal authority.
+	if _run_status in ["terminal", "closed"]:
+		return
 	var marker := _provider_failure_marker(authoritative_response)
 	if not bool(marker.get("present", false)):
 		return

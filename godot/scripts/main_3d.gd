@@ -158,6 +158,7 @@ var _provider_failure_retry_context: Dictionary = {}
 var _provider_failure_retry_in_flight := false
 var _run_abandon_id := ""
 var _run_abandon_in_flight := false
+var _terminal_contract_cleanup_required := false
 
 
 func _ready() -> void:
@@ -172,8 +173,7 @@ func _ready() -> void:
 	_player.preload_intent_changed.connect(_on_player_preload_intent_changed)
 	_player.unfocused_interaction_requested.connect(_on_unfocused_interaction_requested)
 	_player.settings_requested.connect(_hud.open_settings)
-	_hud.settings_visibility_changed.connect(_on_settings_visibility_changed)
-	_hud.log_visibility_changed.connect(_on_log_visibility_changed)
+	_hud.modal_mode_changed.connect(_on_modal_mode_changed)
 	_hud.debug_visibility_changed.connect(_on_debug_visibility_changed)
 	_hud.look_settings_changed.connect(_on_look_settings_changed)
 	_hud.ui_scale_requested.connect(_on_ui_scale_requested)
@@ -187,6 +187,7 @@ func _ready() -> void:
 	_hud.provider_failure_restart_requested.connect(
 		_on_provider_failure_restart_requested
 	)
+	_hud.legacy_provider_failure_detected.connect(_on_legacy_provider_failure_detected)
 	_hud.restart_requested.connect(_on_restart_requested)
 	_hud.ambient_subtitle_started.connect(_on_ambient_subtitle_started)
 	for surface_value in get_tree().get_nodes_in_group(&"record_surfaces"):
@@ -406,17 +407,8 @@ func presentation_snapshot() -> Dictionary:
 	}
 
 
-func _on_settings_visibility_changed(visible: bool) -> void:
-	if visible:
-		_player.set_control_enabled(false)
-		_player.release_mouse()
-	else:
-		_try_open_pending_contact()
-		_restore_player_control_if_unlocked()
-
-
-func _on_log_visibility_changed(visible: bool) -> void:
-	if visible:
+func _on_modal_mode_changed(_previous: int, current: int) -> void:
+	if current != HUD3D.ModalMode.NONE:
 		_player.set_control_enabled(false)
 		_player.release_mouse()
 	else:
@@ -432,10 +424,8 @@ func _on_debug_visibility_changed(visible: bool) -> void:
 func _restore_player_control_if_unlocked() -> void:
 	if (
 		_run_status in ["hearing_active", "terminal", "closed"]
-		or _record_encounter_in_flight
 		or _conversation_target != null
-		or _hud.settings_visible()
-		or _hud.log_visible()
+		or _hud.modal_mode() != HUD3D.ModalMode.NONE
 	):
 		return
 	_player.set_control_enabled(true)
@@ -449,8 +439,7 @@ func _on_record_surface_requested(surface_id: String) -> void:
 		_run_status != "active"
 		or _record_encounter_in_flight
 		or _conversation_target != null
-		or _hud.settings_visible()
-		or _hud.log_visible()
+		or _hud.modal_mode() != HUD3D.ModalMode.NONE
 	):
 		return
 	_record_encounter_in_flight = true
@@ -641,6 +630,8 @@ func _try_open_pending_contact() -> void:
 	if _run_status != "active":
 		_pending_contact_ready_id = ""
 		return
+	if _hud.modal_mode() != HUD3D.ModalMode.NONE:
+		return
 	if _pending_contact_ready_id.is_empty():
 		return
 	var contact_id := _pending_contact_ready_id
@@ -654,8 +645,6 @@ func _try_open_pending_contact() -> void:
 		or _resolving_answer
 		or _ending_conversation
 		or _record_encounter_in_flight
-		or _hud.settings_visible()
-		or _hud.log_visible()
 	):
 		return
 	var actor := _town.get_node_or_null("Actors/%s" % actor_id) as NPC3D
@@ -1076,13 +1065,19 @@ func _enter_terminal_outcome() -> void:
 	if _terminal_result.is_empty():
 		push_error("Terminal run state has no terminalResult.")
 		return
-	if (
-		not _provider_failure.is_empty()
-		or _present_provider_failure(_terminal_result)
-	):
-		# A provider failure is not a verdict. Keep the authoritative terminal
-		# snapshot for diagnostics, but never render or label deterministic output
-		# as the model's judgment.
+	_run_status = "terminal"
+	_run_snapshot["runStatus"] = _run_status
+	_run_snapshot["terminalResult"] = _terminal_result.duplicate(true)
+	if _terminal_result_requires_cleanup(_terminal_result):
+		# Hydrated terminal state has no immutable request packet to retry. Keep
+		# the authoritative snapshot for diagnostics, but offer only the normal
+		# terminal end lifecycle as clean-run recovery.
+		_active_session_id = ""
+		_active_turn = {}
+		_required_retry_answer = {}
+		_resolving_answer = false
+		_ending_conversation = false
+		_conversation_target = null
 		_player.set_control_enabled(false)
 		_player.release_mouse()
 		_set_run_clock_paused(true)
@@ -1090,9 +1085,7 @@ func _enter_terminal_outcome() -> void:
 		return
 	_discard_conversation_look()
 	_lifecycle_generation += 1
-	_run_status = "terminal"
-	_run_snapshot["runStatus"] = _run_status
-	_run_snapshot["terminalResult"] = _terminal_result.duplicate(true)
+	_terminal_contract_cleanup_required = false
 	_active_session_id = ""
 	_active_turn = {}
 	_required_retry_answer = {}
@@ -1103,11 +1096,33 @@ func _enter_terminal_outcome() -> void:
 	_hud.clear_hearing_opening()
 	_hud.clear_contact_approach()
 	_hud.clear_ambient_subtitles()
-	_hud.show_outcome(_terminal_result)
+	_hud.show_outcome(_terminal_result, _run_snapshot)
 	_player.set_control_enabled(false)
 	_player.release_mouse()
 	_set_run_clock_paused(true)
 	get_tree().paused = true
+
+
+func _terminal_result_requires_cleanup(result: Dictionary) -> bool:
+	var failure := _provider_failure_payload(result)
+	if failure.is_empty() and not _provider_failure.is_empty():
+		failure = _provider_failure.duplicate(true)
+	if failure.is_empty() and _valid_terminal_result(result, _run_snapshot, _hearing_id):
+		return false
+	if failure.is_empty():
+		failure = {
+			"profileId": str(_last_proposal_meta.get("profileId", "client-contract")),
+			"reason": "invalid_envelope",
+			"purpose": "hearing_verdict",
+			"operationKey": "client:terminal_hydration:%s" % str(
+				result.get("hearingId", "unknown")
+			),
+		}
+	_terminal_contract_cleanup_required = true
+	_provider_failure_retry_kind = ""
+	_provider_failure_retry_context = {}
+	_present_provider_failure({"providerFailure": failure})
+	return true
 
 
 func _on_restart_requested() -> void:
@@ -1197,7 +1212,7 @@ func _begin_conversation(
 		return
 	if _conversation_target != null or _resolving_answer or _ending_conversation:
 		return
-	if _hud.settings_visible() or _hud.log_visible() or _record_encounter_in_flight:
+	if _hud.modal_mode() != HUD3D.ModalMode.NONE or _record_encounter_in_flight:
 		if not contact_id.is_empty():
 			_pending_contact_ready_id = contact_id
 		return
@@ -1528,6 +1543,15 @@ func _submit_hearing_answer(answer_payload: Dictionary) -> void:
 		_required_retry_answer = answer_payload.duplicate(true)
 		_hud.show_conversation_error(&"hud.m3r.error.invalid_response")
 		return
+	var terminal_candidate := _dictionary_or_empty(result.get("terminalResult"))
+	if not _valid_terminal_result(terminal_candidate, _run_snapshot, _hearing_id):
+		_required_retry_answer = answer_payload.duplicate(true)
+		_present_client_contract_interruption(
+			"hearing_answer",
+			{"answer": answer_payload.duplicate(true)}
+		)
+		_hud.show_conversation_error(&"hud.m3r.error.invalid_response")
+		return
 	_resolve_provider_failure("hearing_answer")
 	_required_retry_answer = {}
 	_apply_social_view_from_response(result)
@@ -1537,6 +1561,100 @@ func _submit_hearing_answer(answer_payload: Dictionary) -> void:
 	_last_proposal_meta = _dictionary_or_empty(result.get("proposalMeta"))
 	_run_snapshot["lastProposalMeta"] = _last_proposal_meta.duplicate(true)
 	_enter_terminal_outcome()
+
+
+func _present_client_contract_interruption(
+	retry_kind: String,
+	retry_context: Dictionary
+) -> void:
+	_present_provider_failure({
+		"providerFailure": {
+			"profileId": str(_last_proposal_meta.get("profileId", "client-contract")),
+			"reason": "invalid_envelope",
+			"purpose": "hearing_verdict",
+			"operationKey": "client:%s:%s:%s" % [
+				retry_kind,
+				_hearing_id,
+				str(_active_turn.get("turnId", "")),
+			],
+		},
+	}, retry_kind, retry_context)
+
+
+func _valid_terminal_result(
+	result: Dictionary,
+	run_snapshot: Dictionary,
+	expected_hearing_id := ""
+) -> bool:
+	if (
+		result.is_empty()
+		or str(result.get("hearingId", "")).is_empty()
+		or (
+			not expected_hearing_id.is_empty()
+			and str(result.get("hearingId", "")) != expected_hearing_id
+		)
+		or str(result.get("verdict", "")) not in ["ordinary", "abnormal"]
+		or str(result.get("verdictWhyLine", "")).strip_edges().is_empty()
+		or str(result.get("officerLine", "")).strip_edges().is_empty()
+		or str(result.get("finalDefense", "")).strip_edges().is_empty()
+		or int(result.get("evidencedVouchCount", -1)) not in range(7)
+		or not result.get("residentAssessments") is Array
+		or (result.get("residentAssessments") as Array).size() != 6
+		or not result.get("citedRecordIds") is Array
+		or not result.get("citedLedgerEventIds") is Array
+		or not result.get("recap") is Array
+		or (result.get("recap") as Array).size() < 2
+		or not result.get("proposalMeta") is Dictionary
+	):
+		return false
+	var actor_memories: Dictionary = {}
+	for actor_value in _array_or_empty(run_snapshot.get("actors")):
+		if not actor_value is Dictionary:
+			return false
+		var actor := actor_value as Dictionary
+		var actor_id := str(actor.get("actorId", ""))
+		var memory_ids: Dictionary = {}
+		for memory_value in _array_or_empty(actor.get("memories")):
+			if not memory_value is Dictionary:
+				return false
+			var memory_id := str((memory_value as Dictionary).get("memoryId", ""))
+			if memory_id.is_empty():
+				return false
+			memory_ids[memory_id] = true
+		actor_memories[actor_id] = memory_ids
+	var seen_actors: Dictionary = {}
+	for assessment_value in result.get("residentAssessments") as Array:
+		if not assessment_value is Dictionary:
+			return false
+		var assessment := assessment_value as Dictionary
+		var actor_id := str(assessment.get("actorId", ""))
+		if (
+			actor_id not in HUD3D.OUTCOME_ACTOR_IDS
+			or seen_actors.has(actor_id)
+			or str(assessment.get("contactBasis", "")) not in [
+				"meaningful_firsthand",
+				"limited_firsthand",
+				"never_conversed",
+			]
+			or str(assessment.get("proposedStance", "")) not in [
+				"oppose", "uncertain", "vouch"
+			]
+			or str(assessment.get("appliedStance", "")) not in [
+				"oppose", "uncertain", "vouch"
+			]
+			or str(assessment.get("testimonyLine", "")).strip_edges().is_empty()
+			or not assessment.get("citedMemoryIds") is Array
+			or not actor_memories.has(actor_id)
+		):
+			return false
+		seen_actors[actor_id] = true
+		for cited_id in assessment.get("citedMemoryIds") as Array:
+			if (
+				not cited_id is String
+				or not (actor_memories[actor_id] as Dictionary).has(str(cited_id))
+			):
+				return false
+	return seen_actors.size() == 6
 
 
 func _on_conversation_end_retry_requested() -> void:
@@ -2623,6 +2741,7 @@ func _dispatch_ambient_decision() -> void:
 		or _advance_rebase_in_flight
 		or _ambient_decision_in_flight
 		or _ambient_pending_request.is_empty()
+		or _hud.modal_mode() != HUD3D.ModalMode.NONE
 	):
 		return
 	if (
@@ -3857,9 +3976,9 @@ func _finish_conversation_modal() -> void:
 	_conversation_target = null
 	_hud.close_conversation()
 	_restore_conversation_look()
-	_player.set_control_enabled(true)
-	_player.capture_mouse()
 	get_tree().paused = false
+	_set_run_clock_paused(false)
+	_restore_player_control_if_unlocked()
 	_flush_deferred_ambient_speech_events()
 	_flush_queued_movement_deltas()
 	_resume_active_contact_follow()
@@ -4140,8 +4259,27 @@ func _on_provider_failure_retry_requested() -> void:
 		_hud.set_provider_failure_action_busy(false)
 
 
+func _on_legacy_provider_failure_detected(failure: Dictionary) -> void:
+	var retry_kind := ""
+	var retry_context: Dictionary = {}
+	if _run_id.is_empty():
+		retry_kind = "run_start"
+	elif not _required_retry_answer.is_empty():
+		if _run_status == "hearing_active":
+			retry_kind = "hearing_answer"
+		elif _run_status == "active" and not _active_session_id.is_empty():
+			retry_kind = "conversation_answer"
+		if not retry_kind.is_empty():
+			retry_context = {"answer": _required_retry_answer.duplicate(true)}
+	_present_provider_failure(
+		{"providerFailure": failure.duplicate(true)},
+		retry_kind,
+		retry_context
+	)
+
+
 func _on_provider_failure_restart_requested() -> void:
-	if _run_abandon_in_flight:
+	if _run_abandon_in_flight or _run_end_in_flight:
 		return
 	if (
 		_provider_failure_retry_in_flight
@@ -4149,6 +4287,9 @@ func _on_provider_failure_restart_requested() -> void:
 		or not _provider_failure_restart_supported()
 	):
 		_hud.show_provider_failure_restart_error()
+		return
+	if _terminal_contract_cleanup_required:
+		await _end_terminal_contract_run()
 		return
 	if _run_abandon_id.is_empty():
 		_run_abandon_id = (
@@ -4174,6 +4315,30 @@ func _on_provider_failure_restart_requested() -> void:
 		_restore_player_control_if_unlocked()
 		return
 	_cache_provider_evidence(result, "run_abandon")
+	_reload_current_run_scene(true)
+
+
+func _end_terminal_contract_run() -> void:
+	if _run_end_id.is_empty():
+		_run_end_id = _new_run_end_id()
+	_run_end_in_flight = true
+	_player.set_control_enabled(false)
+	_player.release_mouse()
+	_hud.set_provider_failure_action_busy(true, &"restart")
+	var result: Dictionary = await _run_session.end_run(_run_id, _run_end_id)
+	_run_end_in_flight = false
+	if (
+		_is_error(result)
+		or str(result.get("runId", "")) != _run_id
+		or str(result.get("endId", "")) != _run_end_id
+		or str(result.get("runStatus", "")) != "closed"
+	):
+		_hud.show_provider_failure_restart_error()
+		return
+	_hydrate_run_lifecycle(result)
+	_run_snapshot["providerBudget"] = _dictionary_or_empty(result.get("providerBudget"))
+	_cache_provider_evidence(result)
+	_last_proposal_meta = _dictionary_or_empty(result.get("lastProposalMeta"))
 	_reload_current_run_scene(true)
 
 
@@ -4279,7 +4444,10 @@ func _provider_failure_restart_supported() -> bool:
 	return (
 		not _provider_failure.is_empty()
 		and not _run_id.is_empty()
-		and _run_status not in ["terminal", "closed"]
+		and (
+			_terminal_contract_cleanup_required
+			or _run_status not in ["terminal", "closed"]
+		)
 	)
 
 

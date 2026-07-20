@@ -587,9 +587,9 @@ func _check_hud_scale_layout(label: String, hud: HUD3D) -> void:
 		"procedure": "ordinary",
 		"hesitationMs": 0,
 		"choices": [
-			{"choiceId": "scale-smoke-1", "line": "One"},
-			{"choiceId": "scale-smoke-2", "line": "Two"},
-			{"choiceId": "scale-smoke-3", "line": "Three"},
+			{"choiceId": "scale-smoke-1", "line": "One", "intent": "safe/local", "evidenceIds": [], "introducesNewClaim": false},
+			{"choiceId": "scale-smoke-2", "line": "Two", "intent": "uncertain/repair", "evidenceIds": [], "introducesNewClaim": false},
+			{"choiceId": "scale-smoke-3", "line": "Three", "intent": "risky/weird", "evidenceIds": [], "introducesNewClaim": true},
 		],
 		"proposalMeta": {"transport": "scripted"},
 	}):
@@ -599,9 +599,32 @@ func _check_hud_scale_layout(label: String, hud: HUD3D) -> void:
 	) as Button
 	if first_choice == null or not first_choice.text.begins_with("1 — "):
 		_failures.append("%s conversation choices do not expose keyboard shortcuts" % label)
+	var third_choice := hud.find_child("ConversationChoice3", true, false) as Button
+	if (
+		first_choice == null
+		or third_choice == null
+		or first_choice.text.contains("새 주장")
+		or not third_choice.text.contains("새 주장 · Three")
+	):
+		_failures.append("%s 150%% choice marker ignored the explicit new-claim field" % label)
+	hud.set_ui_scale(1.0)
+	await process_frame
+	if third_choice == null or not third_choice.text.contains("새 주장 · Three"):
+		_failures.append("%s 100%% choice marker was not retained" % label)
 	hud.close_conversation()
 	if hud.get_viewport().gui_get_focus_owner() != null:
 		_failures.append("%s closed conversation retained hidden GUI focus" % label)
+	hud.begin_conversation({"actorId": "NPC_Park_Caretaker"})
+	if hud.show_turn({
+		"prompt": "Malformed reply contract.",
+		"choices": [
+			{"choiceId": "bad-1", "line": "One", "intent": "safe/local", "evidenceIds": []},
+			{"choiceId": "bad-2", "line": "Two", "intent": "uncertain/repair", "evidenceIds": [], "introducesNewClaim": false},
+			{"choiceId": "bad-3", "line": "Three", "intent": "risky/weird", "evidenceIds": [], "introducesNewClaim": true},
+		],
+	}):
+		_failures.append("%s accepted a reply choice missing one of five strict fields" % label)
+	hud.close_conversation()
 	hud.open_log()
 	var close_log_event := InputEventKey.new()
 	close_log_event.physical_keycode = KEY_TAB
@@ -615,9 +638,42 @@ func _check_hud_scale_layout(label: String, hud: HUD3D) -> void:
 	if hud.get_viewport().gui_get_focus_owner() != null:
 		_failures.append("%s closed log retained hidden GUI focus" % label)
 	hud.open_settings()
+	hud.open_log()
+	hud.begin_conversation({"actorId": "NPC_Park_Caretaker"})
+	if hud.modal_mode() != HUD3D.ModalMode.SETTINGS:
+		_failures.append("%s modal owner allowed settings to overlap another surface" % label)
 	hud.close_settings()
 	if hud.get_viewport().gui_get_focus_owner() != null:
 		_failures.append("%s closed settings retained hidden GUI focus" % label)
+	hud.begin_conversation({"actorId": "NPC_Park_Caretaker"})
+	hud.show_provider_failure({
+		"profileId": "modal-smoke",
+		"reason": "timeout",
+		"purpose": "conversation_turn",
+		"operationKey": "modal-smoke:conversation",
+	}, true, true)
+	if (
+		hud.modal_mode() != HUD3D.ModalMode.INTERRUPTION
+		or hud.conversation_visible()
+		or hud.settings_visible()
+		or hud.log_visible()
+		or hud.outcome_visible()
+	):
+		_failures.append("%s interruption did not exclusively preempt conversation" % label)
+	hud.clear_provider_failure()
+	if hud.modal_mode() != HUD3D.ModalMode.CONVERSATION:
+		_failures.append("%s interrupted conversation was not the sole resumed surface" % label)
+	hud.close_conversation()
+	hud.open_log()
+	hud.show_provider_failure({
+		"profileId": "modal-smoke",
+		"reason": "timeout",
+		"purpose": "agent_step",
+		"operationKey": "modal-smoke:inspect",
+	}, false, true)
+	hud.clear_provider_failure()
+	if hud.modal_mode() != HUD3D.ModalMode.NONE:
+		_failures.append("%s interruption incorrectly resumed a non-conversation modal" % label)
 	hud.set_ui_scale(1.0)
 	await process_frame
 
@@ -3799,9 +3855,9 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		"procedure": "ordinary",
 		"hesitationMs": 0,
 		"choices": [
-			{"choiceId": "smoke-1", "line": "One"},
-			{"choiceId": "smoke-2", "line": "Two"},
-			{"choiceId": "smoke-3", "line": "Three"},
+			{"choiceId": "smoke-1", "line": "One", "intent": "safe/local", "evidenceIds": [], "introducesNewClaim": false},
+			{"choiceId": "smoke-2", "line": "Two", "intent": "uncertain/repair", "evidenceIds": [], "introducesNewClaim": false},
+			{"choiceId": "smoke-3", "line": "Three", "intent": "risky/weird", "evidenceIds": [], "introducesNewClaim": true},
 		],
 		"proposalMeta": {"transport": "scripted"},
 	}
@@ -4009,7 +4065,59 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 	):
 		_failures.append("%s failed abandon did not preserve a recoverable warning" % label)
 	instance.call("_resolve_provider_failure", "hearing_answer")
+	var fixture_backend := run_session.get("_backend") as Object
+	if fixture_backend == null:
+		_failures.append("%s fixture backend is unavailable for malformed verdict smoke" % label)
+		paused = false
+		return
+	var fixture_data := (fixture_backend.get("_fixture") as Dictionary).duplicate(true)
+	var fixture_endpoints := (fixture_data.get("endpoints", {}) as Dictionary).duplicate(true)
+	var valid_hearing_packet := (
+		fixture_endpoints.get("runHearingAnswer", {}) as Dictionary
+	).duplicate(true)
+	var malformed_hearing_packet := valid_hearing_packet.duplicate(true)
+	var malformed_hearing_response := (
+		malformed_hearing_packet.get("response", {}) as Dictionary
+	).duplicate(true)
+	var malformed_terminal := (
+		malformed_hearing_response.get("terminalResult", {}) as Dictionary
+	).duplicate(true)
+	malformed_terminal["verdict"] = "unknown"
+	malformed_hearing_response["terminalResult"] = malformed_terminal
+	malformed_hearing_packet["response"] = malformed_hearing_response
+	fixture_endpoints["runHearingAnswer"] = malformed_hearing_packet
+	fixture_data["endpoints"] = fixture_endpoints
+	fixture_backend.set("_fixture", fixture_data)
 	instance.call("_submit_hearing_answer", final_answer)
+	var malformed_interrupted := false
+	for _frame in range(120):
+		await process_frame
+		var contract_failure := hud.provider_failure_snapshot()
+		if (
+			bool(contract_failure.get("visible", false))
+			and bool(contract_failure.get("retryVisible", false))
+			and str(
+				(contract_failure.get("failure", {}) as Dictionary).get("reason", "")
+			) == "invalid_envelope"
+		):
+			malformed_interrupted = true
+			break
+	if (
+		not malformed_interrupted
+		or hud.outcome_visible()
+		or not (instance.get("_terminal_result") as Dictionary).is_empty()
+		or (instance.get("_required_retry_answer") as Dictionary) != final_answer
+	):
+		_failures.append("%s malformed verdict did not fail closed with its exact retry" % label)
+	fixture_data = (fixture_backend.get("_fixture") as Dictionary).duplicate(true)
+	fixture_endpoints = (fixture_data.get("endpoints", {}) as Dictionary).duplicate(true)
+	fixture_endpoints["runHearingAnswer"] = valid_hearing_packet
+	fixture_data["endpoints"] = fixture_endpoints
+	fixture_backend.set("_fixture", fixture_data)
+	fixture_backend.set("_hearing_answered", false)
+	fixture_backend.set("_hearing_answer_request", {})
+	fixture_backend.set("_hearing_answer_response", {})
+	instance.call("_on_provider_failure_retry_requested")
 	var terminal := false
 	for _frame in range(360):
 		await process_frame
@@ -4053,6 +4161,10 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 		!= (terminal_result.get("citedRecordIds", []) as Array).size()
 		or (outcome.get("citedLedgerEventIds", []) as Array).size()
 		!= (terminal_result.get("citedLedgerEventIds", []) as Array).size()
+		or int(outcome.get("stepCount", 0)) != 8
+		or str(outcome.get("stepKind", "")) != "testimony"
+		or not bool(outcome.get("continueVisible", false))
+		or bool(outcome.get("restartVisible", true))
 		or str(outcome.get("body", "")).contains("NPC_")
 	):
 		_failures.append("%s outcome omitted verdict, quorum, testimony, recap, or leaked ids" % label)
@@ -4074,60 +4186,216 @@ func _check_hearing_and_outcome(label: String, instance: Node) -> void:
 				"%s outcome has an incomplete resident testimony or contact basis" % label
 			)
 			break
-	var fallback_result := terminal_result.duplicate(true)
-	var fallback_meta := (fallback_result.get("proposalMeta", {}) as Dictionary).duplicate(true)
+	var continue_button := hud.find_child("OutcomeContinueButton", true, false) as Button
+	var step_kinds: Array[String] = [str(outcome.get("stepKind", ""))]
+	for _step in range(7):
+		if continue_button == null or not continue_button.visible:
+			break
+		continue_button.pressed.emit()
+		await process_frame
+		var advanced_outcome := hud.outcome_snapshot()
+		step_kinds.append(str(advanced_outcome.get("stepKind", "")))
+		if str(advanced_outcome.get("body", "")).contains("NPC_"):
+			_failures.append("%s hearing procedure exposed a raw actor id" % label)
+			break
+	var recap_outcome := hud.outcome_snapshot()
+	var expected_step_kinds: Array[String] = [
+		"testimony", "testimony", "testimony", "testimony",
+		"testimony", "testimony", "verdict", "recap",
+	]
+	if (
+		step_kinds != expected_step_kinds
+		or bool(recap_outcome.get("continueVisible", true))
+		or not bool(recap_outcome.get("restartVisible", false))
+	):
+		_failures.append("%s hearing did not present six testimonies, verdict, then recap" % label)
+	var progress_after_steps := _provider_evidence_progress_from_snapshot(
+		instance,
+		instance.call("presentation_snapshot")
+	)
+	if progress_after_steps != terminal_provider_progress:
+		_failures.append("%s hearing continue steps changed provider call accounting" % label)
+	var malformed_verdict := terminal_result.duplicate(true)
+	malformed_verdict["verdict"] = "unknown"
+	if bool(instance.call(
+		"_valid_terminal_result",
+		malformed_verdict,
+		instance.get("_run_snapshot"),
+		str(terminal_result.get("hearingId", "")),
+	)):
+		_failures.append("%s accepted a malformed hearing verdict" % label)
+	var cited_snapshot := (instance.get("_run_snapshot") as Dictionary).duplicate(true)
+	var cited_actors := (cited_snapshot.get("actors", []) as Array).duplicate(true)
+	if not cited_actors.is_empty() and cited_actors[0] is Dictionary:
+		var cited_actor := (cited_actors[0] as Dictionary).duplicate(true)
+		cited_actor["memories"] = [
+			{
+				"memoryId": "memory:hearing-smoke-owned-first",
+				"kind": "player_conversation",
+				"sourceActorId": "player",
+				"playerLine": "첫 번째로 제시할 실제 답변입니다.",
+			},
+			{
+				"memoryId": "memory:hearing-smoke-owned-second",
+				"kind": "player_conversation",
+				"sourceActorId": "player",
+				"playerLine": "두 번째라 화면에는 나오지 않아야 합니다.",
+			},
+		]
+		cited_actors[0] = cited_actor
+		cited_snapshot["actors"] = cited_actors
+		var cited_result := terminal_result.duplicate(true)
+		var cited_assessments := (cited_result.get("residentAssessments", []) as Array).duplicate(true)
+		var cited_assessment := (cited_assessments[0] as Dictionary).duplicate(true)
+		cited_assessment["contactBasis"] = "meaningful_firsthand"
+		cited_assessment["citedMemoryIds"] = [
+			"memory:hearing-smoke-owned-first",
+			"memory:hearing-smoke-owned-second",
+		]
+		cited_assessments[0] = cited_assessment
+		cited_result["residentAssessments"] = cited_assessments
+		if not bool(instance.call(
+			"_valid_terminal_result",
+			cited_result,
+			cited_snapshot,
+			str(terminal_result.get("hearingId", "")),
+		)):
+			_failures.append("%s rejected an actor-owned hearing citation" % label)
+		else:
+			hud.show_outcome(cited_result, cited_snapshot)
+			var cited_body := str(hud.outcome_snapshot().get("body", ""))
+			if (
+				not cited_body.contains("첫 번째로 제시할 실제 답변입니다.")
+				or cited_body.contains("두 번째라 화면에는 나오지 않아야 합니다.")
+				or cited_body.contains("memory:hearing-smoke-owned")
+			):
+				_failures.append(
+					"%s hearing testimony did not present exactly its first validated memory"
+					% label
+				)
+		var unknown_citation := cited_result.duplicate(true)
+		var unknown_assessments := (unknown_citation.get("residentAssessments", []) as Array).duplicate(true)
+		var unknown_assessment := (unknown_assessments[0] as Dictionary).duplicate(true)
+		unknown_assessment["citedMemoryIds"] = ["memory:belongs-nowhere"]
+		unknown_assessments[0] = unknown_assessment
+		unknown_citation["residentAssessments"] = unknown_assessments
+		if bool(instance.call(
+			"_valid_terminal_result",
+			unknown_citation,
+			cited_snapshot,
+			str(terminal_result.get("hearingId", "")),
+		)):
+			_failures.append("%s accepted a hearing citation outside its actor memory" % label)
+	# Rebase is the production ingestion path for a terminal snapshot that did
+	# not originate from this client's exact hearing-answer request. Neither an
+	# unknown verdict nor fallback-marked terminal content may reach Outcome.
+	var authoritative_terminal_snapshot := (
+		instance.get("_run_snapshot") as Dictionary
+	).duplicate(true)
+	var malformed_hydrated_snapshot := authoritative_terminal_snapshot.duplicate(true)
+	var malformed_hydrated_terminal := terminal_result.duplicate(true)
+	malformed_hydrated_terminal["verdict"] = "unknown"
+	malformed_hydrated_snapshot["runStatus"] = "terminal"
+	malformed_hydrated_snapshot["terminalResult"] = malformed_hydrated_terminal
+	malformed_hydrated_snapshot.erase("providerFailure")
+	fixture_backend.set("_current_run_snapshot", malformed_hydrated_snapshot)
+	instance.set("_advance_needs_rebase", true)
+	await instance.call("_rebase_run_after_advance_conflict")
+	var malformed_hydrated_failure := hud.provider_failure_snapshot()
+	if (
+		not bool(malformed_hydrated_failure.get("visible", false))
+		or bool(malformed_hydrated_failure.get("retryVisible", true))
+		or not bool(malformed_hydrated_failure.get("restartVisible", false))
+		or str(
+			(malformed_hydrated_failure.get("failure", {}) as Dictionary).get(
+				"reason", ""
+			)
+		) != "invalid_envelope"
+		or bool(hud.outcome_snapshot().get("visible", true))
+		or not bool(instance.get("_terminal_contract_cleanup_required"))
+		or not str(instance.get("_run_abandon_id")).is_empty()
+	):
+		_failures.append(
+			"%s malformed hydrated terminal did not fail closed into end-run recovery"
+			% label
+		)
+	var fallback_hydrated_snapshot := authoritative_terminal_snapshot.duplicate(true)
+	var fallback_hydrated_terminal := terminal_result.duplicate(true)
+	var fallback_meta := (
+		fallback_hydrated_terminal.get("proposalMeta", {}) as Dictionary
+	).duplicate(true)
 	fallback_meta["transport"] = "fallback"
 	fallback_meta["usedFallback"] = true
 	fallback_meta["fallbackReason"] = "timeout"
-	fallback_result["proposalMeta"] = fallback_meta
-	hud.show_outcome(fallback_result)
-	var fallback_outcome := hud.outcome_snapshot()
-	var fallback_failure := hud.provider_failure_snapshot()
+	fallback_hydrated_terminal["proposalMeta"] = fallback_meta
+	fallback_hydrated_snapshot["runStatus"] = "terminal"
+	fallback_hydrated_snapshot["terminalResult"] = fallback_hydrated_terminal
+	fallback_hydrated_snapshot.erase("providerFailure")
+	fixture_backend.set("_current_run_snapshot", fallback_hydrated_snapshot)
+	instance.set("_advance_needs_rebase", true)
+	await instance.call("_rebase_run_after_advance_conflict")
+	var fallback_hydrated_failure := hud.provider_failure_snapshot()
 	if (
-		bool(fallback_outcome.get("visible", true))
-		or not str(fallback_outcome.get("route", "")).is_empty()
-		or not str(fallback_outcome.get("verdictDisplay", "")).is_empty()
-		or not bool(fallback_failure.get("visible", false))
+		not bool(fallback_hydrated_failure.get("visible", false))
+		or bool(fallback_hydrated_failure.get("retryVisible", true))
+		or not bool(fallback_hydrated_failure.get("restartVisible", false))
 		or str(
-			(fallback_failure.get("failure", {}) as Dictionary).get("reason", "")
+			(fallback_hydrated_failure.get("failure", {}) as Dictionary).get(
+				"reason", ""
+			)
 		) != "timeout"
+		or bool(hud.outcome_snapshot().get("visible", true))
+		or not bool(instance.get("_terminal_contract_cleanup_required"))
 		or hud.find_child("OutcomeFallbackBadge", true, false) != null
 	):
 		_failures.append(
-			"%s provider failure rendered a fallback verdict or hid the failure" % label
+			"%s fallback-marked hydrated terminal exposed a verdict or wrong recovery"
+			% label
 		)
-	var main_presented_failure := bool(instance.call(
-		"_present_provider_failure",
-		{
-			"error": "provider_failed",
-			"profileId": "fixture-live-profile",
-			"reason": "timeout",
-			"purpose": "hearing_verdict",
-		},
-	))
-	var main_failure_snapshot := (
-		instance.call("presentation_snapshot").get("providerFailure", {}) as Dictionary
-	)
-	if (
-		not main_presented_failure
-		or not bool(main_failure_snapshot.get("visible", false))
-		or str(
-			(main_failure_snapshot.get("failure", {}) as Dictionary).get(
-				"profileId",
-				""
-			)
-		) != "fixture-live-profile"
-		or bool(main_failure_snapshot.get("retryVisible", false))
-		or bool(main_failure_snapshot.get("restartVisible", false))
-		or bool(hud.outcome_snapshot().get("visible", true))
-	):
-		_failures.append("%s Main did not surface a structured provider failure" % label)
+	# The remaining checks exercise HUD focus and busy-state behavior directly.
+	instance.set("_provider_failure", {})
+	instance.set("_terminal_contract_cleanup_required", false)
+	hud.clear_provider_failure()
 	hud.show_provider_failure({
 		"profileId": "fixture-live-profile",
 		"reason": "timeout",
 		"purpose": "hearing_verdict",
 		"operationKey": "hearing_verdict:fixture",
 	}, true, true)
+	hud.set_provider_failure_action_busy(true, &"retry")
+	var failure_before_late_outcome := hud.provider_failure_snapshot()
+	var late_fallback_result := terminal_result.duplicate(true)
+	var late_fallback_meta := (
+		late_fallback_result.get("proposalMeta", {}) as Dictionary
+	).duplicate(true)
+	late_fallback_meta["transport"] = "fallback"
+	late_fallback_meta["usedFallback"] = true
+	late_fallback_meta["fallbackReason"] = "rate_limited"
+	late_fallback_meta["operationKey"] = "hearing_verdict:late-outcome"
+	late_fallback_result["proposalMeta"] = late_fallback_meta
+	hud.show_outcome(late_fallback_result, instance.get("_run_snapshot"))
+	var failure_after_late_outcome := hud.provider_failure_snapshot()
+	if (
+		failure_after_late_outcome.get("failure", {})
+		!= failure_before_late_outcome.get("failure", {})
+		or bool(failure_after_late_outcome.get("retryVisible", false))
+		!= bool(failure_before_late_outcome.get("retryVisible", false))
+		or bool(failure_after_late_outcome.get("restartVisible", false))
+		!= bool(failure_before_late_outcome.get("restartVisible", false))
+		or bool(failure_after_late_outcome.get("retryDisabled", false))
+		!= bool(failure_before_late_outcome.get("retryDisabled", false))
+		or bool(failure_after_late_outcome.get("restartDisabled", false))
+		!= bool(failure_before_late_outcome.get("restartDisabled", false))
+		or str(failure_after_late_outcome.get("busyAction", ""))
+		!= str(failure_before_late_outcome.get("busyAction", ""))
+		or hud.modal_mode() != HUD3D.ModalMode.INTERRUPTION
+		or hud.outcome_visible()
+	):
+		_failures.append(
+			"%s late fallback outcome overwrote the active interruption contract"
+			% label
+		)
+	hud.set_provider_failure_action_busy(false)
 	var retryable_failure := hud.provider_failure_snapshot()
 	var retry_button := hud.get_node_or_null(
 		"Overlay/ProviderFailurePanel/ProviderFailureMargin/ProviderFailureColumns/ProviderFailureRetryButton"
@@ -4419,6 +4687,128 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 		_failures.append("%s leaves a false receptionist re-conversation prompt" % label)
 	if receptionist.is_interaction_focusable():
 		_failures.append("%s leaves a pending prompt after the clean receptionist session" % label)
+	var free_roam_was_paused := paused
+	instance.call(
+		"_present_provider_failure",
+		{
+			"providerFailure": {
+				"profileId": "fixture-live-profile",
+				"reason": "timeout",
+				"purpose": "agent_step",
+				"operationKey": "npc_decision:free-roam-smoke",
+			},
+		},
+		"ambient_background"
+	)
+	var saved_pending_contact := str(instance.get("_pending_contact_ready_id"))
+	instance.set("_pending_contact_ready_id", "modal-blocked-contact")
+	instance.call("_try_open_pending_contact")
+	var contact_dispatch_blocked := (
+		str(instance.get("_pending_contact_ready_id")) == "modal-blocked-contact"
+	)
+	instance.set("_pending_contact_ready_id", saved_pending_contact)
+	var saved_ambient_request := (
+		instance.get("_ambient_pending_request") as Dictionary
+	).duplicate(true)
+	instance.set("_ambient_pending_request", {
+		"runId": str(instance.get("_run_id")),
+		"wakeId": "modal-blocked-wake",
+		"observedWorldRevision": int(
+			(instance.get("_run_snapshot") as Dictionary).get("worldRevision", 0)
+		),
+	})
+	instance.call("_dispatch_ambient_decision")
+	var ambient_dispatch_blocked := not bool(instance.get("_ambient_decision_in_flight"))
+	instance.set("_ambient_pending_request", saved_ambient_request)
+	hud.set_focus(receptionist)
+	hud.show_contact_ready("modal-blocked-contact", str(receptionist.actor_id))
+	hud.set("_current_ambient_subtitle", {
+		"speakerActorId": str(receptionist.actor_id),
+		"line": "interruption exclusivity smoke",
+		"direction": "center",
+	})
+	hud.call("_refresh_ambient_subtitle_text")
+	hud.call("_refresh_ambient_subtitle_visibility")
+	hud.call("_refresh_encountered_stances")
+	var interruption_snapshot := hud.presentation_snapshot()
+	hud.open_log()
+	hud.open_settings()
+	hud.begin_conversation({"actorId": str(receptionist.actor_id)})
+	hud.show_outcome({
+		"verdict": "ordinary",
+		"proposalMeta": {"transport": "live", "usedFallback": false},
+	})
+	var ancillary_hidden := true
+	for panel_name in [
+		"PromptPanel",
+		"EncounteredStancePanel",
+		"AmbientSubtitlePanel",
+		"ContactCuePanel",
+	]:
+		var panel := hud.find_child(panel_name, true, false) as Control
+		ancillary_hidden = ancillary_hidden and panel != null and not panel.visible
+	if (
+		str(interruption_snapshot.get("modalSurface", "")) != "interruption"
+		or bool(player.get("_control_enabled"))
+		or paused != free_roam_was_paused
+		or hud.log_visible()
+		or hud.settings_visible()
+		or hud.conversation_visible()
+		or hud.outcome_visible()
+		or not ancillary_hidden
+		or not contact_dispatch_blocked
+		or not ambient_dispatch_blocked
+	):
+		_failures.append(
+			"%s free-roam interruption lost exclusive HUD or dispatch ownership" % label
+		)
+	# A failed pre-server conversation can tear down to a free-roam
+	# interruption. The world resumes, but modal ownership must keep control and
+	# mouse capture locked until recovery succeeds.
+	instance.set("_conversation_target", receptionist)
+	paused = true
+	instance.call("_set_run_clock_paused", true)
+	instance.call("_finish_conversation_modal")
+	var teardown_clock := (
+		(instance.get("_run_snapshot") as Dictionary).get("worldClock", {}) as Dictionary
+	)
+	if (
+		paused
+		or hud.modal_mode() != HUD3D.ModalMode.INTERRUPTION
+		or instance.get("_conversation_target") != null
+		or bool(player.get("_control_enabled"))
+		or Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+		or bool(teardown_clock.get("paused", true))
+	):
+		_failures.append(
+			"%s interrupted conversation teardown restored control, capture, or pause incorrectly"
+			% label
+		)
+	instance.call("_resolve_provider_failure", "ambient_background")
+	await process_frame
+	hud.clear_contact_approach()
+	hud.clear_ambient_subtitles()
+	hud.set_focus(null)
+	if hud.modal_mode() != HUD3D.ModalMode.NONE or not bool(player.get("_control_enabled")):
+		_failures.append("%s clearing free-roam interruption did not restore control" % label)
+	hud.show_provider({
+		"profileId": "legacy-fixture-profile",
+		"transport": "fallback",
+		"usedFallback": true,
+		"fallbackReason": "timeout",
+	})
+	var legacy_failure := hud.provider_failure_snapshot()
+	if (
+		str(hud.presentation_snapshot().get("modalSurface", "")) != "interruption"
+		or not bool(legacy_failure.get("restartVisible", false))
+		or (
+			not bool(legacy_failure.get("retryVisible", false))
+			and not bool(legacy_failure.get("restartVisible", false))
+		)
+	):
+		_failures.append("%s legacy fallback metadata produced an actionless modal" % label)
+	instance.call("_resolve_provider_failure", "")
+	await process_frame
 	var main_snapshot: Dictionary = instance.call("presentation_snapshot")
 	var stance_judgment: Dictionary = (
 		hud.presentation_snapshot().get("stanceJudgment", {}) as Dictionary
@@ -4481,41 +4871,35 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 		record_surface.call("interact", player)
 		var pending_snapshot := hud.presentation_snapshot()
 		var pending_log: Dictionary = pending_snapshot.get("log", {})
-		hud.toggle_log()
 		hud.close_log()
-		var close_button := hud.get_node_or_null(
-			"Overlay/LogShade/LogPanel/LogMargin/LogColumns/CloseLogButton"
-		) as Button
-		if close_button != null:
-			close_button.pressed.emit()
-		var resisted_close := hud.presentation_snapshot()
+		await process_frame
+		var closed_while_busy := hud.presentation_snapshot()
 		if (
 			str(pending_snapshot.get("modalSurface", "")) != "inspect"
 			or not bool(pending_log.get("busy", false))
-			or str(resisted_close.get("modalSurface", "")) != "inspect"
-			or not bool((resisted_close.get("log", {}) as Dictionary).get("busy", false))
-			or bool(player.get("_control_enabled"))
+			or str(closed_while_busy.get("modalSurface", "")) != "none"
+			or not bool(player.get("_control_enabled"))
 			or paused
-			or close_events[0] != 0
+			or close_events[0] != 1
 		):
 			_failures.append(
-				"%s pending record inspect could close or release its player lock" % label
+				"%s pending record inspect was not cancellable without cancelling transport" % label
 			)
-		var record_log_opened := false
+		var late_view_applied := false
 		for _frame in range(120):
 			await process_frame
 			var inspect_snapshot := hud.presentation_snapshot()
 			var inspect_log: Dictionary = inspect_snapshot.get("log", {})
 			var inspect_social: Dictionary = inspect_snapshot.get("socialView", {})
 			if (
-				str(inspect_snapshot.get("modalSurface", "")) == "inspect"
+				str(inspect_snapshot.get("modalSurface", "")) == "none"
 				and not bool(inspect_log.get("busy", true))
 				and (inspect_social.get("encounteredRecords", []) as Array).size() == 1
 			):
-				record_log_opened = true
+				late_view_applied = true
 				break
-		if not record_log_opened:
-			_failures.append("%s record encounter did not open the inspect log" % label)
+		if not late_view_applied:
+			_failures.append("%s late record response reopened or failed to update stored view" % label)
 		else:
 			var record_snapshot: Dictionary = instance.call("presentation_snapshot")
 			var record_social: Dictionary = record_snapshot.get("socialView", {})
@@ -4523,24 +4907,20 @@ func _check_run_conversation(label: String, instance: Node) -> void:
 			var encountered_records: Array = record_social.get("encounteredRecords", [])
 			if (
 				paused
-				or bool(player.get("_control_enabled"))
+				or not bool(player.get("_control_enabled"))
 				or str(record_pressure.get("band", "")) != "raised"
 				or encountered_records.size() != 1
 			):
 				_failures.append(
 					"%s record inspect failed its non-pausing disclosed-view contract" % label
 				)
-			hud.close_log()
-			await process_frame
-			hud.close_log()
-			await process_frame
 			if (
 				not bool(player.get("_control_enabled"))
 				or paused
 				or close_events[0] != 1
 			):
 				_failures.append(
-					"%s record inspect did not restore player control exactly once" % label
+					"%s late record response reclaimed focus or player control" % label
 				)
 	var manager := instance.get_node_or_null("Town/Actors/NPC_Studio_Manager") as NPC3D
 	var caretaker := instance.get_node_or_null("Town/Actors/NPC_Park_Caretaker") as NPC3D

@@ -702,8 +702,18 @@ theme_override_font_sizes/font_size = 17
 horizontal_alignment = 1
 autowrap_mode = 3
 
+[node name="OutcomeContinueButton" type="Button" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 20
+text = "hud.m3r.outcome.continue"
+autowrap_mode = 3
+
 [node name="RestartButton" type="Button" parent="Overlay/OutcomeShade/OutcomePanel/OutcomeMargin/OutcomeColumns"]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(0, 54)
 layout_mode = 2
 size_flags_horizontal = 3

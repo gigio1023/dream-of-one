@@ -2,6 +2,7 @@ class_name HUD3D
 extends CanvasLayer
 
 signal settings_visibility_changed(visible: bool)
+signal modal_mode_changed(previous: int, current: int)
 signal look_settings_changed(sensitivity: float, inverted: bool, fov: float)
 signal ui_scale_requested(scale: float)
 signal audio_settings_requested(master_volume: float, sfx_volume: float)
@@ -16,6 +17,16 @@ signal hesitation_expired
 signal restart_requested
 signal provider_failure_retry_requested
 signal provider_failure_restart_requested
+signal legacy_provider_failure_detected(failure: Dictionary)
+
+enum ModalMode {
+	NONE,
+	SETTINGS,
+	CONVERSATION,
+	INSPECT,
+	OUTCOME,
+	INTERRUPTION,
+}
 
 const UI_SCALE_OPTIONS: Array[float] = [0.8, 1.0, 1.25, 1.5]
 const TYPEWRITER_CHARACTERS_PER_SECOND := 42.0
@@ -94,6 +105,7 @@ const OUTCOME_ACTOR_IDS: PackedStringArray = [
 @onready var _outcome_vouch_label: Label = %OutcomeVouchLabel
 @onready var _outcome_body: RichTextLabel = %OutcomeBody
 @onready var _outcome_status_label: Label = %OutcomeStatusLabel
+@onready var _outcome_continue_button: Button = %OutcomeContinueButton
 @onready var _restart_button: Button = %RestartButton
 @onready var _hearing_fade: ColorRect = %HearingFade
 @onready var _debug_panel: PanelContainer = %DebugPanel
@@ -102,6 +114,8 @@ const OUTCOME_ACTOR_IDS: PackedStringArray = [
 
 var _settings_visible := false
 var _conversation_visible := false
+var _modal_mode := ModalMode.NONE
+var _conversation_interrupted := false
 var _conversation_busy := false
 var _log_visible := false
 var _log_busy := false
@@ -139,6 +153,9 @@ var _hesitation_remaining_seconds := 0.0
 var _outcome_visible := false
 var _outcome_busy := false
 var _outcome_result: Dictionary = {}
+var _outcome_run_snapshot: Dictionary = {}
+var _outcome_steps: Array[Dictionary] = []
+var _outcome_step_index := 0
 var _outcome_presented_testimonies: Array[Dictionary] = []
 var _outcome_recap_lines: Array[String] = []
 var _outcome_presented_recap: Array[Dictionary] = []
@@ -177,6 +194,7 @@ func _ready() -> void:
 	_configure_keyboard_focus_paths()
 	_close_log_button.pressed.connect(close_log)
 	_close_log_button.gui_input.connect(_on_close_log_button_gui_input)
+	_outcome_continue_button.pressed.connect(_on_outcome_continue_pressed)
 	_restart_button.pressed.connect(_on_restart_pressed)
 	_prompt_panel.visible = false
 	_contact_cue_panel.visible = false
@@ -196,6 +214,7 @@ func _ready() -> void:
 	_log_error_label.visible = false
 	_log_busy_label.visible = false
 	_outcome_shade.visible = false
+	_outcome_continue_button.visible = false
 	_outcome_status_label.visible = false
 	_hearing_fade.visible = false
 	_debug_panel.visible = false
@@ -213,17 +232,73 @@ func _notification(what: int) -> void:
 	_apply_localized_text()
 
 
+func modal_mode() -> int:
+	return _modal_mode
+
+
+func modal_mode_name() -> String:
+	return ModalMode.keys()[_modal_mode].to_lower()
+
+
+func _transition_modal(next_mode: int, allow_interrupt_exit := false) -> bool:
+	if next_mode < ModalMode.NONE or next_mode > ModalMode.INTERRUPTION:
+		return false
+	if _modal_mode == ModalMode.INTERRUPTION and not allow_interrupt_exit:
+		if next_mode != ModalMode.INTERRUPTION:
+			return false
+	if next_mode == ModalMode.INTERRUPTION:
+		if _modal_mode != ModalMode.INTERRUPTION:
+			_conversation_interrupted = _modal_mode == ModalMode.CONVERSATION
+	elif _modal_mode != ModalMode.INTERRUPTION:
+		_conversation_interrupted = false
+	if _modal_mode == next_mode:
+		_apply_modal_visibility()
+		return true
+	var previous := _modal_mode
+	var settings_was_visible := _settings_visible
+	var log_was_visible := _log_visible
+	_modal_mode = next_mode
+	_apply_modal_visibility()
+	if settings_was_visible != _settings_visible:
+		settings_visibility_changed.emit(_settings_visible)
+	if log_was_visible != _log_visible:
+		log_visibility_changed.emit(_log_visible)
+	modal_mode_changed.emit(previous, _modal_mode)
+	return true
+
+
+func _apply_modal_visibility() -> void:
+	_settings_visible = _modal_mode == ModalMode.SETTINGS
+	_conversation_visible = _modal_mode == ModalMode.CONVERSATION
+	_log_visible = _modal_mode == ModalMode.INSPECT
+	_outcome_visible = _modal_mode == ModalMode.OUTCOME
+	_settings_shade.visible = _settings_visible
+	_conversation_shade.visible = _conversation_visible
+	_log_shade.visible = _log_visible
+	_outcome_shade.visible = _outcome_visible
+	_provider_failure_panel.visible = (
+		_modal_mode == ModalMode.INTERRUPTION and not _provider_failure.is_empty()
+	)
+	if _modal_mode != ModalMode.NONE:
+		_prompt_panel.visible = false
+		_encountered_stance_panel.visible = false
+		_ambient_subtitle_panel.visible = false
+		_contact_cue_panel.visible = false
+	if _modal_mode == ModalMode.OUTCOME:
+		_reticle.visible = false
+	elif _modal_mode == ModalMode.NONE:
+		_reticle.visible = true
+		_refresh_encountered_stances()
+		_refresh_ambient_subtitle_visibility()
+		_refresh_contact_cue()
+		set_focus(_focused_target)
+
+
 func _process(delta: float) -> void:
 	_process_hesitation_timer(delta)
 	if _current_ambient_subtitle.is_empty():
 		return
-	if (
-		_conversation_visible
-		or _settings_visible
-		or _log_visible
-		or _outcome_visible
-		or provider_failure_visible()
-	):
+	if _modal_mode != ModalMode.NONE:
 		return
 	_ambient_subtitle_remaining = maxf(0.0, _ambient_subtitle_remaining - delta)
 	if is_zero_approx(_ambient_subtitle_remaining):
@@ -283,7 +358,7 @@ func set_preload_target(target: Node) -> void:
 func _refresh_interaction_prompt() -> void:
 	_interaction_prompt_actionable = false
 	_interaction_prompt_preparing = false
-	if _conversation_visible or _settings_visible or _log_visible or _outcome_visible:
+	if _modal_mode != ModalMode.NONE:
 		_prompt_panel.visible = false
 		return
 	var prompt_target: Node = (
@@ -403,33 +478,32 @@ func fade_from_hearing() -> void:
 	_hearing_fade.visible = false
 
 
-func show_outcome(result: Dictionary) -> void:
+func show_outcome(result: Dictionary, run_snapshot := {}) -> void:
 	if result.is_empty():
+		return
+	if _modal_mode == ModalMode.INTERRUPTION:
 		return
 	var failed_meta := _provider_failure_from_result(result)
 	if not failed_meta.is_empty():
-		show_provider_failure(failed_meta, false)
+		show_provider_failure(failed_meta, false, true)
 		return
 	stop_hesitation_timer()
-	if _settings_visible:
-		_set_settings_visible(false)
-	if _log_visible:
-		_set_log_busy(false)
-		_set_log_visible(false)
-	if _conversation_visible:
-		close_conversation()
+	_set_log_busy(false)
+	if _modal_mode == ModalMode.CONVERSATION:
+		_clear_conversation_payload()
 	_outcome_result = result.duplicate(true)
-	_outcome_visible = true
+	_outcome_run_snapshot = (
+		(run_snapshot as Dictionary).duplicate(true)
+		if run_snapshot is Dictionary
+		else {}
+	)
 	_outcome_busy = false
+	_outcome_step_index = 0
 	_hearing_opening_state = ""
-	_outcome_shade.visible = true
-	_prompt_panel.visible = false
-	_reticle.visible = false
-	_contact_cue_panel.visible = false
-	_ambient_subtitle_panel.visible = false
-	_encountered_stance_panel.visible = false
+	_build_outcome_steps()
+	_transition_modal(ModalMode.OUTCOME)
 	_refresh_outcome()
-	_restart_button.grab_focus()
+	_outcome_continue_button.grab_focus()
 
 
 func outcome_visible() -> bool:
@@ -439,6 +513,7 @@ func outcome_visible() -> bool:
 func set_outcome_busy(value: bool, error_key := StringName()) -> void:
 	_outcome_busy = value
 	_restart_button.disabled = value
+	_outcome_continue_button.disabled = value
 	_outcome_status_label.text = "" if error_key.is_empty() else str(tr(error_key))
 	_outcome_status_label.visible = value or not _outcome_status_label.text.is_empty()
 	if value:
@@ -449,6 +524,15 @@ func outcome_snapshot() -> Dictionary:
 	return {
 		"visible": _outcome_visible,
 		"busy": _outcome_busy,
+		"stepIndex": _outcome_step_index,
+		"stepCount": _outcome_steps.size(),
+		"stepKind": str(
+			_outcome_steps[_outcome_step_index].get("kind", "")
+			if _outcome_step_index >= 0 and _outcome_step_index < _outcome_steps.size()
+			else ""
+		),
+		"continueVisible": _outcome_continue_button.visible,
+		"restartVisible": _restart_button.visible,
 		"route": str(_outcome_result.get("verdict", "")),
 		"title": _outcome_title.text,
 		"verdictWhy": str(_outcome_result.get("verdictWhyLine", "")),
@@ -484,11 +568,7 @@ func show_provider_failure(
 	_provider_failure_can_restart = can_restart
 	_provider_failure_busy_action = ""
 	_provider_failure_restart_error = false
-	if _settings_visible:
-		_set_settings_visible(false)
-	if _log_visible:
-		_set_log_busy(false)
-		_set_log_visible(false)
+	_set_log_busy(false)
 	_provider_failure_retry_button.disabled = false
 	_provider_failure_restart_button.disabled = false
 	_provider_failure_status.text = ""
@@ -496,13 +576,14 @@ func show_provider_failure(
 	# A provider failure is not a terminal verdict. If a malformed or legacy
 	# response tries to pair the two, remove the verdict surface rather than
 	# presenting deterministic content as though the model authored it.
-	_outcome_visible = false
 	_outcome_busy = false
 	_outcome_result = {}
+	_outcome_run_snapshot = {}
+	_outcome_steps.clear()
+	_outcome_step_index = 0
 	_outcome_presented_testimonies.clear()
 	_outcome_recap_lines.clear()
 	_outcome_presented_recap.clear()
-	_outcome_shade.visible = false
 	_outcome_title.text = ""
 	_outcome_verdict_label.text = ""
 	_outcome_vouch_label.text = ""
@@ -511,10 +592,8 @@ func show_provider_failure(
 	_outcome_status_label.visible = false
 	_restart_button.disabled = false
 	_provider_meta = {}
-	_refresh_provider_label()
 	_refresh_provider_failure()
-	_provider_failure_panel.visible = true
-	_refresh_ambient_subtitle_visibility()
+	_transition_modal(ModalMode.INTERRUPTION)
 	_focus_provider_failure_action()
 	call_deferred("_focus_provider_failure_action")
 
@@ -525,12 +604,18 @@ func clear_provider_failure() -> void:
 	_provider_failure_can_restart = false
 	_provider_failure_busy_action = ""
 	_provider_failure_restart_error = false
-	_provider_failure_panel.visible = false
 	_provider_failure_retry_button.disabled = false
 	_provider_failure_restart_button.disabled = false
 	_provider_failure_status.text = ""
 	_provider_failure_status.visible = false
-	_refresh_ambient_subtitle_visibility()
+	var resume_conversation := _conversation_interrupted and not _conversation_actor_id.is_empty()
+	_conversation_interrupted = false
+	_transition_modal(
+		ModalMode.CONVERSATION if resume_conversation else ModalMode.NONE,
+		true
+	)
+	if resume_conversation:
+		_focus_conversation_action()
 
 
 func provider_failure_visible() -> bool:
@@ -722,12 +807,7 @@ func clear_ambient_subtitles() -> void:
 
 
 func open_settings() -> void:
-	if (
-		_conversation_visible
-		or _log_visible
-		or _outcome_visible
-		or provider_failure_visible()
-	):
+	if _modal_mode != ModalMode.NONE:
 		return
 	_set_settings_visible(true)
 
@@ -757,13 +837,13 @@ func log_busy() -> bool:
 
 
 func toggle_log() -> void:
-	if _log_busy or _outcome_visible:
+	if _modal_mode not in [ModalMode.NONE, ModalMode.INSPECT]:
 		return
 	_set_log_visible(not _log_visible)
 
 
 func open_log(error_key := StringName()) -> void:
-	if _conversation_visible or _settings_visible or _outcome_visible:
+	if _modal_mode not in [ModalMode.NONE, ModalMode.INSPECT]:
 		return
 	if not error_key.is_empty():
 		show_log_error(error_key)
@@ -771,13 +851,11 @@ func open_log(error_key := StringName()) -> void:
 
 
 func close_log() -> void:
-	if _log_busy:
-		return
 	_set_log_visible(false)
 
 
 func open_log_busy() -> void:
-	if _conversation_visible or _settings_visible or _outcome_visible:
+	if _modal_mode != ModalMode.NONE:
 		return
 	clear_log_error()
 	_set_log_busy(true)
@@ -827,11 +905,8 @@ func set_debug_snapshot(value: Dictionary) -> void:
 
 
 func begin_conversation(actor: Dictionary) -> void:
-	if _outcome_visible:
+	if _modal_mode not in [ModalMode.NONE, ModalMode.CONVERSATION]:
 		return
-	if _settings_visible:
-		_set_settings_visible(false)
-	_conversation_visible = true
 	_conversation_busy = false
 	_conversation_actor_id = str(actor.get("actorId", ""))
 	_current_stance = _disclosed_stance(_conversation_actor_id)
@@ -855,14 +930,15 @@ func begin_conversation(actor: Dictionary) -> void:
 	_end_conversation_button.visible = false
 	for button in _choice_buttons:
 		button.visible = false
-	_conversation_shade.visible = true
-	_prompt_panel.visible = false
+	_transition_modal(ModalMode.CONVERSATION)
 	_refresh_contact_cue()
 	_refresh_ambient_subtitle_visibility()
 	set_conversation_busy(true)
 
 
 func show_turn(turn: Dictionary) -> bool:
+	if _modal_mode != ModalMode.CONVERSATION:
+		return false
 	var choices_value: Variant = turn.get("choices", [])
 	if not choices_value is Array:
 		show_conversation_error(&"hud.m3r.error.invalid_response")
@@ -882,6 +958,10 @@ func show_turn(turn: Dictionary) -> bool:
 	) or (not hearing_turn and choices.size() != 3):
 		show_conversation_error(&"hud.m3r.error.invalid_response")
 		return false
+	for choice_value in choices:
+		if not choice_value is Dictionary or not _valid_reply_choice(choice_value as Dictionary):
+			show_conversation_error(&"hud.m3r.error.invalid_response")
+			return false
 	_current_turn = turn.duplicate(true)
 	show_provider(_dictionary_or_empty(turn.get("proposalMeta")))
 	_end_conversation_button.visible = false
@@ -891,15 +971,16 @@ func show_turn(turn: Dictionary) -> bool:
 	for button in _choice_buttons:
 		button.visible = false
 	for index in choices.size():
-		var choice_value: Variant = choices[index]
-		if not choice_value is Dictionary:
-			show_conversation_error(&"hud.m3r.error.invalid_response")
-			return false
-		var choice := choice_value as Dictionary
+		var choice := choices[index] as Dictionary
 		_choice_ids[index] = str(choice.get("choiceId", ""))
+		var line := str(choice.get("line", ""))
+		if bool(choice.get("introducesNewClaim", false)):
+			line = str(tr(&"hud.m3r.conversation.new_claim_choice")).format({
+				"line": line,
+			})
 		_choice_buttons[index].text = "%d — %s" % [
 			index + 1,
-			str(choice.get("line", "")),
+			line,
 		]
 		_choice_buttons[index].visible = true
 	_conversation_input_row.visible = accepts_free_input
@@ -994,34 +1075,70 @@ func clear_turn_controls() -> void:
 
 
 func close_conversation() -> void:
+	_clear_conversation_payload()
+	if _modal_mode == ModalMode.CONVERSATION:
+		_transition_modal(ModalMode.NONE)
+
+
+func _clear_conversation_payload() -> void:
 	if is_instance_valid(_prompt_tween):
 		_prompt_tween.kill()
-	_conversation_visible = false
 	_conversation_busy = false
 	_reset_hesitation_timer()
 	_conversation_actor_id = ""
 	_retry_button_mode = &"end"
 	_current_turn.clear()
 	_provider_meta = {}
-	_conversation_shade.visible = false
 	_conversation_thinking_label.visible = false
 	_end_conversation_button.visible = false
 	get_viewport().gui_release_focus()
-	_refresh_encountered_stances()
-	_refresh_ambient_subtitle_visibility()
-	_refresh_contact_cue()
-	set_focus(_focused_target)
+
+
+func _focus_conversation_action() -> void:
+	if _modal_mode != ModalMode.CONVERSATION or _conversation_busy:
+		return
+	if _conversation_input_row.visible:
+		_conversation_free_input.call_deferred("grab_focus")
+		return
+	for button in _choice_buttons:
+		if button.visible and not button.disabled:
+			button.call_deferred("grab_focus")
+			return
+	if _end_conversation_button.visible and not _end_conversation_button.disabled:
+		_end_conversation_button.call_deferred("grab_focus")
+
+
+func _valid_reply_choice(choice: Dictionary) -> bool:
+	if choice.size() != 5:
+		return false
+	for key in ["choiceId", "line", "intent", "evidenceIds", "introducesNewClaim"]:
+		if not choice.has(key):
+			return false
+	if (
+		str(choice.get("choiceId", "")).strip_edges().is_empty()
+		or str(choice.get("line", "")).strip_edges().is_empty()
+		or str(choice.get("intent", "")) not in [
+			"safe/local",
+			"uncertain/repair",
+			"risky/weird",
+		]
+		or not choice.get("evidenceIds") is Array
+		or not choice.get("introducesNewClaim") is bool
+	):
+		return false
+	for evidence_id in choice.get("evidenceIds") as Array:
+		if not evidence_id is String or str(evidence_id).strip_edges().is_empty():
+			return false
+	return true
 
 
 func presentation_snapshot() -> Dictionary:
 	return {
 		"modalSurface": (
-			"outcome" if _outcome_visible
-			else "conversation" if _conversation_visible
-			else "inspect" if _log_visible
-			else "settings" if _settings_visible
-			else "none"
+			"interruption" if _modal_mode == ModalMode.INTERRUPTION
+			else modal_mode_name()
 		),
+		"modalMode": _modal_mode,
 		"busy": _conversation_busy,
 		"thinking": _conversation_busy,
 		"conversationTurnActionable": conversation_turn_actionable(),
@@ -1129,48 +1246,29 @@ func _layout_conversation_panel() -> void:
 
 
 func _set_settings_visible(should_show: bool) -> void:
-	if should_show and (_conversation_visible or _log_visible or _outcome_visible):
-		return
-	if _settings_visible == should_show:
-		return
-	_settings_visible = should_show
-	_settings_shade.visible = should_show
 	if should_show:
-		_prompt_panel.visible = false
-		_encountered_stance_panel.visible = false
-	else:
-		get_viewport().gui_release_focus()
-		_refresh_encountered_stances()
-		set_focus(_focused_target)
-	_refresh_ambient_subtitle_visibility()
-	_refresh_contact_cue()
-	settings_visibility_changed.emit(should_show)
-	if should_show:
+		if not _transition_modal(ModalMode.SETTINGS):
+			return
 		_close_settings_button.grab_focus()
+	else:
+		if _modal_mode != ModalMode.SETTINGS:
+			return
+		get_viewport().gui_release_focus()
+		_transition_modal(ModalMode.NONE)
 
 
 func _set_log_visible(should_show: bool) -> void:
-	if not should_show and _log_busy:
-		return
-	if should_show and (_conversation_visible or _settings_visible or _outcome_visible):
-		return
-	if _log_visible == should_show:
-		return
-	_log_visible = should_show
-	_log_shade.visible = should_show
 	if should_show:
-		_prompt_panel.visible = false
-		_encountered_stance_panel.visible = false
+		if not _transition_modal(ModalMode.INSPECT):
+			return
 		_refresh_log_body()
 		_close_log_button.grab_focus()
 	else:
+		if _modal_mode != ModalMode.INSPECT:
+			return
 		get_viewport().gui_release_focus()
 		clear_log_error()
-		_refresh_encountered_stances()
-		set_focus(_focused_target)
-	_refresh_ambient_subtitle_visibility()
-	_refresh_contact_cue()
-	log_visibility_changed.emit(should_show)
+		_transition_modal(ModalMode.NONE)
 
 
 func _set_debug_visible(should_show: bool) -> void:
@@ -1182,7 +1280,10 @@ func _set_debug_visible(should_show: bool) -> void:
 func _set_log_busy(should_be_busy: bool) -> void:
 	_log_busy = should_be_busy
 	_log_busy_label.visible = should_be_busy
-	_close_log_button.disabled = should_be_busy
+	# Inspection transport remains single-flight, but its presentation is always
+	# cancellable. A late response may refresh the stored view without reclaiming
+	# modal ownership or focus.
+	_close_log_button.disabled = false
 
 
 func _on_look_setting_changed(_value: float) -> void:
@@ -1270,10 +1371,29 @@ func _on_end_conversation_retry_pressed() -> void:
 
 
 func _on_restart_pressed() -> void:
-	if not _outcome_visible or _outcome_busy:
+	if (
+		not _outcome_visible
+		or _outcome_busy
+		or _outcome_step_index != _outcome_steps.size() - 1
+	):
 		return
 	set_outcome_busy(true)
 	restart_requested.emit()
+
+
+func _on_outcome_continue_pressed() -> void:
+	if (
+		not _outcome_visible
+		or _outcome_busy
+		or _outcome_step_index >= _outcome_steps.size() - 1
+	):
+		return
+	_outcome_step_index += 1
+	_refresh_outcome()
+	if _outcome_continue_button.visible:
+		_outcome_continue_button.grab_focus()
+	else:
+		_restart_button.grab_focus()
 
 
 func _on_provider_failure_retry_pressed() -> void:
@@ -1349,26 +1469,100 @@ func _refresh_hesitation_timer_text() -> void:
 func _refresh_outcome() -> void:
 	if not is_instance_valid(_outcome_title):
 		return
-	var verdict := str(_outcome_result.get("verdict", "abnormal"))
-	if verdict not in ["ordinary", "abnormal"]:
-		verdict = "abnormal"
-	_outcome_title.text = str(tr("hud.m3r.outcome.title.%s" % verdict))
-	var verdict_why := str(_outcome_result.get("verdictWhyLine", "")).strip_edges()
-	var verdict_display := str(
-		tr(&"hud.m3r.outcome.verdict_why")
-	).format({"reason": verdict_why})
-	var officer_line := str(_outcome_result.get("officerLine", "")).strip_edges()
-	if not officer_line.is_empty():
-		verdict_display += "\n\n" + str(
-			tr(&"hud.m3r.outcome.officer_line")
-		).format({"line": officer_line})
-	_outcome_verdict_label.text = verdict_display
-	_outcome_vouch_label.text = str(tr(&"hud.m3r.outcome.vouches")).format({
-		"count": _outcome_vouch_count(),
-		"required": 4,
-	})
+	if _outcome_steps.size() != 8:
+		return
+	_outcome_step_index = clampi(_outcome_step_index, 0, _outcome_steps.size() - 1)
+	var step := _outcome_steps[_outcome_step_index]
+	var step_kind := str(step.get("kind", ""))
+	_outcome_title.text = str(tr(&"hud.m3r.outcome.procedure_title"))
+	_outcome_vouch_label.text = ""
+	var body_lines: Array[String] = []
+	if step_kind == "testimony":
+		var actor_id := str(step.get("actorId", ""))
+		var actor_name := _actor_label(actor_id)
+		var testimony := _outcome_testimony(actor_id)
+		_outcome_verdict_label.text = str(
+			tr(&"hud.m3r.outcome.testimony_progress")
+		).format({
+			"current": _outcome_step_index + 1,
+			"total": OUTCOME_ACTOR_IDS.size(),
+		})
+		var cited_ids := _array_or_empty(testimony.get("citedMemoryIds"))
+		if cited_ids.is_empty():
+			body_lines.append(str(tr(
+				&"hud.m3r.outcome.memory.no_contact"
+				if str(testimony.get("contactBasis", "")) == "never_conversed"
+				else &"hud.m3r.outcome.memory.uncited"
+			)).format({"actor": actor_name}))
+		else:
+			# Main validates every cited id against this resident's memories. The
+			# procedure presents exactly one deterministic memory: the first id in
+			# the provider's validated order.
+			var memory := _outcome_memory(actor_id, str(cited_ids[0]))
+			var memory_text := _outcome_memory_text(memory, actor_name)
+			if not memory_text.is_empty():
+				body_lines.append(memory_text)
+		var contact_basis := str(testimony.get("contactBasis", ""))
+		if contact_basis in ["meaningful_firsthand", "limited_firsthand", "never_conversed"]:
+			body_lines.append(str(tr("hud.m3r.outcome.contact_basis.%s" % contact_basis)))
+		body_lines.append(str(tr(&"hud.m3r.outcome.testimony_entry")).format({
+			"actor": actor_name,
+			"testimony": str(testimony.get("testimony", "")),
+		}))
+		body_lines.append(str(tr(&"hud.m3r.outcome.resulting_stance")).format({
+			"stance": _stance_text(str(testimony.get("appliedStance", ""))),
+		}))
+	elif step_kind == "verdict":
+		var verdict := str(_outcome_result.get("verdict", ""))
+		_outcome_verdict_label.text = str(tr("hud.m3r.outcome.title.%s" % verdict))
+		body_lines.append(str(tr(&"hud.m3r.outcome.verdict_why")).format({
+			"reason": str(_outcome_result.get("verdictWhyLine", "")).strip_edges(),
+		}))
+		body_lines.append(str(tr(&"hud.m3r.outcome.officer_line")).format({
+			"line": str(_outcome_result.get("officerLine", "")).strip_edges(),
+		}))
+		_outcome_vouch_label.text = str(tr(&"hud.m3r.outcome.vouches")).format({
+			"count": _outcome_vouch_count(),
+			"required": 4,
+		})
+	else:
+		_outcome_verdict_label.text = str(tr(&"hud.m3r.outcome.recap"))
+		body_lines.append(str(tr(&"hud.m3r.outcome.evidence_counts")).format({
+			"records": _array_or_empty(_outcome_result.get("citedRecordIds")).size(),
+			"ledger": _array_or_empty(_outcome_result.get("citedLedgerEventIds")).size(),
+		}))
+		if _outcome_presented_recap.is_empty():
+			body_lines.append(str(tr(&"hud.m3r.outcome.recap_empty")))
+		else:
+			for recap_entry in _outcome_presented_recap:
+				var recap_actor_id := str(recap_entry.get("actorId", ""))
+				body_lines.append(str(tr(&"hud.m3r.outcome.recap_entry")).format({
+					"kind": tr(
+						"hud.m3r.outcome.recap.kind.%s"
+						% str(recap_entry.get("kind", "verdict"))
+					),
+					"actor": (
+						_actor_label(recap_actor_id)
+						if not recap_actor_id.is_empty()
+						else tr(&"hud.m3r.outcome.recap.actor_none")
+					),
+					"entry": str(recap_entry.get("line", "")),
+					"sources": str(tr(&"hud.m3r.outcome.recap.source_count")).format({
+						"count": int(recap_entry.get("sourceCount", 0)),
+					}),
+				}))
+	_outcome_body.text = "\n\n".join(body_lines)
+	_outcome_continue_button.text = str(tr(&"hud.m3r.outcome.continue"))
+	_outcome_continue_button.visible = _outcome_step_index < _outcome_steps.size() - 1
+	_outcome_continue_button.disabled = _outcome_busy
+	_restart_button.text = str(tr(&"hud.m3r.outcome.restart"))
+	_restart_button.visible = _outcome_step_index == _outcome_steps.size() - 1
+	_restart_button.disabled = _outcome_busy
+
+
+func _build_outcome_steps() -> void:
 	_outcome_presented_testimonies.clear()
-	var body_lines: Array[String] = [str(tr(&"hud.m3r.outcome.testimonies"))]
+	_outcome_steps.clear()
 	for actor_id in OUTCOME_ACTOR_IDS:
 		var testimony := _outcome_testimony(actor_id)
 		var line := str(testimony.get("testimony", "")).strip_edges()
@@ -1384,14 +1578,7 @@ func _refresh_outcome() -> void:
 			contact_basis_label = str(
 				tr("hud.m3r.outcome.contact_basis.%s" % contact_basis)
 			)
-		var displayed_testimony := line
-		if not contact_basis_label.is_empty():
-			displayed_testimony = "%s\n%s" % [contact_basis_label, line]
 		var actor_name := _actor_label(actor_id)
-		body_lines.append(str(tr(&"hud.m3r.outcome.testimony_entry")).format({
-			"actor": actor_name,
-			"testimony": displayed_testimony,
-		}))
 		_outcome_presented_testimonies.append({
 			"actorId": actor_id,
 			"actor": actor_name,
@@ -1403,39 +1590,66 @@ func _refresh_outcome() -> void:
 				and not _array_or_empty(testimony.get("citedMemoryIds")).is_empty()
 			),
 		})
+		_outcome_steps.append({"kind": "testimony", "actorId": actor_id})
+	_outcome_steps.append({"kind": "verdict"})
+	_outcome_steps.append({"kind": "recap"})
 	_outcome_presented_recap = _outcome_recap()
 	_outcome_recap_lines.clear()
 	for recap_entry in _outcome_presented_recap:
 		_outcome_recap_lines.append(str(recap_entry.get("line", "")))
-	body_lines.append("")
-	body_lines.append(str(tr(&"hud.m3r.outcome.recap")))
-	body_lines.append(str(tr(&"hud.m3r.outcome.evidence_counts")).format({
-		"records": _array_or_empty(_outcome_result.get("citedRecordIds")).size(),
-		"ledger": _array_or_empty(_outcome_result.get("citedLedgerEventIds")).size(),
-	}))
-	if _outcome_presented_recap.is_empty():
-		body_lines.append(str(tr(&"hud.m3r.outcome.recap_empty")))
-	else:
-		for recap_entry in _outcome_presented_recap:
-			var actor_id := str(recap_entry.get("actorId", ""))
-			body_lines.append(str(tr(&"hud.m3r.outcome.recap_entry")).format({
-				"kind": tr(
-					"hud.m3r.outcome.recap.kind.%s"
-					% str(recap_entry.get("kind", "verdict"))
-				),
-				"actor": (
-					_actor_label(actor_id)
-					if not actor_id.is_empty()
-					else tr(&"hud.m3r.outcome.recap.actor_none")
-				),
-				"entry": str(recap_entry.get("line", "")),
-				"sources": str(tr(&"hud.m3r.outcome.recap.source_count")).format({
-					"count": int(recap_entry.get("sourceCount", 0)),
-				}),
-			}))
-	_outcome_body.text = "\n\n".join(body_lines)
-	_restart_button.text = str(tr(&"hud.m3r.outcome.restart"))
-	_restart_button.disabled = _outcome_busy
+
+
+func _outcome_memory(actor_id: String, memory_id: String) -> Dictionary:
+	for actor_value in _array_or_empty(_outcome_run_snapshot.get("actors")):
+		if not actor_value is Dictionary:
+			continue
+		var actor := actor_value as Dictionary
+		if str(actor.get("actorId", "")) != actor_id:
+			continue
+		for memory_value in _array_or_empty(actor.get("memories")):
+			if (
+				memory_value is Dictionary
+				and str((memory_value as Dictionary).get("memoryId", "")) == memory_id
+			):
+				return (memory_value as Dictionary).duplicate(true)
+	return {}
+
+
+func _outcome_memory_text(memory: Dictionary, witness: String) -> String:
+	if memory.is_empty():
+		return ""
+	if str(memory.get("kind", "")) == "prop_handling_observation":
+		var action := str(memory.get("action", ""))
+		var prop_id := str(memory.get("propId", ""))
+		var prop_key := "prop.%s.label" % prop_id
+		var prop_label := str(tr(prop_key))
+		if prop_label == prop_key:
+			prop_label = str(tr(&"hud.m3r.resident.unknown"))
+		return str(tr(&"hud.m3r.outcome.memory.prop_handling")).format({
+			"action": tr("hud.m3r.outcome.memory.action.%s" % action),
+			"prop": prop_label,
+		})
+	var kind := str(memory.get("kind", ""))
+	var source_id := str(memory.get("sourceActorId", memory.get("speakerActorId", "")))
+	var memory_line := ""
+	match kind:
+		"player_conversation":
+			memory_line = str(memory.get("playerLine", ""))
+		"npc_utterance", "ambient_utterance":
+			memory_line = str(memory.get("line", ""))
+		"ambient_stance_judgment", "interrogation_outcome":
+			memory_line = str(memory.get("whyLine", ""))
+		"record_read":
+			memory_line = str(memory.get("stateBody", ""))
+		"player_contact_outcome":
+			memory_line = str(memory.get("contactReason", ""))
+	if memory_line.strip_edges().is_empty():
+		return ""
+	return str(tr(&"hud.m3r.outcome.memory.attributed")).format({
+		"source": _actor_label(source_id),
+		"witness": witness,
+		"memory": memory_line.strip_edges(),
+	})
 
 
 func _outcome_vouch_count() -> int:
@@ -1621,27 +1835,20 @@ func _refresh_provider_label() -> void:
 		_conversation_provider_label.visible = true
 		return
 	if transport == "fallback" or bool(_provider_meta.get("usedFallback", false)):
-		_provider_failure = _normalize_provider_failure({
+		var legacy_failure := _normalize_provider_failure({
 			"profileId": str(_provider_meta.get("profileId", "unknown")),
 			"reason": str(_provider_meta.get("fallbackReason", "unknown")),
 			"purpose": "conversation_turn",
 			"operationKey": "legacy-fallback-meta",
 		})
-		_provider_failure_can_retry = false
-		_provider_failure_can_restart = false
-		_provider_failure_busy_action = ""
-		_provider_failure_restart_error = false
-		_provider_failure_retry_button.disabled = false
-		_provider_failure_restart_button.disabled = false
-		_provider_failure_status.text = ""
-		_provider_failure_status.visible = false
-		_provider_failure_panel.visible = true
-		_refresh_provider_failure()
-		_refresh_ambient_subtitle_visibility()
-		_focus_provider_failure_action()
 		_provider_meta = {}
 		_conversation_provider_label.text = ""
 		_conversation_provider_label.visible = false
+		# Compatibility metadata must enter the same interruption route as a
+		# structured failure. The local restart affordance prevents an actionless
+		# modal while Main binds the authoritative retry/restart context.
+		show_provider_failure(legacy_failure, false, true)
+		legacy_provider_failure_detected.emit(legacy_failure.duplicate(true))
 		return
 	_conversation_provider_label.text = ""
 	_conversation_provider_label.visible = false
@@ -1748,12 +1955,7 @@ func _refresh_encountered_stances() -> void:
 	lines.append("")
 	lines.append(str(tr(&"hud.m3r.log.hint")))
 	_encountered_stance_label.text = "\n".join(lines)
-	_encountered_stance_panel.visible = (
-		not _conversation_visible
-		and not _settings_visible
-		and not _log_visible
-		and not _outcome_visible
-	)
+	_encountered_stance_panel.visible = _modal_mode == ModalMode.NONE
 
 
 func _encountered_stance_snapshot() -> Array:
@@ -1979,11 +2181,7 @@ func _refresh_ambient_subtitle_visibility() -> void:
 		return
 	_ambient_subtitle_panel.visible = (
 		not _current_ambient_subtitle.is_empty()
-		and not _conversation_visible
-		and not _settings_visible
-		and not _log_visible
-		and not _outcome_visible
-		and not provider_failure_visible()
+		and _modal_mode == ModalMode.NONE
 	)
 
 
@@ -1996,12 +2194,7 @@ func _refresh_contact_cue() -> void:
 			if _hearing_opening_state == "retry"
 			else &"hud.m3r.hearing.opening"
 		))
-		_contact_cue_panel.visible = (
-			not _conversation_visible
-			and not _settings_visible
-			and not _log_visible
-			and not _outcome_visible
-		)
+		_contact_cue_panel.visible = _modal_mode == ModalMode.NONE
 		return
 	if _contact_cue_id.is_empty() or _contact_cue_actor_id.is_empty():
 		_contact_cue_label.text = ""
@@ -2021,12 +2214,7 @@ func _refresh_contact_cue() -> void:
 	)).format({
 		"speaker_subject": speaker_subject,
 	})
-	_contact_cue_panel.visible = (
-		not _conversation_visible
-		and not _settings_visible
-		and not _log_visible
-		and not _outcome_visible
-	)
+	_contact_cue_panel.visible = _modal_mode == ModalMode.NONE
 
 
 func _dictionary_or_empty(value: Variant) -> Dictionary:

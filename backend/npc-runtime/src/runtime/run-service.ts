@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import {
   DEFAULT_ROLE_POLICIES,
+  type ActorMemoryEvidence,
   type HeardSpeechRecord,
   type ObservePacket,
 } from "../agentloop/context.js";
@@ -109,6 +110,7 @@ import type {
   RunHearingResponse,
   RunInterrogationOutcomeMemory,
   RunJudgment,
+  RunLedgerEvent,
   RunMemory,
   RunMovementDelta,
   RunNpcDecisionRequest,
@@ -261,6 +263,7 @@ interface AmbientListenerState {
   stance: CoarseStance;
   suspicion: number;
   hasMeaningfulFirsthandConversation: boolean;
+  currentOpenQuestion: RunOpenQuestion | null;
 }
 
 interface AmbientListenerJudgment extends AmbientListenerState {
@@ -780,13 +783,112 @@ function semanticGoalKeyFromAdmission(goalKey: string): string {
   return markerIndex >= 0 ? goalKey.slice(0, markerIndex) : goalKey;
 }
 
+type QuestionCapableMemory =
+  | RunPlayerConversationMemory
+  | RunAmbientStanceJudgmentMemory;
+
+function latestQuestionCapableMemory(
+  memories: readonly RunMemory[],
+): QuestionCapableMemory | null {
+  for (let index = memories.length - 1; index >= 0; index -= 1) {
+    const memory = memories[index];
+    if (
+      memory?.kind === "player_conversation" ||
+      memory?.kind === "ambient_stance_judgment"
+    ) return memory;
+  }
+  return null;
+}
+
 /**
- * Choose the newest bounded history without changing the chronological order
- * presented to the provider. Run-owned memory remains complete; current-turn
- * evidence is appended separately after this historical selection.
+ * Bound provider history by durable social value, then restore chronology.
+ * The full memory list remains authoritative for category derivation and is
+ * never truncated by this prompt-only projection.
  */
-function selectRecentChronological<T>(values: readonly T[], limit: number): T[] {
-  return values.slice(Math.max(0, values.length - limit));
+function selectPrioritizedProviderMemories(
+  memories: readonly RunMemory[],
+  records: readonly RunRecord[],
+  ledgerEvents: readonly RunLedgerEvent[],
+  limit: number,
+  eligible: (memory: RunMemory) => boolean = () => true,
+): RunMemory[] {
+  if (limit <= 0) return [];
+
+  const chronological: RunMemory[] = [];
+  const seenMemoryIds = new Set<string>();
+  for (const memory of memories) {
+    if (seenMemoryIds.has(memory.memoryId)) continue;
+    seenMemoryIds.add(memory.memoryId);
+    chronological.push(memory);
+  }
+
+  const selectedIds = new Set<string>();
+  const add = (memory: RunMemory | undefined): void => {
+    if (
+      memory &&
+      selectedIds.size < limit &&
+      eligible(memory)
+    ) selectedIds.add(memory.memoryId);
+  };
+  const addNewest = (candidates: readonly RunMemory[]): void => {
+    for (
+      let index = candidates.length - 1;
+      index >= 0 && selectedIds.size < limit;
+      index -= 1
+    ) add(candidates[index]);
+  };
+
+  // First contact is deliberately the earliest, even though every other
+  // overflowing category keeps its newest members.
+  add(chronological.find(memory => memory.kind === "player_conversation"));
+
+  let derivedStance: CoarseStance = "uncertain";
+  const stanceChangingContacts: RunPlayerConversationMemory[] = [];
+  for (const memory of chronological) {
+    if (memory.kind === "player_conversation") {
+      if (memory.appliedStance !== derivedStance) stanceChangingContacts.push(memory);
+      derivedStance = memory.appliedStance;
+    } else if (memory.kind === "ambient_stance_judgment") {
+      derivedStance = memory.appliedStance;
+    }
+  }
+  addNewest(stanceChangingContacts);
+
+  const recordOrLedgerSourceIds = new Set<string>([
+    ...records.flatMap(record => record.sourceRefs.map(source => source.sourceMemoryId)),
+    ...ledgerEvents.map(event => event.sourceMemoryId),
+  ]);
+  const playerContacts = chronological.filter(
+    (memory): memory is RunPlayerConversationMemory => memory.kind === "player_conversation",
+  );
+  const citedContacts = playerContacts.filter((memory, index) => {
+    if (recordOrLedgerSourceIds.has(memory.memoryId)) return true;
+    const evidenceIds = [
+      memory.statementEvidenceId,
+      `resident_memory:${memory.memoryId}`,
+    ];
+    return playerContacts.slice(index + 1).some(later =>
+      evidenceIds.some(evidenceId => later.evidenceIds.includes(evidenceId))
+    );
+  });
+  addNewest(citedContacts);
+
+  const latestQuestionMemory = latestQuestionCapableMemory(chronological);
+  if (latestQuestionMemory?.openQuestion?.status === "open") {
+    if (eligible(latestQuestionMemory)) {
+      add(latestQuestionMemory);
+    } else if (latestQuestionMemory.kind === "ambient_stance_judgment") {
+      // Heard-speech projections retain the exact utterance that grounds the
+      // selected typed ambient judgment instead of dropping its source.
+      add(chronological.find(memory =>
+        memory.kind === "ambient_utterance" &&
+        memory.memoryId === latestQuestionMemory.sourceMemoryId
+      ));
+    }
+  }
+
+  addNewest(chronological);
+  return chronological.filter(memory => selectedIds.has(memory.memoryId));
 }
 
 /**
@@ -2582,11 +2684,7 @@ export class RunService {
           sceneFacts: this.conversationSceneFacts(actor, conversation.procedure),
           stanceBefore,
           hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
-          currentOpenQuestion: clone(
-            conversation.lastMemory?.kind === "player_conversation"
-              ? conversation.lastMemory.openQuestion
-              : null,
-          ),
+          currentOpenQuestion: this.currentActorOpenQuestion(actor),
           continuationAllowed,
         });
         this.rejectFallbackProposalMeta(resolved.meta, "conversation_turn");
@@ -3686,6 +3784,7 @@ export class RunService {
             suspicionBefore: claim.listenerState.suspicion,
             hasMeaningfulFirsthandConversation:
               claim.listenerState.hasMeaningfulFirsthandConversation,
+            currentOpenQuestion: clone(claim.listenerState.currentOpenQuestion),
             observePacket: clone(claim.observePacket),
             ...(request.budgetCeiling ? { budgetCeiling: request.budgetCeiling } : {}),
           };
@@ -4837,6 +4936,7 @@ export class RunService {
                 suspicionBefore: listenerState.suspicion,
                 hasMeaningfulFirsthandConversation:
                   listenerState.hasMeaningfulFirsthandConversation,
+                currentOpenQuestion: clone(listenerState.currentOpenQuestion),
                 observePacket,
                 budgetCeiling,
               }),
@@ -5227,7 +5327,11 @@ export class RunService {
         speech.speakerActorId === context.sourceSpeakerActorId &&
         speech.line === context.sourceUtterance
       ) ||
-      proposal.toolCall.args.actorId !== context.targetActorId
+      proposal.toolCall.args.actorId !== context.targetActorId ||
+      (
+        context.listenerState.currentOpenQuestion !== null &&
+        proposal.openQuestion === null
+      )
     ) {
       return null;
     }
@@ -5259,6 +5363,7 @@ export class RunService {
       stance: actor.stance,
       suspicion: actor.suspicion,
       hasMeaningfulFirsthandConversation: actor.hasMeaningfulFirsthandConversation,
+      currentOpenQuestion: this.currentActorOpenQuestion(actor),
     };
   }
 
@@ -5591,6 +5696,38 @@ export class RunService {
     run.socialView.revision += 1;
   }
 
+  private currentActorOpenQuestion(actor: RunActorState): RunOpenQuestion | null {
+    const latest = latestQuestionCapableMemory(actor.memories);
+    return latest?.openQuestion?.status === "open"
+      ? clone(latest.openQuestion)
+      : null;
+  }
+
+  private reconcileResidentQuestion(
+    run: RunState,
+    actorId: string,
+    sourceMemoryId: string,
+    question: RunOpenQuestion | null,
+    provenance: RunSocialProvenance,
+  ): void {
+    // Record-authored questions have subjectActorId=null and are deliberately
+    // outside this one-question-per-resident reconciliation. Null means this
+    // judgment created or resolved no question, so it preserves any prior
+    // disclosed question; only an exact model-authored object replaces it.
+    if (!question) return;
+    run.socialView.openQuestions = run.socialView.openQuestions.filter(
+      entry => entry.subjectActorId !== actorId,
+    );
+    run.socialView.openQuestions.push({
+      questionId: `question:${sourceMemoryId}`,
+      subjectActorId: actorId,
+      status: question.status,
+      text: question.text,
+      whyLine: question.whyLine,
+      provenance: { ...provenance, whyLine: question.whyLine },
+    });
+  }
+
   private discloseResidentJudgment(
     run: RunState,
     actor: RunActorState,
@@ -5620,19 +5757,16 @@ export class RunService {
     );
     if (index >= 0) run.socialView.encounteredResidents[index] = resident;
     else run.socialView.encounteredResidents.push(resident);
-    if (memory.openQuestion) {
-      run.socialView.openQuestions = run.socialView.openQuestions.filter(
-        entry => entry.subjectActorId !== actor.actorId,
-      );
-      run.socialView.openQuestions.push({
-        questionId: `question:${memory.memoryId}`,
-        subjectActorId: actor.actorId,
-        status: memory.openQuestion.status,
-        text: memory.openQuestion.text,
-        whyLine: memory.openQuestion.whyLine,
-        provenance: { ...provenance, whyLine: memory.openQuestion.whyLine },
-      });
-    }
+    const latestQuestionMemory = latestQuestionCapableMemory(actor.memories);
+    this.reconcileResidentQuestion(
+      run,
+      actor.actorId,
+      memory.memoryId,
+      latestQuestionMemory?.memoryId === memory.memoryId
+        ? memory.openQuestion
+        : null,
+      provenance,
+    );
     this.bumpSocialRevision(run);
   }
 
@@ -5678,19 +5812,13 @@ export class RunService {
     );
     if (index >= 0) run.socialView.encounteredResidents[index] = resident;
     else run.socialView.encounteredResidents.push(resident);
-    if (memory.openQuestion) {
-      run.socialView.openQuestions = run.socialView.openQuestions.filter(
-        entry => entry.subjectActorId !== actor.actorId,
-      );
-      run.socialView.openQuestions.push({
-        questionId: `question:${memory.memoryId}`,
-        subjectActorId: actor.actorId,
-        status: memory.openQuestion.status,
-        text: memory.openQuestion.text,
-        whyLine: memory.openQuestion.whyLine,
-        provenance: { ...provenance, whyLine: memory.openQuestion.whyLine },
-      });
-    }
+    this.reconcileResidentQuestion(
+      run,
+      actor.actorId,
+      memory.memoryId,
+      memory.openQuestion,
+      provenance,
+    );
     this.bumpSocialRevision(run);
   }
 
@@ -6924,10 +7052,13 @@ export class RunService {
         sourceMemoryId: record.sourceRefs[0]?.sourceMemoryId,
         textSurfaceId: record.textSurfaceId,
       }));
-    const memoryActionNotes = selectRecentChronological(
+    const providerMemoryHistory = selectPrioritizedProviderMemories(
       actor.memories,
+      run.records,
+      run.ledgerEvents,
       RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT,
-    ).map(memory => {
+    );
+    const memoryActionNotes = providerMemoryHistory.map(memory => {
       if (memory.kind === "npc_utterance") return `[npc_utterance_memory=${memory.memoryId}]`;
       if (memory.kind === "player_conversation") {
         return `[player_conversation_memory=${memory.memoryId}]`;
@@ -6968,112 +7099,124 @@ export class RunService {
       ...memoryActionNotes,
       ...administrativeDispositionNotes,
     ].slice(-RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT);
-    const memoryEvidence = selectRecentChronological(
+    const historicalHeardMemories = selectPrioritizedProviderMemories(
       actor.memories,
-      RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT,
-    ).map(memory => {
+      run.records,
+      run.ledgerEvents,
+      RUN_OBSERVE_HEARD_SPEECH_LIMIT,
+      memory =>
+        memory.kind === "player_conversation" ||
+        (
+          memory.kind === "ambient_utterance" &&
+          memory.speakerActorId !== actor.actorId &&
+          memory.listenerActorIds.includes(actor.actorId)
+        ),
+    );
+    const heardSpeech = historicalHeardMemories.map<HeardSpeechRecord>(memory => {
       if (memory.kind === "player_conversation") {
         return {
+          speakerActorId: "player",
+          source: {
+            kind: "player_statement",
+            id: memory.statementEvidenceId,
+          },
+          line: memory.playerLine,
+        };
+      }
+      if (memory.kind !== "ambient_utterance") {
+        throw new Error(`non-speech memory selected for heard speech: ${memory.memoryId}`);
+      }
+      return {
+        speakerActorId: memory.speakerActorId,
+        source: {
+          kind: "ambient_utterance",
+          id: `memory:${memory.memoryId}`,
+        },
+        line: memory.line,
+      };
+    });
+    const heardSpeechEvidenceIds = new Set(heardSpeech.map(speech => speech.source.id));
+    const memoryEvidence = providerMemoryHistory.flatMap<ActorMemoryEvidence>(memory => {
+      if (memory.kind === "player_conversation") {
+        if (!heardSpeechEvidenceIds.has(memory.statementEvidenceId)) return [];
+        return [{
           evidenceType: "player_conversation_exchange" as const,
           memoryId: memory.memoryId,
           sourceActorId: "player" as const,
-          playerLine: memory.playerLine,
+          playerStatementEvidenceId: memory.statementEvidenceId,
           residentReply: memory.npcLine,
           judgmentReason: memory.whyLine,
-        };
+          openQuestion: clone(memory.openQuestion),
+        }];
       }
       if (memory.kind === "npc_utterance") {
-        return {
+        return [{
           evidenceType: "utterance" as const,
           memoryId: memory.memoryId,
           memoryKind: memory.kind,
           sourceActorId: memory.sourceActorId,
           line: memory.line,
-        };
+        }];
       }
       if (memory.kind === "ambient_utterance") {
-        return {
+        if (memory.speakerActorId !== actor.actorId) return [];
+        return [{
           evidenceType: "utterance" as const,
           memoryId: memory.memoryId,
           memoryKind: memory.kind,
           sourceActorId: memory.speakerActorId,
           line: memory.line,
-        };
+        }];
       }
       if (memory.kind === "ambient_stance_judgment") {
-        return {
-          evidenceType: "memory_fact" as const,
+        const sourceSpeechEvidenceId = `memory:${memory.sourceMemoryId}`;
+        if (!heardSpeechEvidenceIds.has(sourceSpeechEvidenceId)) return [];
+        return [{
+          evidenceType: "ambient_stance_judgment" as const,
           memoryId: memory.memoryId,
-          memoryKind: memory.kind,
           sourceActorId: memory.sourceActorId,
-          summary: memory.whyLine,
-        };
+          sourceMemoryId: memory.sourceMemoryId,
+          sourceSpeechEvidenceId,
+          appliedStance: memory.appliedStance,
+          judgmentReason: memory.whyLine,
+          openQuestion: clone(memory.openQuestion),
+        }];
       }
       if (memory.kind === "record_read") {
-        return {
+        return [{
           evidenceType: "memory_fact" as const,
           memoryId: memory.memoryId,
           memoryKind: memory.kind,
           sourceActorId: memory.sourceActorId,
           summary: memory.stateBody,
-        };
+        }];
       }
       if (memory.kind === "player_contact_outcome") {
-        return {
+        return [{
           evidenceType: "memory_fact" as const,
           memoryId: memory.memoryId,
           memoryKind: memory.kind,
           sourceActorId: "player",
           summary: memory.contactReason,
-        };
+        }];
       }
       if (memory.kind === "interrogation_outcome") {
-        return {
+        return [{
           evidenceType: "memory_fact" as const,
           memoryId: memory.memoryId,
           memoryKind: memory.kind,
           sourceActorId: "player",
           summary: memory.whyLine,
-        };
+        }];
       }
-      return {
+      return [{
         evidenceType: "memory_fact" as const,
         memoryId: memory.memoryId,
         memoryKind: memory.kind,
         sourceActorId: "player",
         summary: `${memory.action}:${memory.propId}`,
-      };
+      }];
     });
-    const heardSpeech = selectRecentChronological(
-      actor.memories.flatMap<HeardSpeechRecord>(memory => {
-        if (memory.kind === "player_conversation") {
-          return [{
-            speakerActorId: "player",
-            source: {
-              kind: "player_statement" as const,
-              id: memory.statementEvidenceId,
-            },
-            line: memory.playerLine,
-          }];
-        }
-        if (
-          memory.kind === "ambient_utterance" &&
-          memory.speakerActorId !== actor.actorId &&
-          memory.listenerActorIds.includes(actor.actorId)
-        ) {
-          return [{
-            speakerActorId: memory.speakerActorId,
-            source: {
-              kind: "ambient_utterance" as const,
-              id: `memory:${memory.memoryId}`,
-            },
-            line: memory.line,
-          }];
-        }
-        return [];
-      }),
-      RUN_OBSERVE_HEARD_SPEECH_LIMIT,
-    );
     const packet: ObservePacket = {
       actorId: actor.actorId,
       role: actor.role,

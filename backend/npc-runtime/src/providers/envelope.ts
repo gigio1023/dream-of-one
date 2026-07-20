@@ -1465,6 +1465,7 @@ export function ambientReplyJudgmentJsonSchemaForTarget(
   targetActorId: string,
   locale?: string,
   visibleRecordIds: readonly string[] = [],
+  requireTrackedQuestion = false,
 ): Record<string, unknown> {
   const schema = structuredClone(ambientReplyJudgmentJsonSchema);
   const properties = schema.properties as Record<string, Record<string, unknown>>;
@@ -1482,6 +1483,17 @@ export function ambientReplyJudgmentJsonSchemaForTarget(
   const visible = uniqueStrings(visibleRecordIds);
   if (visible.length === 0) citedRecordIds.maxItems = 0;
   else citedItems.enum = visible;
+  if (requireTrackedQuestion) {
+    const openQuestion = properties.openQuestion;
+    const objectBranch = (openQuestion.anyOf as Array<Record<string, unknown>>)
+      .find(branch => branch.type === "object");
+    if (!objectBranch) throw new Error("ambient open-question schema lacks object branch");
+    properties.openQuestion = {
+      ...objectBranch,
+      description:
+        "A tracked currentOpenQuestion exists. Return one complete open or resolved question object; null is invalid and cannot erase or silently preserve it.",
+    };
+  }
   if (locale) annotatePlayerVisibleDescriptions(schema, locale);
   return schema;
 }

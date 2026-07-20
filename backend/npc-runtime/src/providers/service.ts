@@ -350,14 +350,46 @@ function conversationGroundingContract(
   for (const memory of request.observePacket.actorMemory.evidence) {
     const evidenceId = `resident_memory:${memory.memoryId}`;
     if (memory.evidenceType === "player_conversation_exchange") {
+      const playerStatement = evidenceCatalog.get(memory.playerStatementEvidenceId);
+      if (
+        playerStatement?.evidenceType !== "player_statement" ||
+        playerStatement.speakerActorId !== "player"
+      ) {
+        throw new Error(
+          `player conversation memory requires canonical statement evidence: ${memory.playerStatementEvidenceId}`,
+        );
+      }
       addEvidence({
         evidenceId,
         evidenceType: "resident_memory",
         memoryKind: memory.evidenceType,
         sourceActorId: memory.sourceActorId,
-        playerLine: memory.playerLine,
+        playerStatementEvidenceId: memory.playerStatementEvidenceId,
         residentReply: memory.residentReply,
         judgmentReason: memory.judgmentReason,
+        openQuestion: memory.openQuestion,
+      });
+    } else if (memory.evidenceType === "ambient_stance_judgment") {
+      const sourceSpeech = evidenceCatalog.get(memory.sourceSpeechEvidenceId);
+      if (
+        memory.sourceSpeechEvidenceId !== `memory:${memory.sourceMemoryId}` ||
+        sourceSpeech?.evidenceType !== "ambient_utterance" ||
+        sourceSpeech.speakerActorId !== memory.sourceActorId
+      ) {
+        throw new Error(
+          `ambient judgment memory requires canonical source speech: ${memory.sourceSpeechEvidenceId}`,
+        );
+      }
+      addEvidence({
+        evidenceId,
+        evidenceType: "resident_memory",
+        memoryKind: memory.evidenceType,
+        sourceActorId: memory.sourceActorId,
+        sourceMemoryId: memory.sourceMemoryId,
+        sourceSpeechEvidenceId: memory.sourceSpeechEvidenceId,
+        appliedStance: memory.appliedStance,
+        judgmentReason: memory.judgmentReason,
+        openQuestion: memory.openQuestion,
       });
     } else if (memory.evidenceType === "utterance") {
       addEvidence({
@@ -471,9 +503,23 @@ function conversationMemoryEvidence(packet: ObservePacket) {
         memoryId: memory.memoryId,
         playerSpeakerActorId: "player" as const,
         residentSpeakerActorId: packet.actorId,
-        playerLine: memory.playerLine,
+        playerStatementEvidenceId: memory.playerStatementEvidenceId,
         residentReply: memory.residentReply,
         judgmentReason: memory.judgmentReason,
+        openQuestion: memory.openQuestion,
+      };
+    }
+    if (memory.evidenceType === "ambient_stance_judgment") {
+      return {
+        evidenceType: memory.evidenceType,
+        memoryId: memory.memoryId,
+        holderActorId: packet.actorId,
+        sourceActorId: memory.sourceActorId,
+        sourceMemoryId: memory.sourceMemoryId,
+        sourceSpeechEvidenceId: memory.sourceSpeechEvidenceId,
+        appliedStance: memory.appliedStance,
+        judgmentReason: memory.judgmentReason,
+        openQuestion: memory.openQuestion,
       };
     }
     if (memory.evidenceType === "utterance" && memory.sourceActorId === packet.actorId) {
@@ -1109,11 +1155,27 @@ export class ProviderService implements NpcProposalPort {
   async judgeAndProposeAmbientReply(
     request: AmbientReplyRequest,
   ): Promise<ResolvedProposal<AmbientReplyJudgment>> {
+    const visibleRecordIds = request.observePacket.visibleRecords.map(record => record.recordId);
     const jsonSchema = ambientReplyJudgmentJsonSchemaForTarget(
       request.targetActorId,
       request.locale,
-      request.observePacket.visibleRecords.map(record => record.recordId),
+      visibleRecordIds,
+      request.currentOpenQuestion !== null,
     );
+    const proposalSchema = ambientReplyJudgmentSchemaForRequest(
+      request.locale,
+      request.targetActorId,
+      visibleRecordIds,
+    ).superRefine((value, context) => {
+      if (request.currentOpenQuestion !== null && value.openQuestion === null) {
+        context.addIssue({
+          code: "custom",
+          path: ["openQuestion"],
+          message:
+            "a tracked currentOpenQuestion requires one complete open or resolved question object",
+        });
+      }
+    });
     const instructions = [
       "You are the listening resident described in requestContext. Speak and reason only from inside that resident's world.",
       "Reply once to the exact source utterance AND judge whether that remembered speech changes your personal opinion of the visitor.",
@@ -1126,7 +1188,8 @@ export class ProviderService implements NpcProposalPort {
       `toolCall must be exactly talk_to with actorId ${request.targetActorId}; utterance is the listener's one in-character reply and done must be true.`,
       `Keep utterance to one concise sentence no longer than ${TRANSIENT_WORLD_UTTERANCE_MAX_CODE_POINTS} Unicode code points because it appears as a transient world subtitle.`,
       "citedRecordIds must contain every listener-visible record whose content this reply meaningfully conveys, and no other id. Use [] when the reply cites no record. A citation can disclose that record only if the visitor actually hears this line, so make the cited content understandable in the utterance itself.",
-      "openQuestion is null unless this exact exchange creates or resolves one concise question the visitor may later learn when meeting this listener.",
+      "currentOpenQuestion is the listener's exact currently open question, if any. When it is non-null, openQuestion must be one complete open or resolved object: preserve it as open unless this exchange grounds an explicit resolution, or replace it only with a materially different grounded question. Never return null to erase or silently preserve a tracked question.",
+      "When currentOpenQuestion is null, return openQuestion=null unless this exact exchange creates one concise grounded question the visitor may later learn when meeting this listener. In that case null means this exchange creates or resolves no question; it does not carry hidden question semantics.",
       ...localeOutputInstructions(
         request.locale,
         "utterance, rationale, whyLine, and openQuestion text/whyLine",
@@ -1141,6 +1204,7 @@ export class ProviderService implements NpcProposalPort {
       stanceBefore: request.stanceBefore,
       suspicionBefore: request.suspicionBefore,
       hasMeaningfulFirsthandConversation: request.hasMeaningfulFirsthandConversation,
+      currentOpenQuestion: request.currentOpenQuestion,
       listener: ambientListenerContext(request),
       playerVisibleOutputContract: playerVisibleOutputContract(request.locale),
     };
@@ -1154,11 +1218,7 @@ export class ProviderService implements NpcProposalPort {
         schemaName: "npc_ambient_reply_judgment",
         jsonSchema,
       },
-      schema: ambientReplyJudgmentSchemaForRequest(
-        request.locale,
-        request.targetActorId,
-        request.observePacket.visibleRecords.map(record => record.recordId),
-      ),
+      schema: proposalSchema,
       repairContext: requestContext,
       budgetCeiling: request.budgetCeiling,
     });

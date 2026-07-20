@@ -244,6 +244,7 @@ function ambientReplyRequest(locale = "ko-KR"): AmbientReplyRequest {
     stanceBefore: "uncertain",
     suspicionBefore: 10,
     hasMeaningfulFirsthandConversation: false,
+    currentOpenQuestion: null,
     observePacket: packet,
     budgetCeiling: { maxCalls: 100, maxTokens: 250_000 },
   };
@@ -1875,6 +1876,62 @@ test("ambient reply repairs one wrong nonempty target then succeeds or fails clo
   assert.equal(failedAudit.complete, false);
 });
 
+test("ambient reply receives and must explicitly preserve or resolve a tracked question", async () => {
+  const trackedQuestion = {
+    status: "open" as const,
+    text: "방문자는 왜 서로 다른 설명을 했을까?",
+    whyLine: "서로 다른 설명의 이유를 아직 직접 확인하지 못했습니다.",
+  };
+  const request = {
+    ...ambientReplyRequest(),
+    currentOpenQuestion: trackedQuestion,
+  };
+  const erased = {
+    ...JSON.parse(validAmbientReply),
+    openQuestion: null,
+  };
+  const preserved = {
+    ...erased,
+    openQuestion: trackedQuestion,
+  };
+  const textGen = new FakeTextGen([
+    { text: JSON.stringify(erased) },
+    { text: JSON.stringify(preserved) },
+  ]);
+  const service = new ProviderService({
+    profileId: "test/ambient-question-preservation",
+    textGen,
+  });
+
+  const result = await service.judgeAndProposeAmbientReply(request);
+
+  assert.deepEqual(result.proposal.openQuestion, trackedQuestion);
+  assert.deepEqual(textGen.requests.map(entry => entry.purpose), [
+    "ambient_reply",
+    "repair",
+  ]);
+  const initialInput = JSON.parse(textGen.requests[0]?.input ?? "{}") as {
+    currentOpenQuestion: typeof trackedQuestion;
+  };
+  assert.deepEqual(initialInput.currentOpenQuestion, trackedQuestion);
+  assert.match(
+    textGen.requests[0]?.instructions ?? "",
+    /Never return null to erase or silently preserve a tracked question/,
+  );
+  const openQuestionSchema = (
+    textGen.requests[0]?.jsonSchema.properties as Record<string, Record<string, unknown>>
+  ).openQuestion;
+  assert.equal(openQuestionSchema.type, "object");
+  assert.equal("anyOf" in openQuestionSchema, false);
+  const repairInput = JSON.parse(textGen.requests[1]?.input ?? "{}") as {
+    validationIssues: Array<{ path: string; message: string }>;
+  };
+  assert.deepEqual(repairInput.validationIssues, [{
+    path: "openQuestion",
+    message: "a tracked currentOpenQuestion requires one complete open or resolved question object",
+  }]);
+});
+
 test("hearing strict schema requires every property and exactly six unique residents", () => {
   assertEveryObjectPropertyIsRequired(hearingJudgmentJsonSchema);
   const residentArray = (
@@ -2600,13 +2657,6 @@ test("conversation openings keep resident, player, third-party speech, and locat
     evidence: [
       {
         evidenceType: "utterance",
-        memoryId: "role-memory-heard-1",
-        memoryKind: "ambient_utterance",
-        sourceActorId: "NPC_Station_Officer",
-        line: "외부인은 스테이션에서 확인해야 합니다.",
-      },
-      {
-        evidenceType: "utterance",
         memoryId: "role-memory-self-1",
         memoryKind: "npc_utterance",
         sourceActorId: request.actorId,
@@ -2616,9 +2666,24 @@ test("conversation openings keep resident, player, third-party speech, and locat
         evidenceType: "player_conversation_exchange",
         memoryId: "role-memory-exchange-1",
         sourceActorId: "player",
-        playerLine: "청문회 때문에 왔습니다.",
+        playerStatementEvidenceId: "player_statement:run-1:turn-1",
         residentReply: "이유를 알겠습니다.",
         judgmentReason: "직접 설명했습니다.",
+        openQuestion: null,
+      },
+      {
+        evidenceType: "ambient_stance_judgment",
+        memoryId: "role-memory-ambient-judgment-1",
+        sourceActorId: "NPC_Station_Officer",
+        sourceMemoryId: "station-heard-1",
+        sourceSpeechEvidenceId: "memory:station-heard-1",
+        appliedStance: "oppose",
+        judgmentReason: "스테이션 담당자의 말에 확인할 내용이 생겼습니다.",
+        openQuestion: {
+          status: "open",
+          text: "스테이션 담당자가 들은 설명은 왜 달랐나요?",
+          whyLine: "서로 다른 설명의 이유를 직접 확인하지 못했습니다.",
+        },
       },
     ],
   };
@@ -2684,12 +2749,6 @@ test("conversation openings keep resident, player, third-party speech, and locat
   assert.equal("actor" in input, false, "the old ambiguous actor projection must stay absent");
   assert.deepEqual(input.residentContext.memoryEvidence, [
     {
-      evidenceType: "heard_third_party_npc",
-      memoryId: "role-memory-heard-1",
-      speakerActorId: "NPC_Station_Officer",
-      note: "외부인은 스테이션에서 확인해야 합니다.",
-    },
-    {
       evidenceType: "resident_prior_utterance",
       memoryId: "role-memory-self-1",
       speakerActorId: "NPC_Roaming_Liaison",
@@ -2700,11 +2759,30 @@ test("conversation openings keep resident, player, third-party speech, and locat
       memoryId: "role-memory-exchange-1",
       playerSpeakerActorId: "player",
       residentSpeakerActorId: "NPC_Roaming_Liaison",
-      playerLine: "청문회 때문에 왔습니다.",
+      playerStatementEvidenceId: "player_statement:run-1:turn-1",
       residentReply: "이유를 알겠습니다.",
       judgmentReason: "직접 설명했습니다.",
+      openQuestion: null,
+    },
+    {
+      evidenceType: "ambient_stance_judgment",
+      memoryId: "role-memory-ambient-judgment-1",
+      holderActorId: "NPC_Roaming_Liaison",
+      sourceActorId: "NPC_Station_Officer",
+      sourceMemoryId: "station-heard-1",
+      sourceSpeechEvidenceId: "memory:station-heard-1",
+      appliedStance: "oppose",
+      judgmentReason: "스테이션 담당자의 말에 확인할 내용이 생겼습니다.",
+      openQuestion: {
+        status: "open",
+        text: "스테이션 담당자가 들은 설명은 왜 달랐나요?",
+        whyLine: "서로 다른 설명의 이유를 직접 확인하지 못했습니다.",
+      },
     },
   ]);
+  const projectedMemory = JSON.stringify(input.residentContext.memoryEvidence);
+  assert.doesNotMatch(projectedMemory, /외부인은 스테이션에서 확인해야 합니다/);
+  assert.doesNotMatch(projectedMemory, /NPC_Park_Caretaker: 청문회 때문입니다/);
   assert.doesNotMatch(
     JSON.stringify(input.residentContext.memoryEvidence),
     /NPC_Forged/,

@@ -11,6 +11,7 @@ import {
   type WorldRole,
   type WorldState,
 } from "../runtime/world/index.js";
+import type { CoarseStance } from "../contracts/types.js";
 import {
   recordKindsForRole,
   toolCatalogForRole,
@@ -26,15 +27,34 @@ export interface ActorPolicy {
   forbiddenClaims: string[];
 }
 
+export interface ActorMemoryOpenQuestion {
+  status: "open" | "resolved";
+  text: string;
+  whyLine: string;
+}
+
 /** Typed memory context; attribution and exchange roles never come from prose markers. */
 export type ActorMemoryEvidence =
   | {
       evidenceType: "player_conversation_exchange";
       memoryId: string;
       sourceActorId: "player";
-      playerLine: string;
+      /** Canonical player prose lives in heardSpeech under this exact id. */
+      playerStatementEvidenceId: string;
       residentReply: string;
       judgmentReason: string;
+      openQuestion: ActorMemoryOpenQuestion | null;
+    }
+  | {
+      evidenceType: "ambient_stance_judgment";
+      memoryId: string;
+      sourceActorId: string;
+      sourceMemoryId: string;
+      /** Canonical source prose lives in heardSpeech under this exact id. */
+      sourceSpeechEvidenceId: string;
+      appliedStance: CoarseStance;
+      judgmentReason: string;
+      openQuestion: ActorMemoryOpenQuestion | null;
     }
   | {
       evidenceType: "utterance";

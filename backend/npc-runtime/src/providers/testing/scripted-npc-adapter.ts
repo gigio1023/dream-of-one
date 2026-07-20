@@ -288,7 +288,9 @@ export class ScriptedNpcAdapter implements NpcProposalPort {
           suspicionDelta: 0,
           proposedStance: request.stanceBefore,
           whyLine: scriptedLines(request.locale).ambientWhy,
-          openQuestion: null,
+          openQuestion: request.currentOpenQuestion
+            ? { ...request.currentOpenQuestion }
+            : null,
         };
     return {
       proposal,

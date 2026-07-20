@@ -21,6 +21,7 @@ import {
 import {
   runSnapshotSchema,
   type RunLedgerEvent,
+  type RunMemory,
   type RunRecord,
 } from "../../src/runtime/run-schema.js";
 import { normalizeHearingMemory } from "../../src/runtime/run-hearing.js";
@@ -1294,6 +1295,173 @@ test("a direct multi-turn conversation can visibly recover from oppose and high 
     playerStatementEvidenceId(started.sessionId, started.nextTurn.turnId),
     playerStatementEvidenceId(started.sessionId, first.nextTurn.turnId),
   ]);
+});
+
+test("an exact open question crosses conversations, survives interruption, and is replaced by resolution", async () => {
+  const openQuestion = {
+    status: "open" as const,
+    text: "두 번째 방문에서 확인할 원본 기록은 어디에 있나요?",
+    whyLine: "첫 방문에서 원본 기록의 위치가 확인되지 않았습니다.",
+  };
+  const resolvedQuestion = {
+    status: "resolved" as const,
+    text: openQuestion.text,
+    whyLine: "두 번째 방문에서 원본 기록의 위치를 직접 확인했습니다.",
+  };
+  const receivedCurrentQuestions: unknown[] = [];
+  let mergedAttempt = 0;
+  const adapter = new ScriptedNpcAdapter({
+    conversation: () => ({
+      utterance: "확인할 내용을 말씀해 주세요.",
+      suggestedReplies: [
+        { text: "원본 기록의 위치를 설명하겠습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+        { text: "무엇을 더 확인해야 하나요?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+        { text: "답하지 않겠습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
+      ],
+      continueConversation: false,
+    }),
+    mergedTurn: request => {
+      receivedCurrentQuestions.push(structuredClone(request.currentOpenQuestion ?? null));
+      mergedAttempt += 1;
+      if (mergedAttempt === 2) {
+        throw new ProviderFailureError(
+          "scripted/studio-reception",
+          "timeout",
+          "conversation_turn",
+        );
+      }
+      const question = mergedAttempt === 1 ? openQuestion : resolvedQuestion;
+      return {
+        suspicionDelta: 0,
+        reportDelta: 0,
+        signals: [],
+        whyLine: question.whyLine,
+        stance: "uncertain",
+        meaningfulFirsthand: true,
+        openQuestion: question,
+        utterance: mergedAttempt === 1
+          ? "원본 기록의 위치를 다음에 확인하겠습니다."
+          : "원본 기록의 위치를 확인했습니다.",
+        suggestedReplies: [
+          { text: "알겠습니다.", intent: "safe/local", evidenceIds: [], introducesNewClaim: false },
+          { text: "더 확인할 것이 있나요?", intent: "uncertain/repair", evidenceIds: [], introducesNewClaim: false },
+          { text: "이제 가겠습니다.", intent: "risky/weird", evidenceIds: [], introducesNewClaim: false },
+        ],
+        continueConversation: false,
+      };
+    },
+    nextStep: () => ({ rationale: "후속 행동 없음", done: true }),
+  });
+  const service = new RunService({ proposalPort: adapter, idFactory: deterministicIds() });
+  const run = service.start("run-cross-conversation-question", "ko-KR");
+  await preloadReceptionist(service, run.runId);
+  await groundOrdinaryConversation(
+    service,
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-cross-question-first",
+  );
+  const firstSession = await service.startConversation(
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+  const firstAnswer = await service.answer(
+    run.runId,
+    firstSession.sessionId,
+    firstSession.nextTurn.turnId,
+    { type: "choice", choiceId: firstSession.nextTurn.choices[0].choiceId },
+  );
+  assert.equal(firstAnswer.nextTurn, null);
+  assert.deepEqual(receivedCurrentQuestions, [null]);
+  const disclosedOpenQuestion = firstAnswer.socialView.openQuestions.find(
+    question => question.subjectActorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(disclosedOpenQuestion);
+  assert.equal(disclosedOpenQuestion.questionId, `question:${firstAnswer.memoryDelta.memoryId}`);
+  assert.equal(disclosedOpenQuestion.status, openQuestion.status);
+  assert.equal(disclosedOpenQuestion.text, openQuestion.text);
+  assert.equal(disclosedOpenQuestion.whyLine, openQuestion.whyLine);
+  assert.equal(disclosedOpenQuestion.provenance.whyLine, openQuestion.whyLine);
+  await service.endConversation(run.runId, firstSession.sessionId);
+
+  type MutableActor = { memories: RunMemory[] };
+  type MutableRun = { actors: Map<string, MutableActor> };
+  const internalRuns = Reflect.get(service, "runs") as Map<string, MutableRun>;
+  const actor = internalRuns.get(run.runId)?.actors.get(STUDIO_RECEPTIONIST_ID);
+  assert.ok(actor);
+  actor.memories.push({
+    memoryId: "memory-between-question-sessions",
+    kind: "npc_utterance",
+    sourceActorId: STUDIO_RECEPTIONIST_ID,
+    listenerActorIds: ["player"],
+    conversationId: "between-question-sessions",
+    turnId: "between-question-sessions#0",
+    line: "새로운 확인 자료가 도착했습니다.",
+    citedRecords: [],
+    worldSeconds: 0,
+    worldRevision: service.snapshot(run.runId).worldRevision,
+    proposalMeta: {
+      profileId: "scripted/studio-reception",
+      transport: "scripted",
+      usedFallback: false,
+    },
+  });
+
+  await preloadReceptionist(service, run.runId);
+  await groundOrdinaryConversation(
+    service,
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ground-cross-question-second",
+  );
+  const secondSession = await service.startConversation(
+    run.runId,
+    STUDIO_RECEPTIONIST_ID,
+    STUDIO_ZONE_ID,
+    "ko-KR",
+  );
+  const secondAnswerRequest = {
+    type: "choice" as const,
+    choiceId: secondSession.nextTurn.choices[0].choiceId,
+  };
+  const beforeInterruption = service.snapshot(run.runId).socialView;
+  await assert.rejects(
+    service.answer(
+      run.runId,
+      secondSession.sessionId,
+      secondSession.nextTurn.turnId,
+      secondAnswerRequest,
+    ),
+    (error: unknown) =>
+      error instanceof ProviderFailureError && error.reason === "timeout",
+  );
+  assert.deepEqual(service.snapshot(run.runId).socialView, beforeInterruption);
+
+  const resolved = await service.answer(
+    run.runId,
+    secondSession.sessionId,
+    secondSession.nextTurn.turnId,
+    secondAnswerRequest,
+  );
+  assert.deepEqual(receivedCurrentQuestions, [null, openQuestion, openQuestion]);
+  const disclosedResolution = resolved.socialView.openQuestions.find(
+    question => question.subjectActorId === STUDIO_RECEPTIONIST_ID,
+  );
+  assert.ok(disclosedResolution);
+  assert.equal(disclosedResolution.status, resolvedQuestion.status);
+  assert.equal(disclosedResolution.text, resolvedQuestion.text);
+  assert.equal(disclosedResolution.whyLine, resolvedQuestion.whyLine);
+  assert.equal(disclosedResolution.provenance.whyLine, resolvedQuestion.whyLine);
+  assert.equal(
+    resolved.socialView.openQuestions.filter(
+      question => question.subjectActorId === STUDIO_RECEPTIONIST_ID,
+    ).length,
+    1,
+  );
 });
 
 test("the final bounded player turn ends without erasing an unanswered open question", async () => {

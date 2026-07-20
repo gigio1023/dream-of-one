@@ -200,6 +200,9 @@ export function createSessionServer(service: SessionService, runService = new Ru
         return;
       }
 
+      // This default-loopback debug/hydration route intentionally returns all
+      // six actors' complete memories. Any non-loopback transport must use a
+      // separate filtered serializer; normal presentation consumes socialView.
       if (method === "GET" && path === "/v1/run/snapshot") {
         const parsed = runSnapshotRequestSchema.safeParse({
           runId: url.searchParams.get("runId") ?? undefined,

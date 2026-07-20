@@ -172,6 +172,12 @@ export interface AgentStepProposal {
   done: boolean;
 }
 
+export interface ProviderOpenQuestion {
+  status: "open" | "resolved";
+  text: string;
+  whyLine: string;
+}
+
 /**
  * One NPC listener's grounded reply to an exact ambient utterance plus the
  * listener's model-owned personal judgment of the player. Administrative
@@ -188,7 +194,7 @@ export interface AmbientReplyJudgment {
   suspicionDelta: number;
   proposedStance: CoarseStance;
   whyLine: string;
-  openQuestion: { status: "open" | "resolved"; text: string; whyLine: string } | null;
+  openQuestion: ProviderOpenQuestion | null;
 }
 
 export interface ResolvedProposal<T> {
@@ -230,7 +236,7 @@ export interface MergedConversationTurn extends ConversationJudgment {
   /** Whether the exchange contained enough firsthand substance to support a vouch. */
   meaningfulFirsthand: boolean;
   /** Provider-authored player log entry; null when this exchange opens no question. */
-  openQuestion: { status: "open" | "resolved"; text: string; whyLine: string } | null;
+  openQuestion: ProviderOpenQuestion | null;
   utterance: string;
   /** Resident-visible records whose contents are meaningfully conveyed by utterance. */
   citedRecordIds?: string[];
@@ -262,11 +268,7 @@ export interface MergedConversationTurnRequest extends ConversationJudgmentReque
   stanceBefore?: CoarseStance;
   hasMeaningfulFirsthandConversation?: boolean;
   /** Exact question tracked from this conversation's previous judged turn. */
-  currentOpenQuestion?: {
-    status: "open" | "resolved";
-    text: string;
-    whyLine: string;
-  } | null;
+  currentOpenQuestion?: ProviderOpenQuestion | null;
   /** Whether the runtime has capacity to present another modal turn after this answer. */
   continuationAllowed?: boolean;
 }
@@ -319,6 +321,8 @@ export interface AmbientReplyRequest {
   stanceBefore: CoarseStance;
   suspicionBefore: number;
   hasMeaningfulFirsthandConversation: boolean;
+  /** Exact currently open listener-owned question, if one survives prior judgments. */
+  currentOpenQuestion: ProviderOpenQuestion | null;
   observePacket: ObservePacket;
   budgetCeiling?: { maxCalls: number; maxTokens: number };
 }

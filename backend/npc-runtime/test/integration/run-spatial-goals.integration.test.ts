@@ -80,7 +80,13 @@ function stationaryLayout(hearingAtSeconds = loadRunLayout().hearingAtSeconds) {
   };
 }
 
-function ambientHistoryMemory(sequence: number, listenerActorId: string): RunMemory {
+type AmbientUtteranceMemory = Extract<RunMemory, { kind: "ambient_utterance" }>;
+type AmbientJudgmentMemory = Extract<RunMemory, { kind: "ambient_stance_judgment" }>;
+
+function ambientHistoryMemory(
+  sequence: number,
+  listenerActorId: string,
+): AmbientUtteranceMemory {
   const serial = String(sequence).padStart(3, "0");
   return {
     memoryId: `memory-bounded-${serial}`,
@@ -110,7 +116,9 @@ function ambientHistoryMemory(sequence: number, listenerActorId: string): RunMem
   };
 }
 
-function reportBearingMemory(listenerActorId: string): RunMemory {
+type PlayerConversationMemory = Extract<RunMemory, { kind: "player_conversation" }>;
+
+function reportBearingMemory(listenerActorId: string): PlayerConversationMemory {
   return {
     memoryId: "memory-bounded-report-bearing",
     kind: "player_conversation",
@@ -118,7 +126,10 @@ function reportBearingMemory(listenerActorId: string): RunMemory {
     listenerActorId,
     conversationId: "conversation-bounded-report-bearing",
     turnId: "turn-bounded-report-bearing",
+    statementEvidenceId: "player_statement:bounded:first",
     playerLine: "기록을 조작했다고 직접 말했습니다.",
+    evidenceIds: [],
+    introducesNewClaim: false,
     npcLine: "그 진술은 별도로 판단해야 합니다.",
     citedRecords: [],
     signals: [],
@@ -136,6 +147,86 @@ function reportBearingMemory(listenerActorId: string): RunMemory {
     openQuestion: null,
     worldSeconds: 0,
     worldRevision: 0,
+    proposalMeta: {
+      profileId: "scripted/studio-reception",
+      transport: "scripted",
+      usedFallback: false,
+    },
+  };
+}
+
+function playerHistoryMemory(options: {
+  memoryId: string;
+  listenerActorId: string;
+  sequence: number;
+  appliedStance?: "uncertain" | "vouch" | "oppose";
+  evidenceIds?: string[];
+  openQuestion?: PlayerConversationMemory["openQuestion"];
+}): PlayerConversationMemory {
+  const appliedStance = options.appliedStance ?? "oppose";
+  return {
+    memoryId: options.memoryId,
+    kind: "player_conversation",
+    sourceActorId: "player",
+    listenerActorId: options.listenerActorId,
+    conversationId: `conversation-${options.memoryId}`,
+    turnId: `turn-${options.memoryId}`,
+    statementEvidenceId: `player_statement:${options.memoryId}`,
+    playerLine: `player line ${options.memoryId}`,
+    evidenceIds: options.evidenceIds ?? [],
+    introducesNewClaim: false,
+    npcLine: `resident reply ${options.memoryId}`,
+    citedRecords: [],
+    signals: [],
+    whyLine: `judgment ${options.memoryId}`,
+    suspicionBefore: 20,
+    suspicionAfter: 20,
+    suspicionDelta: 0,
+    reportPressureBefore: 0,
+    reportPressureAfter: 0,
+    reportDelta: 0,
+    institutionalPressureDelta: 0,
+    proposedStance: appliedStance,
+    appliedStance,
+    meaningfulFirsthand: true,
+    openQuestion: options.openQuestion ?? null,
+    worldSeconds: options.sequence,
+    worldRevision: options.sequence + 1,
+    proposalMeta: {
+      profileId: "scripted/studio-reception",
+      transport: "scripted",
+      usedFallback: false,
+    },
+  };
+}
+
+function ambientQuestionJudgment(
+  source: AmbientUtteranceMemory,
+  listenerActorId: string,
+): AmbientJudgmentMemory {
+  return {
+    memoryId: "memory-bounded-ambient-question",
+    kind: "ambient_stance_judgment",
+    sourceActorId: source.speakerActorId,
+    listenerActorId,
+    sourceSpeechEventId: source.eventId,
+    sourceMemoryId: source.memoryId,
+    wakeId: source.wakeId,
+    conversationId: source.conversationId,
+    suspicionBefore: 20,
+    suspicionDelta: 0,
+    suspicionAfter: 20,
+    stanceBefore: "oppose",
+    proposedStance: "oppose",
+    appliedStance: "oppose",
+    whyLine: "공원 관리인의 말에 직접 확인할 질문이 남았습니다.",
+    openQuestion: {
+      status: "open",
+      text: "공원 관리인에게 다른 방문 목적을 말했나요?",
+      whyLine: "공원 관리인이 들은 방문 목적과 직접 들은 설명이 다릅니다.",
+    },
+    worldSeconds: source.worldSeconds,
+    worldRevision: source.worldRevision + 1,
     proposalMeta: {
       profileId: "scripted/studio-reception",
       transport: "scripted",
@@ -1202,13 +1293,16 @@ test("provider run observations bound recent history without deleting runtime or
     layout: stationaryLayout(),
   });
   const started = service.start("bounded-observe-start", "ko-KR");
-  const historyCount = Math.max(
+  const fillerCount = Math.max(
     RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT,
     RUN_OBSERVE_HEARD_SPEECH_LIMIT,
     RUN_OBSERVE_ADMINISTRATIVE_SOURCE_LIMIT,
-  ) + 5;
+  ) + 8;
   type MutableActor = { actorId: string; memories: RunMemory[] };
-  type MutableRun = { actors: Map<string, MutableActor> };
+  type MutableRun = {
+    actors: Map<string, MutableActor>;
+    records: RunRecord[];
+  };
   const internalRuns = Reflect.get(service, "runs") as Map<string, MutableRun>;
   const internalRun = internalRuns.get(started.runId);
   const internalActor = internalRun?.actors.get(actorId);
@@ -1218,19 +1312,85 @@ test("provider run observations bound recent history without deleting runtime or
     actor: MutableActor,
     visibleActorIds: string[],
     goals: string[],
-    additionalSpeech: string[],
+    additionalSpeech: AgentStepRequest["observePacket"]["heardSpeech"],
   ) => AgentStepRequest["observePacket"];
   const sparsePacket = buildObserve(internalRun, internalActor, [], ["대기합니다."], []);
   assert.deepEqual(sparsePacket.toolCatalog, ["wait"]);
 
+  const firstContact = reportBearingMemory(actorId);
+  firstContact.appliedStance = "uncertain";
+  firstContact.proposedStance = "uncertain";
+  firstContact.openQuestion = {
+    status: "resolved",
+    text: "처음 방문한 목적은 무엇인가요?",
+    whyLine: "첫 설명에서 방문 목적을 직접 확인했습니다.",
+  };
+  const stanceChangingContact = playerHistoryMemory({
+    memoryId: "memory-bounded-stance-change",
+    listenerActorId: actorId,
+    sequence: 3,
+  });
+  const answerCitedContact = playerHistoryMemory({
+    memoryId: "memory-bounded-answer-cited",
+    listenerActorId: actorId,
+    sequence: 6,
+  });
+  const recordCitedContact = playerHistoryMemory({
+    memoryId: "memory-bounded-record-cited",
+    listenerActorId: actorId,
+    sequence: 7,
+  });
+  const laterSelectedContact = playerHistoryMemory({
+    memoryId: "memory-bounded-later-selected",
+    listenerActorId: actorId,
+    sequence: 8,
+    evidenceIds: [answerCitedContact.statementEvidenceId],
+  });
+  const ambientQuestionSource = ambientHistoryMemory(9, actorId);
+  const ambientQuestion = ambientQuestionJudgment(ambientQuestionSource, actorId);
   internalActor.memories.push(
-    reportBearingMemory(actorId),
-    ...Array.from({ length: historyCount }, (_, sequence) =>
-      ambientHistoryMemory(sequence, actorId)
+    firstContact,
+    ambientHistoryMemory(1, actorId),
+    ambientHistoryMemory(2, actorId),
+    stanceChangingContact,
+    ambientHistoryMemory(4, actorId),
+    ambientHistoryMemory(5, actorId),
+    answerCitedContact,
+    recordCitedContact,
+    laterSelectedContact,
+    ambientQuestionSource,
+    ambientQuestion,
+    ...Array.from({ length: fillerCount }, (_, offset) =>
+      ambientHistoryMemory(11 + offset, actorId)
     ),
   );
+  internalRun.records.push({
+    recordId: "record:bounded-citation",
+    kind: "note",
+    authorActorId: actorId,
+    authorRole: "studio_manager",
+    targetId: "player",
+    stateBody: "bounded citation record",
+    visibleToActorIds: ["player"],
+    sourceRefs: [{
+      sourceMemoryId: recordCitedContact.memoryId,
+      originActorId: "player",
+    }],
+    textSurfaceId: "bounded-citation-surface",
+    createdWorldSeconds: 0,
+    createdWorldRevision: 1,
+    recordRevision: 1,
+    lastLedgerEventId: "ledger:bounded-citation",
+  });
 
-  const currentRequiredSpeech = "NPC_Park_Caretaker: 방금 들은 이 문장은 반드시 그대로 남아야 합니다.";
+  const currentRequiredSpeech = {
+    speakerActorId: "NPC_Park_Caretaker",
+    source: {
+      kind: "ambient_utterance" as const,
+      id: "speech:current-required",
+    },
+    line: "방금 들은 이 문장은 반드시 그대로 남아야 합니다.",
+  };
   const currentEvidencePacket = buildObserve(
     internalRun,
     internalActor,
@@ -1242,16 +1402,17 @@ test("provider run observations bound recent history without deleting runtime or
     currentEvidencePacket.heardSpeech.length,
     RUN_OBSERVE_HEARD_SPEECH_LIMIT + 1,
   );
-  assert.equal(currentEvidencePacket.heardSpeech.at(-1), currentRequiredSpeech);
+  assert.deepEqual(currentEvidencePacket.heardSpeech.at(-1), currentRequiredSpeech);
 
   const fullSnapshot = service.snapshot(started.runId);
   const fullActor = fullSnapshot.actors.find(actor => actor.actorId === actorId);
   assert.ok(fullActor);
-  assert.equal(fullActor.memories.length, historyCount + 1);
+  const fullMemoryCount = 11 + fillerCount;
+  assert.equal(fullActor.memories.length, fullMemoryCount);
   assert.equal(fullActor.memories[0]?.memoryId, "memory-bounded-report-bearing");
   assert.equal(
     fullActor.memories.at(-1)?.memoryId,
-    `memory-bounded-${String(historyCount - 1).padStart(3, "0")}`,
+    `memory-bounded-${String(10 + fillerCount).padStart(3, "0")}`,
   );
   const hearingRequest = buildHearingJudgmentRequest({
     runId: fullSnapshot.runId,
@@ -1271,7 +1432,7 @@ test("provider run observations bound recent history without deleting runtime or
   });
   const hearingActor = hearingRequest.residents.find(actor => actor.actorId === actorId);
   assert.ok(hearingActor);
-  assert.equal(hearingActor.memories.length, historyCount + 1);
+  assert.equal(hearingActor.memories.length, fullMemoryCount);
   assert.equal(hearingActor.memories[0]?.memoryId, "memory-bounded-report-bearing");
 
   const advanced = await service.advance({
@@ -1299,59 +1460,110 @@ test("provider run observations bound recent history without deleting runtime or
   const observed = capturedRequest;
   assert.ok(observed);
 
-  const expectedIds = (limit: number) => Array.from(
-    { length: limit },
-    (_, offset) => `memory-bounded-${String(historyCount - limit + offset).padStart(3, "0")}`,
+  const newestFillerIds = (count: number) => Array.from(
+    { length: count },
+    (_, offset) =>
+      `memory-bounded-${String(11 + fillerCount - count + offset).padStart(3, "0")}`,
   );
-  const expectedLines = (limit: number) => Array.from(
-    { length: limit },
-    (_, offset) => `bounded history ${String(historyCount - limit + offset).padStart(3, "0")}`,
-  );
+  const priorityContactIds = [
+    firstContact.memoryId,
+    stanceChangingContact.memoryId,
+    answerCitedContact.memoryId,
+    recordCitedContact.memoryId,
+  ];
+  const expectedMemoryIds = [
+    ...priorityContactIds,
+    ambientQuestion.memoryId,
+    ...newestFillerIds(
+      RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT - priorityContactIds.length - 1,
+    ),
+  ];
   assert.deepEqual(
     observed.observePacket.actorMemory.ownActionNotes,
-    expectedIds(RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT).map(
-      memoryId => `[ambient_utterance_memory=${memoryId}]`,
+    expectedMemoryIds.map(memoryId =>
+      priorityContactIds.includes(memoryId)
+        ? `[player_conversation_memory=${memoryId}]`
+        : memoryId === ambientQuestion.memoryId
+          ? `[ambient_judgment_from=${ambientQuestion.sourceActorId}] stance=${ambientQuestion.appliedStance} reason=${ambientQuestion.whyLine}`
+        : `[ambient_utterance_memory=${memoryId}]`
     ),
   );
   assert.deepEqual(
-    observed.observePacket.actorMemory.evidence,
-    expectedLines(RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT).map((line, offset) => ({
-      evidenceType: "utterance",
-      memoryId: expectedIds(RUN_OBSERVE_OWN_ACTION_NOTE_LIMIT)[offset],
-      memoryKind: "ambient_utterance",
-      sourceActorId: "NPC_Park_Caretaker",
-      line,
-    })),
+    observed.observePacket.actorMemory.evidence.map(evidence => evidence.memoryId),
+    [...priorityContactIds, ambientQuestion.memoryId],
+  );
+  const expectedHeardFillerIds = newestFillerIds(
+    RUN_OBSERVE_HEARD_SPEECH_LIMIT - priorityContactIds.length - 1,
   );
   assert.deepEqual(
-    observed.observePacket.heardSpeech,
-    expectedLines(RUN_OBSERVE_HEARD_SPEECH_LIMIT).map((line, offset) => ({
-      speakerActorId: "NPC_Park_Caretaker",
-      source: {
-        kind: "ambient_utterance",
-        id: `memory:${expectedIds(RUN_OBSERVE_HEARD_SPEECH_LIMIT)[offset]}`,
-      },
-      line,
-    })),
+    observed.observePacket.heardSpeech.map(speech => speech.source.id),
+    [
+      firstContact.statementEvidenceId,
+      stanceChangingContact.statementEvidenceId,
+      answerCitedContact.statementEvidenceId,
+      recordCitedContact.statementEvidenceId,
+      `memory:${ambientQuestionSource.memoryId}`,
+      ...expectedHeardFillerIds.map(memoryId => `memory:${memoryId}`),
+    ],
+  );
+  const ambientQuestionEvidence = observed.observePacket.actorMemory.evidence.find(
+    evidence => evidence.memoryId === ambientQuestion.memoryId,
+  );
+  assert.ok(
+    ambientQuestionEvidence &&
+    ambientQuestionEvidence.evidenceType === "ambient_stance_judgment",
+  );
+  assert.deepEqual(ambientQuestionEvidence.openQuestion, ambientQuestion.openQuestion);
+  assert.equal(
+    ambientQuestionEvidence.sourceSpeechEvidenceId,
+    `memory:${ambientQuestionSource.memoryId}`,
+  );
+  const retainedQuestionSource = observed.observePacket.heardSpeech.find(
+    speech => speech.source.id === ambientQuestionEvidence.sourceSpeechEvidenceId,
+  );
+  assert.equal(retainedQuestionSource?.line, ambientQuestionSource.line);
+  assert.equal(
+    JSON.stringify(observed.observePacket.actorMemory.evidence).includes(
+      ambientQuestionSource.line,
+    ),
+    false,
+    "canonical ambient prose appears only in heardSpeech",
+  );
+  const firstContactEvidence = observed.observePacket.actorMemory.evidence.find(
+    evidence => evidence.memoryId === firstContact.memoryId,
+  );
+  assert.ok(
+    firstContactEvidence &&
+    firstContactEvidence.evidenceType === "player_conversation_exchange",
+  );
+  assert.deepEqual(firstContactEvidence.openQuestion, firstContact.openQuestion);
+  assert.equal(firstContactEvidence.playerStatementEvidenceId, firstContact.statementEvidenceId);
+  assert.equal(
+    JSON.stringify(observed.observePacket.actorMemory.evidence).includes(firstContact.playerLine),
+    false,
+    "canonical player prose appears only in heardSpeech",
   );
   assert.deepEqual(
     observed.observePacket.administrativeSources.map(source => source.memoryId),
     [
       "memory-bounded-report-bearing",
-      ...expectedIds(RUN_OBSERVE_ADMINISTRATIVE_SOURCE_LIMIT - 1),
+      ...newestFillerIds(RUN_OBSERVE_ADMINISTRATIVE_SOURCE_LIMIT - 1),
     ],
   );
+  const newestFillerId = newestFillerIds(1)[0];
+  assert.ok(newestFillerId);
+  const newestFillerSequence = 10 + fillerCount;
   assert.deepEqual(observed.observePacket.administrativeSources.at(-1), {
-    memoryId: `memory-bounded-${String(historyCount - 1).padStart(3, "0")}`,
+    memoryId: newestFillerId,
     kind: "ambient_utterance",
     originActorId: "NPC_Park_Caretaker",
-    summary: `bounded history ${String(historyCount - 1).padStart(3, "0")}`,
-    whyLine: `bounded history ${String(historyCount - 1).padStart(3, "0")}`,
+    summary: `bounded history ${String(newestFillerSequence).padStart(3, "0")}`,
+    whyLine: `bounded history ${String(newestFillerSequence).padStart(3, "0")}`,
     reportDelta: 0,
   });
   assert.equal(service.snapshot(started.runId).actors.find(
     actor => actor.actorId === actorId
-  )?.memories.length, historyCount + 2);
+  )?.memories.length, fullMemoryCount + 1);
 });
 
 test("visible reachable player facts outside a conversation zone stay valid but cannot open contact", async () => {

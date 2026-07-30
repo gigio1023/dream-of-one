@@ -4862,6 +4862,17 @@ test("production registry contains no scripted profile", () => {
     (config.profiles["modelscope/qwen3.7-plus"]?.params.maxTokens ?? 0) >= 1_200,
     "the Qwen profile needs room for the exact-six hearing envelope",
   );
+  const qwen38 = config.profiles["alibaba-model-studio/qwen3.8-max-preview"];
+  assert.equal(qwen38?.adapter, "chat-completions");
+  assert.equal(qwen38?.baseUrlEnv, "MODEL_STUDIO_BASE_URL");
+  assert.equal(qwen38?.apiKeyEnv, "MODEL_STUDIO_API_KEY");
+  assert.equal(qwen38?.model, "qwen3.8-max-preview");
+  assert.equal(qwen38?.timeoutMs, 180_000);
+  assert.equal(qwen38?.params.enableThinking, undefined);
+  assert.ok(
+    (qwen38?.params.maxTokens ?? 0) >= 1_200,
+    "the Qwen3.8-Max profile needs room for the exact-six hearing envelope",
+  );
 });
 
 test("Qwen profile timeout governs both its transport and ProviderService boundary", async () => {

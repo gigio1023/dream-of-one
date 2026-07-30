@@ -23,6 +23,18 @@
       },
       "structured": "json-instructed"
     },
+    "alibaba-model-studio/qwen3.8-max-preview": {
+      "adapter": "chat-completions",
+      "baseUrlEnv": "MODEL_STUDIO_BASE_URL",
+      "apiKeyEnv": "MODEL_STUDIO_API_KEY",
+      "model": "qwen3.8-max-preview",
+      "timeoutMs": 180000,
+      "params": {
+        "temperature": 0.7,
+        "maxTokens": 1600
+      },
+      "structured": "json-instructed"
+    },
     "local/openai-compatible": {
       "adapter": "chat-completions",
       "baseUrlEnv": "LOCAL_LLM_BASE_URL",

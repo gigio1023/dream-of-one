@@ -175,6 +175,29 @@ for the other supported languages. It uses the M3R Studio receptionist
 opening and merged judgment/reply path; it is a provider calibration check,
 not a substitute for the final Godot AI play route.
 
+For a separate Qwen3.8-Max Preview provider experiment, derive the
+workspace-scoped endpoint at launch and select the opt-in profile:
+
+```bash
+: "${MODEL_STUDIO_WORKSPACE_ID:?MODEL_STUDIO_WORKSPACE_ID is required}"
+: "${MODEL_STUDIO_API_KEY:?MODEL_STUDIO_API_KEY is required}"
+set -o pipefail
+env -u OPENAI_API_KEY -u MODELSCOPE_API_KEY -u LOCAL_LLM_BASE_URL \
+  NPC_PROVIDER_PROFILE=alibaba-model-studio/qwen3.8-max-preview \
+  MODEL_STUDIO_BASE_URL="https://${MODEL_STUDIO_WORKSPACE_ID}.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1" \
+  bun --no-env-file backend/npc-runtime/src/tools/provider-smoke.ts \
+  --profile alibaba-model-studio/qwen3.8-max-preview --locale ko-KR | \
+  jq -e '
+    .profileId == "alibaba-model-studio/qwen3.8-max-preview" and
+    .locale == "ko-KR" and
+    .acceptancePassed == true
+  '
+```
+
+This is live provider-contract evidence for the exact Qwen3.8 model. It is
+not M3R acceptance, a rendered Godot playtest, or a fun-gate result. M3R live
+play remains pinned to `modelscope/qwen3.7-plus`.
+
 For a live game run, start the sidecar with the same guard and no dotenv
 autoload, then point Godot at it:
 

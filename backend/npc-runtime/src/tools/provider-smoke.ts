@@ -10,7 +10,7 @@ import { createProviderFromEnvironment } from "../providers/registry.js";
 import { loadRunCast } from "../runtime/run-cast.js";
 import { loadRunLayout } from "../runtime/run-layout.js";
 
-const EXPECTED_PROFILE_ID = "modelscope/qwen3.7-plus";
+const DEFAULT_PROFILE_ID = "modelscope/qwen3.7-plus";
 const PLAYER_ANSWERS: Record<string, string> = {
   "ko-KR": "청문회 전에 필요한 절차를 확인하려고 왔습니다.",
   "en-US": "I came to confirm the steps I need before the hearing.",
@@ -32,6 +32,7 @@ function optionValue(flag: "--profile" | "--locale"): string | undefined {
 }
 
 const requestedProfile = optionValue("--profile");
+const expectedProfileId = requestedProfile ?? DEFAULT_PROFILE_ID;
 const localeResult = gameplayLocaleSchema.safeParse(
   optionValue("--locale") ?? DEFAULT_GAMEPLAY_LOCALE,
 );
@@ -159,13 +160,13 @@ const answer = await proposalPort.judgeAndProposeConversationTurn({
 
 const audit = proposalPort.auditSnapshot(scopeId);
 const isAcceptedLiveMeta = (meta: ProposalMeta): boolean =>
-  meta.profileId === EXPECTED_PROFILE_ID &&
+  meta.profileId === expectedProfileId &&
   meta.transport === "live" &&
   !meta.usedFallback &&
   meta.fallbackReason === undefined;
 const chargedTokens = audit.calls.reduce((total, call) => total + call.chargedTokens, 0);
 const acceptancePassed =
-  profileId === EXPECTED_PROFILE_ID &&
+  profileId === expectedProfileId &&
   isAcceptedLiveMeta(opening.meta) &&
   isAcceptedLiveMeta(answer.meta) &&
   audit.complete &&
@@ -177,7 +178,7 @@ const acceptancePassed =
   audit.callsUsed === audit.calls.length &&
   audit.tokensUsed === chargedTokens &&
   audit.calls.every(call =>
-    call.profileId === EXPECTED_PROFILE_ID &&
+    call.profileId === expectedProfileId &&
     call.transport === "live" &&
     !call.usedFallback &&
     call.outcome === "success" &&
@@ -187,7 +188,7 @@ const acceptancePassed =
   audit.resolutions.map(resolution => resolution.purpose).join(",") ===
     "conversation,conversation_turn" &&
   audit.resolutions.every(resolution =>
-    resolution.profileId === EXPECTED_PROFILE_ID &&
+    resolution.profileId === expectedProfileId &&
     resolution.transport === "live" &&
     !resolution.usedFallback &&
     resolution.fallbackReason === null &&
@@ -196,7 +197,7 @@ const acceptancePassed =
 
 console.log(JSON.stringify({
   profileId,
-  expectedProfileId: EXPECTED_PROFILE_ID,
+  expectedProfileId,
   locale,
   acceptancePassed,
   opening: {

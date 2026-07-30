@@ -24,8 +24,14 @@ provider call as proof of a finished game.
 
 ![The current Dream of One first-person town prototype](/img/qwen38/town-prototype.png)
 
-*The current Godot prototype. The Qwen3.8 run reused its Studio receptionist
-contract without claiming this rendered route as Qwen3.8 play evidence.*
+*The current Godot prototype running with its English presentation locale.
+The Qwen3.8 run reused its Studio receptionist contract without claiming this
+rendered route as Qwen3.8 play evidence.*
+
+![The Dream of One settings screen in English](/img/qwen38/settings-english.png)
+
+*The English UI used for these public captures. The provider-contract test
+below intentionally ran in Korean to exercise locale validation.*
 
 ## The job I gave Qwen
 
@@ -152,11 +158,6 @@ clarifying question.
 | Fallback calls | 0 |
 | Audit | complete and untruncated |
 | Dropped or in-flight work | 0 |
-
-![The current Dream of One Station hearing interface](/img/qwen38/hearing-prototype.png)
-
-*The current prototype's Station hearing. A Qwen3.8-powered rendered hearing
-remains unverified; this post reports the provider-contract run only.*
 
 Both resolutions reported `transport=live` and the exact Qwen3.8-Max Preview
 profile. The runtime accepted the Korean writing-system checks, the

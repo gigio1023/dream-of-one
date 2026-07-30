@@ -289,6 +289,7 @@ Available adapter shapes:
 | --- | --- | --- |
 | `openai/gpt-5.4-mini` | Responses | `OPENAI_API_KEY` |
 | `modelscope/qwen3.7-plus` (`Qwen-Ambassador/Qwen3.7-Plus`) | Chat Completions | ModelScope env vars |
+| `alibaba-model-studio/qwen3.8-max-preview` | Chat Completions | Model Studio env vars |
 | `local/openai-compatible` | Chat Completions | `LOCAL_LLM_BASE_URL` |
 
 Secrets are environment variables and never appear in config, logs, fixtures,
@@ -306,6 +307,12 @@ pause the world and conversation openings are preloaded, so the extra network
 margin avoids unnecessary interruptions for most traffic. A merged response after the
 player answers can still block the modal, but it now has a finite 30-second
 ceiling rather than letting ordinary ModelScope latency wait forever.
+The opt-in Model Studio profile reads `MODEL_STUDIO_BASE_URL` and
+`MODEL_STUDIO_API_KEY` and selects the exact
+`qwen3.8-max-preview` model. Operators derive the workspace-scoped Singapore
+base URL from `MODEL_STUDIO_WORKSPACE_ID`; the workspace id stays outside
+checked-in config. This profile is for separate provider experiments and
+public project work. It does not replace the Qwen3.7 M3R acceptance pin.
 
 ## Live prompt calibration
 
@@ -442,6 +449,7 @@ GODOT_BIN="$GODOT_BIN" backend/npc-runtime/scripts/live-route-parity.sh
 # Manual and spend-bearing; never CI
 bun run --cwd backend/npc-runtime provider:smoke -- --profile openai/gpt-5.4-mini
 bun run --cwd backend/npc-runtime provider:smoke -- --profile modelscope/qwen3.7-plus
+bun run --cwd backend/npc-runtime provider:smoke -- --profile alibaba-model-studio/qwen3.8-max-preview
 ```
 
 Under the scripted test adapter, route outcomes are deterministic for a given

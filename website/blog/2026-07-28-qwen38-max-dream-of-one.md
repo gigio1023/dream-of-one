@@ -22,6 +22,11 @@ provider call as proof of a finished game.
 
 <!-- truncate -->
 
+![The current Dream of One first-person town prototype](/img/qwen38/town-prototype.png)
+
+*The current Godot prototype. The Qwen3.8 run reused its Studio receptionist
+contract without claiming this rendered route as Qwen3.8 play evidence.*
+
 ## The job I gave Qwen
 
 Dream of One is a first-person social simulation. Six residents move through a
@@ -50,6 +55,18 @@ action. This made factual restraint part of the test.
 Dream of One already routes all model work through `NpcProposalPort` and a
 Chat Completions adapter. I added an opt-in profile rather than placing an
 Alibaba call in game logic:
+
+```mermaid
+flowchart TB
+  accTitle: Qwen provider boundary
+  accDescr: The Godot client sends observed game context to the runtime. The runtime calls Qwen through the adapter and validates the returned proposal before the client receives it.
+
+  Client["Godot client<br/>input + presentation"] --> Runtime["NPC runtime<br/>ground + validate + audit"]
+  Runtime --> Adapter["Chat Completions adapter"]
+  Adapter --> Model["Qwen3.8-Max Preview"]
+  Model -->|JSON proposal| Runtime
+  Runtime -->|accepted turn| Client
+```
 
 ```json
 {
@@ -135,6 +152,11 @@ clarifying question.
 | Fallback calls | 0 |
 | Audit | complete and untruncated |
 | Dropped or in-flight work | 0 |
+
+![The current Dream of One Station hearing interface](/img/qwen38/hearing-prototype.png)
+
+*The current prototype's Station hearing. A Qwen3.8-powered rendered hearing
+remains unverified; this post reports the provider-contract run only.*
 
 Both resolutions reported `transport=live` and the exact Qwen3.8-Max Preview
 profile. The runtime accepted the Korean writing-system checks, the

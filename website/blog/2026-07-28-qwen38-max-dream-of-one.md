@@ -63,15 +63,37 @@ Chat Completions adapter. I added an opt-in profile rather than placing an
 Alibaba call in game logic:
 
 ```mermaid
-flowchart TB
-  accTitle: Qwen provider boundary
-  accDescr: The Godot client sends observed game context to the runtime. The runtime calls Qwen through the adapter and validates the returned proposal before the client receives it.
+sequenceDiagram
+  autonumber
+  accTitle: One grounded NPC turn inside Dream of One
+  accDescr: The player speaks to the Studio receptionist. Godot sends the scene to the NPC runtime, which gives Qwen only observed evidence, validates the response, commits accepted social state, and can reuse that state in later town events.
 
-  Client["Godot client<br/>input + presentation"] --> Runtime["NPC runtime<br/>ground + validate + audit"]
-  Runtime --> Adapter["Chat Completions adapter"]
-  Adapter --> Model["Qwen3.8-Max Preview"]
-  Model -->|JSON proposal| Runtime
-  Runtime -->|accepted turn| Client
+  actor P as Player
+  participant G as Godot town
+  participant R as NPC runtime
+  participant Q as Qwen3.8-Max Preview
+
+  P->>G: Ask the receptionist about hearing procedure
+  Note over P,G: Studio reception, face to face
+  G->>R: Player line + scene facts
+  R->>R: Add NPC memory and visible records
+  R->>Q: Chat Completions request with closed-world evidence
+  Q-->>R: Judgment + next line + reply options
+  R->>R: Validate schema, evidence IDs, and delta bounds
+
+  alt proposal accepted
+    R->>R: Commit speech, suspicion, stance, and memory
+    R-->>G: Render NPC reply and player options
+    opt later full-run path, not exercised in this test
+      R->>R: Persist NPC meetings and validated records
+      R->>Q: Judge hearing from six memories and final defense
+      Q-->>R: Testimony and proposed verdict
+    end
+  else invalid proposal
+    R->>Q: Request one same-model repair
+    Q-->>R: Replacement proposal
+    Note over R,G: Final failure interrupts the turn without mutation
+  end
 ```
 
 ```json
@@ -116,13 +138,18 @@ server error proving why the first request was rejected.
 
 ## The live conversation
 
+The live calls used the `ko-KR` locale. I translated the three lines below
+into English for this post while keeping the original locale and audit totals
+in the recorded result.
+
 The first call asked Qwen for the grounded opening. It returned:
 
-> 안녕하세요. 스튜디오 접수처예요. 어떤 일로 오셨는지 먼저 말씀해 주시겠어요?
+> Hello, this is the Studio reception desk. Could you first tell me what
+> brings you here?
 
 The player answered:
 
-> 청문회 전에 필요한 절차를 확인하려고 왔습니다.
+> I came to check what procedures I need to follow before the hearing.
 
 The second call performed a merged operation. Qwen judged the answer and wrote
 the next NPC line in one response. Its social judgment was:
@@ -137,7 +164,9 @@ the next NPC line in one response. Its social judgment was:
 
 Qwen's next line was:
 
-> 네, 청문회 전에 절차를 확인하러 오셨군요. 먼저 일반적인 접수 안내를 원하시는지, 아니면 이미 잡힌 일정과 관련된 확인을 원하시는지 말씀해 주시겠어요?
+> I see. You are here to check the procedure before the hearing. Could you
+> tell me whether you want general reception guidance or whether you are
+> asking about an appointment that has already been scheduled?
 
 The response recognized the player's stated purpose without asserting that an
 appointment or document existed. It kept the receptionist uncertain, treated

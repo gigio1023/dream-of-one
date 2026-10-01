@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   labeler:
-    runs-on: doo-arc-runner-set
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/labeler@v5
         with:

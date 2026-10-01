@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   runtime-check:
-    runs-on: doo-arc-runner-set
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend/npc-runtime
